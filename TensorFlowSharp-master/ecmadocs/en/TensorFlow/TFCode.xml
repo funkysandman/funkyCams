@@ -1,0 +1,355 @@
+<Type Name="TFCode" FullName="TensorFlow.TFCode">
+  <TypeSignature Language="C#" Value="public enum TFCode" />
+  <TypeSignature Language="ILAsm" Value=".class public auto ansi sealed TFCode extends System.Enum" />
+  <AssemblyInfo>
+    <AssemblyName>TensorFlowSharp</AssemblyName>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+  </AssemblyInfo>
+  <Base>
+    <BaseTypeName>System.Enum</BaseTypeName>
+  </Base>
+  <Docs>
+    <summary>
+            Status code for invoking a tensorflow operation.
+            </summary>
+    <remarks>To be added.</remarks>
+  </Docs>
+  <Members>
+    <Member MemberName="Aborted">
+      <MemberSignature Language="C#" Value="Aborted" />
+      <MemberSignature Language="ILAsm" Value=".field public static literal valuetype TensorFlow.TFCode Aborted = unsigned int32(10)" />
+      <MemberType>Field</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>1.0.0.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>TensorFlow.TFCode</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>
+             The operation was aborted, typically due to a concurrency issue
+             like sequencer check failures, transaction aborts, etc.
+            
+             See litmus test above for deciding between FailedPrecondition,
+             Aborted and Unavailable
+             </summary>
+      </Docs>
+    </Member>
+    <Member MemberName="AlreadyExists">
+      <MemberSignature Language="C#" Value="AlreadyExists" />
+      <MemberSignature Language="ILAsm" Value=".field public static literal valuetype TensorFlow.TFCode AlreadyExists = unsigned int32(6)" />
+      <MemberType>Field</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>1.0.0.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>TensorFlow.TFCode</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>
+            Some entity that we attempted to create (e.g., file or directory) already exists.
+            </summary>
+      </Docs>
+    </Member>
+    <Member MemberName="Cancelled">
+      <MemberSignature Language="C#" Value="Cancelled" />
+      <MemberSignature Language="ILAsm" Value=".field public static literal valuetype TensorFlow.TFCode Cancelled = unsigned int32(1)" />
+      <MemberType>Field</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>1.0.0.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>TensorFlow.TFCode</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>
+            The operation was cancelled (typically by the caller).
+            </summary>
+      </Docs>
+    </Member>
+    <Member MemberName="DataLoss">
+      <MemberSignature Language="C#" Value="DataLoss" />
+      <MemberSignature Language="ILAsm" Value=".field public static literal valuetype TensorFlow.TFCode DataLoss = unsigned int32(15)" />
+      <MemberType>Field</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>1.0.0.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>TensorFlow.TFCode</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>
+            Unrecoverable data loss or corruption.
+            </summary>
+      </Docs>
+    </Member>
+    <Member MemberName="DeadlineExceeded">
+      <MemberSignature Language="C#" Value="DeadlineExceeded" />
+      <MemberSignature Language="ILAsm" Value=".field public static literal valuetype TensorFlow.TFCode DeadlineExceeded = unsigned int32(4)" />
+      <MemberType>Field</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>1.0.0.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>TensorFlow.TFCode</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>
+            Deadline expired before operation could complete.  For operations
+            that change the state of the system, this error may be returned
+            even if the operation has completed successfully.  For example, a
+            successful response from a server could have been delayed long
+            enough for the deadline to expire.
+            </summary>
+      </Docs>
+    </Member>
+    <Member MemberName="FailedPrecondition">
+      <MemberSignature Language="C#" Value="FailedPrecondition" />
+      <MemberSignature Language="ILAsm" Value=".field public static literal valuetype TensorFlow.TFCode FailedPrecondition = unsigned int32(9)" />
+      <MemberType>Field</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>1.0.0.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>TensorFlow.TFCode</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>
+             Operation was rejected because the system is not in a state
+             required for the operation's execution.  For example, directory
+             to be deleted may be non-empty, an rmdir operation is applied to
+             a non-directory, etc.
+            
+             A litmus test that may help a service implementor in deciding
+             between FailedPrecondition, Aborted, and Unavailable:
+             
+              (a) Use Unavailableif the client can retry just the failing call.
+              (b) Use Aborted if the client should retry at a higher-level
+                  (e.g., restarting a read-modify-write sequence).
+              (c) Use FailedPrecondition if the client should not retry until
+                  the system state has been explicitly fixed.  E.g., if an "rmdir"
+                  fails because the directory is non-empty, FailedPrecondition
+                  should be returned since the client should not retry unless
+                  they have first fixed up the directory by deleting files from it.
+              (d) Use FailedPrecondition if the client performs conditional
+                  REST Get/Update/Delete on a resource and the resource on the
+                  server does not match the condition. E.g., conflicting
+                  read-modify-write on the same resource.
+             </summary>
+      </Docs>
+    </Member>
+    <Member MemberName="Internal">
+      <MemberSignature Language="C#" Value="Internal" />
+      <MemberSignature Language="ILAsm" Value=".field public static literal valuetype TensorFlow.TFCode Internal = unsigned int32(13)" />
+      <MemberType>Field</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>1.0.0.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>TensorFlow.TFCode</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>
+            Internal errors.  Means some invariants expected by underlying
+            system has been broken.  If you see one of these errors,
+            something is very broken.
+            </summary>
+      </Docs>
+    </Member>
+    <Member MemberName="InvalidArgument">
+      <MemberSignature Language="C#" Value="InvalidArgument" />
+      <MemberSignature Language="ILAsm" Value=".field public static literal valuetype TensorFlow.TFCode InvalidArgument = unsigned int32(3)" />
+      <MemberType>Field</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>1.0.0.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>TensorFlow.TFCode</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>
+            Client specified an invalid argument.  Note that this differs
+            from FailedPrecondition.  InvalidArgumentindicates arguments
+            that are problematic regardless of the state of the system
+            (e.g., a malformed file name).
+            </summary>
+      </Docs>
+    </Member>
+    <Member MemberName="NotFound">
+      <MemberSignature Language="C#" Value="NotFound" />
+      <MemberSignature Language="ILAsm" Value=".field public static literal valuetype TensorFlow.TFCode NotFound = unsigned int32(5)" />
+      <MemberType>Field</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>1.0.0.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>TensorFlow.TFCode</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>
+            Some requested entity (e.g., file or directory) was not found.
+            For privacy reasons, this code may be returned when the client
+            does not have the access right to the entity.
+            </summary>
+      </Docs>
+    </Member>
+    <Member MemberName="Ok">
+      <MemberSignature Language="C#" Value="Ok" />
+      <MemberSignature Language="ILAsm" Value=".field public static literal valuetype TensorFlow.TFCode Ok = unsigned int32(0)" />
+      <MemberType>Field</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>1.0.0.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>TensorFlow.TFCode</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>
+            Not an error; returned on success
+            </summary>
+      </Docs>
+    </Member>
+    <Member MemberName="OutOfRange">
+      <MemberSignature Language="C#" Value="OutOfRange" />
+      <MemberSignature Language="ILAsm" Value=".field public static literal valuetype TensorFlow.TFCode OutOfRange = unsigned int32(11)" />
+      <MemberType>Field</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>1.0.0.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>TensorFlow.TFCode</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>
+             Operation tried to iterate past the valid input range.  E.g., seeking or
+             reading past end of file.
+            
+             Unlike InvalidArgument, this error indicates a problem that may
+             be fixed if the system state changes. For example, a 32-bit file
+             system will generate InvalidArgument if asked to read at an
+             offset that is not in the range [0,2^32-1], but it will generate
+             OutOfRange if asked to read from an offset past the current
+             file size.
+            
+             There is a fair bit of overlap between FailedPrecondition and
+             OutOfRange.  We recommend using OutOfRane (the more specific
+             error) when it applies so that callers who are iterating through
+             a space can easily look for an OutOfRange error to detect when
+             they are done.
+             </summary>
+      </Docs>
+    </Member>
+    <Member MemberName="PermissionDenied">
+      <MemberSignature Language="C#" Value="PermissionDenied" />
+      <MemberSignature Language="ILAsm" Value=".field public static literal valuetype TensorFlow.TFCode PermissionDenied = unsigned int32(7)" />
+      <MemberType>Field</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>1.0.0.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>TensorFlow.TFCode</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>
+            The caller does not have permission to execute the specified
+            operation.  PermissionDenied must not be used for rejections
+            caused by exhausting some resource (use ResourceExhausted
+            instead for those errors).  PermissionDeniedmust not be
+            used if the caller can not be identified (use Unauthenticated
+            instead for those errors).
+            </summary>
+      </Docs>
+    </Member>
+    <Member MemberName="ResourceExhausted">
+      <MemberSignature Language="C#" Value="ResourceExhausted" />
+      <MemberSignature Language="ILAsm" Value=".field public static literal valuetype TensorFlow.TFCode ResourceExhausted = unsigned int32(8)" />
+      <MemberType>Field</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>1.0.0.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>TensorFlow.TFCode</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>
+            Some resource has been exhausted, perhaps a per-user quota, or
+            perhaps the entire file system is out of space.
+            </summary>
+      </Docs>
+    </Member>
+    <Member MemberName="Unauthenticated">
+      <MemberSignature Language="C#" Value="Unauthenticated" />
+      <MemberSignature Language="ILAsm" Value=".field public static literal valuetype TensorFlow.TFCode Unauthenticated = unsigned int32(16)" />
+      <MemberType>Field</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>1.0.0.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>TensorFlow.TFCode</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>
+            The request does not have valid authentication credentials for the
+            operation.
+            </summary>
+      </Docs>
+    </Member>
+    <Member MemberName="Unavailable">
+      <MemberSignature Language="C#" Value="Unavailable" />
+      <MemberSignature Language="ILAsm" Value=".field public static literal valuetype TensorFlow.TFCode Unavailable = unsigned int32(14)" />
+      <MemberType>Field</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>1.0.0.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>TensorFlow.TFCode</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>
+             The service is currently unavailable.  This is a most likely a
+             transient condition and may be corrected by retrying with
+             a backoff.
+            
+             See litmus test above for deciding between FailedPrecondition,
+             Aborted, and Unavailable.
+             </summary>
+      </Docs>
+    </Member>
+    <Member MemberName="Unimplemented">
+      <MemberSignature Language="C#" Value="Unimplemented" />
+      <MemberSignature Language="ILAsm" Value=".field public static literal valuetype TensorFlow.TFCode Unimplemented = unsigned int32(12)" />
+      <MemberType>Field</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>1.0.0.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>TensorFlow.TFCode</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>
+            Operation is not implemented or not supported/enabled in this service.
+            </summary>
+      </Docs>
+    </Member>
+    <Member MemberName="Unknown">
+      <MemberSignature Language="C#" Value="Unknown" />
+      <MemberSignature Language="ILAsm" Value=".field public static literal valuetype TensorFlow.TFCode Unknown = unsigned int32(2)" />
+      <MemberType>Field</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>1.0.0.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>TensorFlow.TFCode</ReturnType>
+      </ReturnValue>
+      <Docs>
+        <summary>
+            Unknown error.  An example of where this error may be returned is
+            if a Status value received from another address space belongs to
+            an error-space that is not known in this address space.  Also
+            errors raised by APIs that do not return enough error information
+            may be converted to this error.
+            </summary>
+      </Docs>
+    </Member>
+  </Members>
+</Type>

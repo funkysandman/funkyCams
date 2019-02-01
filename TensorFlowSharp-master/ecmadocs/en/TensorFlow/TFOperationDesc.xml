@@ -1,0 +1,568 @@
+<Type Name="TFOperationDesc" FullName="TensorFlow.TFOperationDesc">
+  <TypeSignature Language="C#" Value="public class TFOperationDesc : TensorFlow.TFDisposable" />
+  <TypeSignature Language="ILAsm" Value=".class public auto ansi beforefieldinit TFOperationDesc extends TensorFlow.TFDisposable" />
+  <AssemblyInfo>
+    <AssemblyName>TensorFlowSharp</AssemblyName>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+  </AssemblyInfo>
+  <Base>
+    <BaseTypeName>TensorFlow.TFDisposable</BaseTypeName>
+  </Base>
+  <Interfaces />
+  <Docs>
+    <summary>
+            Low-level TensorFlow operation builder
+            </summary>
+    <remarks>
+      <para>This is the low-level API that is used to create operations by manually specificying all
+            the parameters of an operation (inputs, outputs, attribute descriptions) that can then
+            be attached into a graph.
+            </para>
+      <para>
+            Generally, you will instead be using the methods surfaced in <see cref="T:TensorFlow.TFGraph" /> 
+            that surfaces a C# high-level API that has already been bound to the built-in TensorFlow
+            nodes.
+            </para>
+      <para>
+            You create instances bound to a graph, add inputs, attributes and so on, and when you are done
+            you can call the <see cref="M:TensorFlow.TFOperationDesc.FinishOperation(TensorFlow.TFStatus)" /> method that will turn this TFOperationDesc 
+            into a <see cref="T:TensorFlow.TFOperation" />.
+            </para>
+    </remarks>
+  </Docs>
+  <Members>
+    <Member MemberName=".ctor">
+      <MemberSignature Language="C#" Value="public TFOperationDesc (TensorFlow.TFGraph graph, string opType, string operName);" />
+      <MemberSignature Language="ILAsm" Value=".method public hidebysig specialname rtspecialname instance void .ctor(class TensorFlow.TFGraph graph, string opType, string operName) cil managed" />
+      <MemberType>Constructor</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>1.0.0.0</AssemblyVersion>
+      </AssemblyInfo>
+      <Parameters>
+        <Parameter Name="graph" Type="TensorFlow.TFGraph" />
+        <Parameter Name="opType" Type="System.String" />
+        <Parameter Name="operName" Type="System.String" />
+      </Parameters>
+      <Docs>
+        <param name="graph">To be added.</param>
+        <param name="opType">To be added.</param>
+        <param name="operName">To be added.</param>
+        <summary>To be added.</summary>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="AddControlInput">
+      <MemberSignature Language="C#" Value="public TensorFlow.TFOperationDesc AddControlInput (TensorFlow.TFOperation control);" />
+      <MemberSignature Language="ILAsm" Value=".method public hidebysig instance class TensorFlow.TFOperationDesc AddControlInput(class TensorFlow.TFOperation control) cil managed" />
+      <MemberType>Method</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>1.0.0.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>TensorFlow.TFOperationDesc</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="control" Type="TensorFlow.TFOperation" />
+      </Parameters>
+      <Docs>
+        <param name="control">Operation that must be executed before running this operation.</param>
+        <summary>
+            Ensure that the operation does not execute before the control operation does.
+            </summary>
+        <returns>To be added.</returns>
+        <remarks>
+          <para>
+            A control input is an Operation that must be executed before running the operation 
+            currently being built.  
+            </para>
+          <para>
+            For example, an Assert operation may be added as a control input for this operation. 
+            The Assert now behaves as a pre-condition that will always verify itself before
+            running the operation.
+            </para>
+        </remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="AddInput">
+      <MemberSignature Language="C#" Value="public TensorFlow.TFOperationDesc AddInput (TensorFlow.TFOutput input);" />
+      <MemberSignature Language="ILAsm" Value=".method public hidebysig instance class TensorFlow.TFOperationDesc AddInput(valuetype TensorFlow.TFOutput input) cil managed" />
+      <MemberType>Method</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>1.0.0.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>TensorFlow.TFOperationDesc</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="input" Type="TensorFlow.TFOutput" />
+      </Parameters>
+      <Docs>
+        <param name="input">Input.</param>
+        <summary>
+            Adds the specified input to the operation
+            </summary>
+        <returns>The input.</returns>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="AddInputs">
+      <MemberSignature Language="C#" Value="public TensorFlow.TFOperationDesc AddInputs (TensorFlow.TFOutput[] inputs);" />
+      <MemberSignature Language="ILAsm" Value=".method public hidebysig instance class TensorFlow.TFOperationDesc AddInputs(valuetype TensorFlow.TFOutput[] inputs) cil managed" />
+      <MemberType>Method</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>1.0.0.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>TensorFlow.TFOperationDesc</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="inputs" Type="TensorFlow.TFOutput[]">
+          <Attributes>
+            <Attribute>
+              <AttributeName>System.ParamArray</AttributeName>
+            </Attribute>
+          </Attributes>
+        </Parameter>
+      </Parameters>
+      <Docs>
+        <param name="inputs">Inputs, this is a params array for your convenience.</param>
+        <summary>
+            Adds a series of inputs to the operation.
+            </summary>
+        <returns>To be added.</returns>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="ColocateWith">
+      <MemberSignature Language="C#" Value="public TensorFlow.TFOperationDesc ColocateWith (TensorFlow.TFOperation op);" />
+      <MemberSignature Language="ILAsm" Value=".method public hidebysig instance class TensorFlow.TFOperationDesc ColocateWith(class TensorFlow.TFOperation op) cil managed" />
+      <MemberType>Method</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>1.0.0.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>TensorFlow.TFOperationDesc</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="op" Type="TensorFlow.TFOperation" />
+      </Parameters>
+      <Docs>
+        <param name="op">To be added.</param>
+        <summary>To be added.</summary>
+        <returns>To be added.</returns>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="FinishOperation">
+      <MemberSignature Language="C#" Value="public TensorFlow.TFOperation FinishOperation (TensorFlow.TFStatus status = null);" />
+      <MemberSignature Language="ILAsm" Value=".method public hidebysig instance class TensorFlow.TFOperation FinishOperation(class TensorFlow.TFStatus status) cil managed" />
+      <MemberType>Method</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>1.0.0.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>TensorFlow.TFOperation</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="status" Type="TensorFlow.TFStatus" />
+      </Parameters>
+      <Docs>
+        <param name="status">Optional status, on failure the operation is not added to the graph.  If you pass null (the default), this operation throws on error conditions.</param>
+        <summary>
+            Turns the operation description into an actual operation in the graph.
+            </summary>
+        <returns>The operation on success, or null on error.</returns>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="SetAttr">
+      <MemberSignature Language="C#" Value="public TensorFlow.TFOperationDesc SetAttr (string attrName, bool value);" />
+      <MemberSignature Language="ILAsm" Value=".method public hidebysig instance class TensorFlow.TFOperationDesc SetAttr(string attrName, bool value) cil managed" />
+      <MemberType>Method</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>1.0.0.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>TensorFlow.TFOperationDesc</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="attrName" Type="System.String" />
+        <Parameter Name="value" Type="System.Boolean" />
+      </Parameters>
+      <Docs>
+        <param name="attrName">To be added.</param>
+        <param name="value">To be added.</param>
+        <summary>To be added.</summary>
+        <returns>To be added.</returns>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="SetAttr">
+      <MemberSignature Language="C#" Value="public TensorFlow.TFOperationDesc SetAttr (string attrName, bool[] values);" />
+      <MemberSignature Language="ILAsm" Value=".method public hidebysig instance class TensorFlow.TFOperationDesc SetAttr(string attrName, bool[] values) cil managed" />
+      <MemberType>Method</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>1.0.0.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>TensorFlow.TFOperationDesc</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="attrName" Type="System.String" />
+        <Parameter Name="values" Type="System.Boolean[]" />
+      </Parameters>
+      <Docs>
+        <param name="attrName">To be added.</param>
+        <param name="values">To be added.</param>
+        <summary>To be added.</summary>
+        <returns>To be added.</returns>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="SetAttr">
+      <MemberSignature Language="C#" Value="public TensorFlow.TFOperationDesc SetAttr (string attrName, long value);" />
+      <MemberSignature Language="ILAsm" Value=".method public hidebysig instance class TensorFlow.TFOperationDesc SetAttr(string attrName, int64 value) cil managed" />
+      <MemberType>Method</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>1.0.0.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>TensorFlow.TFOperationDesc</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="attrName" Type="System.String" />
+        <Parameter Name="value" Type="System.Int64" />
+      </Parameters>
+      <Docs>
+        <param name="attrName">To be added.</param>
+        <param name="value">To be added.</param>
+        <summary>To be added.</summary>
+        <returns>To be added.</returns>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="SetAttr">
+      <MemberSignature Language="C#" Value="public TensorFlow.TFOperationDesc SetAttr (string attrName, long[] values);" />
+      <MemberSignature Language="ILAsm" Value=".method public hidebysig instance class TensorFlow.TFOperationDesc SetAttr(string attrName, int64[] values) cil managed" />
+      <MemberType>Method</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>1.0.0.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>TensorFlow.TFOperationDesc</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="attrName" Type="System.String" />
+        <Parameter Name="values" Type="System.Int64[]" />
+      </Parameters>
+      <Docs>
+        <param name="attrName">To be added.</param>
+        <param name="values">To be added.</param>
+        <summary>To be added.</summary>
+        <returns>To be added.</returns>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="SetAttr">
+      <MemberSignature Language="C#" Value="public TensorFlow.TFOperationDesc SetAttr (string attrName, float value);" />
+      <MemberSignature Language="ILAsm" Value=".method public hidebysig instance class TensorFlow.TFOperationDesc SetAttr(string attrName, float32 value) cil managed" />
+      <MemberType>Method</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>1.0.0.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>TensorFlow.TFOperationDesc</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="attrName" Type="System.String" />
+        <Parameter Name="value" Type="System.Single" />
+      </Parameters>
+      <Docs>
+        <param name="attrName">To be added.</param>
+        <param name="value">To be added.</param>
+        <summary>To be added.</summary>
+        <returns>To be added.</returns>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="SetAttr">
+      <MemberSignature Language="C#" Value="public TensorFlow.TFOperationDesc SetAttr (string attrName, float[] values);" />
+      <MemberSignature Language="ILAsm" Value=".method public hidebysig instance class TensorFlow.TFOperationDesc SetAttr(string attrName, float32[] values) cil managed" />
+      <MemberType>Method</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>1.0.0.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>TensorFlow.TFOperationDesc</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="attrName" Type="System.String" />
+        <Parameter Name="values" Type="System.Single[]" />
+      </Parameters>
+      <Docs>
+        <param name="attrName">To be added.</param>
+        <param name="values">To be added.</param>
+        <summary>To be added.</summary>
+        <returns>To be added.</returns>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="SetAttr">
+      <MemberSignature Language="C#" Value="public TensorFlow.TFOperationDesc SetAttr (string attrName, string value);" />
+      <MemberSignature Language="ILAsm" Value=".method public hidebysig instance class TensorFlow.TFOperationDesc SetAttr(string attrName, string value) cil managed" />
+      <MemberType>Method</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>1.0.0.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>TensorFlow.TFOperationDesc</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="attrName" Type="System.String" />
+        <Parameter Name="value" Type="System.String" />
+      </Parameters>
+      <Docs>
+        <param name="attrName">To be added.</param>
+        <param name="value">To be added.</param>
+        <summary>To be added.</summary>
+        <returns>To be added.</returns>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="SetAttr">
+      <MemberSignature Language="C#" Value="public TensorFlow.TFOperationDesc SetAttr (string attrName, string[] values);" />
+      <MemberSignature Language="ILAsm" Value=".method public hidebysig instance class TensorFlow.TFOperationDesc SetAttr(string attrName, string[] values) cil managed" />
+      <MemberType>Method</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>1.0.0.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>TensorFlow.TFOperationDesc</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="attrName" Type="System.String" />
+        <Parameter Name="values" Type="System.String[]" />
+      </Parameters>
+      <Docs>
+        <param name="attrName">To be added.</param>
+        <param name="values">To be added.</param>
+        <summary>To be added.</summary>
+        <returns>To be added.</returns>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="SetAttr">
+      <MemberSignature Language="C#" Value="public TensorFlow.TFOperationDesc SetAttr (string attrName, TensorFlow.TFTensor tensor, TensorFlow.TFStatus status = null);" />
+      <MemberSignature Language="ILAsm" Value=".method public hidebysig instance class TensorFlow.TFOperationDesc SetAttr(string attrName, class TensorFlow.TFTensor tensor, class TensorFlow.TFStatus status) cil managed" />
+      <MemberType>Method</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>1.0.0.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>TensorFlow.TFOperationDesc</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="attrName" Type="System.String" />
+        <Parameter Name="tensor" Type="TensorFlow.TFTensor" />
+        <Parameter Name="status" Type="TensorFlow.TFStatus" />
+      </Parameters>
+      <Docs>
+        <param name="attrName">To be added.</param>
+        <param name="tensor">To be added.</param>
+        <param name="status">To be added.</param>
+        <summary>To be added.</summary>
+        <returns>To be added.</returns>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="SetAttr">
+      <MemberSignature Language="C#" Value="public TensorFlow.TFOperationDesc SetAttr (string attrName, TensorFlow.TFTensor[] tensor, TensorFlow.TFStatus status = null);" />
+      <MemberSignature Language="ILAsm" Value=".method public hidebysig instance class TensorFlow.TFOperationDesc SetAttr(string attrName, class TensorFlow.TFTensor[] tensor, class TensorFlow.TFStatus status) cil managed" />
+      <MemberType>Method</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>1.0.0.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>TensorFlow.TFOperationDesc</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="attrName" Type="System.String" />
+        <Parameter Name="tensor" Type="TensorFlow.TFTensor[]" />
+        <Parameter Name="status" Type="TensorFlow.TFStatus" />
+      </Parameters>
+      <Docs>
+        <param name="attrName">To be added.</param>
+        <param name="tensor">To be added.</param>
+        <param name="status">To be added.</param>
+        <summary>To be added.</summary>
+        <returns>To be added.</returns>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="SetAttribute">
+      <MemberSignature Language="C#" Value="public void SetAttribute (string attrName, string value);" />
+      <MemberSignature Language="ILAsm" Value=".method public hidebysig instance void SetAttribute(string attrName, string value) cil managed" />
+      <MemberType>Method</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>1.0.0.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>System.Void</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="attrName" Type="System.String" />
+        <Parameter Name="value" Type="System.String" />
+      </Parameters>
+      <Docs>
+        <param name="attrName">The attribute name.</param>
+        <param name="value">The value for the attribute.</param>
+        <summary>
+            Sets an attribute on the function to the specified value.
+            </summary>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="SetAttrShape">
+      <MemberSignature Language="C#" Value="public TensorFlow.TFOperationDesc SetAttrShape (string attrName, TensorFlow.TFShape shape);" />
+      <MemberSignature Language="ILAsm" Value=".method public hidebysig instance class TensorFlow.TFOperationDesc SetAttrShape(string attrName, class TensorFlow.TFShape shape) cil managed" />
+      <MemberType>Method</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>1.0.0.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>TensorFlow.TFOperationDesc</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="attrName" Type="System.String" />
+        <Parameter Name="shape" Type="TensorFlow.TFShape" />
+      </Parameters>
+      <Docs>
+        <param name="attrName">To be added.</param>
+        <param name="shape">To be added.</param>
+        <summary>To be added.</summary>
+        <returns>To be added.</returns>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="SetAttrShape">
+      <MemberSignature Language="C#" Value="public TensorFlow.TFOperationDesc SetAttrShape (string attrName, TensorFlow.TFShape[] shapeList);" />
+      <MemberSignature Language="ILAsm" Value=".method public hidebysig instance class TensorFlow.TFOperationDesc SetAttrShape(string attrName, class TensorFlow.TFShape[] shapeList) cil managed" />
+      <MemberType>Method</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>1.0.0.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>TensorFlow.TFOperationDesc</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="attrName" Type="System.String" />
+        <Parameter Name="shapeList" Type="TensorFlow.TFShape[]" />
+      </Parameters>
+      <Docs>
+        <param name="attrName">To be added.</param>
+        <param name="shapeList">To be added.</param>
+        <summary>To be added.</summary>
+        <returns>To be added.</returns>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="SetAttrTensorShapeProto">
+      <MemberSignature Language="C#" Value="public TensorFlow.TFOperationDesc SetAttrTensorShapeProto (string attrName, IntPtr proto, UIntPtr protoLen, TensorFlow.TFStatus status = null);" />
+      <MemberSignature Language="ILAsm" Value=".method public hidebysig instance class TensorFlow.TFOperationDesc SetAttrTensorShapeProto(string attrName, native int proto, native unsigned int protoLen, class TensorFlow.TFStatus status) cil managed" />
+      <MemberType>Method</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>1.0.0.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>TensorFlow.TFOperationDesc</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="attrName" Type="System.String" />
+        <Parameter Name="proto" Type="System.IntPtr" />
+        <Parameter Name="protoLen" Type="System.UIntPtr" />
+        <Parameter Name="status" Type="TensorFlow.TFStatus" />
+      </Parameters>
+      <Docs>
+        <param name="attrName">To be added.</param>
+        <param name="proto">To be added.</param>
+        <param name="protoLen">To be added.</param>
+        <param name="status">To be added.</param>
+        <summary>To be added.</summary>
+        <returns>To be added.</returns>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="SetAttrType">
+      <MemberSignature Language="C#" Value="public TensorFlow.TFOperationDesc SetAttrType (string attrName, TensorFlow.TFDataType dataType);" />
+      <MemberSignature Language="ILAsm" Value=".method public hidebysig instance class TensorFlow.TFOperationDesc SetAttrType(string attrName, valuetype TensorFlow.TFDataType dataType) cil managed" />
+      <MemberType>Method</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>1.0.0.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>TensorFlow.TFOperationDesc</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="attrName" Type="System.String" />
+        <Parameter Name="dataType" Type="TensorFlow.TFDataType" />
+      </Parameters>
+      <Docs>
+        <param name="attrName">To be added.</param>
+        <param name="dataType">To be added.</param>
+        <summary>To be added.</summary>
+        <returns>To be added.</returns>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="SetAttrType">
+      <MemberSignature Language="C#" Value="public TensorFlow.TFOperationDesc SetAttrType (string attrName, TensorFlow.TFDataType[] dataType);" />
+      <MemberSignature Language="ILAsm" Value=".method public hidebysig instance class TensorFlow.TFOperationDesc SetAttrType(string attrName, valuetype TensorFlow.TFDataType[] dataType) cil managed" />
+      <MemberType>Method</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>1.0.0.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>TensorFlow.TFOperationDesc</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="attrName" Type="System.String" />
+        <Parameter Name="dataType" Type="TensorFlow.TFDataType[]">
+          <Attributes>
+            <Attribute>
+              <AttributeName>System.ParamArray</AttributeName>
+            </Attribute>
+          </Attributes>
+        </Parameter>
+      </Parameters>
+      <Docs>
+        <param name="attrName">To be added.</param>
+        <param name="dataType">To be added.</param>
+        <summary>To be added.</summary>
+        <returns>To be added.</returns>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+    <Member MemberName="SetDevice">
+      <MemberSignature Language="C#" Value="public TensorFlow.TFOperationDesc SetDevice (string device);" />
+      <MemberSignature Language="ILAsm" Value=".method public hidebysig instance class TensorFlow.TFOperationDesc SetDevice(string device) cil managed" />
+      <MemberType>Method</MemberType>
+      <AssemblyInfo>
+        <AssemblyVersion>1.0.0.0</AssemblyVersion>
+      </AssemblyInfo>
+      <ReturnValue>
+        <ReturnType>TensorFlow.TFOperationDesc</ReturnType>
+      </ReturnValue>
+      <Parameters>
+        <Parameter Name="device" Type="System.String" />
+      </Parameters>
+      <Docs>
+        <param name="device">The device to constraint to in this operation.</param>
+        <summary>
+            Specifies the device for the operation, if one is not provided, the operation is unconstrained.
+            </summary>
+        <returns>This instance, allows for chaining operation invocations.</returns>
+        <remarks>To be added.</remarks>
+      </Docs>
+    </Member>
+  </Members>
+</Type>

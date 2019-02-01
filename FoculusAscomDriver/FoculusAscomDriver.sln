@@ -1,0 +1,59 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27428.2002
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FoculusAscomDriver", "FoculusAscomDriver\FoculusAscomDriver.csproj", "{64308775-BD4A-469C-BCAB-3ED830B811AF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FoculusAscomDriverTester", "FoculusAscomDriverTester\FoculusAscomDriverTester.csproj", "{8E8D406C-1838-4914-867D-AB602D0EAF3E}"
+EndProject
+Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "FoculusAscomDrvr", "FoculusAscomDrvr\FoculusAscomDrvr.vbproj", "{71BB4DA7-4092-416D-89FE-97CD15207371}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleApp1", "ConsoleApp1\ConsoleApp1.csproj", "{4A3B14A0-C16B-4422-899E-58CDC177FE5C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|x86 = Debug|x86
+		Release|Any CPU = Release|Any CPU
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{64308775-BD4A-469C-BCAB-3ED830B811AF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{64308775-BD4A-469C-BCAB-3ED830B811AF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{64308775-BD4A-469C-BCAB-3ED830B811AF}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{64308775-BD4A-469C-BCAB-3ED830B811AF}.Debug|x86.Build.0 = Debug|Any CPU
+		{64308775-BD4A-469C-BCAB-3ED830B811AF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{64308775-BD4A-469C-BCAB-3ED830B811AF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{64308775-BD4A-469C-BCAB-3ED830B811AF}.Release|x86.ActiveCfg = Release|Any CPU
+		{64308775-BD4A-469C-BCAB-3ED830B811AF}.Release|x86.Build.0 = Release|Any CPU
+		{8E8D406C-1838-4914-867D-AB602D0EAF3E}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{8E8D406C-1838-4914-867D-AB602D0EAF3E}.Debug|x86.ActiveCfg = Debug|x86
+		{8E8D406C-1838-4914-867D-AB602D0EAF3E}.Debug|x86.Build.0 = Debug|x86
+		{8E8D406C-1838-4914-867D-AB602D0EAF3E}.Release|Any CPU.ActiveCfg = Release|x86
+		{8E8D406C-1838-4914-867D-AB602D0EAF3E}.Release|x86.ActiveCfg = Release|x86
+		{8E8D406C-1838-4914-867D-AB602D0EAF3E}.Release|x86.Build.0 = Release|x86
+		{71BB4DA7-4092-416D-89FE-97CD15207371}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{71BB4DA7-4092-416D-89FE-97CD15207371}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{71BB4DA7-4092-416D-89FE-97CD15207371}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{71BB4DA7-4092-416D-89FE-97CD15207371}.Debug|x86.Build.0 = Debug|Any CPU
+		{71BB4DA7-4092-416D-89FE-97CD15207371}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{71BB4DA7-4092-416D-89FE-97CD15207371}.Release|Any CPU.Build.0 = Release|Any CPU
+		{71BB4DA7-4092-416D-89FE-97CD15207371}.Release|x86.ActiveCfg = Release|Any CPU
+		{71BB4DA7-4092-416D-89FE-97CD15207371}.Release|x86.Build.0 = Release|Any CPU
+		{4A3B14A0-C16B-4422-899E-58CDC177FE5C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4A3B14A0-C16B-4422-899E-58CDC177FE5C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4A3B14A0-C16B-4422-899E-58CDC177FE5C}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{4A3B14A0-C16B-4422-899E-58CDC177FE5C}.Debug|x86.Build.0 = Debug|Any CPU
+		{4A3B14A0-C16B-4422-899E-58CDC177FE5C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4A3B14A0-C16B-4422-899E-58CDC177FE5C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4A3B14A0-C16B-4422-899E-58CDC177FE5C}.Release|x86.ActiveCfg = Release|Any CPU
+		{4A3B14A0-C16B-4422-899E-58CDC177FE5C}.Release|x86.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {C60BE971-59A6-4E32-A618-876ECB66B242}
+	EndGlobalSection
+EndGlobal

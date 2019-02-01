@@ -1,0 +1,813 @@
+### YamlMime:ManagedReference
+items:
+- uid: TensorFlow.TFSession
+  id: TFSession
+  children:
+  - TensorFlow.TFSession.#ctor(TensorFlow.TFStatus)
+  - TensorFlow.TFSession.#ctor(TensorFlow.TFGraph,TensorFlow.TFStatus)
+  - TensorFlow.TFSession.#ctor(TensorFlow.TFGraph,TensorFlow.TFSessionOptions,TensorFlow.TFStatus)
+  - TensorFlow.TFSession.CloseSession(TensorFlow.TFStatus)
+  - TensorFlow.TFSession.DeleteSession(TensorFlow.TFStatus)
+  - TensorFlow.TFSession.FromSavedModel(TensorFlow.TFSessionOptions,TensorFlow.TFBuffer,System.String,System.String[],TensorFlow.TFGraph,TensorFlow.TFBuffer,TensorFlow.TFStatus)
+  - TensorFlow.TFSession.GetRunner
+  - TensorFlow.TFSession.Graph
+  - TensorFlow.TFSession.ListDevices(TensorFlow.TFStatus)
+  - TensorFlow.TFSession.PartialRun(TensorFlow.TFSession.PartialRunToken,TensorFlow.TFOutput[],TensorFlow.TFTensor[],TensorFlow.TFOutput[],TensorFlow.TFOperation[],TensorFlow.TFStatus)
+  - TensorFlow.TFSession.PartialRunSetup(TensorFlow.TFOutput[],TensorFlow.TFOutput[],TensorFlow.TFOperation[],TensorFlow.TFStatus)
+  - TensorFlow.TFSession.RestoreTensor(System.String,System.String,TensorFlow.TFDataType)
+  - TensorFlow.TFSession.Run(TensorFlow.TFOutput[],TensorFlow.TFTensor[],TensorFlow.TFOutput[],TensorFlow.TFOperation[],TensorFlow.TFBuffer,TensorFlow.TFBuffer,TensorFlow.TFStatus)
+  - TensorFlow.TFSession.SaveTensors(System.String,System.ValueTuple{System.String,TensorFlow.TFOutput}[])
+  langs:
+  - csharp
+  name: TFSession
+  nameWithType: TFSession
+  fullName: TensorFlow.TFSession
+  type: Class
+  assemblies:
+  - TensorFlowSharp
+  namespace: TensorFlow
+  summary: Drives the execution of a graph
+  remarks: "<p>\n            This creates a new context to execute a TFGraph.   You can use the \n            constructor to create an empty session, or you can load an existing\n            model using the <xref href=\"TensorFlow.TFSession.FromSavedModel(TensorFlow.TFSessionOptions,TensorFlow.TFBuffer,System.String,System.String[],TensorFlow.TFGraph,TensorFlow.TFBuffer,TensorFlow.TFStatus)\"></xref> static method in this class.\n            </p>\n    <p>\n            To execute operations with the graph, call the <xref href=\"TensorFlow.TFSession.GetRunner\"></xref>  method\n            which returns an object that you can use to build the operation by providing\n            the inputs, requesting the operations that you want to execute and the desired outputs.\n            </p>\n    <p>\n            The <xref href=\"TensorFlow.TFSession.GetRunner\"></xref> method is a high-level helper function that wraps a\n            call to the <xref href=\"TensorFlow.TFSession.Run(TensorFlow.TFOutput[],TensorFlow.TFTensor[],TensorFlow.TFOutput[],TensorFlow.TFOperation[],TensorFlow.TFBuffer,TensorFlow.TFBuffer,TensorFlow.TFStatus)\"></xref> method which just takes too many parameters that must\n            be kept in sync.\n            </p>"
+  syntax:
+    content: 'public class TFSession : TensorFlow.TFDisposableThreadSafe'
+  inheritance:
+  - System.Object
+  - TensorFlow.TFDisposable
+  - TensorFlow.TFDisposableThreadSafe
+  implements: []
+  inheritedMembers:
+  - TensorFlow.TFDisposable.Dispose
+  - TensorFlow.TFDisposable.Handle
+  - TensorFlow.TFDisposableThreadSafe.Dispose(System.Boolean)
+- uid: TensorFlow.TFSession.#ctor(TensorFlow.TFStatus)
+  id: '#ctor(TensorFlow.TFStatus)'
+  parent: TensorFlow.TFSession
+  langs:
+  - csharp
+  name: TFSession(TFStatus)
+  nameWithType: TFSession.TFSession(TFStatus)
+  fullName: TFSession.TFSession(TFStatus)
+  type: Constructor
+  assemblies:
+  - TensorFlowSharp
+  namespace: TensorFlow
+  summary: Creates a new execution session with an empty graph
+  remarks: The created graph can be retrieved using the Graph property on the session.
+  syntax:
+    content: public TFSession (TensorFlow.TFStatus status = null);
+    parameters:
+    - id: status
+      type: TensorFlow.TFStatus
+      description: Status buffer, if specified a status code will be left here, if not specified, a <xref href="TensorFlow.TFException"></xref> exception is raised if there is an error.
+  overload: TensorFlow.TFSession.#ctor*
+  exceptions: []
+- uid: TensorFlow.TFSession.#ctor(TensorFlow.TFGraph,TensorFlow.TFStatus)
+  id: '#ctor(TensorFlow.TFGraph,TensorFlow.TFStatus)'
+  parent: TensorFlow.TFSession
+  langs:
+  - csharp
+  name: TFSession(TFGraph, TFStatus)
+  nameWithType: TFSession.TFSession(TFGraph, TFStatus)
+  fullName: TFSession.TFSession(TFGraph, TFStatus)
+  type: Constructor
+  assemblies:
+  - TensorFlowSharp
+  namespace: TensorFlow
+  summary: Creates a new execution session associated with the specified session graph.
+  syntax:
+    content: public TFSession (TensorFlow.TFGraph graph, TensorFlow.TFStatus status = null);
+    parameters:
+    - id: graph
+      type: TensorFlow.TFGraph
+      description: The Graph to which this session is associated.
+    - id: status
+      type: TensorFlow.TFStatus
+      description: Status buffer, if specified a status code will be left here, if not specified, a <xref href="TensorFlow.TFException"></xref> exception is raised if there is an error.
+  overload: TensorFlow.TFSession.#ctor*
+  exceptions: []
+- uid: TensorFlow.TFSession.#ctor(TensorFlow.TFGraph,TensorFlow.TFSessionOptions,TensorFlow.TFStatus)
+  id: '#ctor(TensorFlow.TFGraph,TensorFlow.TFSessionOptions,TensorFlow.TFStatus)'
+  parent: TensorFlow.TFSession
+  langs:
+  - csharp
+  name: TFSession(TFGraph, TFSessionOptions, TFStatus)
+  nameWithType: TFSession.TFSession(TFGraph, TFSessionOptions, TFStatus)
+  fullName: TFSession.TFSession(TFGraph, TFSessionOptions, TFStatus)
+  type: Constructor
+  assemblies:
+  - TensorFlowSharp
+  namespace: TensorFlow
+  summary: Creates a new execution session associated with the specified session graph with some configuration options.
+  syntax:
+    content: public TFSession (TensorFlow.TFGraph graph, TensorFlow.TFSessionOptions sessionOptions, TensorFlow.TFStatus status = null);
+    parameters:
+    - id: graph
+      type: TensorFlow.TFGraph
+      description: The Graph to which this session is associated.
+    - id: sessionOptions
+      type: TensorFlow.TFSessionOptions
+      description: Session options.
+    - id: status
+      type: TensorFlow.TFStatus
+      description: Status buffer, if specified a status code will be left here, if not specified, a <xref href="TensorFlow.TFException"></xref> exception is raised if there is an error.
+  overload: TensorFlow.TFSession.#ctor*
+  exceptions: []
+- uid: TensorFlow.TFSession.CloseSession(TensorFlow.TFStatus)
+  id: CloseSession(TensorFlow.TFStatus)
+  parent: TensorFlow.TFSession
+  langs:
+  - csharp
+  name: CloseSession(TFStatus)
+  nameWithType: TFSession.CloseSession(TFStatus)
+  fullName: TFSession.CloseSession(TFStatus)
+  type: Method
+  assemblies:
+  - TensorFlowSharp
+  namespace: TensorFlow
+  summary: Closes the session.  Contacts any other processes associated with the session, if applicable.
+  remarks: Can not be called after calling DeleteSession.
+  syntax:
+    content: public void CloseSession (TensorFlow.TFStatus status = null);
+    parameters:
+    - id: status
+      type: TensorFlow.TFStatus
+      description: Status buffer, if specified a status code will be left here, if not specified, a <xref href="TensorFlow.TFException"></xref> exception is raised if there is an error.
+  overload: TensorFlow.TFSession.CloseSession*
+  exceptions: []
+- uid: TensorFlow.TFSession.DeleteSession(TensorFlow.TFStatus)
+  id: DeleteSession(TensorFlow.TFStatus)
+  parent: TensorFlow.TFSession
+  langs:
+  - csharp
+  name: DeleteSession(TFStatus)
+  nameWithType: TFSession.DeleteSession(TFStatus)
+  fullName: TFSession.DeleteSession(TFStatus)
+  type: Method
+  assemblies:
+  - TensorFlowSharp
+  namespace: TensorFlow
+  summary: Deletes the session.
+  syntax:
+    content: public void DeleteSession (TensorFlow.TFStatus status = null);
+    parameters:
+    - id: status
+      type: TensorFlow.TFStatus
+      description: Status.
+  overload: TensorFlow.TFSession.DeleteSession*
+  exceptions: []
+- uid: TensorFlow.TFSession.FromSavedModel(TensorFlow.TFSessionOptions,TensorFlow.TFBuffer,System.String,System.String[],TensorFlow.TFGraph,TensorFlow.TFBuffer,TensorFlow.TFStatus)
+  id: FromSavedModel(TensorFlow.TFSessionOptions,TensorFlow.TFBuffer,System.String,System.String[],TensorFlow.TFGraph,TensorFlow.TFBuffer,TensorFlow.TFStatus)
+  parent: TensorFlow.TFSession
+  langs:
+  - csharp
+  name: FromSavedModel(TFSessionOptions, TFBuffer, String, String[], TFGraph, TFBuffer, TFStatus)
+  nameWithType: TFSession.FromSavedModel(TFSessionOptions, TFBuffer, String, String[], TFGraph, TFBuffer, TFStatus)
+  fullName: TFSession.FromSavedModel(TFSessionOptions, TFBuffer, String, String[], TFGraph, TFBuffer, TFStatus)
+  type: Method
+  assemblies:
+  - TensorFlowSharp
+  namespace: TensorFlow
+  summary: Creates a session and graph from a model stored in the SavedModel file format.
+  remarks: >-
+    <p>
+                This function creates a new session using the specified <code>sessionOptions</code> and then initializes
+                the state (restoring tensors and other assets) using <code>runOptions</code>.
+                </p>
+        <p>
+                This function loads the data that was saved using the SavedModel file format, as described
+                here: https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/saved_model/README.md
+                </p>
+  syntax:
+    content: public TensorFlow.TFSession FromSavedModel (TensorFlow.TFSessionOptions sessionOptions, TensorFlow.TFBuffer runOptions, string exportDir, string[] tags, TensorFlow.TFGraph graph, TensorFlow.TFBuffer metaGraphDef, TensorFlow.TFStatus status = null);
+    parameters:
+    - id: sessionOptions
+      type: TensorFlow.TFSessionOptions
+      description: Session options to use for the new session.
+    - id: runOptions
+      type: TensorFlow.TFBuffer
+      description: Options to use to initialize the state (can be null).
+    - id: exportDir
+      type: System.String
+      description: must be set to the path of the exported SavedModel.
+    - id: tags
+      type: System.String[]
+      description: must include the set of tags used to identify one MetaGraphDef in the SavedModel.
+    - id: graph
+      type: TensorFlow.TFGraph
+      description: This must be a newly created graph.
+    - id: metaGraphDef
+      type: TensorFlow.TFBuffer
+      description: On success, this will be populated on return with the contents of the MetaGraphDef (can be null).
+    - id: status
+      type: TensorFlow.TFStatus
+      description: Status buffer, if specified a status code will be left here, if not specified, a <xref href="TensorFlow.TFException"></xref> exception is raised if there is an error.
+    return:
+      type: TensorFlow.TFSession
+      description: On success, this populates the provided <code>graph</code> with the contents of the graph stored in the specified model and <code>metaGraphDef</code> with the MetaGraphDef of the loaded model.
+  overload: TensorFlow.TFSession.FromSavedModel*
+  exceptions: []
+- uid: TensorFlow.TFSession.GetRunner
+  id: GetRunner
+  parent: TensorFlow.TFSession
+  langs:
+  - csharp
+  name: GetRunner()
+  nameWithType: TFSession.GetRunner()
+  fullName: TFSession.GetRunner()
+  type: Method
+  assemblies:
+  - TensorFlowSharp
+  namespace: TensorFlow
+  summary: Gets a new runner, this provides a simpler API to prepare the inputs to run on a session
+  remarks: "The runner has a simple API that allows developers to call the AddTarget, AddInput, AddOutput and Fetch\n            to construct the parameters that will be passed to the TFSession.Run method.\n            \n            The Run method will return an array of TFTensor values, one for each invocation to the Fetch method."
+  syntax:
+    content: public TensorFlow.TFSession.Runner GetRunner ();
+    parameters: []
+    return:
+      type: TensorFlow.TFSession+Runner
+      description: The runner.
+  overload: TensorFlow.TFSession.GetRunner*
+  exceptions: []
+- uid: TensorFlow.TFSession.Graph
+  id: Graph
+  parent: TensorFlow.TFSession
+  langs:
+  - csharp
+  name: Graph
+  nameWithType: TFSession.Graph
+  fullName: TFSession.Graph
+  type: Property
+  assemblies:
+  - TensorFlowSharp
+  namespace: TensorFlow
+  summary: Gets the graph associated with this TensorFlow session.
+  syntax:
+    content: public TensorFlow.TFGraph Graph { get; }
+    return:
+      type: TensorFlow.TFGraph
+      description: The graph.
+  overload: TensorFlow.TFSession.Graph*
+  exceptions: []
+- uid: TensorFlow.TFSession.ListDevices(TensorFlow.TFStatus)
+  id: ListDevices(TensorFlow.TFStatus)
+  parent: TensorFlow.TFSession
+  langs:
+  - csharp
+  name: ListDevices(TFStatus)
+  nameWithType: TFSession.ListDevices(TFStatus)
+  fullName: TFSession.ListDevices(TFStatus)
+  type: Method
+  assemblies:
+  - TensorFlowSharp
+  namespace: TensorFlow
+  summary: Lists available devices in this session.
+  syntax:
+    content: public System.Collections.Generic.IEnumerable<TensorFlow.DeviceAttributes> ListDevices (TensorFlow.TFStatus status = null);
+    parameters:
+    - id: status
+      type: TensorFlow.TFStatus
+      description: Status buffer, if specified a status code will be left here, if not specified, a <xref href="TensorFlow.TFException"></xref> exception is raised if there is an error.
+    return:
+      type: System.Collections.Generic.IEnumerable{TensorFlow.DeviceAttributes}
+      description: To be added.
+  overload: TensorFlow.TFSession.ListDevices*
+  exceptions: []
+- uid: TensorFlow.TFSession.PartialRun(TensorFlow.TFSession.PartialRunToken,TensorFlow.TFOutput[],TensorFlow.TFTensor[],TensorFlow.TFOutput[],TensorFlow.TFOperation[],TensorFlow.TFStatus)
+  id: PartialRun(TensorFlow.TFSession.PartialRunToken,TensorFlow.TFOutput[],TensorFlow.TFTensor[],TensorFlow.TFOutput[],TensorFlow.TFOperation[],TensorFlow.TFStatus)
+  parent: TensorFlow.TFSession
+  langs:
+  - csharp
+  name: PartialRun(TFSession+PartialRunToken, TFOutput[], TFTensor[], TFOutput[], TFOperation[], TFStatus)
+  nameWithType: TFSession.PartialRun(TFSession+PartialRunToken, TFOutput[], TFTensor[], TFOutput[], TFOperation[], TFStatus)
+  fullName: TFSession.PartialRun(TFSession+PartialRunToken, TFOutput[], TFTensor[], TFOutput[], TFOperation[], TFStatus)
+  type: Method
+  assemblies:
+  - TensorFlowSharp
+  namespace: TensorFlow
+  syntax:
+    content: public TensorFlow.TFTensor[] PartialRun (TensorFlow.TFSession.PartialRunToken token, TensorFlow.TFOutput[] inputs, TensorFlow.TFTensor[] inputValues, TensorFlow.TFOutput[] outputs, TensorFlow.TFOperation[] targetOpers, TensorFlow.TFStatus status = null);
+    parameters:
+    - id: token
+      type: TensorFlow.TFSession+PartialRunToken
+      description: To be added.
+    - id: inputs
+      type: TensorFlow.TFOutput[]
+      description: To be added.
+    - id: inputValues
+      type: TensorFlow.TFTensor[]
+      description: To be added.
+    - id: outputs
+      type: TensorFlow.TFOutput[]
+      description: To be added.
+    - id: targetOpers
+      type: TensorFlow.TFOperation[]
+      description: To be added.
+    - id: status
+      type: TensorFlow.TFStatus
+      description: To be added.
+    return:
+      type: TensorFlow.TFTensor[]
+      description: To be added.
+  overload: TensorFlow.TFSession.PartialRun*
+  exceptions: []
+- uid: TensorFlow.TFSession.PartialRunSetup(TensorFlow.TFOutput[],TensorFlow.TFOutput[],TensorFlow.TFOperation[],TensorFlow.TFStatus)
+  id: PartialRunSetup(TensorFlow.TFOutput[],TensorFlow.TFOutput[],TensorFlow.TFOperation[],TensorFlow.TFStatus)
+  parent: TensorFlow.TFSession
+  langs:
+  - csharp
+  name: PartialRunSetup(TFOutput[], TFOutput[], TFOperation[], TFStatus)
+  nameWithType: TFSession.PartialRunSetup(TFOutput[], TFOutput[], TFOperation[], TFStatus)
+  fullName: TFSession.PartialRunSetup(TFOutput[], TFOutput[], TFOperation[], TFStatus)
+  type: Method
+  assemblies:
+  - TensorFlowSharp
+  namespace: TensorFlow
+  summary: Prepares the session for a partial run.
+  syntax:
+    content: public TensorFlow.TFSession.PartialRunToken PartialRunSetup (TensorFlow.TFOutput[] inputs, TensorFlow.TFOutput[] outputs, TensorFlow.TFOperation[] targetOpers, TensorFlow.TFStatus status = null);
+    parameters:
+    - id: inputs
+      type: TensorFlow.TFOutput[]
+      description: Inputs.
+    - id: outputs
+      type: TensorFlow.TFOutput[]
+      description: Outputs.
+    - id: targetOpers
+      type: TensorFlow.TFOperation[]
+      description: Target operations to run.
+    - id: status
+      type: TensorFlow.TFStatus
+      description: Status buffer, if specified a status code will be left here, if not specified, a <xref href="TensorFlow.TFException"></xref> exception is raised if there is an error.
+    return:
+      type: TensorFlow.TFSession+PartialRunToken
+      description: A token that can be used to call <xref href="TensorFlow.TFSession.PartialRun(TensorFlow.TFSession.PartialRunToken,TensorFlow.TFOutput[],TensorFlow.TFTensor[],TensorFlow.TFOutput[],TensorFlow.TFOperation[],TensorFlow.TFStatus)"></xref> repeatedly.   To complete your partial run, you should call Dispose on the resulting method.
+  overload: TensorFlow.TFSession.PartialRunSetup*
+  exceptions: []
+- uid: TensorFlow.TFSession.RestoreTensor(System.String,System.String,TensorFlow.TFDataType)
+  id: RestoreTensor(System.String,System.String,TensorFlow.TFDataType)
+  parent: TensorFlow.TFSession
+  langs:
+  - csharp
+  name: RestoreTensor(String, String, TFDataType)
+  nameWithType: TFSession.RestoreTensor(String, String, TFDataType)
+  fullName: TFSession.RestoreTensor(String, String, TFDataType)
+  type: Method
+  assemblies:
+  - TensorFlowSharp
+  namespace: TensorFlow
+  summary: Restores a tensor from a serialized tensorflor file.
+  syntax:
+    content: public TensorFlow.TFOutput RestoreTensor (string filename, string tensor, TensorFlow.TFDataType type);
+    parameters:
+    - id: filename
+      type: System.String
+      description: File containing your saved tensors.
+    - id: tensor
+      type: System.String
+      description: The name that was used to save the tensor.
+    - id: type
+      type: TensorFlow.TFDataType
+      description: The data type for the tensor.
+    return:
+      type: TensorFlow.TFOutput
+      description: The deserialized tensor from the file.
+  overload: TensorFlow.TFSession.RestoreTensor*
+  exceptions: []
+- uid: TensorFlow.TFSession.Run(TensorFlow.TFOutput[],TensorFlow.TFTensor[],TensorFlow.TFOutput[],TensorFlow.TFOperation[],TensorFlow.TFBuffer,TensorFlow.TFBuffer,TensorFlow.TFStatus)
+  id: Run(TensorFlow.TFOutput[],TensorFlow.TFTensor[],TensorFlow.TFOutput[],TensorFlow.TFOperation[],TensorFlow.TFBuffer,TensorFlow.TFBuffer,TensorFlow.TFStatus)
+  parent: TensorFlow.TFSession
+  langs:
+  - csharp
+  name: Run(TFOutput[], TFTensor[], TFOutput[], TFOperation[], TFBuffer, TFBuffer, TFStatus)
+  nameWithType: TFSession.Run(TFOutput[], TFTensor[], TFOutput[], TFOperation[], TFBuffer, TFBuffer, TFStatus)
+  fullName: TFSession.Run(TFOutput[], TFTensor[], TFOutput[], TFOperation[], TFBuffer, TFBuffer, TFStatus)
+  type: Method
+  assemblies:
+  - TensorFlowSharp
+  namespace: TensorFlow
+  summary: "Executes a pipeline given the specified inputs, inputValues, outputs, targetOpers, runMetadata and runOptions.   \n            A simpler API is available by calling the <xref href=\"GetRunner\"></xref> method which performs all the bookkeeping\n            necessary."
+  syntax:
+    content: public TensorFlow.TFTensor[] Run (TensorFlow.TFOutput[] inputs, TensorFlow.TFTensor[] inputValues, TensorFlow.TFOutput[] outputs, TensorFlow.TFOperation[] targetOpers = null, TensorFlow.TFBuffer runMetadata = null, TensorFlow.TFBuffer runOptions = null, TensorFlow.TFStatus status = null);
+    parameters:
+    - id: inputs
+      type: TensorFlow.TFOutput[]
+      description: Inputs nodes.
+    - id: inputValues
+      type: TensorFlow.TFTensor[]
+      description: Input values.
+    - id: outputs
+      type: TensorFlow.TFOutput[]
+      description: Output nodes.
+    - id: targetOpers
+      type: TensorFlow.TFOperation[]
+      description: Target operations to execute.
+    - id: runMetadata
+      type: TensorFlow.TFBuffer
+      description: Run metadata, a buffer containing the protocol buffer encoded value for https://github.com/tensorflow/tensorflow/blob/r1.9/tensorflow/core/protobuf/config.proto.
+    - id: runOptions
+      type: TensorFlow.TFBuffer
+      description: Run options, a buffer containing the protocol buffer encoded value for https://github.com/tensorflow/tensorflow/blob/r1.9/tensorflow/core/protobuf/config.proto.
+    - id: status
+      type: TensorFlow.TFStatus
+      description: Status buffer, if specified a status code will be left here, if not specified, a <xref href="TensorFlow.TFException"></xref> exception is raised if there is an error.
+    return:
+      type: TensorFlow.TFTensor[]
+      description: An array of tensors fetched from the requested outputs.
+  overload: TensorFlow.TFSession.Run*
+  exceptions: []
+- uid: TensorFlow.TFSession.SaveTensors(System.String,System.ValueTuple{System.String,TensorFlow.TFOutput}[])
+  id: SaveTensors(System.String,System.ValueTuple{System.String,TensorFlow.TFOutput}[])
+  parent: TensorFlow.TFSession
+  langs:
+  - csharp
+  name: SaveTensors(String, ValueTuple<String,TFOutput>[])
+  nameWithType: TFSession.SaveTensors(String, ValueTuple<String,TFOutput>[])
+  fullName: TFSession.SaveTensors(String, ValueTuple<String,TFOutput>[])
+  type: Method
+  assemblies:
+  - TensorFlowSharp
+  namespace: TensorFlow
+  summary: Saves the tensors in the session to a file.
+  remarks: >-
+    <p>
+                Tensors saved with this method can be loaded by calling <xref href="RestoreTensor"></xref>.
+                </p>
+        <pre><code>
+                using (var session = new TFSession ()) {
+                  var a = session.Graph.Const(30, "a");
+                  var b = session.Graph.Const(12, "b");
+                  var multiplyResults = session.GetRunner().Run(session.Graph.Add(a, b));
+                  var multiplyResultValue = multiplyResults.GetValue();
+                  Console.WriteLine("a*b={0}", multiplyResultValue);
+                  session.SaveTensors($"saved.tsf", ("a", a), ("b", b));
+                }
+                </code></pre>
+  syntax:
+    content: public TensorFlow.TFTensor[] SaveTensors (string filename, ValueTuple<string,TensorFlow.TFOutput>[] tensors);
+    parameters:
+    - id: filename
+      type: System.String
+      description: 'File to store the tensors in (for example: tensors.tsf).'
+    - id: tensors
+      type: System.ValueTuple{System.String,TensorFlow.TFOutput}[]
+      description: An array of tuples that include the name you want to give the tensor on output, and the tensor you want to save.
+    return:
+      type: TensorFlow.TFTensor[]
+      description: The tensors.
+  overload: TensorFlow.TFSession.SaveTensors*
+  exceptions: []
+references:
+- uid: TensorFlow.TFDisposableThreadSafe
+  parent: TensorFlow
+  isExternal: false
+  name: TFDisposableThreadSafe
+  nameWithType: TFDisposableThreadSafe
+  fullName: TensorFlow.TFDisposableThreadSafe
+- uid: TensorFlow.TFSession.#ctor(TensorFlow.TFStatus)
+  parent: TensorFlow.TFSession
+  isExternal: false
+  name: TFSession(TFStatus)
+  nameWithType: TFSession.TFSession(TFStatus)
+  fullName: TFSession.TFSession(TFStatus)
+- uid: TensorFlow.TFStatus
+  parent: TensorFlow
+  isExternal: false
+  name: TFStatus
+  nameWithType: TFStatus
+  fullName: TensorFlow.TFStatus
+- uid: TensorFlow.TFSession.#ctor(TensorFlow.TFGraph,TensorFlow.TFStatus)
+  parent: TensorFlow.TFSession
+  isExternal: false
+  name: TFSession(TFGraph, TFStatus)
+  nameWithType: TFSession.TFSession(TFGraph, TFStatus)
+  fullName: TFSession.TFSession(TFGraph, TFStatus)
+- uid: TensorFlow.TFGraph
+  parent: TensorFlow
+  isExternal: false
+  name: TFGraph
+  nameWithType: TFGraph
+  fullName: TensorFlow.TFGraph
+- uid: TensorFlow.TFSession.#ctor(TensorFlow.TFGraph,TensorFlow.TFSessionOptions,TensorFlow.TFStatus)
+  parent: TensorFlow.TFSession
+  isExternal: false
+  name: TFSession(TFGraph, TFSessionOptions, TFStatus)
+  nameWithType: TFSession.TFSession(TFGraph, TFSessionOptions, TFStatus)
+  fullName: TFSession.TFSession(TFGraph, TFSessionOptions, TFStatus)
+- uid: TensorFlow.TFSessionOptions
+  parent: TensorFlow
+  isExternal: false
+  name: TFSessionOptions
+  nameWithType: TFSessionOptions
+  fullName: TensorFlow.TFSessionOptions
+- uid: TensorFlow.TFSession.CloseSession(TensorFlow.TFStatus)
+  parent: TensorFlow.TFSession
+  isExternal: false
+  name: CloseSession(TFStatus)
+  nameWithType: TFSession.CloseSession(TFStatus)
+  fullName: TFSession.CloseSession(TFStatus)
+- uid: TensorFlow.TFSession.DeleteSession(TensorFlow.TFStatus)
+  parent: TensorFlow.TFSession
+  isExternal: false
+  name: DeleteSession(TFStatus)
+  nameWithType: TFSession.DeleteSession(TFStatus)
+  fullName: TFSession.DeleteSession(TFStatus)
+- uid: TensorFlow.TFSession.FromSavedModel(TensorFlow.TFSessionOptions,TensorFlow.TFBuffer,System.String,System.String[],TensorFlow.TFGraph,TensorFlow.TFBuffer,TensorFlow.TFStatus)
+  parent: TensorFlow.TFSession
+  isExternal: false
+  name: FromSavedModel(TFSessionOptions, TFBuffer, String, String[], TFGraph, TFBuffer, TFStatus)
+  nameWithType: TFSession.FromSavedModel(TFSessionOptions, TFBuffer, String, String[], TFGraph, TFBuffer, TFStatus)
+  fullName: TFSession.FromSavedModel(TFSessionOptions, TFBuffer, String, String[], TFGraph, TFBuffer, TFStatus)
+- uid: TensorFlow.TFSession
+  parent: TensorFlow
+  isExternal: false
+  name: TFSession
+  nameWithType: TFSession
+  fullName: TensorFlow.TFSession
+- uid: TensorFlow.TFBuffer
+  parent: TensorFlow
+  isExternal: false
+  name: TFBuffer
+  nameWithType: TFBuffer
+  fullName: TensorFlow.TFBuffer
+- uid: System.String
+  parent: System
+  isExternal: true
+  name: String
+  nameWithType: String
+  fullName: System.String
+- uid: System.String[]
+  parent: System
+  isExternal: true
+  name: String[]
+  nameWithType: String[]
+  fullName: System.String[]
+  spec.csharp:
+  - uid: System.String
+    name: String
+    nameWithType: String
+    fullName: System.String
+  - name: '[]'
+    nameWithType: '[]'
+    fullName: '[]'
+- uid: TensorFlow.TFSession.GetRunner
+  parent: TensorFlow.TFSession
+  isExternal: false
+  name: GetRunner()
+  nameWithType: TFSession.GetRunner()
+  fullName: TFSession.GetRunner()
+- uid: TensorFlow.TFSession.Graph
+  parent: TensorFlow.TFSession
+  isExternal: false
+  name: Graph
+  nameWithType: TFSession.Graph
+  fullName: TFSession.Graph
+- uid: TensorFlow.TFSession.ListDevices(TensorFlow.TFStatus)
+  parent: TensorFlow.TFSession
+  isExternal: false
+  name: ListDevices(TFStatus)
+  nameWithType: TFSession.ListDevices(TFStatus)
+  fullName: TFSession.ListDevices(TFStatus)
+- uid: System.Collections.Generic.IEnumerable`1
+  name: IEnumerable
+  nameWithType: IEnumerable
+  fullName: System.Collections.Generic.IEnumerable
+- uid: TensorFlow.DeviceAttributes
+  name: DeviceAttributes
+  nameWithType: DeviceAttributes
+  fullName: TensorFlow.DeviceAttributes
+- uid: System.Collections.Generic.IEnumerable{TensorFlow.DeviceAttributes}
+  parent: System.Collections.Generic
+  isExternal: true
+  name: IEnumerable<DeviceAttributes>
+  nameWithType: IEnumerable<DeviceAttributes>
+  fullName: System.Collections.Generic.IEnumerable<TensorFlow.DeviceAttributes>
+  spec.csharp:
+  - uid: System.Collections.Generic.IEnumerable`1
+    name: IEnumerable
+    nameWithType: IEnumerable
+    fullName: System.Collections.Generic.IEnumerable
+  - name: <
+    nameWithType: <
+    fullName: <
+  - uid: TensorFlow.DeviceAttributes
+    name: DeviceAttributes
+    nameWithType: DeviceAttributes
+    fullName: TensorFlow.DeviceAttributes
+  - name: '>'
+    nameWithType: '>'
+    fullName: '>'
+- uid: TensorFlow.TFSession.PartialRun(TensorFlow.TFSession.PartialRunToken,TensorFlow.TFOutput[],TensorFlow.TFTensor[],TensorFlow.TFOutput[],TensorFlow.TFOperation[],TensorFlow.TFStatus)
+  parent: TensorFlow.TFSession
+  isExternal: false
+  name: PartialRun(TFSession+PartialRunToken, TFOutput[], TFTensor[], TFOutput[], TFOperation[], TFStatus)
+  nameWithType: TFSession.PartialRun(TFSession+PartialRunToken, TFOutput[], TFTensor[], TFOutput[], TFOperation[], TFStatus)
+  fullName: TFSession.PartialRun(TFSession+PartialRunToken, TFOutput[], TFTensor[], TFOutput[], TFOperation[], TFStatus)
+- uid: TensorFlow.TFTensor
+  name: TFTensor
+  nameWithType: TFTensor
+  fullName: TensorFlow.TFTensor
+- uid: TensorFlow.TFTensor[]
+  parent: TensorFlow
+  isExternal: false
+  name: TFTensor[]
+  nameWithType: TFTensor[]
+  fullName: TensorFlow.TFTensor[]
+  spec.csharp:
+  - uid: TensorFlow.TFTensor
+    name: TFTensor
+    nameWithType: TFTensor
+    fullName: TensorFlow.TFTensor
+  - name: '[]'
+    nameWithType: '[]'
+    fullName: '[]'
+- uid: TensorFlow.TFOutput
+  name: TFOutput
+  nameWithType: TFOutput
+  fullName: TensorFlow.TFOutput
+- uid: TensorFlow.TFOutput[]
+  parent: TensorFlow
+  isExternal: false
+  name: TFOutput[]
+  nameWithType: TFOutput[]
+  fullName: TensorFlow.TFOutput[]
+  spec.csharp:
+  - uid: TensorFlow.TFOutput
+    name: TFOutput
+    nameWithType: TFOutput
+    fullName: TensorFlow.TFOutput
+  - name: '[]'
+    nameWithType: '[]'
+    fullName: '[]'
+- uid: TensorFlow.TFOperation
+  name: TFOperation
+  nameWithType: TFOperation
+  fullName: TensorFlow.TFOperation
+- uid: TensorFlow.TFOperation[]
+  parent: TensorFlow
+  isExternal: false
+  name: TFOperation[]
+  nameWithType: TFOperation[]
+  fullName: TensorFlow.TFOperation[]
+  spec.csharp:
+  - uid: TensorFlow.TFOperation
+    name: TFOperation
+    nameWithType: TFOperation
+    fullName: TensorFlow.TFOperation
+  - name: '[]'
+    nameWithType: '[]'
+    fullName: '[]'
+- uid: TensorFlow.TFSession.PartialRunSetup(TensorFlow.TFOutput[],TensorFlow.TFOutput[],TensorFlow.TFOperation[],TensorFlow.TFStatus)
+  parent: TensorFlow.TFSession
+  isExternal: false
+  name: PartialRunSetup(TFOutput[], TFOutput[], TFOperation[], TFStatus)
+  nameWithType: TFSession.PartialRunSetup(TFOutput[], TFOutput[], TFOperation[], TFStatus)
+  fullName: TFSession.PartialRunSetup(TFOutput[], TFOutput[], TFOperation[], TFStatus)
+- uid: TensorFlow.TFSession.RestoreTensor(System.String,System.String,TensorFlow.TFDataType)
+  parent: TensorFlow.TFSession
+  isExternal: false
+  name: RestoreTensor(String, String, TFDataType)
+  nameWithType: TFSession.RestoreTensor(String, String, TFDataType)
+  fullName: TFSession.RestoreTensor(String, String, TFDataType)
+- uid: TensorFlow.TFDataType
+  parent: TensorFlow
+  isExternal: false
+  name: TFDataType
+  nameWithType: TFDataType
+  fullName: TensorFlow.TFDataType
+- uid: TensorFlow.TFSession.Run(TensorFlow.TFOutput[],TensorFlow.TFTensor[],TensorFlow.TFOutput[],TensorFlow.TFOperation[],TensorFlow.TFBuffer,TensorFlow.TFBuffer,TensorFlow.TFStatus)
+  parent: TensorFlow.TFSession
+  isExternal: false
+  name: Run(TFOutput[], TFTensor[], TFOutput[], TFOperation[], TFBuffer, TFBuffer, TFStatus)
+  nameWithType: TFSession.Run(TFOutput[], TFTensor[], TFOutput[], TFOperation[], TFBuffer, TFBuffer, TFStatus)
+  fullName: TFSession.Run(TFOutput[], TFTensor[], TFOutput[], TFOperation[], TFBuffer, TFBuffer, TFStatus)
+- uid: TensorFlow.TFSession.SaveTensors(System.String,System.ValueTuple{System.String,TensorFlow.TFOutput}[])
+  parent: TensorFlow.TFSession
+  isExternal: false
+  name: SaveTensors(String, ValueTuple<String,TFOutput>[])
+  nameWithType: TFSession.SaveTensors(String, ValueTuple<String,TFOutput>[])
+  fullName: TFSession.SaveTensors(String, ValueTuple<String,TFOutput>[])
+- uid: System.ValueTuple`2
+  name: ValueTuple
+  nameWithType: ValueTuple
+  fullName: System.ValueTuple
+- uid: System.ValueTuple{System.String,TensorFlow.TFOutput}[]
+  parent: System
+  isExternal: true
+  name: ValueTuple<String,TFOutput>[]
+  nameWithType: ValueTuple<String,TFOutput>[]
+  fullName: System.ValueTuple<System.String,TensorFlow.TFOutput>[]
+  spec.csharp:
+  - uid: System.ValueTuple`2
+    name: ValueTuple
+    nameWithType: ValueTuple
+    fullName: System.ValueTuple
+  - name: <
+    nameWithType: <
+    fullName: <
+  - uid: System.String
+    name: String
+    nameWithType: String
+    fullName: System.String
+  - name: ','
+    nameWithType: ','
+    fullName: ','
+  - uid: TensorFlow.TFOutput
+    name: TFOutput
+    nameWithType: TFOutput
+    fullName: TensorFlow.TFOutput
+  - name: '>'
+    nameWithType: '>'
+    fullName: '>'
+  - name: '[]'
+    nameWithType: '[]'
+    fullName: '[]'
+- uid: TensorFlow.TFSession.#ctor*
+  parent: TensorFlow.TFSession
+  isExternal: false
+  name: TFSession
+  nameWithType: TFSession.TFSession
+  fullName: TFSession.TFSession
+- uid: TensorFlow.TFSession.CloseSession*
+  parent: TensorFlow.TFSession
+  isExternal: false
+  name: CloseSession
+  nameWithType: TFSession.CloseSession
+  fullName: TFSession.CloseSession
+- uid: TensorFlow.TFSession.DeleteSession*
+  parent: TensorFlow.TFSession
+  isExternal: false
+  name: DeleteSession
+  nameWithType: TFSession.DeleteSession
+  fullName: TFSession.DeleteSession
+- uid: TensorFlow.TFSession.FromSavedModel*
+  parent: TensorFlow.TFSession
+  isExternal: false
+  name: FromSavedModel
+  nameWithType: TFSession.FromSavedModel
+  fullName: TFSession.FromSavedModel
+- uid: TensorFlow.TFSession.GetRunner*
+  parent: TensorFlow.TFSession
+  isExternal: false
+  name: GetRunner
+  nameWithType: TFSession.GetRunner
+  fullName: TFSession.GetRunner
+- uid: TensorFlow.TFSession.Graph*
+  parent: TensorFlow.TFSession
+  isExternal: false
+  name: Graph
+  nameWithType: TFSession.Graph
+  fullName: TFSession.Graph
+- uid: TensorFlow.TFSession.ListDevices*
+  parent: TensorFlow.TFSession
+  isExternal: false
+  name: ListDevices
+  nameWithType: TFSession.ListDevices
+  fullName: TFSession.ListDevices
+- uid: TensorFlow.TFSession.PartialRun*
+  parent: TensorFlow.TFSession
+  isExternal: false
+  name: PartialRun
+  nameWithType: TFSession.PartialRun
+  fullName: TFSession.PartialRun
+- uid: TensorFlow.TFSession.PartialRunSetup*
+  parent: TensorFlow.TFSession
+  isExternal: false
+  name: PartialRunSetup
+  nameWithType: TFSession.PartialRunSetup
+  fullName: TFSession.PartialRunSetup
+- uid: TensorFlow.TFSession.RestoreTensor*
+  parent: TensorFlow.TFSession
+  isExternal: false
+  name: RestoreTensor
+  nameWithType: TFSession.RestoreTensor
+  fullName: TFSession.RestoreTensor
+- uid: TensorFlow.TFSession.Run*
+  parent: TensorFlow.TFSession
+  isExternal: false
+  name: Run
+  nameWithType: TFSession.Run
+  fullName: TFSession.Run
+- uid: TensorFlow.TFSession.SaveTensors*
+  parent: TensorFlow.TFSession
+  isExternal: false
+  name: SaveTensors
+  nameWithType: TFSession.SaveTensors
+  fullName: TFSession.SaveTensors
+- uid: TensorFlow.TFDisposable.Dispose
+  parent: TensorFlow.TFDisposable
+  isExternal: false
+  name: Dispose()
+  nameWithType: TFDisposable.Dispose()
+  fullName: TFDisposable.Dispose()
+- uid: TensorFlow.TFDisposableThreadSafe.Dispose(System.Boolean)
+  parent: TensorFlow.TFDisposableThreadSafe
+  isExternal: false
+  name: Dispose(Boolean)
+  nameWithType: TFDisposableThreadSafe.Dispose(Boolean)
+  fullName: TFDisposableThreadSafe.Dispose(Boolean)
+- uid: TensorFlow.TFDisposable.Handle
+  parent: TensorFlow.TFDisposable
+  isExternal: false
+  name: Handle
+  nameWithType: TFDisposable.Handle
+  fullName: TFDisposable.Handle

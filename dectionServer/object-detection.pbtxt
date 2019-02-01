@@ -1,0 +1,30 @@
+item {
+  name: "meteor"
+  id: 1
+  display_name: "meteor"
+}
+item {
+  name: "cloud"
+  id: 2
+  display_name: "cloud"
+}
+item {
+  name: "plane"
+  id: 3
+  display_name: "plane"
+}
+item {
+  name: "flare"
+  id: 4
+  display_name: "flare"
+}
+item {
+  name: "tree"
+  id: 5
+  display_name: "tree"
+}
+item {
+  name: "satellite"
+  id: 6
+  display_name: "satellite"
+}

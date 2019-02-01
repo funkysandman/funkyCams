@@ -1,0 +1,17 @@
+item {
+  name: "meteor"
+  id: 1
+  display_name: "meteor"
+} item {
+  name: "space"
+  id: 2
+  display_name: "space"
+} item {
+  name: "plane"
+  id: 3
+  display_name: "plane"
+} item {
+  name: "flare"
+  id: 4
+  display_name: "flare"
+}

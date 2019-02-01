@@ -1,0 +1,104 @@
+<?xml version="1.0"?>
+<IIDCConfig>
+  <GigECamera SelectPolicy="GUID" GUID="56025" Model="GC1290M" FirmwareVersion="1.50.1">
+    <CameraSettings>
+      <Attribute Name="AcqEndTriggerEvent" Datatype="Enum" Value="EdgeRising" />
+      <Attribute Name="AcqEndTriggerMode" Datatype="Enum" Value="Disabled" />
+      <Attribute Name="AcqRecTriggerEvent" Datatype="Enum" Value="EdgeRising" />
+      <Attribute Name="AcqRecTriggerMode" Datatype="Enum" Value="Disabled" />
+      <Attribute Name="AcqStartTriggerEvent" Datatype="Enum" Value="EdgeRising" />
+      <Attribute Name="AcqStartTriggerMode" Datatype="Enum" Value="Disabled" />
+      <Attribute Name="AcquisitionFrameCount" Datatype="Uint32" Value="1" />
+      <Attribute Name="AcquisitionMode" Datatype="Enum" Value="MultiFrame" />
+      <Attribute Name="BandwidthCtrlMode" Datatype="Enum" Value="StreamBytesPerSecond" />
+      <Attribute Name="BinningX" Datatype="Uint32" Value="1" />
+      <Attribute Name="BinningY" Datatype="Uint32" Value="1" />
+      <Attribute Name="CameraName" Datatype="String" Value="GC1290M" />
+      <Attribute Name="ConfigFileIndex" Datatype="Enum" Value="Factory" />
+      <Attribute Name="ConfigFilePowerUp" Datatype="Enum" Value="Factory" />
+      <Attribute Name="DSPSubregionBottom" Datatype="Uint32" Value="960" />
+      <Attribute Name="DSPSubregionLeft" Datatype="Uint32" Value="0" />
+      <Attribute Name="DSPSubregionRight" Datatype="Uint32" Value="1280" />
+      <Attribute Name="DSPSubregionTop" Datatype="Uint32" Value="0" />
+      <Attribute Name="EventNotification" Datatype="Enum" Value="Off" />
+      <Attribute Name="EventSelector" Datatype="Enum" Value="FrameTriggerReady" />
+      <Attribute Name="EventsEnable1" Datatype="Uint32" Value="0" />
+      <Attribute Name="ExposureAutoAdjustTol" Datatype="Uint32" Value="5" />
+      <Attribute Name="ExposureAutoAlg" Datatype="Enum" Value="Mean" />
+      <Attribute Name="ExposureAutoMax" Datatype="Uint32" Value="10000000" />
+      <Attribute Name="ExposureAutoMin" Datatype="Uint32" Value="12" />
+      <Attribute Name="ExposureAutoOutliers" Datatype="Uint32" Value="0" />
+      <Attribute Name="ExposureAutoRate" Datatype="Uint32" Value="100" />
+      <Attribute Name="ExposureAutoTarget" Datatype="Uint32" Value="50" />
+      <Attribute Name="ExposureMode" Datatype="Enum" Value="Manual" />
+      <Attribute Name="ExposureValue" Datatype="Uint32" Value="10000000" />
+      <Attribute Name="FrameRate" Datatype="Float32" Value="1.000000e-001" />
+      <Attribute Name="FrameStartTriggerDelay" Datatype="Uint32" Value="0" />
+      <Attribute Name="FrameStartTriggerEvent" Datatype="Enum" Value="EdgeRising" />
+      <Attribute Name="FrameStartTriggerMode" Datatype="Enum" Value="Freerun" />
+      <Attribute Name="FrameStartTriggerOverlap" Datatype="Enum" Value="Off" />
+      <Attribute Name="GainAutoAdjustTol" Datatype="Uint32" Value="5" />
+      <Attribute Name="GainAutoMax" Datatype="Uint32" Value="24" />
+      <Attribute Name="GainAutoMin" Datatype="Uint32" Value="0" />
+      <Attribute Name="GainAutoOutliers" Datatype="Uint32" Value="0" />
+      <Attribute Name="GainAutoRate" Datatype="Uint32" Value="100" />
+      <Attribute Name="GainAutoTarget" Datatype="Uint32" Value="50" />
+      <Attribute Name="GainMode" Datatype="Enum" Value="Manual" />
+      <Attribute Name="GainValue" Datatype="Uint32" Value="10" />
+      <Attribute Name="GvcpRetries" Datatype="Uint32" Value="5" />
+      <Attribute Name="GvspLookbackWindow" Datatype="Uint32" Value="25" />
+      <Attribute Name="GvspResendPercent" Datatype="Float32" Value="1.000000e+000" />
+      <Attribute Name="GvspRetries" Datatype="Uint32" Value="3" />
+      <Attribute Name="GvspSocketBuffersCount" Datatype="Enum" Value="512" />
+      <Attribute Name="GvspTimeout" Datatype="Uint32" Value="50" />
+      <Attribute Name="HeartbeatInterval" Datatype="Uint32" Value="3500" />
+      <Attribute Name="HeartbeatTimeout" Datatype="Uint32" Value="6000" />
+      <Attribute Name="Height" Datatype="Uint32" Value="960" />
+      <Attribute Name="IrisAutoTarget" Datatype="Uint32" Value="50" />
+      <Attribute Name="IrisMode" Datatype="Enum" Value="Disabled" />
+      <Attribute Name="IrisVideoLevelMax" Datatype="Uint32" Value="110" />
+      <Attribute Name="IrisVideoLevelMin" Datatype="Uint32" Value="90" />
+      <Attribute Name="MulticastEnable" Datatype="Enum" Value="Off" />
+      <Attribute Name="MulticastIPAddress" Datatype="String" Value="239.255.15.49" />
+      <Attribute Name="PacketSize" Datatype="Uint32" Value="1500" />
+      <Attribute Name="PixelFormat" Datatype="Enum" Value="Mono12Packed" />
+      <Attribute Name="PtpAcquisitionGateTimeHi" Datatype="Uint32" Value="0" />
+      <Attribute Name="PtpAcquisitionGateTimeLo" Datatype="Uint32" Value="0" />
+      <Attribute Name="PtpMode" Datatype="Enum" Value="Off" />
+      <Attribute Name="RecorderPreEventCount" Datatype="Uint32" Value="0" />
+      <Attribute Name="RegionX" Datatype="Uint32" Value="0" />
+      <Attribute Name="RegionY" Datatype="Uint32" Value="0" />
+      <Attribute Name="StreamBytesPerSecond" Datatype="Uint32" Value="124000000" />
+      <Attribute Name="StreamHoldEnable" Datatype="Enum" Value="Off" />
+      <Attribute Name="Strobe1ControlledDuration" Datatype="Enum" Value="Off" />
+      <Attribute Name="Strobe1Delay" Datatype="Uint32" Value="0" />
+      <Attribute Name="Strobe1Duration" Datatype="Uint32" Value="0" />
+      <Attribute Name="Strobe1Mode" Datatype="Enum" Value="FrameTrigger" />
+      <Attribute Name="SyncIn1GlitchFilter" Datatype="Uint32" Value="2000" />
+      <Attribute Name="SyncIn2GlitchFilter" Datatype="Uint32" Value="0" />
+      <Attribute Name="SyncOut1Invert" Datatype="Enum" Value="Off" />
+      <Attribute Name="SyncOut1Mode" Datatype="Enum" Value="Exposing" />
+      <Attribute Name="SyncOut2Invert" Datatype="Enum" Value="Off" />
+      <Attribute Name="SyncOut2Mode" Datatype="Enum" Value="Exposing" />
+      <Attribute Name="SyncOutGpoLevels" Datatype="Uint32" Value="0" />
+      <Attribute Name="Width" Datatype="Uint32" Value="1280" />
+    </CameraSettings>
+    <SoftwareSettings>
+      <InputPin0State Value="1" />
+      <InputPin1State Value="0" />
+      <TriggerActive Value="0" />
+      <StdShutter TimeBase="4" />
+    </SoftwareSettings>
+  </GigECamera>
+  <IIDCApplication Name="AVT_UniCam" Version="1.2.4">
+    <Camera Model="GC1290M" SerialNumber="02-2185A-06025">
+      <AdditionalSetting Name="MultishotCount">2</AdditionalSetting>
+      <AdditionalSetting Name="FrameBufferCount">3</AdditionalSetting>
+      <AdditionalSetting Name="DebayerMethod">0</AdditionalSetting>
+      <AdditionalSetting Name="DebayerPattern">-1</AdditionalSetting>
+      <AdditionalSetting Name="LutFilename">
+      </AdditionalSetting>
+      <AdditionalSetting Name="LutFileColumnIndex">0</AdditionalSetting>
+    </Camera>
+  </IIDCApplication>
+</IIDCConfig>

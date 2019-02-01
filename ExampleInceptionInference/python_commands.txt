@@ -1,0 +1,7 @@
+classifying:
+
+python tensorflow/tensorflow/examples/label_image/label_image.py --graph=c:/tmp/output_graph.pb --labels=c:/tmp/output_labels.txt --input_layer=Mul --output_layer=final_result --input_mean=128 --input_std=128 --image=$HOME/meteor_photos/meteor/image26.jpg
+
+training model:
+
+C:\Users\sandy>python tensorflow/tensorflow/examples/image_retraining/retrain.py --image_dir meteor_photos --architecture MobileNet_v1_1.0_224
