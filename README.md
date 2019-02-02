@@ -1,6 +1,6 @@
 # funkyCams
 
-This is a collection of vb/c# .net programs that I use to control various machine vision type cameras.
+This is a collection of vb/c# .net programs that I use to control various machine vision type cameras.  The cameras involved are USB, GIGE, 1394 firewire variety.  Cameras touched include SVS Vistek, Photonics HQ2, Allied Vision (AVT), Foculus, Point Grey, Basler models.
 
 These cameras are primarily used outdoors for taking snapshots of the night sky.
 
