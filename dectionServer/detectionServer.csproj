@@ -71,6 +71,9 @@
     <Content Include=".pb">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="frozen_inference_graph_836.pb">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="frozen_inference_graph.pb">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
