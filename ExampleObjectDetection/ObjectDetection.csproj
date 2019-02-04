@@ -145,9 +145,9 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ExampleCommon\ObjDetectCommon.csproj">
+    <ProjectReference Include="..\ExampleCommon\ObjectDetectCommon.csproj">
       <Project>{116BA176-F67C-4066-8685-C080705BAA16}</Project>
-      <Name>ObjDetectCommon</Name>
+      <Name>ObjectDetectCommon</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

@@ -13,7 +13,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pylon.NETSupportLibrary", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsynchronousGrabForms", "AsynchronousGrab\Forms\Build\VS2010\AsynchronousGrabForms.csproj", "{1FB459E7-7C5D-45C3-BF6E-428C9CD191BA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ObjDetectCommon", "ExampleCommon\ObjDetectCommon.csproj", "{116BA176-F67C-4066-8685-C080705BAA16}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ObjectDetectCommon", "ExampleCommon\ObjectDetectCommon.csproj", "{116BA176-F67C-4066-8685-C080705BAA16}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ObjectDetection", "ExampleObjectDetection\ObjectDetection.csproj", "{69471B59-576D-446B-8DF3-96EC783C0B6C}"
 EndProject
