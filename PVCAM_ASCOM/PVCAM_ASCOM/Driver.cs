@@ -123,7 +123,7 @@ namespace ASCOM.Photometrics
             // open first camera
             if (pvcam_helper.PVCamCamera.OpenCamera(pvcam_helper.PVCamCamera.CameraList[0], myCam))
                 myCam.ReadCameraParams();
-            myCam.SetClockingMode("Normal");
+            myCam.SetClockingMode("Alternate Normal");
             myCam.SetClearMode("Pre-Exposure");
             myCam.SetClearCycles(2);
             myCam.SetEMGain(1);

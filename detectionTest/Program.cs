@@ -20,10 +20,10 @@ namespace detectionTest
 
             DateTime from_date = DateTime.Now.AddHours(-1600000);
             DateTime to_date = DateTime.Now;
-            var directory = new DirectoryInfo("e:\\notfound");
+            var directory = new DirectoryInfo("\\\\192.168.1.198\\c\\image_avt_astro\\2019-Feb-01");
 
 
-            var files = directory.GetFiles("*.png"); //.Where(file => file.LastWriteTime >= from_date && file.LastWriteTime <= to_date);
+            var files = directory.GetFiles("*.jpg"); //.Where(file => file.LastWriteTime >= from_date && file.LastWriteTime <= to_date);
 
             foreach (FileInfo afile in files)
             {
