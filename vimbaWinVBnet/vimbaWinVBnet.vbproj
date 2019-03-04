@@ -11,7 +11,7 @@
     <AssemblyName>vimbaWinVBnet</AssemblyName>
     <FileAlignment>512</FileAlignment>
     <MyType>WindowsForms</MyType>
-    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7.1</TargetFrameworkVersion>
     <TargetFrameworkProfile />
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
@@ -323,7 +323,6 @@
     <ProjectReference Include="..\BaumerAPI\BaumerAPI.csproj">
       <Project>{782f80d9-c751-4664-a6be-f6f499bdd581}</Project>
       <Name>BaumerAPI</Name>
-      <EmbedInteropTypes>False</EmbedInteropTypes>
     </ProjectReference>
     <ProjectReference Include="..\ExampleObjectDetection\ObjectDetection.csproj">
       <Project>{69471b59-576d-446b-8df3-96ec783c0b6c}</Project>
