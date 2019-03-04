@@ -46,4 +46,10 @@ Public Class Form3
         Me.Close()
 
     End Sub
+
+    Private Sub Button7_Click(sender As Object, e As EventArgs) Handles Button7.Click
+        Dim f As New frmQ
+        f.Show()
+        Me.Hide()
+    End Sub
 End Class
