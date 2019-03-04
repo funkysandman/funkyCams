@@ -260,7 +260,7 @@ Public Class frmSVSVistek
         ' Save the bitmap as a JPEG file with quality level 25.
         myEncoderParameter = New EncoderParameter(myEncoder, CType(85L, Int32))
         myEncoderParameters.Param(0) = myEncoderParameter
-        md.LoadModel("c:\tmp\frozen_inference_graph_orig.pb", "c:\tmp\mscoco_label_map.pbtxt")
+        ' md.LoadModel("c:\tmp\frozen_inference_graph_orig.pb", "c:\tmp\mscoco_label_map.pbtxt")
     End Sub
 
 
@@ -569,12 +569,12 @@ Public Class frmSVSVistek
     End Function 'GetEncoderInfo
 
     Private Sub cbMeteors_CheckedChanged(sender As Object, e As EventArgs) Handles cbMeteors.CheckedChanged
-        If Not cbMeteors.Checked Then
-            md.LoadModel("c:\tmp\frozen_inference_graph_orig.pb", "c:\tmp\mscoco_label_map.pbtxt")
+        'If Not cbMeteors.Checked Then
+        '    md.LoadModel("c:\tmp\frozen_inference_graph_orig.pb", "c:\tmp\mscoco_label_map.pbtxt")
 
-        Else
-            md.LoadModel("c:\tmp\frozen_inference_graph.pb", "c:\tmp\object-detection.pbtxt")
-        End If
+        'Else
+        '    md.LoadModel("c:\tmp\frozen_inference_graph.pb", "c:\tmp\object-detection.pbtxt")
+        'End If
     End Sub
 
     Private Sub Timer3_Tick(sender As Object, e As EventArgs) Handles Timer3.Tick
