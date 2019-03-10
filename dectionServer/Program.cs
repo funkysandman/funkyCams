@@ -108,7 +108,7 @@ namespace DetectionServer
     {
 
         private static Queue qt = new Queue();
-        private bool queueRunning = false;
+        //private bool queueRunning = false;
         //private static Thread t = new Thread(processImages);
         private static object syncLock = new object();
         private static object syncLock2 = new object();

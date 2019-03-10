@@ -25,7 +25,7 @@ namespace ObjectDetection
         private static string _catalogPath;
         private static string _modelPath;
         private static TFGraph graph;
-        private static double MIN_SCORE_FOR_OBJECT_HIGHLIGHTING = 0.05;
+        private static double MIN_SCORE_FOR_OBJECT_HIGHLIGHTING = 0.30;
         private static TFSession mySession;
         private TFTensor tensor;
         private TFSession.Runner runner;
@@ -72,7 +72,7 @@ namespace ObjectDetection
             jgpEncoder = GetEncoder(ImageFormat.Jpeg);
             myEncoderParameters = new EncoderParameters(1);
 
-            myEncoderParameter = new EncoderParameter(myEncoder, 50L);
+            myEncoderParameter = new EncoderParameter(myEncoder,  100L);
             myEncoderParameters.Param[0] = myEncoderParameter;
             if (!(  mySession is  null))
                 mySession.Dispose();
