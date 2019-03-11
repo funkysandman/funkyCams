@@ -23,9 +23,8 @@ namespace SVS_Wrapper
         // private bool selectBayer = false;
         private GigeApi.BAYER_METHOD bayerMethod = GigeApi.BAYER_METHOD.BAYER_METHOD_HQLINEAR;
 
-        private ObjectDetection.TFDetector md = new ObjectDetection.TFDetector();
-        
-
+      //  private ObjectDetection.TFDetector md = new ObjectDetection.TFDetector();
+       
 
         private bool m_saveLocal;
         // private string m_savePath;
@@ -116,7 +115,7 @@ namespace SVS_Wrapper
 
         public SVS_Vistek_Grabber()
         {
-            md.LoadModel("c:\\tmp\\frozen_inference_graph.pb", "c:\\tmp\\object-detection.pbtxt");
+            //md.LoadModel("c:\\tmp\\frozen_inference_graph.pb", "c:\\tmp\\object-detection.pbtxt");
         }
 
 
@@ -708,7 +707,7 @@ namespace SVS_Wrapper
                         System.IO.Directory.CreateDirectory(Path.Combine("c:\\image",folderName));
                      
                         bimageRGB[0].Save(Path.Combine("c:\\image",folderName, filename), jpgEncoder, myEncoderParameters);
-                        md.examine(Path.Combine("c:\\image", folderName, filename));
+                      //  md.examine(Path.Combine("c:\\image", folderName, filename));
                         Console.WriteLine("SVS Vistek: saving image");
                         readimageCount++;
                         fifoCount--;

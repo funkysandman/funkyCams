@@ -1571,7 +1571,7 @@ Public Class WebServer
             Exit Sub
         End If
         bProcessingPic = True
-        myForm.writeline("firewire image received event")
+        'myForm.writeline("firewire image received event")
         Try
 
 

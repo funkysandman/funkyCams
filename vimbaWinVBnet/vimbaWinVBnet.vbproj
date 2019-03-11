@@ -72,8 +72,13 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="AxInterop.FGControlLib">
-      <HintPath>..\FoculusAscomDriver\FoculusAscomDriver\AxInterop.FGControlLib.dll</HintPath>
+    <Reference Include="AxInterop.FGControlLib, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Program Files\NET GmbH\FGControl\Samples\Project\C#\CSharpFGControl\obj\Debug\AxInterop.FGControlLib.dll</HintPath>
+    </Reference>
+    <Reference Include="Interop.FGControlLib">
+      <HintPath>..\..\Program Files\NET GmbH\FGControl\Samples\Project\C#\CSharpFGControl\obj\Debug\Interop.FGControlLib.dll</HintPath>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
     </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
@@ -346,16 +351,16 @@
   <ItemGroup>
     <COMReference Include="AxFGControlLib">
       <Guid>{C77A0016-5D29-4D3A-86A6-C8AFE470E1B2}</Guid>
-      <VersionMajor>2</VersionMajor>
-      <VersionMinor>3</VersionMinor>
+      <VersionMajor>1</VersionMajor>
+      <VersionMinor>0</VersionMinor>
       <Lcid>0</Lcid>
       <WrapperTool>aximp</WrapperTool>
       <Isolated>False</Isolated>
     </COMReference>
     <COMReference Include="FGControlLib">
       <Guid>{C77A0016-5D29-4D3A-86A6-C8AFE470E1B2}</Guid>
-      <VersionMajor>2</VersionMajor>
-      <VersionMinor>3</VersionMinor>
+      <VersionMajor>1</VersionMajor>
+      <VersionMinor>0</VersionMinor>
       <Lcid>0</Lcid>
       <WrapperTool>tlbimp</WrapperTool>
       <Isolated>False</Isolated>

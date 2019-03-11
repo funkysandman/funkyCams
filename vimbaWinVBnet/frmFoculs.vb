@@ -11,14 +11,15 @@ Public Class frmFoculs
         Button1.Enabled = False
         cboNight.SelectedIndex = 1
         cboDay.SelectedIndex = 1
-        AxFGControlCtrl1.BeginInit()
-        AxFGControlCtrl1.EndInit()
-        'AxFGControlCtrl1.Camera = 0
+        AxFGControlCtrl2.BeginInit()
+        AxFGControlCtrl2.EndInit()
+        'AxFGControlCtrl2.Camera = 0
 
+        ComboBox1.DataSource = AxFGControlCtrl2.GetCameraList()
 
         Button1.Enabled = True
 
-        Me.ComboBox1.DataSource = AxFGControlCtrl1.GetCameraList()
+
     End Sub
 
     Public Sub writeline(s As String)
@@ -28,27 +29,27 @@ Public Class frmFoculs
 
     Private Sub Button1_Click(sender As Object, e As EventArgs) Handles Button1.Click
 
-        AxFGControlCtrl1.Camera = 0
+        AxFGControlCtrl2.Camera = 0
         '        
 
 
-        '  AxFGControlCtrl1.SetGain("", 400)
+        '  AxFGControlCtrl2.SetGain("", 400)
 
-        AxFGControlCtrl1.ShowPropertyPage()
+        AxFGControlCtrl2.ShowPropertyPage()
     End Sub
 
     Private Sub Button2_Click(sender As Object, e As EventArgs) Handles Button2.Click
 
-        AxFGControlCtrl1.PixelFormat = 8
-        AxFGControlCtrl1.BytePerPacket = 1200
-        AxFGControlCtrl1.AcquisitionMode = "Single"
-        AxFGControlCtrl1.SetExposureTimeString("5s")
-        AxFGControlCtrl1.Acquisition = 1
+        AxFGControlCtrl2.PixelFormat = 8
+        AxFGControlCtrl2.BytePerPacket = 1200
+        AxFGControlCtrl2.AcquisitionMode = "SingleFrame"
+        AxFGControlCtrl2.SetExposureTimeString("5s")
+        AxFGControlCtrl2.Acquisition = 1
 
     End Sub
 
     Private Sub Button3_Click(sender As Object, e As EventArgs) Handles Button3.Click
-        AxFGControlCtrl1.Acquisition = 0
+        AxFGControlCtrl2.Acquisition = 0
     End Sub
 
 
@@ -74,22 +75,22 @@ Public Class frmFoculs
 
 
 
-        AxFGControlCtrl1.AcquisitionMode = "Continuous"
-        AxFGControlCtrl1.Trigger = 1
-        AxFGControlCtrl1.TriggerMode = 0
-        AxFGControlCtrl1.TriggerSource = "Software"
-        '        AxFGControlCtrl1.TriggerActivation = "RisingEdge"
-        AxFGControlCtrl1.PixelFormat = 8
-        AxFGControlCtrl1.BytePerPacket = 1200
-        AxFGControlCtrl1.SetLUTKneePoint(0, 525, 1290)
-        AxFGControlCtrl1.SetLUTKneePoint(1, 1290, 1980)
-        AxFGControlCtrl1.SetLUTKneePoint(2, 1860, 2265)
-        AxFGControlCtrl1.SetLUTKneePoint(3, 2475, 2715)
-        AxFGControlCtrl1.SetExposureTimeString(tbNightExp.Text)
-        AxFGControlCtrl1.SetExposureTimeString("135us")
-        AxFGControlCtrl1.SetGain("", 0)
-        AxFGControlCtrl1.Acquisition = 1
-        'AxFGControlCtrl1.SetExposureTimeString("3s")
+        AxFGControlCtrl2.AcquisitionMode = "Continuous"
+        AxFGControlCtrl2.Trigger = 1
+        AxFGControlCtrl2.TriggerMode = 0
+        AxFGControlCtrl2.TriggerSource = "Software"
+        '        AxFGControlCtrl2.TriggerActivation = "RisingEdge"
+        AxFGControlCtrl2.PixelFormat = 8
+        AxFGControlCtrl2.BytePerPacket = 1000
+        AxFGControlCtrl2.SetLUTKneePoint(0, 525, 1290)
+        AxFGControlCtrl2.SetLUTKneePoint(1, 1290, 1980)
+        AxFGControlCtrl2.SetLUTKneePoint(2, 1860, 2265)
+        AxFGControlCtrl2.SetLUTKneePoint(3, 2475, 2715)
+        AxFGControlCtrl2.SetExposureTimeString(tbNightExp.Text)
+        AxFGControlCtrl2.SetExposureTimeString("135us")
+        AxFGControlCtrl2.SetGain("", 0)
+        AxFGControlCtrl2.Acquisition = 1
+        'AxFGControlCtrl2.SetExposureTimeString("3s")
     End Sub
     Private Sub Button6_Click(sender As Object, e As EventArgs) Handles Button6.Click
         myWebServer = WebServer.getWebServer
@@ -97,7 +98,7 @@ Public Class frmFoculs
         initCamera()
 
 
-        myWebServer.StartWebServer(Me.AxFGControlCtrl1, Me, Val(Me.tbPort.Text))
+        myWebServer.StartWebServer(Me.AxFGControlCtrl2, Me, Val(Me.tbPort.Text))
 
     End Sub
 
@@ -132,8 +133,8 @@ Public Class frmFoculs
                 ' If currentMode <> night Then
 
                 If night Then
-                    'AxFGControlCtrl1.ExposureTimeAuto = "Off"
-                    '  AxFGControlCtrl1.AcquisitionMode = "Continuous"
+                    'AxFGControlCtrl2.ExposureTimeAuto = "Off"
+                    '  AxFGControlCtrl2.AcquisitionMode = "Continuous"
 
                     tbExposureTime.Text = tbNightExp.Text
                     tbGain.Text = "490"
@@ -167,40 +168,44 @@ Public Class frmFoculs
 
 
 
-        AxFGControlCtrl1.Acquisition = 1
+        AxFGControlCtrl2.Acquisition = 1
 
     End Sub
 
     Private Sub ComboBox1_SelectedIndexChanged(sender As Object, e As EventArgs) Handles ComboBox1.SelectedIndexChanged
-        AxFGControlCtrl1.Camera = ComboBox1.SelectedIndex
+        AxFGControlCtrl2.Camera = ComboBox1.SelectedIndex
+    End Sub
+
+    Private Sub frmFoculs_Activated(sender As Object, e As EventArgs) Handles Me.Activated
+
     End Sub
 
     'Private Sub Button7_Click(sender As Object, e As EventArgs) Handles Button7.Click
     '    initCamera()
     'End Sub
 
-    'Private Sub AxFGControlCtrl1_ImageReceived(sender As Object, e As AxFGControlLib._IFGControlEvents_ImageReceivedEvent) Handles AxFGControlCtrl1.ImageReceived
-    '    AxFGControlCtrl1.Acquisition = 0
+    'Private Sub AxFGControlCtrl2_ImageReceived(sender As Object, e As AxFGControlLib._IFGControlEvents_ImageReceivedEvent) Handles AxFGControlCtrl2.ImageReceived
+    '    AxFGControlCtrl2.Acquisition = 0
 
 
     'End Sub
 
-    'Private Sub AxFGControlCtrl1_ImageReceivedExt(sender As Object, e As AxFGControlLib._IFGControlEvents_ImageReceivedExtEvent) Handles AxFGControlCtrl1.ImageReceivedExt
+    'Private Sub AxFGControlCtrl2_ImageReceivedExt(sender As Object, e As AxFGControlLib._IFGControlEvents_ImageReceivedExtEvent) Handles AxFGControlCtrl2.ImageReceivedExt
     '    Dim rawBytesCount
 
-    '    rawBytesCount = AxFGControlCtrl1.GetPayloadSize()
+    '    rawBytesCount = AxFGControlCtrl2.GetPayloadSize()
     '    '  Dim rawData(rawBytesCount) As Byte
 
 
 
-    '    MsgBox(AxFGControlCtrl1.GetReceivedFrameCount)
+    '    MsgBox(AxFGControlCtrl2.GetReceivedFrameCount)
     'End Sub
 
-    'Private Sub AxFGControlCtrl1_DeviceEventCallback(sender As Object, e As AxFGControlLib._IFGControlEvents_DeviceEventCallbackEvent) Handles AxFGControlCtrl1.DeviceEventCallback
+    'Private Sub AxFGControlCtrl2_DeviceEventCallback(sender As Object, e As AxFGControlLib._IFGControlEvents_DeviceEventCallbackEvent) Handles AxFGControlCtrl2.DeviceEventCallback
     '    MsgBox("deviceEventCallback")
     'End Sub
 
-    'Private Sub AxFGControlCtrl1_JobCompleted(sender As Object, e As AxFGControlLib._IFGControlEvents_JobCompletedEvent) Handles AxFGControlCtrl1.JobCompleted
+    'Private Sub AxFGControlCtrl2_JobCompleted(sender As Object, e As AxFGControlLib._IFGControlEvents_JobCompletedEvent) Handles AxFGControlCtrl2.JobCompleted
     '    MsgBox("job completed")
     'End Sub
 

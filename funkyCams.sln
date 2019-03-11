@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.27428.2002
+VisualStudioVersion = 15.0.26228.73
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GigeApi_", "SVGigE_ExampleVC#.VS2010\GigeApi_.csproj", "{B209E79D-9E9E-475E-9300-076E0062DABB}"
 EndProject
@@ -189,8 +189,8 @@ Global
 		{69471B59-576D-446B-8DF3-96EC783C0B6C}.MinSizeRel|x86.Build.0 = Release|Any CPU
 		{69471B59-576D-446B-8DF3-96EC783C0B6C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{69471B59-576D-446B-8DF3-96EC783C0B6C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{69471B59-576D-446B-8DF3-96EC783C0B6C}.Release|x64.ActiveCfg = Release|x64
-		{69471B59-576D-446B-8DF3-96EC783C0B6C}.Release|x64.Build.0 = Release|x64
+		{69471B59-576D-446B-8DF3-96EC783C0B6C}.Release|x64.ActiveCfg = Release|Any CPU
+		{69471B59-576D-446B-8DF3-96EC783C0B6C}.Release|x64.Build.0 = Release|Any CPU
 		{69471B59-576D-446B-8DF3-96EC783C0B6C}.Release|x86.ActiveCfg = Release|Any CPU
 		{69471B59-576D-446B-8DF3-96EC783C0B6C}.Release|x86.Build.0 = Release|Any CPU
 		{69471B59-576D-446B-8DF3-96EC783C0B6C}.RelWithDebInfo|Any CPU.ActiveCfg = Release|Any CPU
