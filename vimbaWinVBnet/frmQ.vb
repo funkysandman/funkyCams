@@ -41,7 +41,7 @@ Public Class frmQ
     Private startTime As DateTime
     Private gotFrameTime As DateTime
     Private dark() As Byte
-    Private md As New ObjectDetection.TFDetector()
+    ' Private md As New ObjectDetection.TFDetector()
     Private myImageCodecInfo As ImageCodecInfo
     Private myEncoder As System.Drawing.Imaging.Encoder
     Private myEncoderParameter As EncoderParameter

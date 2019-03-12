@@ -46,8 +46,13 @@ Partial Class frmFoculs
         Me.Label4 = New System.Windows.Forms.Label()
         Me.tbExposureTime = New System.Windows.Forms.TextBox()
         Me.lblDayNight = New System.Windows.Forms.Label()
-
         Me.AxFGControlCtrl2 = New AxFGControlLib.AxFGControlCtrl()
+        Me.cbFlip = New System.Windows.Forms.CheckBox()
+        Me.cbSaveImages = New System.Windows.Forms.CheckBox()
+        Me.Button10 = New System.Windows.Forms.Button()
+        Me.Label5 = New System.Windows.Forms.Label()
+        Me.tbPath = New System.Windows.Forms.TextBox()
+        Me.cbxMeteor = New System.Windows.Forms.CheckBox()
         CType(Me.AxFGControlCtrl2, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
         '
@@ -88,7 +93,7 @@ Partial Class frmFoculs
         '
         'Button6
         '
-        Me.Button6.Location = New System.Drawing.Point(44, 362)
+        Me.Button6.Location = New System.Drawing.Point(38, 409)
         Me.Button6.Name = "Button6"
         Me.Button6.Size = New System.Drawing.Size(124, 23)
         Me.Button6.TabIndex = 8
@@ -97,7 +102,7 @@ Partial Class frmFoculs
         '
         'tbPort
         '
-        Me.tbPort.Location = New System.Drawing.Point(185, 365)
+        Me.tbPort.Location = New System.Drawing.Point(179, 412)
         Me.tbPort.Name = "tbPort"
         Me.tbPort.Size = New System.Drawing.Size(50, 20)
         Me.tbPort.TabIndex = 9
@@ -108,7 +113,7 @@ Partial Class frmFoculs
         Me.CheckBox1.AutoSize = True
         Me.CheckBox1.Checked = True
         Me.CheckBox1.CheckState = System.Windows.Forms.CheckState.Checked
-        Me.CheckBox1.Location = New System.Drawing.Point(384, 362)
+        Me.CheckBox1.Location = New System.Drawing.Point(378, 409)
         Me.CheckBox1.Name = "CheckBox1"
         Me.CheckBox1.Size = New System.Drawing.Size(110, 17)
         Me.CheckBox1.TabIndex = 10
@@ -165,7 +170,7 @@ Partial Class frmFoculs
         '
         'Button4
         '
-        Me.Button4.Location = New System.Drawing.Point(248, 362)
+        Me.Button4.Location = New System.Drawing.Point(242, 409)
         Me.Button4.Name = "Button4"
         Me.Button4.Size = New System.Drawing.Size(116, 22)
         Me.Button4.TabIndex = 17
@@ -195,7 +200,7 @@ Partial Class frmFoculs
         '
         'Button5
         '
-        Me.Button5.Location = New System.Drawing.Point(536, 352)
+        Me.Button5.Location = New System.Drawing.Point(530, 399)
         Me.Button5.Name = "Button5"
         Me.Button5.Size = New System.Drawing.Size(123, 32)
         Me.Button5.TabIndex = 20
@@ -250,26 +255,89 @@ Partial Class frmFoculs
         '
         'AxFGControlCtrl1
         '
-        'Me.AxFGControlCtrl1.Enabled = True
-        'Me.AxFGControlCtrl1.Location = New System.Drawing.Point(0, 0)
-        'Me.AxFGControlCtrl1.Name = "AxFGControlCtrl1"
-        'Me.AxFGControlCtrl1.Size = New System.Drawing.Size(75, 23)
-        'Me.AxFGControlCtrl1.TabIndex = 0
+
         '
         'AxFGControlCtrl2
         '
         Me.AxFGControlCtrl2.Enabled = True
-        Me.AxFGControlCtrl2.Location = New System.Drawing.Point(24, 18)
+        Me.AxFGControlCtrl2.Location = New System.Drawing.Point(30, 22)
         Me.AxFGControlCtrl2.Name = "AxFGControlCtrl2"
         Me.AxFGControlCtrl2.OcxState = CType(resources.GetObject("AxFGControlCtrl2.OcxState"), System.Windows.Forms.AxHost.State)
-        Me.AxFGControlCtrl2.Size = New System.Drawing.Size(425, 320)
+        Me.AxFGControlCtrl2.Size = New System.Drawing.Size(413, 330)
         Me.AxFGControlCtrl2.TabIndex = 26
+        '
+        'cbFlip
+        '
+        Me.cbFlip.AutoSize = True
+        Me.cbFlip.Checked = True
+        Me.cbFlip.CheckState = System.Windows.Forms.CheckState.Checked
+        Me.cbFlip.Location = New System.Drawing.Point(625, 99)
+        Me.cbFlip.Name = "cbFlip"
+        Me.cbFlip.Size = New System.Drawing.Size(39, 17)
+        Me.cbFlip.TabIndex = 27
+        Me.cbFlip.Text = "flip"
+        Me.cbFlip.UseVisualStyleBackColor = True
+        '
+        'cbSaveImages
+        '
+        Me.cbSaveImages.AutoSize = True
+        Me.cbSaveImages.Location = New System.Drawing.Point(378, 363)
+        Me.cbSaveImages.Name = "cbSaveImages"
+        Me.cbSaveImages.Size = New System.Drawing.Size(97, 17)
+        Me.cbSaveImages.TabIndex = 97
+        Me.cbSaveImages.Text = "Save snaphots"
+        Me.cbSaveImages.UseVisualStyleBackColor = True
+        '
+        'Button10
+        '
+        Me.Button10.Location = New System.Drawing.Point(330, 360)
+        Me.Button10.Margin = New System.Windows.Forms.Padding(2)
+        Me.Button10.Name = "Button10"
+        Me.Button10.Size = New System.Drawing.Size(36, 18)
+        Me.Button10.TabIndex = 96
+        Me.Button10.Text = "..."
+        Me.Button10.UseVisualStyleBackColor = True
+        '
+        'Label5
+        '
+        Me.Label5.AutoSize = True
+        Me.Label5.Location = New System.Drawing.Point(31, 363)
+        Me.Label5.Margin = New System.Windows.Forms.Padding(2, 0, 2, 0)
+        Me.Label5.Name = "Label5"
+        Me.Label5.Size = New System.Drawing.Size(31, 13)
+        Me.Label5.TabIndex = 95
+        Me.Label5.Text = "path:"
+        '
+        'tbPath
+        '
+        Me.tbPath.Location = New System.Drawing.Point(66, 360)
+        Me.tbPath.Margin = New System.Windows.Forms.Padding(2)
+        Me.tbPath.Name = "tbPath"
+        Me.tbPath.Size = New System.Drawing.Size(252, 20)
+        Me.tbPath.TabIndex = 94
+        Me.tbPath.Text = "c:\image"
+        '
+        'cbxMeteor
+        '
+        Me.cbxMeteor.AutoSize = True
+        Me.cbxMeteor.Location = New System.Drawing.Point(378, 386)
+        Me.cbxMeteor.Name = "cbxMeteor"
+        Me.cbxMeteor.Size = New System.Drawing.Size(96, 17)
+        Me.cbxMeteor.TabIndex = 98
+        Me.cbxMeteor.Text = "detect meteors"
+        Me.cbxMeteor.UseVisualStyleBackColor = True
         '
         'frmFoculs
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(685, 395)
+        Me.ClientSize = New System.Drawing.Size(685, 465)
+        Me.Controls.Add(Me.cbxMeteor)
+        Me.Controls.Add(Me.cbSaveImages)
+        Me.Controls.Add(Me.Button10)
+        Me.Controls.Add(Me.Label5)
+        Me.Controls.Add(Me.tbPath)
+        Me.Controls.Add(Me.cbFlip)
         Me.Controls.Add(Me.AxFGControlCtrl2)
         Me.Controls.Add(Me.lblDayNight)
         Me.Controls.Add(Me.tbExposureTime)
@@ -294,7 +362,6 @@ Partial Class frmFoculs
         Me.Controls.Add(Me.ComboBox1)
         Me.Name = "frmFoculs"
         Me.Text = "Firewire camera"
-        '        CType(Me.AxFGControlCtrl1, System.ComponentModel.ISupportInitialize).EndInit()
         CType(Me.AxFGControlCtrl2, System.ComponentModel.ISupportInitialize).EndInit()
         Me.ResumeLayout(False)
         Me.PerformLayout()
@@ -323,5 +390,10 @@ Partial Class frmFoculs
     Friend WithEvents tbExposureTime As System.Windows.Forms.TextBox
     Friend WithEvents lblDayNight As System.Windows.Forms.Label
     Friend WithEvents AxFGControlCtrl2 As AxFGControlLib.AxFGControlCtrl
-
+    Friend WithEvents cbFlip As System.Windows.Forms.CheckBox
+    Friend WithEvents cbSaveImages As System.Windows.Forms.CheckBox
+    Friend WithEvents Button10 As System.Windows.Forms.Button
+    Friend WithEvents Label5 As System.Windows.Forms.Label
+    Friend WithEvents tbPath As System.Windows.Forms.TextBox
+    Friend WithEvents cbxMeteor As System.Windows.Forms.CheckBox
 End Class
