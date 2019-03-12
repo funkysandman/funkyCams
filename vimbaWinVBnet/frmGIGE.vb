@@ -26,6 +26,7 @@ Public Class frmGIGE
     Private myEncoderParameter As EncoderParameter
     Private myEncoderParameters As EncoderParameters
     Private mThread As Thread
+    Private meteorCheckRunning As Boolean
     Private t As Thread
     Private Class queueEntry
 
@@ -246,7 +247,7 @@ Public Class frmGIGE
     End Function
     Public Sub processDetection()
         Dim aQE As queueEntry
-        While (True)
+        While (meteorCheckRunning)
             If myDetectionQueue.Count > 0 Then
                 aQE = myDetectionQueue.Dequeue()
                 callAzureMeteorDetection(aQE.img, aQE.filename)
@@ -506,6 +507,7 @@ Public Class frmGIGE
         TimerAcquistionRate.Enabled = True
         startTime = Now
         Timer2.Enabled = True
+        meteorCheckRunning = True
         t = New Thread(AddressOf processDetection)
         t.Start()
 
@@ -522,7 +524,7 @@ Public Class frmGIGE
     Private Sub Button3_Click(sender As Object, e As EventArgs) Handles Button3.Click
         gigeGrabber.stopAcquisition()
         mThread.Abort()
-        t.Abort()
+        meteorCheckRunning = False
 
     End Sub
 

@@ -18,6 +18,7 @@ Public Class frmFoculs
     Private myEncoderParameter As EncoderParameter
     Private myEncoderParameters As EncoderParameters
     Private running As Boolean = False
+    Private meteorCheckRunning As Boolean = False
     Private bmp As Bitmap
     Private t As Thread
     Private Class queueEntry
@@ -265,6 +266,7 @@ Public Class frmFoculs
 
         End If
         AxFGControlCtrl2.Acquisition = 1
+        meteorCheckRunning = True
         t = New Thread(AddressOf processDetection)
         t.Start()
         Button3.Enabled = True
@@ -272,7 +274,7 @@ Public Class frmFoculs
 
     Private Sub Button3_Click(sender As Object, e As EventArgs) Handles Button3.Click
         AxFGControlCtrl2.Acquisition = 0
-        t.Abort()
+        meteorCheckRunning = False
         Button3.Enabled = False
         Button2.Enabled = True
     End Sub
@@ -410,8 +412,8 @@ Public Class frmFoculs
         AxFGControlCtrl2.Camera = ComboBox1.SelectedIndex
     End Sub
     Public Sub processDetection()
-        Dim aQE As QueueEntry
-        While (True)
+        Dim aQE As queueEntry
+        While (meteorCheckRunning)
             If myDetectionQueue.Count > 0 Then
                 aQE = myDetectionQueue.Dequeue()
                 CallAzureMeteorDetection(aQE.img, aQE.filename)

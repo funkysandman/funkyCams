@@ -33,6 +33,7 @@ Public Class frmAVT
     Dim myEncoderParameter As EncoderParameter
     Dim myEncoderParameters As EncoderParameters
     Dim t As Thread
+    Dim meteorCheckRunning As Boolean = False
 
     Private Class queueEntry
 
@@ -266,7 +267,7 @@ Public Class frmAVT
     End Sub
     Public Sub processDetection()
         Dim aQE As queueEntry
-        While (True)
+        While (meteorCheckRunning)
             If myDetectionQueue.Count > 0 Then
                 aQE = myDetectionQueue.Dequeue()
                 callAzureMeteorDetection(aQE.img, aQE.filename)
@@ -583,7 +584,7 @@ Public Class frmAVT
         startTime = Now
         Timer1.Enabled = True
         Timer3.Enabled = True
-
+        meteorCheckRunning = True
         t = New Thread(AddressOf processDetection)
         t.Start()
 
@@ -602,7 +603,7 @@ Public Class frmAVT
         Button7.Enabled = True
         Button8.Enabled = False
         v.StopContinuousImageAcquisition()
-        t.Abort()
+        meteorCheckRunning = False
         'myCam.StopContinuousImageAcquisition()
     End Sub
 
