@@ -41,6 +41,7 @@ Public Class frmQ
     Private startTime As DateTime
     Private gotFrameTime As DateTime
     Private dark() As Byte
+    Private t As Thread
     ' Private md As New ObjectDetection.TFDetector()
     Private myImageCodecInfo As ImageCodecInfo
     Private myEncoder As System.Drawing.Imaging.Encoder
@@ -363,12 +364,13 @@ Public Class frmQ
         TimerAcquistionRate.Enabled = True
         startTime = Now
         Timer2.Enabled = True
-        Dim t As New Thread(AddressOf processDetection)
+        t = New Thread(AddressOf processDetection)
         t.Start()
     End Sub
 
     Private Sub Button8_Click(sender As Object, e As EventArgs) Handles Button8.Click
         StopStream()
+        t.Abort()
         Button7.Enabled = True
         Button8.Enabled = False
     End Sub

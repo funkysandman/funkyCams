@@ -7,7 +7,7 @@ Imports System.Net.Http
 Imports AxFGControlLib
 
 Public Class frmFoculs
-
+    Dim myDetectionQueue As New Queue(Of queueEntry)
     Dim night As Boolean = False
     Private myWebServer As WebServer
     Private b8 As Bitmap
@@ -19,6 +19,13 @@ Public Class frmFoculs
     Private myEncoderParameters As EncoderParameters
     Private running As Boolean = False
     Private bmp As Bitmap
+    Private t As Thread
+    Private Class queueEntry
+
+        Public img As Byte()
+        Public filename As String
+
+    End Class
     Public Function getLastImage() As Bitmap
 
         Dim stopWatch As Stopwatch = New Stopwatch()
@@ -228,7 +235,7 @@ Public Class frmFoculs
 
     Private Sub Button2_Click(sender As Object, e As EventArgs) Handles Button2.Click
         '
-
+        Button2.Enabled = False
         Call Timer1_Tick(sender, e)
 
         '
@@ -258,11 +265,16 @@ Public Class frmFoculs
 
         End If
         AxFGControlCtrl2.Acquisition = 1
-
+        t = New Thread(AddressOf processDetection)
+        t.Start()
+        Button3.Enabled = True
     End Sub
 
     Private Sub Button3_Click(sender As Object, e As EventArgs) Handles Button3.Click
         AxFGControlCtrl2.Acquisition = 0
+        t.Abort()
+        Button3.Enabled = False
+        Button2.Enabled = True
     End Sub
 
 
@@ -397,7 +409,21 @@ Public Class frmFoculs
     Private Sub ComboBox1_SelectedIndexChanged(sender As Object, e As EventArgs) Handles ComboBox1.SelectedIndexChanged
         AxFGControlCtrl2.Camera = ComboBox1.SelectedIndex
     End Sub
+    Public Sub processDetection()
+        Dim aQE As QueueEntry
+        While (True)
+            If myDetectionQueue.Count > 0 Then
+                aQE = myDetectionQueue.Dequeue()
+                CallAzureMeteorDetection(aQE.img, aQE.filename)
 
+                aQE = Nothing
+
+            End If
+            Console.WriteLine("in the queue:{0}", myDetectionQueue.Count)
+            Thread.Sleep(100)
+        End While
+
+    End Sub
     Private Sub AxFGControlCtrl2_ImageReceived(sender As Object, e As _IFGControlEvents_ImageReceivedEvent) Handles AxFGControlCtrl2.ImageReceived
         If bProcessingPic Then
             Exit Sub
@@ -521,12 +547,19 @@ Public Class frmFoculs
 
             End If
             If Me.cbxMeteor.Checked Then
+                ' md.examine(bm, filename)
+                'call azure service
                 Dim ms As New MemoryStream()
-                b8.Save(ms, System.Drawing.Imaging.ImageFormat.Bmp)
+                b8.Save(ms, ImageFormat.Bmp)
 
                 Dim contents = ms.ToArray()
-                CallAzureMeteorDetection(contents, filename)
+                Dim qe As New queueEntry
+                qe.img = contents
+                qe.filename = Path.GetFileName(filename)
+                myDetectionQueue.Enqueue(qe)
+
                 ms.Close()
+
             End If
 
             bTakingPic = False

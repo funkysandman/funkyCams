@@ -26,6 +26,7 @@ Public Class frmGIGE
     Private myEncoderParameter As EncoderParameter
     Private myEncoderParameters As EncoderParameters
     Private mThread As Thread
+    Private t As Thread
     Private Class queueEntry
 
         Public img As Byte()
@@ -505,7 +506,7 @@ Public Class frmGIGE
         TimerAcquistionRate.Enabled = True
         startTime = Now
         Timer2.Enabled = True
-        Dim t As New Thread(AddressOf processDetection)
+        t = New Thread(AddressOf processDetection)
         t.Start()
 
     End Sub
@@ -520,6 +521,9 @@ Public Class frmGIGE
 
     Private Sub Button3_Click(sender As Object, e As EventArgs) Handles Button3.Click
         gigeGrabber.stopAcquisition()
+        mThread.Abort()
+        t.Abort()
+
     End Sub
 
     Private Sub Button7_Click(sender As Object, e As EventArgs) Handles Button7.Click
