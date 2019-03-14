@@ -161,9 +161,16 @@ namespace ASCOM.Photometrics
         {
             //
 
-            if (evtType.NotifEvent == pvcam_helper.CameraNotifications.ACQ_NEW_FRAME_RECEIVED)
+            if (evtType.NotifEvent == pvcam_helper.CameraNotifications.ACQ_SINGLE_FINISHED)
             {
                 cameraImageReady = true;
+
+            }
+
+
+                if (evtType.NotifEvent == pvcam_helper.CameraNotifications.ACQ_NEW_FRAME_RECEIVED)
+            {
+                
                 //copy image frame
                 int tempW = ccdWidth / myCam.Binning;
                 int tempH = ccdHeight / myCam.Binning;
@@ -911,7 +918,9 @@ namespace ASCOM.Photometrics
         }
 
         public void StartExposure(double Duration, bool Light)
+
         {
+            cameraImageReady = false;
             myCam.SetExposureTime(Convert.ToUInt32(Duration * 1000));
             if (Duration < 0.0) throw new InvalidValueException("StartExposure", Duration.ToString(), "0.0 upwards");
             if (cameraNumX > ccdWidth) throw new InvalidValueException("StartExposure", cameraNumX.ToString(), ccdWidth.ToString());
