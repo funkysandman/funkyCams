@@ -31,7 +31,7 @@ Public Class WebServer
     Private myQICam As QCamManagedDriver.QCam
     '' Private myBaslerCam As BaslerWrapper.Grabber
     Private mySVSVistekCam As SVCamApi.SVCamGrabber
-    Private b8 As Bitmap
+
     Private myForm As frmAVT
     Private myFWform As frmFoculs
     Private myQIform As frmQ
@@ -229,23 +229,39 @@ Public Class WebServer
 
         End Try
     End Sub
-    Public Sub StartWebServer(ByRef aCam As AxFGControlLib.AxFGControlCtrl, f As frmFoculs, port As Integer)
+    Public Sub StartWebServer(f As frmFoculs, port As Integer)
         Try
+            ' md.LoadModel("c:\tmp\frozen_inference_graph_orig.pb", "c:\tmp\mscoco_label_map.pbtxt")
             LocalPort = port
             myFWform = f
-            myFirewireCam = aCam
+            'myFirewireCam = aCam
             useDarks = False
             ' loadFirewireEDarks()
             LocalTCPListener = New TcpListener(LocalAddress, LocalPort)
             LocalTCPListener.Start()
             WebThread = New Thread(AddressOf StartListenFirewire)
             WebThread.Start()
-            f.WriteLine("starting Foculus web server")
+            f.writeline("starting Foculus web server")
+            'myImageCodecInfo = GetEncoderInfo("image/jpeg")
 
+            '' Create an Encoder object based on the GUID
+            '' for the Quality parameter category.
+            'myEncoder = System.Drawing.Imaging.Encoder.Quality
+
+            '' Create an EncoderParameters object.
+            '' An EncoderParameters object has an array of EncoderParameter
+            '' objects. In this case, there is only one
+            '' EncoderParameter object in the array.
+            'myEncoderParameters = New EncoderParameters(1)
+
+            '' Save the bitmap as a JPEG file with quality level 25.
+            'myEncoderParameter = New EncoderParameter(myEncoder, CType(85L, Int32))
+            'myEncoderParameters.Param(0) = myEncoderParameter
         Catch ex As Exception
-            f.WriteLine(ex.Message)
+            f.writeline(ex.Message)
         End Try
     End Sub
+
     'Here is where we check our XML file and see what MIME types are defined and handle the accordingly.
     Private Sub loadGigEDarks()
         Dim fs As FileStream
@@ -789,20 +805,28 @@ Public Class WebServer
         Dim sPhysicalFilePath As String = ""
         Dim sFormattedMessage As String = ""
 
-        Dim startTime As Date
+        'If LCase(mySVSVistekForm.lblDayNight.Text) = "day" Then
+        '    mySVSVistekCam.setParams(Val(mySVSVistekForm.tbExposureTime.Text), Val(mySVSVistekForm.tbDayGain.Text), Val(mySVSVistekForm.tbDayDgain.Text), Val(mySVSVistekForm.tbDayGamma.Text), 0)
+        'Else
+        '    mySVSVistekCam.setParams(Val(mySVSVistekForm.tbExposureTime.Text), Val(mySVSVistekForm.tbNightAgain.Text), Val(mySVSVistekForm.tbNightDgain.Text), Val(mySVSVistekForm.tbNightGamma.Text), 0)
+
+        'End If
+        'If Not mySVSVistekCam.isStreaming Then
+        '    mySVSVistekCam.startStreamingFF()
+        'End If
 
 
         Do While True
             'accept new socket connection
             LocalTCPListener.Start()
-            'myQIform.writeline("starting Firewire listener")
+            'mySVSVistekForm.writeline("starting SVS Vistek listener")
             Dim mySocket As Socket = LocalTCPListener.AcceptSocket
             If mySocket.Connected Then
                 Dim bReceive() As Byte = New [Byte](1024) {}
                 Dim i As Integer = mySocket.Receive(bReceive, bReceive.Length, 0)
                 Dim sBuffer As String = Encoding.ASCII.GetString(bReceive)
                 'find the GET request.
-                'myFWform.writeline("Firewire image server connected")
+                ' mySVSVistekForm.writeline("SVS Vistek image server connected")
                 If sBuffer.Contains("GET") And sBuffer.Contains("HTTP") Then
 
 
@@ -813,133 +837,155 @@ Public Class WebServer
                     Try
                         'grab image from cam
 
-                        ' myFWform.writeline("triggering firewire camera")
+                        Dim b As Bitmap
+
+                        Dim myWidth As Integer = 1392
+                        Dim myHeight As Integer
 
 
 
 
-                        '                      myFirewireCam.SetGamma(17)
-                        'myFirewireCam.SetBlackLevel(700)
-                        bTakingPic = True
-                        bFault = False
+                        'myWidth = mySVSVistekCam.getSizeX
+                        'myHeight = mySVSVistekCam.getSizeY
+
+                        'mySVSVistekForm.writeline("request for SVS Vistek image")
+                        'we know this camera has the following params:
+                        '
+                        'Dim bytes() As Byte = New Byte(myBaslerCam.getSizeX() * myBaslerCam.getSizeY()) {}
+                        'If LCase(mySVSVistekForm.lblDayNight.Text) = "day" Then
+                        '    mySVSVistekCam.setParams(Val(mySVSVistekForm.tbExposureTime.Text), Val(mySVSVistekForm.tbDayGain.Text), Val(mySVSVistekForm.tbDayDgain.Text), Val(mySVSVistekForm.tbDayGamma.Text), 0)
+                        'Else
+                        '    mySVSVistekCam.setParams(Val(mySVSVistekForm.tbExposureTime.Text), Val(mySVSVistekForm.tbNightAgain.Text), Val(mySVSVistekForm.tbNightDgain.Text), Val(mySVSVistekForm.tbNightGamma.Text), 0)
+
+                        'End If
+                        'mySVSVistekCam.useDarks = Me.useDarks
+                        b = myFWform.getLastImage()
+                        ' mySVSVistekForm.writeline("acquired last SVS Vistek image")
 
 
-                        myFirewireCam.SetGain("", Val(myFWform.tbGain.Text))
-                        myFirewireCam.SetExposureTimeString(myFWform.tbExposureTime.Text)
-                        myFirewireCam.RunSoftwareTrigger()
+                        'Dim BoundsRect = New Rectangle(0, 0, myWidth, myHeight)
+                        'Dim bmpDataSrc As BitmapData = b.LockBits(BoundsRect, ImageLockMode.[ReadOnly], b.PixelFormat)
+                        'Dim bytes As Integer = bmpDataSrc.Stride * b.Height
+                        'Dim ptr As IntPtr = bmpDataSrc.Scan0
 
+                        'Dim rawData = New Byte(bytes - 1) {}
+                        ''copy source pic to byte array
 
+                        'Marshal.Copy(ptr, rawData, 0, bytes)
 
+                        'Dim b2 = New Bitmap(myWidth, myHeight, PixelFormat.Format8bppIndexed)
+                        'Dim bmpData As BitmapData = b2.LockBits(BoundsRect, ImageLockMode.[WriteOnly], b2.PixelFormat)
 
-                        startTime = Now
+                        ''b contains original
+                        ''b2 is to be the copy
+                        ''Dim ncp As ColorPalette = b2.Palette
 
-                        While bTakingPic
-                            Threading.Thread.Sleep(50)
-                            ' Application.DoEvents()
-                            If DateDiff(DateInterval.Second, startTime, Now) > 15 Then
-                                bTakingPic = False
-                                bFault = True
-                            End If
-                        End While
-                        myFWform.writeline("received firewire image")
+                        ''For i = 0 To 255
 
+                        ''    ncp.Entries(i) = Color.FromArgb(255, i, i, i)
+                        ''Next
+                        'b2.Palette = b.Palette
+                        'Dim ptr2 As IntPtr = bmpData.Scan0
+                        'Marshal.Copy(rawData, 0, ptr2, bytes)
+                        ''from, to
+                        'b2.UnlockBits(bmpData)
 
-                        'myFirewireCam.Acquisition = 0
-                        If Not bFault Then
+                        'b.UnlockBits(bmpDataSrc)
 
-                            'got an image
-                            ' MsgBox("got image")
-
-
-                            '  b.Save(Application.StartupPath & "\test.bmp")
-                            'imageInUse = imageInUse + 1
-                            Dim iTotBytes As Integer = 0
-                            Dim sResponse As String = ""
-                            'Dim fs As New FileStream(sPhysicalFilePath, FileMode.Open, FileAccess.Read, FileShare.Read)
-                            '
-                            Dim myImageCodecInfo As ImageCodecInfo
-                            Dim myEncoder As System.Drawing.Imaging.Encoder
-                            Dim myEncoderParameter As EncoderParameter
-                            Dim myEncoderParameters As EncoderParameters
-
-                            ' Create a Bitmap object based on a BMP file.
-
-
-                            ' Get an ImageCodecInfo object that represents the JPEG codec.
-                            myImageCodecInfo = GetEncoderInfo("image/jpeg")
-
-                            ' Create an Encoder object based on the GUID
-                            ' for the Quality parameter category.
-                            myEncoder = System.Drawing.Imaging.Encoder.Quality
-
-                            ' Create an EncoderParameters object.
-                            ' An EncoderParameters object has an array of EncoderParameter
-                            ' objects. In this case, there is only one
-                            ' EncoderParameter object in the array.
-                            myEncoderParameters = New EncoderParameters(1)
-
-                            ' Save the bitmap as a JPEG file with quality level 25.
-                            myEncoderParameter = New EncoderParameter(myEncoder, CType(85L, Int32))
-                            myEncoderParameters.Param(0) = myEncoderParameter
-                            ' myBitmap.Save("Shapes025.jpg", myImageCodecInfo, myEncoderParameters)
-
-
-                            Dim ms As New MemoryStream()
-                            '  Dim ms2 As New MemoryStream()
-                            b8.Save(ms, myImageCodecInfo, myEncoderParameters)
-                            ' d2.Save(ms2, Imaging.ImageFormat.Bmp)
-                            ' myForm.PictureBox1.Image = b8
-                            Dim reader As New BinaryReader(ms)
-                            '  Dim reader2 As New BinaryReader(ms2)
-                            Dim bytes2() As Byte = New Byte(ms.Length) {}
-                            '  Dim bytesDarks() As Byte = New Byte(ms2.Length) {}
-
-
-                            reader.BaseStream.Position = 0
-                            ' reader2.BaseStream.Position = 0
+                        ''=======================================================
+                        ''Service provided by Telerik (www.telerik.com)
+                        ''Conversion powered by NRefactory.
+                        ''Twitter: @telerik
+                        ''Facebook: facebook.com/telerik
+                        ''=======================================================
 
 
 
-                            While reader.BaseStream.Position < reader.BaseStream.Length
-                                reader.Read(bytes2, 0, bytes2.Length)
 
-                            End While
-                            ' While reader2.BaseStream.Position < reader2.BaseStream.Length
-                            '     reader2.Read(bytesDarks, 0, bytesDarks.Length)
 
-                            ' End While
-                            ' Dim aVal As Integer
+                        ''myBaslerForm.PictureBox1.Image = b2
 
-                            sResponse = sResponse & Encoding.ASCII.GetString(bytes2, 0, reader.BaseStream.Length)
-                            iTotBytes = reader.BaseStream.Length
-                            reader.Close()
-                            ms.Close()
 
-                            SendHeader(sHttpVersion, "image/jpeg", iTotBytes, " 200 OK", mySocket)
-                            SendToBrowser(bytes2, mySocket)
-                        Else
-                            sErrorMessage = "fault encountred"
-                            SendHeader(sHttpVersion, "", sErrorMessage.Length, " 404 Not Found", mySocket)
-                            SendToBrowser(sErrorMessage, mySocket)
-                        End If
-                        'f.WriteLine("about to set acq=0")
+                        Dim iTotBytes As Integer = 0
+                        Dim sResponse As String = ""
+                        'Dim fs As New FileStream(sPhysicalFilePath, FileMode.Open, FileAccess.Read, FileShare.Read)
+                        '
+                        Dim myImageCodecInfo As ImageCodecInfo
+                        Dim myEncoder As System.Drawing.Imaging.Encoder
+                        Dim myEncoderParameter As EncoderParameter
+                        Dim myEncoderParameters As EncoderParameters
 
-                        'f.WriteLine("set acq=0")
+                        ' Create a Bitmap object based on a BMP file.
+
+
+                        ' Get an ImageCodecInfo object that represents the JPEG codec.
+                        myImageCodecInfo = GetEncoderInfo("image/jpeg")
+
+                        ' Create an Encoder object based on the GUID
+                        ' for the Quality parameter category.
+                        myEncoder = System.Drawing.Imaging.Encoder.Quality
+
+                        ' Create an EncoderParameters object.
+                        ' An EncoderParameters object has an array of EncoderParameter
+                        ' objects. In this case, there is only one
+                        ' EncoderParameter object in the array.
+                        myEncoderParameters = New EncoderParameters(1)
+
+                        ' Save the bitmap as a JPEG file with quality level 25.
+                        myEncoderParameter = New EncoderParameter(myEncoder, CType(95L, Int32))
+                        myEncoderParameters.Param(0) = myEncoderParameter
+                        ' myBitmap.Save("Shapes025.jpg", myImageCodecInfo, myEncoderParameters)
+
+
+                        '
+                        Dim ms As New MemoryStream()
+                        '  Dim ms2 As New MemoryStream()
+                        b.Save(ms, myImageCodecInfo, myEncoderParameters)
+                        ' d2.Save(ms2, Imaging.ImageFormat.Bmp)
+                        ' mySVSVistekForm.PictureBox1.Image = b
+                        'Dim reader As New BinaryReader(ms)
+                        '  Dim reader2 As New BinaryReader(ms2)
+                        ' Dim bytes2() As Byte = New Byte(ms.Length) {}
+
+
+                        'reader.BaseStream.Position = 0
+                        '' reader2.BaseStream.Position = 0
+
+
+
+                        'While reader.BaseStream.Position < reader.BaseStream.Length
+                        '    reader.Read(bytes2, 0, bytes2.Length)
+
+                        'End While
+                        '' While reader2.BaseStream.Position < reader2.BaseStream.Length
+                        ''     reader2.Read(bytesDarks, 0, bytesDarks.Length)
+
+                        '' End While
+                        '' Dim aVal As Integer
+
+
+                        'sResponse = sResponse & Encoding.ASCII.GetString(bytes2, 0, reader.BaseStream.Length)
+                        'iTotBytes = reader.BaseStream.Length
+                        'reader.Close()
+                        'ms.Close()
+
+                        SendHeader(sHttpVersion, "image/jpeg", ms.Length, " 200 OK", mySocket)
+                        SendToBrowser(ms.ToArray(), mySocket)
+                        ms.Close()
+
                     Catch ex As Exception
-                        myFWform.writeline("in firewire startlisten  " & ex.Message)
-                        'myFirewireCam.Acquisition = 0
-                        sErrorMessage = ex.Message
+                        imageInUse = imageInUse - 1
+                        sErrorMessage = "404 Error! File Does Not Exists..."
                         SendHeader(sHttpVersion, "", sErrorMessage.Length, " 404 Not Found", mySocket)
                         SendToBrowser(sErrorMessage, mySocket)
+                        ' mySVSVistekBaumerForm.writeline("error encountered: " & ex.Message)
                     End Try
                 End If
 
                 ' End If
-                bFault = False
                 mySocket.Close()
                 mySocket = Nothing
                 LocalTCPListener.Stop()
-                myFWform.writeline("socket disconnected")
 
             End If
         Loop
@@ -1129,7 +1175,7 @@ Public Class WebServer
                         sErrorMessage = "404 Error! File Does Not Exists..."
                         SendHeader(sHttpVersion, "", sErrorMessage.Length, " 404 Not Found", mySocket)
                         SendToBrowser(sErrorMessage, mySocket)
-                        mySVSVistekBaumerForm.writeline("error encountered: " & ex.Message)
+                        'mySVSVistekBaumerForm.writeline("error encountered: " & ex.Message)
                     End Try
                 End If
 
@@ -1168,7 +1214,7 @@ Public Class WebServer
             'End If
         Catch ex As Exception
 
-            mySVSVistekForm.writeline(ex.Message)
+            'mySVSVistekForm.writeline(ex.Message)
         End Try
     End Sub
     Private Sub StartListenSVSVistek()
@@ -1566,104 +1612,7 @@ Public Class WebServer
 
 
 
-    Private Sub myFirewireCam_ImageReceivedExt(sender As Object, e As AxFGControlLib._IFGControlEvents_ImageReceivedExtEvent) Handles myFirewireCam.ImageReceivedExt
-        If bProcessingPic Then
-            Exit Sub
-        End If
-        bProcessingPic = True
-        myForm.writeline("firewire image received event")
-        Try
-
-
-            Dim rawBytesCount As Integer
-            Dim w As Integer
-            Dim h As Integer
-
-            w = myFirewireCam.SizeX
-            h = myFirewireCam.SizeY
-            b8 = New Bitmap(w, h, System.Drawing.Imaging.PixelFormat.Format8bppIndexed)
-
-            Dim ncp As System.Drawing.Imaging.ColorPalette = b8.Palette
-            For j As Integer = 0 To 255
-                ncp.Entries(j) = System.Drawing.Color.FromArgb(255, j, j, j)
-            Next
-            b8.Palette = ncp
-
-
-            rawBytesCount = myFirewireCam.GetPayloadSize()
-            Dim rawData(rawBytesCount) As Byte
-
-            Dim dptr As IntPtr
-
-            '
-            dptr = myFirewireCam.GetRawDataPointer()
-
-            Marshal.Copy(dptr, rawData, 0, rawBytesCount)
-
-
-
-
-
-
-
-            'darks
-            'Dim fs As FileStream
-            'If useDarks Then
-
-            '    Dim multiplier
-            '    multiplier = Val(myForm.tbMultiplier.Text)
-            '    Dim imageValue
-            '    Dim darkValue
-            '    Dim newvalue
-            '    For i = 0 To rawData.Length - 1 Step 2
-            '        imageValue = rawData(i + 1) * 256 + rawData(i)
-            '        darkValue = rawDark(i + 1) * 256 + rawDark(i)
-            '        If darkValue * multiplier > imageValue Then
-
-            '            rawData(i) = 0
-            '            rawData(i + 1) = 0
-            '        Else
-            '            newvalue = imageValue - darkValue * multiplier
-            '            rawData(i) = newvalue And &HFF
-            '            rawData(i + 1) = (newvalue And &HFF00) >> 8
-
-            '        End If
-
-            '    Next
-
-
-
-            'End If
-            'copy raw data into bitmap
-
-            Dim BoundsRect = New Rectangle(0, 0, w, h)
-            Dim bmpData As System.Drawing.Imaging.BitmapData = b8.LockBits(BoundsRect, System.Drawing.Imaging.ImageLockMode.[WriteOnly], b8.PixelFormat)
-
-            Dim ptr As IntPtr = bmpData.Scan0
-
-            Dim bytes As Integer = bmpData.Stride * b8.Height
-            'Dim rgbValues = New Byte(bytes - 1) {}
-
-            '' fill in rgbValues, e.g. with a for loop over an input array
-            'For i = 0 To bytes - 1
-            '    rgbValues(i) = Rnd(255)
-            'Next
-
-
-            Marshal.Copy(rawData, 0, ptr, bytes)
-            b8.UnlockBits(bmpData)
-            bTakingPic = False
-            bProcessingPic = False
-
-            'PictureBox1.Image = b
-        Catch ex As Exception
-            bTakingPic = False
-            bProcessingPic = False
-            bFault = True
-            myForm.WriteLine("error on firewire image received:" & ex.Message)
-        End Try
-    End Sub
-    Private WithEvents myFirewireCam As AxFGControlLib.AxFGControlCtrl
+    'Private WithEvents myFirewireCam As AxFGControlLib.AxFGControlCtrl
 
 #End Region
 

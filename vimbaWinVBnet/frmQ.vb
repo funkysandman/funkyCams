@@ -41,11 +41,13 @@ Public Class frmQ
     Private startTime As DateTime
     Private gotFrameTime As DateTime
     Private dark() As Byte
-    Private md As New ObjectDetection.TFDetector()
+    Private t As Thread
+    ' Private md As New ObjectDetection.TFDetector()
     Private myImageCodecInfo As ImageCodecInfo
     Private myEncoder As System.Drawing.Imaging.Encoder
     Private myEncoderParameter As EncoderParameter
     Private myEncoderParameters As EncoderParameters
+    Private meteorCheckRunning As Boolean = False
     Private Class queueEntry
 
         Public img As Byte()
@@ -277,7 +279,7 @@ Public Class frmQ
     End Sub
     Public Sub processDetection()
         Dim aQE As queueEntry
-        While (True)
+        While (meteorCheckRunning)
             If myDetectionQueue.Count > 0 Then
                 aQE = myDetectionQueue.Dequeue()
                 CallAzureMeteorDetection(aQE.img, aQE.filename)
@@ -362,13 +364,15 @@ Public Class frmQ
         Button8.Enabled = True
         TimerAcquistionRate.Enabled = True
         startTime = Now
+        meteorCheckRunning = True
         Timer2.Enabled = True
-        Dim t As New Thread(AddressOf processDetection)
+        t = New Thread(AddressOf processDetection)
         t.Start()
     End Sub
 
     Private Sub Button8_Click(sender As Object, e As EventArgs) Handles Button8.Click
         StopStream()
+        meteorCheckRunning = False
         Button7.Enabled = True
         Button8.Enabled = False
     End Sub

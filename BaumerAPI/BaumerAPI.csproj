@@ -53,7 +53,7 @@
   <ItemGroup>
     <Reference Include="bgapi2_genicam_dotnet, Version=2.9.18334.18905, Culture=neutral, PublicKeyToken=0551630d1b572f70, processorArchitecture=AMD64">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\Program Files\Baumer\Baumer GAPI SDK\Components\Dev\C_Sharp\x64\bgapi2_genicam_dotnet.dll</HintPath>
+      <HintPath>..\vimbaWinVBnet\BaumerSDKlibs\bgapi2_genicam_dotnet.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />

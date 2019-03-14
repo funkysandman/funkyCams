@@ -83,10 +83,10 @@
     <Content Include="frozen_inference_graph_846.pb">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="frozen_inference_graph_842_negs.pb">
+    <Content Include="frozen_inference_graph.pb">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="frozen_inference_graph.pb">
+    <Content Include="frozen_inference_graph_latest.pb">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <None Include="packages.config" />

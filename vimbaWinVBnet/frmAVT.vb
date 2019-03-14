@@ -32,6 +32,9 @@ Public Class frmAVT
     Dim myEncoder As System.Drawing.Imaging.Encoder
     Dim myEncoderParameter As EncoderParameter
     Dim myEncoderParameters As EncoderParameters
+    Dim t As Thread
+    Dim meteorCheckRunning As Boolean = False
+
     Private Class queueEntry
 
         Public img As Byte()
@@ -264,7 +267,7 @@ Public Class frmAVT
     End Sub
     Public Sub processDetection()
         Dim aQE As queueEntry
-        While (True)
+        While (meteorCheckRunning)
             If myDetectionQueue.Count > 0 Then
                 aQE = myDetectionQueue.Dequeue()
                 callAzureMeteorDetection(aQE.img, aQE.filename)
@@ -581,8 +584,8 @@ Public Class frmAVT
         startTime = Now
         Timer1.Enabled = True
         Timer3.Enabled = True
-
-        Dim t As New Thread(AddressOf processDetection)
+        meteorCheckRunning = True
+        t = New Thread(AddressOf processDetection)
         t.Start()
 
         'If Now.Hour >= ComboBox2.SelectedItem Or Now.Hour <= ComboBox1.SelectedItem Then
@@ -600,6 +603,7 @@ Public Class frmAVT
         Button7.Enabled = True
         Button8.Enabled = False
         v.StopContinuousImageAcquisition()
+        meteorCheckRunning = False
         'myCam.StopContinuousImageAcquisition()
     End Sub
 

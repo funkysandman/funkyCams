@@ -46,65 +46,65 @@ Partial Class frmFoculs
         Me.Label4 = New System.Windows.Forms.Label()
         Me.tbExposureTime = New System.Windows.Forms.TextBox()
         Me.lblDayNight = New System.Windows.Forms.Label()
-        Me.AxFGControlCtrl1 = New AxFGControlLib.AxFGControlCtrl()
-        CType(Me.AxFGControlCtrl1, System.ComponentModel.ISupportInitialize).BeginInit()
+        Me.AxFGControlCtrl2 = New AxFGControlLib.AxFGControlCtrl()
+        Me.cbFlip = New System.Windows.Forms.CheckBox()
+        Me.cbSaveImages = New System.Windows.Forms.CheckBox()
+        Me.Button10 = New System.Windows.Forms.Button()
+        Me.Label5 = New System.Windows.Forms.Label()
+        Me.tbPath = New System.Windows.Forms.TextBox()
+        Me.cbxMeteor = New System.Windows.Forms.CheckBox()
+        CType(Me.AxFGControlCtrl2, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
         '
         'ComboBox1
         '
         Me.ComboBox1.FormattingEnabled = True
-        Me.ComboBox1.Location = New System.Drawing.Point(632, 60)
-        Me.ComboBox1.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.ComboBox1.Location = New System.Drawing.Point(474, 49)
         Me.ComboBox1.Name = "ComboBox1"
-        Me.ComboBox1.Size = New System.Drawing.Size(200, 24)
+        Me.ComboBox1.Size = New System.Drawing.Size(151, 21)
         Me.ComboBox1.TabIndex = 1
         '
         'Button1
         '
-        Me.Button1.Location = New System.Drawing.Point(632, 382)
-        Me.Button1.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.Button1.Location = New System.Drawing.Point(474, 310)
         Me.Button1.Name = "Button1"
-        Me.Button1.Size = New System.Drawing.Size(111, 34)
+        Me.Button1.Size = New System.Drawing.Size(83, 28)
         Me.Button1.TabIndex = 2
         Me.Button1.Text = "Properties"
         Me.Button1.UseVisualStyleBackColor = True
         '
         'Button2
         '
-        Me.Button2.Location = New System.Drawing.Point(632, 122)
-        Me.Button2.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.Button2.Location = New System.Drawing.Point(474, 99)
         Me.Button2.Name = "Button2"
-        Me.Button2.Size = New System.Drawing.Size(100, 28)
+        Me.Button2.Size = New System.Drawing.Size(75, 23)
         Me.Button2.TabIndex = 3
         Me.Button2.Text = "Play"
         Me.Button2.UseVisualStyleBackColor = True
         '
         'Button3
         '
-        Me.Button3.Location = New System.Drawing.Point(632, 171)
-        Me.Button3.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.Button3.Location = New System.Drawing.Point(474, 139)
         Me.Button3.Name = "Button3"
-        Me.Button3.Size = New System.Drawing.Size(100, 28)
+        Me.Button3.Size = New System.Drawing.Size(75, 23)
         Me.Button3.TabIndex = 4
         Me.Button3.Text = "Stop"
         Me.Button3.UseVisualStyleBackColor = True
         '
         'Button6
         '
-        Me.Button6.Location = New System.Drawing.Point(59, 446)
-        Me.Button6.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.Button6.Location = New System.Drawing.Point(38, 409)
         Me.Button6.Name = "Button6"
-        Me.Button6.Size = New System.Drawing.Size(165, 28)
+        Me.Button6.Size = New System.Drawing.Size(124, 23)
         Me.Button6.TabIndex = 8
         Me.Button6.Text = "Start webserver"
         Me.Button6.UseVisualStyleBackColor = True
         '
         'tbPort
         '
-        Me.tbPort.Location = New System.Drawing.Point(247, 449)
-        Me.tbPort.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.tbPort.Location = New System.Drawing.Point(179, 412)
         Me.tbPort.Name = "tbPort"
-        Me.tbPort.Size = New System.Drawing.Size(65, 22)
+        Me.tbPort.Size = New System.Drawing.Size(50, 20)
         Me.tbPort.TabIndex = 9
         Me.tbPort.Text = "8080"
         '
@@ -113,10 +113,9 @@ Partial Class frmFoculs
         Me.CheckBox1.AutoSize = True
         Me.CheckBox1.Checked = True
         Me.CheckBox1.CheckState = System.Windows.Forms.CheckState.Checked
-        Me.CheckBox1.Location = New System.Drawing.Point(512, 446)
-        Me.CheckBox1.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.CheckBox1.Location = New System.Drawing.Point(378, 409)
         Me.CheckBox1.Name = "CheckBox1"
-        Me.CheckBox1.Size = New System.Drawing.Size(143, 21)
+        Me.CheckBox1.Size = New System.Drawing.Size(110, 17)
         Me.CheckBox1.TabIndex = 10
         Me.CheckBox1.Text = "use darks at night"
         Me.CheckBox1.UseVisualStyleBackColor = True
@@ -124,20 +123,18 @@ Partial Class frmFoculs
         'Label3
         '
         Me.Label3.AutoSize = True
-        Me.Label3.Location = New System.Drawing.Point(628, 279)
-        Me.Label3.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.Label3.Location = New System.Drawing.Point(471, 227)
         Me.Label3.Name = "Label3"
-        Me.Label3.Size = New System.Drawing.Size(39, 17)
+        Me.Label3.Size = New System.Drawing.Size(30, 13)
         Me.Label3.TabIndex = 16
         Me.Label3.Text = "night"
         '
         'Label2
         '
         Me.Label2.AutoSize = True
-        Me.Label2.Location = New System.Drawing.Point(627, 213)
-        Me.Label2.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.Label2.Location = New System.Drawing.Point(470, 173)
         Me.Label2.Name = "Label2"
-        Me.Label2.Size = New System.Drawing.Size(31, 17)
+        Me.Label2.Size = New System.Drawing.Size(24, 13)
         Me.Label2.TabIndex = 15
         Me.Label2.Text = "day"
         '
@@ -146,10 +143,9 @@ Partial Class frmFoculs
         Me.cboNight.DisplayMember = "6"
         Me.cboNight.FormattingEnabled = True
         Me.cboNight.Items.AddRange(New Object() {"15", "16", "17", "18", "19", "20", "21"})
-        Me.cboNight.Location = New System.Drawing.Point(631, 299)
-        Me.cboNight.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.cboNight.Location = New System.Drawing.Point(473, 243)
         Me.cboNight.Name = "cboNight"
-        Me.cboNight.Size = New System.Drawing.Size(144, 24)
+        Me.cboNight.Size = New System.Drawing.Size(109, 21)
         Me.cboNight.TabIndex = 14
         Me.cboNight.ValueMember = "6"
         '
@@ -158,28 +154,25 @@ Partial Class frmFoculs
         Me.cboDay.DisplayMember = "displayMember"
         Me.cboDay.FormattingEnabled = True
         Me.cboDay.Items.AddRange(New Object() {"4", "5", "6", "7", "8", "9"})
-        Me.cboDay.Location = New System.Drawing.Point(632, 233)
-        Me.cboDay.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.cboDay.Location = New System.Drawing.Point(474, 189)
         Me.cboDay.Name = "cboDay"
-        Me.cboDay.Size = New System.Drawing.Size(144, 24)
+        Me.cboDay.Size = New System.Drawing.Size(109, 21)
         Me.cboDay.TabIndex = 13
         Me.cboDay.ValueMember = "displayMember"
         '
         'Label1
         '
         Me.Label1.AutoSize = True
-        Me.Label1.Location = New System.Drawing.Point(645, 238)
-        Me.Label1.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.Label1.Location = New System.Drawing.Point(484, 193)
         Me.Label1.Name = "Label1"
-        Me.Label1.Size = New System.Drawing.Size(0, 17)
+        Me.Label1.Size = New System.Drawing.Size(0, 13)
         Me.Label1.TabIndex = 12
         '
         'Button4
         '
-        Me.Button4.Location = New System.Drawing.Point(331, 446)
-        Me.Button4.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.Button4.Location = New System.Drawing.Point(242, 409)
         Me.Button4.Name = "Button4"
-        Me.Button4.Size = New System.Drawing.Size(155, 27)
+        Me.Button4.Size = New System.Drawing.Size(116, 22)
         Me.Button4.TabIndex = 17
         Me.Button4.Text = "stop web"
         Me.Button4.UseVisualStyleBackColor = True
@@ -191,38 +184,34 @@ Partial Class frmFoculs
         '
         'tbDayTimeExp
         '
-        Me.tbDayTimeExp.Location = New System.Drawing.Point(835, 236)
-        Me.tbDayTimeExp.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.tbDayTimeExp.Location = New System.Drawing.Point(626, 192)
         Me.tbDayTimeExp.Name = "tbDayTimeExp"
-        Me.tbDayTimeExp.Size = New System.Drawing.Size(59, 22)
+        Me.tbDayTimeExp.Size = New System.Drawing.Size(45, 20)
         Me.tbDayTimeExp.TabIndex = 18
         Me.tbDayTimeExp.Text = "125us"
         '
         'tbNightExp
         '
-        Me.tbNightExp.Location = New System.Drawing.Point(835, 279)
-        Me.tbNightExp.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.tbNightExp.Location = New System.Drawing.Point(626, 227)
         Me.tbNightExp.Name = "tbNightExp"
-        Me.tbNightExp.Size = New System.Drawing.Size(59, 22)
+        Me.tbNightExp.Size = New System.Drawing.Size(45, 20)
         Me.tbNightExp.TabIndex = 19
         Me.tbNightExp.Text = "4s"
         '
         'Button5
         '
-        Me.Button5.Location = New System.Drawing.Point(715, 433)
-        Me.Button5.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.Button5.Location = New System.Drawing.Point(530, 399)
         Me.Button5.Name = "Button5"
-        Me.Button5.Size = New System.Drawing.Size(164, 39)
+        Me.Button5.Size = New System.Drawing.Size(123, 32)
         Me.Button5.TabIndex = 20
         Me.Button5.Text = "Button5"
         Me.Button5.UseVisualStyleBackColor = True
         '
         'Button7
         '
-        Me.Button7.Location = New System.Drawing.Point(764, 386)
-        Me.Button7.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.Button7.Location = New System.Drawing.Point(573, 314)
         Me.Button7.Name = "Button7"
-        Me.Button7.Size = New System.Drawing.Size(129, 30)
+        Me.Button7.Size = New System.Drawing.Size(97, 24)
         Me.Button7.TabIndex = 21
         Me.Button7.Text = "initcamera"
         Me.Button7.UseVisualStyleBackColor = True
@@ -230,30 +219,27 @@ Partial Class frmFoculs
         'tbGain
         '
         Me.tbGain.Enabled = False
-        Me.tbGain.Location = New System.Drawing.Point(835, 191)
-        Me.tbGain.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.tbGain.Location = New System.Drawing.Point(626, 155)
         Me.tbGain.Name = "tbGain"
-        Me.tbGain.Size = New System.Drawing.Size(61, 22)
+        Me.tbGain.Size = New System.Drawing.Size(47, 20)
         Me.tbGain.TabIndex = 22
         Me.tbGain.Text = "0"
         '
         'Label4
         '
         Me.Label4.AutoSize = True
-        Me.Label4.Location = New System.Drawing.Point(835, 153)
-        Me.Label4.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.Label4.Location = New System.Drawing.Point(626, 124)
         Me.Label4.Name = "Label4"
-        Me.Label4.Size = New System.Drawing.Size(35, 17)
+        Me.Label4.Size = New System.Drawing.Size(27, 13)
         Me.Label4.TabIndex = 23
         Me.Label4.Text = "gain"
         '
         'tbExposureTime
         '
         Me.tbExposureTime.Enabled = False
-        Me.tbExposureTime.Location = New System.Drawing.Point(833, 346)
-        Me.tbExposureTime.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.tbExposureTime.Location = New System.Drawing.Point(625, 281)
         Me.tbExposureTime.Name = "tbExposureTime"
-        Me.tbExposureTime.Size = New System.Drawing.Size(59, 22)
+        Me.tbExposureTime.Size = New System.Drawing.Size(45, 20)
         Me.tbExposureTime.TabIndex = 24
         Me.tbExposureTime.Text = "4s"
         '
@@ -261,29 +247,98 @@ Partial Class frmFoculs
         '
         Me.lblDayNight.AutoSize = True
         Me.lblDayNight.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.lblDayNight.Location = New System.Drawing.Point(628, 350)
-        Me.lblDayNight.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.lblDayNight.Location = New System.Drawing.Point(471, 284)
         Me.lblDayNight.Name = "lblDayNight"
-        Me.lblDayNight.Size = New System.Drawing.Size(44, 17)
+        Me.lblDayNight.Size = New System.Drawing.Size(35, 13)
         Me.lblDayNight.TabIndex = 25
         Me.lblDayNight.Text = "night"
         '
         'AxFGControlCtrl1
         '
-        Me.AxFGControlCtrl1.Enabled = True
-        Me.AxFGControlCtrl1.Location = New System.Drawing.Point(45, 29)
-        Me.AxFGControlCtrl1.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
-        Me.AxFGControlCtrl1.Name = "AxFGControlCtrl1"
-        Me.AxFGControlCtrl1.OcxState = CType(resources.GetObject("AxFGControlCtrl1.OcxState"), System.Windows.Forms.AxHost.State)
-        Me.AxFGControlCtrl1.Size = New System.Drawing.Size(305, 239)
-        Me.AxFGControlCtrl1.TabIndex = 26
+
+        '
+        'AxFGControlCtrl2
+        '
+        Me.AxFGControlCtrl2.Enabled = True
+        Me.AxFGControlCtrl2.Location = New System.Drawing.Point(30, 22)
+        Me.AxFGControlCtrl2.Name = "AxFGControlCtrl2"
+        Me.AxFGControlCtrl2.OcxState = CType(resources.GetObject("AxFGControlCtrl2.OcxState"), System.Windows.Forms.AxHost.State)
+        Me.AxFGControlCtrl2.Size = New System.Drawing.Size(413, 330)
+        Me.AxFGControlCtrl2.TabIndex = 26
+        '
+        'cbFlip
+        '
+        Me.cbFlip.AutoSize = True
+        Me.cbFlip.Checked = True
+        Me.cbFlip.CheckState = System.Windows.Forms.CheckState.Checked
+        Me.cbFlip.Location = New System.Drawing.Point(625, 99)
+        Me.cbFlip.Name = "cbFlip"
+        Me.cbFlip.Size = New System.Drawing.Size(39, 17)
+        Me.cbFlip.TabIndex = 27
+        Me.cbFlip.Text = "flip"
+        Me.cbFlip.UseVisualStyleBackColor = True
+        '
+        'cbSaveImages
+        '
+        Me.cbSaveImages.AutoSize = True
+        Me.cbSaveImages.Location = New System.Drawing.Point(378, 363)
+        Me.cbSaveImages.Name = "cbSaveImages"
+        Me.cbSaveImages.Size = New System.Drawing.Size(97, 17)
+        Me.cbSaveImages.TabIndex = 97
+        Me.cbSaveImages.Text = "Save snaphots"
+        Me.cbSaveImages.UseVisualStyleBackColor = True
+        '
+        'Button10
+        '
+        Me.Button10.Location = New System.Drawing.Point(330, 360)
+        Me.Button10.Margin = New System.Windows.Forms.Padding(2)
+        Me.Button10.Name = "Button10"
+        Me.Button10.Size = New System.Drawing.Size(36, 18)
+        Me.Button10.TabIndex = 96
+        Me.Button10.Text = "..."
+        Me.Button10.UseVisualStyleBackColor = True
+        '
+        'Label5
+        '
+        Me.Label5.AutoSize = True
+        Me.Label5.Location = New System.Drawing.Point(31, 363)
+        Me.Label5.Margin = New System.Windows.Forms.Padding(2, 0, 2, 0)
+        Me.Label5.Name = "Label5"
+        Me.Label5.Size = New System.Drawing.Size(31, 13)
+        Me.Label5.TabIndex = 95
+        Me.Label5.Text = "path:"
+        '
+        'tbPath
+        '
+        Me.tbPath.Location = New System.Drawing.Point(66, 360)
+        Me.tbPath.Margin = New System.Windows.Forms.Padding(2)
+        Me.tbPath.Name = "tbPath"
+        Me.tbPath.Size = New System.Drawing.Size(252, 20)
+        Me.tbPath.TabIndex = 94
+        Me.tbPath.Text = "c:\image"
+        '
+        'cbxMeteor
+        '
+        Me.cbxMeteor.AutoSize = True
+        Me.cbxMeteor.Location = New System.Drawing.Point(378, 386)
+        Me.cbxMeteor.Name = "cbxMeteor"
+        Me.cbxMeteor.Size = New System.Drawing.Size(96, 17)
+        Me.cbxMeteor.TabIndex = 98
+        Me.cbxMeteor.Text = "detect meteors"
+        Me.cbxMeteor.UseVisualStyleBackColor = True
         '
         'frmFoculs
         '
-        Me.AutoScaleDimensions = New System.Drawing.SizeF(8.0!, 16.0!)
+        Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(913, 486)
-        Me.Controls.Add(Me.AxFGControlCtrl1)
+        Me.ClientSize = New System.Drawing.Size(685, 465)
+        Me.Controls.Add(Me.cbxMeteor)
+        Me.Controls.Add(Me.cbSaveImages)
+        Me.Controls.Add(Me.Button10)
+        Me.Controls.Add(Me.Label5)
+        Me.Controls.Add(Me.tbPath)
+        Me.Controls.Add(Me.cbFlip)
+        Me.Controls.Add(Me.AxFGControlCtrl2)
         Me.Controls.Add(Me.lblDayNight)
         Me.Controls.Add(Me.tbExposureTime)
         Me.Controls.Add(Me.Label4)
@@ -305,10 +360,9 @@ Partial Class frmFoculs
         Me.Controls.Add(Me.Button2)
         Me.Controls.Add(Me.Button1)
         Me.Controls.Add(Me.ComboBox1)
-        Me.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
         Me.Name = "frmFoculs"
         Me.Text = "Firewire camera"
-        CType(Me.AxFGControlCtrl1, System.ComponentModel.ISupportInitialize).EndInit()
+        CType(Me.AxFGControlCtrl2, System.ComponentModel.ISupportInitialize).EndInit()
         Me.ResumeLayout(False)
         Me.PerformLayout()
 
@@ -335,5 +389,11 @@ Partial Class frmFoculs
     Friend WithEvents Label4 As System.Windows.Forms.Label
     Friend WithEvents tbExposureTime As System.Windows.Forms.TextBox
     Friend WithEvents lblDayNight As System.Windows.Forms.Label
-    Friend WithEvents AxFGControlCtrl1 As AxFGControlLib.AxFGControlCtrl
+    Friend WithEvents AxFGControlCtrl2 As AxFGControlLib.AxFGControlCtrl
+    Friend WithEvents cbFlip As System.Windows.Forms.CheckBox
+    Friend WithEvents cbSaveImages As System.Windows.Forms.CheckBox
+    Friend WithEvents Button10 As System.Windows.Forms.Button
+    Friend WithEvents Label5 As System.Windows.Forms.Label
+    Friend WithEvents tbPath As System.Windows.Forms.TextBox
+    Friend WithEvents cbxMeteor As System.Windows.Forms.CheckBox
 End Class
