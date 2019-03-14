@@ -281,7 +281,6 @@ Partial Class frmQ
         '
         'tbExposureTime
         '
-        Me.tbExposureTime.Enabled = False
         Me.tbExposureTime.Location = New System.Drawing.Point(698, 299)
         Me.tbExposureTime.Margin = New System.Windows.Forms.Padding(4)
         Me.tbExposureTime.Name = "tbExposureTime"

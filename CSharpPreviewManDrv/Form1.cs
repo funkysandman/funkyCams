@@ -248,6 +248,7 @@ namespace CSharpPreviewManDrv
             this.tbGain.TabIndex = 0;
             this.tbGain.TickFrequency = 200;
             this.tbGain.TickStyle = System.Windows.Forms.TickStyle.Both;
+            this.tbGain.Scroll += new System.EventHandler(this.tbGain_Scroll);
             this.tbGain.ValueChanged += new System.EventHandler(this.tbGain_ValueChanged);
             // 
             // gbExposure
@@ -637,6 +638,11 @@ namespace CSharpPreviewManDrv
         }
 
         private void Form1_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        private void tbGain_Scroll(object sender, EventArgs e)
         {
 
         }

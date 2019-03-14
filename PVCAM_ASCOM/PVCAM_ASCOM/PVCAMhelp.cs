@@ -467,6 +467,7 @@ namespace pvcam_helper
 
         Int16 m_xSize;
         Int16 m_ySize;
+        Int16 m_pixelSize;
         public static Int16 NrOfCameras;
 
         //ROI 
@@ -2594,6 +2595,8 @@ namespace pvcam_helper
             PVCAM.pl_get_param(m_hCam, PvTypes.PARAM_SER_SIZE, (Int16)PvTypes.AttributeIDs.ATTR_CURRENT, unmngCcdSize);
             m_xSize = Marshal.ReadInt16(unmngCcdSize);
 
+            PVCAM.pl_get_param(m_hCam, PvTypes.PARAM_PIX_PAR_SIZE, (Int16)PvTypes.AttributeIDs.ATTR_CURRENT, unmngCcdSize);
+            m_pixelSize = Marshal.ReadInt16(unmngCcdSize);
             Marshal.FreeHGlobal(unmngCcdSize);
             unmngCcdSize = IntPtr.Zero;
 
@@ -3668,6 +3671,12 @@ namespace pvcam_helper
         {
             get { return m_ySize; }
             set { m_ySize = value; }
+        }
+
+        public Int16 PixelSize
+        {
+            get { return m_pixelSize; }
+            set { m_pixelSize = value; }
         }
 
         public Int16 ImageSizeX

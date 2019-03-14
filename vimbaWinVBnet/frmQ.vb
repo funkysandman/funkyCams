@@ -131,7 +131,7 @@ Public Class frmQ
 
         'QCam.QCamM_SetParam(mSettings, QCamM_Param.qprmOffset, 258)
         QCam.QCamM_SetParam(mSettings, QCamM_Param.qprmCoolerActive, 1)
-        QCam.QCamM_SetParam(mSettings, QCamM_Param.qprmEMGain, tbGain.Text)
+        ' QCam.QCamM_SetParam(mSettings, QCamM_Param.qprmNormIntensGaindB, val(tbGain.Text))
         QCam.QCamM_SetParam(mSettings, QCamM_Param.qprmExposure, tbExposureTime.Text)
         err = QCam.QCamM_SendSettingsToCam(mhCamera, mSettings)
         'If Not mIsMono Then
@@ -353,7 +353,7 @@ Public Class frmQ
     Private Sub Button7_Click(sender As Object, e As EventArgs) Handles Button7.Click
         'use settings
         Dim err As QCamM_Err
-        QCam.QCamM_SetParam(mSettings, QCamM_Param.qprmEMGain, tbGain.Text)
+        QCam.QCamM_SetParam(mSettings, QCamM_Param.qprmGain, Val(tbGain.Text))
         QCam.QCamM_SetParam(mSettings, QCamM_Param.qprmExposure, tbExposureTime.Text)
         err = QCam.QCamM_SendSettingsToCam(mhCamera, mSettings)
 
