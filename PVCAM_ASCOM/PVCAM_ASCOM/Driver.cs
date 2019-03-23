@@ -134,7 +134,7 @@ namespace ASCOM.Photometrics
             myCam.SetReadoutSpeed(1); //10Mhz
             myCam.SetTriggerMode("Timed");
             myCam.SetBinning("1");
-            myCam.SetGainState(1);//gain state 2
+            myCam.SetGainState(0);//gain state 2
             myCam.FramesToGet = 1;
             myCam.SetExposureTime(1);
          //   myCam.StartSeqAcq();
@@ -170,10 +170,13 @@ namespace ASCOM.Photometrics
 
                 if (evtType.NotifEvent == pvcam_helper.CameraNotifications.ACQ_NEW_FRAME_RECEIVED)
             {
-                
+
                 //copy image frame
-                int tempW = ccdWidth / myCam.Binning;
-                int tempH = ccdHeight / myCam.Binning;
+                //check if roi in use
+
+                int tempW = (myCam.Region[0].s2 - myCam.Region[0].s1+1) / myCam.Region[0].sbin;
+
+                int tempH = (myCam.Region[0].p2 - myCam.Region[0].p1 +1) / myCam.Region[0].pbin;
                 cameraImageArray = new int[tempW, tempH];
                 int n = 0;
                 for (int y = 0; y < tempH; y++)
