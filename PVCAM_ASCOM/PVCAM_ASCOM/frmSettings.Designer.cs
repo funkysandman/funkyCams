@@ -89,6 +89,8 @@
             this.tabSettings = new System.Windows.Forms.TabPage();
             this.tabROI = new System.Windows.Forms.TabPage();
             this.btnOk = new System.Windows.Forms.Button();
+            this.label3 = new System.Windows.Forms.Label();
+            this.tbRoiYtrim = new System.Windows.Forms.TextBox();
             this.gboxSettings.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.tbrEMGain)).BeginInit();
             this.gboxROI.SuspendLayout();
@@ -126,10 +128,10 @@
             this.lbxStatusList.FormattingEnabled = true;
             this.lbxStatusList.HorizontalScrollbar = true;
             this.lbxStatusList.ItemHeight = 17;
-            this.lbxStatusList.Location = new System.Drawing.Point(13, 425);
+            this.lbxStatusList.Location = new System.Drawing.Point(13, 442);
             this.lbxStatusList.Margin = new System.Windows.Forms.Padding(4);
             this.lbxStatusList.Name = "lbxStatusList";
-            this.lbxStatusList.Size = new System.Drawing.Size(504, 225);
+            this.lbxStatusList.Size = new System.Drawing.Size(504, 208);
             this.lbxStatusList.TabIndex = 5;
             // 
             // gboxSettings
@@ -717,7 +719,7 @@
             this.tabControl1.Margin = new System.Windows.Forms.Padding(4);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(511, 404);
+            this.tabControl1.Size = new System.Drawing.Size(511, 433);
             this.tabControl1.TabIndex = 19;
             // 
             // tabSettings
@@ -736,14 +738,17 @@
             // tabROI
             // 
             this.tabROI.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.tabROI.Controls.Add(this.label3);
+            this.tabROI.Controls.Add(this.tbRoiYtrim);
             this.tabROI.Controls.Add(this.gboxROI);
             this.tabROI.Location = new System.Drawing.Point(4, 25);
             this.tabROI.Margin = new System.Windows.Forms.Padding(4);
             this.tabROI.Name = "tabROI";
             this.tabROI.Padding = new System.Windows.Forms.Padding(4);
-            this.tabROI.Size = new System.Drawing.Size(503, 375);
+            this.tabROI.Size = new System.Drawing.Size(503, 404);
             this.tabROI.TabIndex = 2;
             this.tabROI.Text = "ROI Control";
+           // this.tabROI.Click += new System.EventHandler(this.tabROI_Click);
             // 
             // btnOk
             // 
@@ -754,6 +759,24 @@
             this.btnOk.Text = "ok";
             this.btnOk.UseVisualStyleBackColor = true;
             this.btnOk.Click += new System.EventHandler(this.btnOk_Click);
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(8, 368);
+            this.label3.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(111, 17);
+            this.label3.TabIndex = 42;
+            this.label3.Text = "Trim Pixels off y:";
+            // 
+            // tbRoiYtrim
+            // 
+            this.tbRoiYtrim.Location = new System.Drawing.Point(127, 368);
+            this.tbRoiYtrim.Margin = new System.Windows.Forms.Padding(4);
+            this.tbRoiYtrim.Name = "tbRoiYtrim";
+            this.tbRoiYtrim.Size = new System.Drawing.Size(61, 22);
+            this.tbRoiYtrim.TabIndex = 41;
             // 
             // FrmSettings
             // 
@@ -786,6 +809,7 @@
             this.tabControl1.ResumeLayout(false);
             this.tabSettings.ResumeLayout(false);
             this.tabROI.ResumeLayout(false);
+            this.tabROI.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -858,6 +882,8 @@
         private System.Windows.Forms.TextBox tbxCentroidCount;
         private System.Windows.Forms.CheckBox cboxCentroidEnable;
         private System.Windows.Forms.Button btnOk;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.TextBox tbRoiYtrim;
 
         public System.Windows.Forms.Label LblErrMsg
         {

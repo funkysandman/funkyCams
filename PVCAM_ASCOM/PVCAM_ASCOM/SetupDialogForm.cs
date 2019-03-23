@@ -26,6 +26,7 @@ namespace ASCOM.Photometrics
             // Update the state variables with results from the dialogue
             Camera.comPort = (string)comboBoxComPort.SelectedItem;
             Camera.tl.Enabled = chkTrace.Checked;
+            Camera.ROIytrim = tbRoiYtrim.Text;
         }
 
         private void cmdCancel_Click(object sender, EventArgs e) // Cancel button event handler
@@ -61,11 +62,18 @@ namespace ASCOM.Photometrics
             {
                 comboBoxComPort.SelectedItem = Camera.comPort;
             }
+            tbRoiYtrim.Text = Camera.ROIytrim;
+
         }
 
         private void btnAddROI_Click(object sender, EventArgs e)
         {
            // myCam.SetReadoutSpeed(Convert.ToInt16(cbxRdOutSpd.SelectedIndex));
+        }
+
+        private void SetupDialogForm_Load(object sender, EventArgs e)
+        {
+
         }
     }
 }

@@ -72,12 +72,15 @@ namespace ASCOM.Photometrics
         private static string driverDescription = "ASCOM Camera Driver for Photometrics.";
         private static pvcam_helper.PVCamCamera myCam;
         internal static string comPortProfileName = "COM Port"; // Constants used for Profile persistence
+        internal static string ROIProfileName = "ROI y trim";//how much to trim off bottom
+        internal static string ROIyTrimDefault = "95";
         internal static string comPortDefault = "COM1";
         internal static string traceStateProfileName = "Trace Level";
         internal static string traceStateDefault = "false";
 
         internal static string comPort; // Variables to hold the currrent device configuration
-
+        public static string ROIytrim;
+        
         /// <summary>
         /// Private variable to hold the connected state
         /// </summary>
@@ -126,6 +129,9 @@ namespace ASCOM.Photometrics
             //myCam.ReadCameraParams();
             ccdWidth= myCam.XSize;
             ccdHeight = myCam.YSize;
+
+
+            myCam.Region[0].p2 = (ushort)( myCam.Region[0].p2 - ushort.Parse(ROIytrim));
             ccdWidth = (myCam.Region[0].s2 - myCam.Region[0].s1 + 1);
             ccdHeight = (myCam.Region[0].p2 - myCam.Region[0].p1 + 1);
 
@@ -135,6 +141,8 @@ namespace ASCOM.Photometrics
             myCam.SetEMGain(1);
            
             myCam.SetReadoutSpeed((short)(myCam.SpeedTable.ReadoutSpeeds-1)); //default to slowest readout
+
+
             myCam.SetTriggerMode("Timed");
             myCam.SetBinning("1");
             myCam.SetGainState(0);//gain state 2
@@ -1116,6 +1124,7 @@ namespace ASCOM.Photometrics
                 driverProfile.DeviceType = "Camera";
                 tl.Enabled = Convert.ToBoolean(driverProfile.GetValue(driverID, traceStateProfileName, string.Empty, traceStateDefault));
                 comPort = driverProfile.GetValue(driverID, comPortProfileName, string.Empty, comPortDefault);
+                ROIytrim = driverProfile.GetValue(driverID, ROIProfileName, string.Empty, ROIyTrimDefault);
             }
         }
 
@@ -1129,6 +1138,7 @@ namespace ASCOM.Photometrics
                 driverProfile.DeviceType = "Camera";
                 driverProfile.WriteValue(driverID, traceStateProfileName, tl.Enabled.ToString());
                 driverProfile.WriteValue(driverID, comPortProfileName, comPort.ToString());
+                driverProfile.WriteValue(driverID, ROIProfileName, ROIytrim.ToString());
             }
         }
 
