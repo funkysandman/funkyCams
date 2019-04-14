@@ -89,6 +89,10 @@ namespace ASCOM.Photometrics
             this.columnHeader4 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.label7 = new System.Windows.Forms.Label();
             this.cbxBinning = new System.Windows.Forms.ComboBox();
+            this.label1 = new System.Windows.Forms.Label();
+            this.tbRoiYtrim = new System.Windows.Forms.TextBox();
+            this.label3 = new System.Windows.Forms.Label();
+            this.textBox1 = new System.Windows.Forms.TextBox();
             ((System.ComponentModel.ISupportInitialize)(this.picASCOM)).BeginInit();
             this.tabControl1.SuspendLayout();
             this.tabSettings.SuspendLayout();
@@ -105,7 +109,7 @@ namespace ASCOM.Photometrics
             // 
             this.cmdOK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.cmdOK.DialogResult = System.Windows.Forms.DialogResult.OK;
-            this.cmdOK.Location = new System.Drawing.Point(455, 483);
+            this.cmdOK.Location = new System.Drawing.Point(368, 521);
             this.cmdOK.Margin = new System.Windows.Forms.Padding(4);
             this.cmdOK.Name = "cmdOK";
             this.cmdOK.Size = new System.Drawing.Size(79, 30);
@@ -183,7 +187,7 @@ namespace ASCOM.Photometrics
             this.tabControl1.Margin = new System.Windows.Forms.Padding(4);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(511, 404);
+            this.tabControl1.Size = new System.Drawing.Size(511, 443);
             this.tabControl1.TabIndex = 20;
             // 
             // tabSettings
@@ -365,6 +369,8 @@ namespace ASCOM.Photometrics
             // 
             // gboxCooling
             // 
+            this.gboxCooling.Controls.Add(this.label1);
+            this.gboxCooling.Controls.Add(this.tbRoiYtrim);
             this.gboxCooling.Controls.Add(this.label20);
             this.gboxCooling.Controls.Add(this.cboxFanSpeed);
             this.gboxCooling.Controls.Add(this.chboxTempUpdate);
@@ -379,7 +385,7 @@ namespace ASCOM.Photometrics
             this.gboxCooling.Margin = new System.Windows.Forms.Padding(4);
             this.gboxCooling.Name = "gboxCooling";
             this.gboxCooling.Padding = new System.Windows.Forms.Padding(4);
-            this.gboxCooling.Size = new System.Drawing.Size(155, 233);
+            this.gboxCooling.Size = new System.Drawing.Size(155, 236);
             this.gboxCooling.TabIndex = 17;
             this.gboxCooling.TabStop = false;
             this.gboxCooling.Text = "Cooling";
@@ -475,12 +481,14 @@ namespace ASCOM.Photometrics
             // tabROI
             // 
             this.tabROI.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.tabROI.Controls.Add(this.label3);
+            this.tabROI.Controls.Add(this.textBox1);
             this.tabROI.Controls.Add(this.gboxROI);
             this.tabROI.Location = new System.Drawing.Point(4, 25);
             this.tabROI.Margin = new System.Windows.Forms.Padding(4);
             this.tabROI.Name = "tabROI";
             this.tabROI.Padding = new System.Windows.Forms.Padding(4);
-            this.tabROI.Size = new System.Drawing.Size(503, 375);
+            this.tabROI.Size = new System.Drawing.Size(503, 414);
             this.tabROI.TabIndex = 2;
             this.tabROI.Text = "ROI Control";
             // 
@@ -766,6 +774,42 @@ namespace ASCOM.Photometrics
             this.cbxBinning.Size = new System.Drawing.Size(145, 24);
             this.cbxBinning.TabIndex = 30;
             // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(22, 157);
+            this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(111, 17);
+            this.label1.TabIndex = 40;
+            this.label1.Text = "Trim Pixels off y:";
+            // 
+            // tbRoiYtrim
+            // 
+            this.tbRoiYtrim.Location = new System.Drawing.Point(26, 177);
+            this.tbRoiYtrim.Margin = new System.Windows.Forms.Padding(4);
+            this.tbRoiYtrim.Name = "tbRoiYtrim";
+            this.tbRoiYtrim.Size = new System.Drawing.Size(61, 22);
+            this.tbRoiYtrim.TabIndex = 39;
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(21, 384);
+            this.label3.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(111, 17);
+            this.label3.TabIndex = 40;
+            this.label3.Text = "Trim Pixels off y:";
+            // 
+            // textBox1
+            // 
+            this.textBox1.Location = new System.Drawing.Point(140, 384);
+            this.textBox1.Margin = new System.Windows.Forms.Padding(4);
+            this.textBox1.Name = "textBox1";
+            this.textBox1.Size = new System.Drawing.Size(61, 22);
+            this.textBox1.TabIndex = 39;
+            // 
             // SetupDialogForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -786,6 +830,7 @@ namespace ASCOM.Photometrics
             this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Photometrics Setup";
+            this.Load += new System.EventHandler(this.SetupDialogForm_Load);
             ((System.ComponentModel.ISupportInitialize)(this.picASCOM)).EndInit();
             this.tabControl1.ResumeLayout(false);
             this.tabSettings.ResumeLayout(false);
@@ -795,6 +840,7 @@ namespace ASCOM.Photometrics
             this.gboxCooling.ResumeLayout(false);
             this.gboxCooling.PerformLayout();
             this.tabROI.ResumeLayout(false);
+            this.tabROI.PerformLayout();
             this.gboxROI.ResumeLayout(false);
             this.gboxROI.PerformLayout();
             this.gbxCentroid.ResumeLayout(false);
@@ -869,5 +915,9 @@ namespace ASCOM.Photometrics
         private System.Windows.Forms.ColumnHeader columnHeader4;
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.ComboBox cbxBinning;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.TextBox tbRoiYtrim;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.TextBox textBox1;
     }
 }
