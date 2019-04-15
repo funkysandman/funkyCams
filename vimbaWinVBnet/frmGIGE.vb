@@ -203,7 +203,7 @@ Public Class frmGIGE
 
 
 
-        If cbMeteors.Checked Then
+        If cbMeteors.Checked And lblDayNight.Text.ToLower = "night" Then
             ' md.examine(bm, filename)
             'call azure service
             Dim ms As New MemoryStream()
@@ -399,7 +399,7 @@ Public Class frmGIGE
                 If night Then
 
                     tbExposureTime.Text = tbNightExp.Text
-                    lblDayNight.Text = "night"
+
                     'night mode
                     ' If Not myWebServer Is Nothing Then
                     If cbUseDarks.Checked Then
@@ -408,15 +408,19 @@ Public Class frmGIGE
                         ' gigeGrabber.useDarks = False
                     End If
                     'End If
-                    gigeGrabber.setParams(Val(Me.tbExposureTime.Text), Val(Me.tbNightAgain.Text))
+                    tbGain.Text = tbNightAgain.Text
+                    lblDayNight.Text = "night"
+                    ' gigeGrabber.setParams(Val(Me.tbExposureTime.Text), Val(Me.tbNightAgain.Text))
 
                 Else
                     'day mode
 
                     tbExposureTime.Text = tbDayTimeExp.Text
 
+
+                    tbGain.Text = tbDayGain.Text
                     lblDayNight.Text = "day"
-                    gigeGrabber.setParams(Val(Me.tbExposureTime.Text), Val(Me.tbDayGain.Text))
+
 
 
                 End If
@@ -559,5 +563,12 @@ Public Class frmGIGE
         Else
             ' md.LoadModel("c:\tmp\frozen_inference_graph.pb", "c:\tmp\object-detection.pbtxt")
         End If
+    End Sub
+
+    Private Sub tbGain_TextChanged(sender As Object, e As EventArgs) Handles tbGain.TextChanged
+        If Not gigeGrabber Is Nothing Then
+            gigeGrabber.setParams(Val(Me.tbExposureTime.Text), Val(Me.tbGain.Text))
+        End If
+
     End Sub
 End Class

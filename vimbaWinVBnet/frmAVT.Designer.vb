@@ -54,6 +54,7 @@ Partial Class frmAVT
         Me.txtFps = New System.Windows.Forms.TextBox()
         Me.cbMeteors = New System.Windows.Forms.CheckBox()
         Me.Label6 = New System.Windows.Forms.Label()
+        Me.lblDayNight = New System.Windows.Forms.Label()
         CType(Me.PictureBox1, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
         '
@@ -271,9 +272,6 @@ Partial Class frmAVT
         Me.Label5.TabIndex = 22
         Me.Label5.Text = "path:"
         '
-        'FolderBrowserDialog1
-        '
-        '
         'Button10
         '
         Me.Button10.Location = New System.Drawing.Point(338, 350)
@@ -329,11 +327,22 @@ Partial Class frmAVT
         Me.Label6.TabIndex = 47
         Me.Label6.Text = "fps"
         '
+        'lblDayNight
+        '
+        Me.lblDayNight.AutoSize = True
+        Me.lblDayNight.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.lblDayNight.Location = New System.Drawing.Point(537, 245)
+        Me.lblDayNight.Name = "lblDayNight"
+        Me.lblDayNight.Size = New System.Drawing.Size(35, 13)
+        Me.lblDayNight.TabIndex = 86
+        Me.lblDayNight.Text = "night"
+        '
         'frmAVT
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.ClientSize = New System.Drawing.Size(584, 526)
+        Me.Controls.Add(Me.lblDayNight)
         Me.Controls.Add(Me.Label6)
         Me.Controls.Add(Me.cbMeteors)
         Me.Controls.Add(Me.txtFps)
@@ -400,4 +409,5 @@ Partial Class frmAVT
     Friend WithEvents txtFps As TextBox
     Friend WithEvents cbMeteors As CheckBox
     Friend WithEvents Label6 As Label
+    Friend WithEvents lblDayNight As Label
 End Class

@@ -67,6 +67,7 @@ Partial Class frmGIGE
         Me.cbUseDarks = New System.Windows.Forms.CheckBox()
         Me.TimerAcquistionRate = New System.Windows.Forms.Timer(Me.components)
         Me.Button7 = New System.Windows.Forms.Button()
+        Me.tbGain = New System.Windows.Forms.TextBox()
         CType(Me.PictureBox1, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
         '
@@ -128,6 +129,7 @@ Partial Class frmGIGE
         '
         'Timer1
         '
+        Me.Timer1.Enabled = True
         Me.Timer1.Interval = 20000
         '
         'Button6
@@ -441,11 +443,20 @@ Partial Class frmGIGE
         Me.Button7.UseVisualStyleBackColor = True
         Me.Button7.Visible = False
         '
+        'tbGain
+        '
+        Me.tbGain.Location = New System.Drawing.Point(489, 270)
+        Me.tbGain.Name = "tbGain"
+        Me.tbGain.Size = New System.Drawing.Size(47, 20)
+        Me.tbGain.TabIndex = 104
+        Me.tbGain.Text = "27"
+        '
         'frmGIGE
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.ClientSize = New System.Drawing.Size(627, 417)
+        Me.Controls.Add(Me.tbGain)
         Me.Controls.Add(Me.Button7)
         Me.Controls.Add(Me.cbUseDarks)
         Me.Controls.Add(Me.Label10)
@@ -538,4 +549,5 @@ Partial Class frmGIGE
     Friend WithEvents cbUseDarks As CheckBox
     Friend WithEvents TimerAcquistionRate As Timer
     Friend WithEvents Button7 As Button
+    Friend WithEvents tbGain As TextBox
 End Class
