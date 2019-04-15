@@ -42,6 +42,7 @@ Public Class frmQ
     Private gotFrameTime As DateTime
     Private dark() As Byte
     Private t As Thread
+    Dim night As Boolean = False
     ' Private md As New ObjectDetection.TFDetector()
     Private myImageCodecInfo As ImageCodecInfo
     Private myEncoder As System.Drawing.Imaging.Encoder
@@ -63,7 +64,7 @@ Public Class frmQ
         QCam.QCamM_Abort(mhCamera)
         QCam.QCamM_SetStreaming(mhCamera, 1)
         QueueFrame(1)
-        QueueFrame(2)
+        'QueueFrame(2)
     End Sub
 
     Private Function QueueFrame(ByVal frameNum As UInteger) As Boolean
@@ -135,6 +136,7 @@ Public Class frmQ
         QCam.QCamM_SetParam(mSettings, QCamM_Param.qprmCoolerActive, 1)
         QCam.QCamM_SetParam(mSettings, QCamM_Param.qprmEMGain, tbGain.Text)
         QCam.QCamM_SetParam(mSettings, QCamM_Param.qprmExposure, tbExposureTime.Text)
+        'QCam.QCamM_SetParam(mSettings, QCamM_Param., tbExposureTime.Text)
         err = QCam.QCamM_SendSettingsToCam(mhCamera, mSettings)
         'If Not mIsMono Then
         '    mRgbFrame = New QCamM_Frame()
@@ -186,10 +188,32 @@ Public Class frmQ
 
         Dim width As UInteger = myFrame.width
         Dim height As UInteger = myFrame.height
-
-
+        bmp = New Bitmap(width, height, PixelFormat.Format8bppIndexed)
+        Dim rawData(mFrame1.bufferSize) As Byte
         If mIsMono Then
-            bmp = New Bitmap(CInt(width), CInt(height), CInt(width), PixelFormat.Format8bppIndexed, myFrame.pBuffer)
+            Marshal.Copy(myFrame.pBuffer, rawData, 0, mFrame1.bufferSize)
+            Dim dptr As IntPtr
+
+            '
+            Dim BoundsRect = New Rectangle(0, 0, width, height)
+            Dim bmpData As System.Drawing.Imaging.BitmapData = bmp.LockBits(BoundsRect, System.Drawing.Imaging.ImageLockMode.[WriteOnly], bmp.PixelFormat)
+
+            Dim ptr As IntPtr = bmpData.Scan0
+
+            Dim bytes As Integer = mFrame1.bufferSize
+
+
+
+            Marshal.Copy(rawData, 0, ptr, bytes)
+            bmp.UnlockBits(bmpData)
+
+            Debug.Print("image")
+            For i = 1 To 512
+                Debug.Print(rawData(i))
+            Next
+
+
+            ' bmp = New Bitmap(New MemoryStream(rawData))
             Dim pt As ColorPalette = bmp.Palette
 
             For i As Integer = 0 To pt.Entries.Length - 1
@@ -205,15 +229,15 @@ Public Class frmQ
         'End If
 
         'Using fs As FileStream = New FileStream("image.raw", FileMode.Create)
-        '        Dim bw As BinaryWriter = New System.IO.BinaryWriter(fs)
-        '        Dim b As Byte
-        '        For i As Integer = 0 To mFrame1.size - 1
-        '            b = Marshal.ReadByte(myFrame.pBuffer, i)
-        '            bw.Write(b)
+        '    Dim bw As BinaryWriter = New System.IO.BinaryWriter(fs)
+        '    Dim b As Byte
+        '    For i As Integer = 0 To mFrame1.size - 1
+        '        b = Marshal.ReadByte(myFrame.pBuffer, i)
+        '        bw.Write(b)
 
-        '        Next
-        '        bw.Close()
-        '    End Using
+        '    Next
+        '    bw.Close()
+        'End Using
         '    mDisplayBitmap = bmp
 
         ' myBitmap.Save("Shapes025.jpg", myImageCodecInfo, myEncoderParameters)
@@ -223,25 +247,27 @@ Public Class frmQ
         Try
 
             'try to draw on bitmap
-            Dim tempbmp As Bitmap
-            tempbmp = New Bitmap(bmp.Width, bmp.Height)
+            'Dim tempbmp As Bitmap
+            'tempbmp = New Bitmap(bmp.Width, bmp.Height)
 
 
             'From this bitmap, the graphics can be obtained, because it has the right PixelFormat
-            Dim gr As Graphics = Graphics.FromImage(tempbmp)
-            gr.DrawImage(bmp, 0, 0)
-            Dim myFontLabels As New Font("Arial", 16, GraphicsUnit.Pixel)
+            ' Dim gr As Graphics = Graphics.FromImage(tempbmp)
+            ' gr.DrawImage(bmp, 0, 0)
+            'Dim myFontLabels As New Font("Arial", 16, GraphicsUnit.Pixel)
             'Dim myBrushLabels As New SolidBrush(Color.White)
+            bmp.RotateFlip(RotateFlipType.Rotate180FlipNone)
 
-            gr.DrawString(firstText, myFontLabels, Brushes.GreenYellow, firstLocation) '# last 2 number are X and Y coords.
-            gr.Dispose()
-            myFontLabels.Dispose()
-            bmp = tempbmp
+            ' gr.DrawString(firstText, myFontLabels, Brushes.GreenYellow, firstLocation) '# last 2 number are X and Y coords.
+            ' gr.Dispose()
+            ' myFontLabels.Dispose()
+            ' bmp = tempbmp
+
         Catch ex As Exception
 
         End Try
 
-        PictureBox1.Image = bmp
+        'PictureBox1.Image = bmp
 
         Dim filename As String
         Dim folderName = String.Format("{0:yyyy-MMM-dd}", DateTime.Now)
@@ -355,7 +381,11 @@ Public Class frmQ
     Private Sub Button7_Click(sender As Object, e As EventArgs) Handles Button7.Click
         'use settings
         Dim err As QCamM_Err
-        QCam.QCamM_SetParam(mSettings, QCamM_Param.qprmEMGain, tbGain.Text)
+
+
+        QCam.QCamM_SetParam(mSettings, QCamM_Param.qprmGain, CUInt((tbNightAgain.Text)))
+
+
         QCam.QCamM_SetParam(mSettings, QCamM_Param.qprmExposure, tbExposureTime.Text)
         err = QCam.QCamM_SendSettingsToCam(mhCamera, mSettings)
 
@@ -475,5 +505,54 @@ Public Class frmQ
         Button5.Enabled = True
         Button6.Enabled = False
         myWebServer.StopWebServer()
+    End Sub
+
+    Private Sub Timer2_Tick(sender As Object, e As EventArgs) Handles Timer2.Tick
+
+    End Sub
+
+    Private Sub Timer1_Tick(sender As Object, e As EventArgs) Handles Timer1.Tick
+
+        Try
+
+
+
+            Dim currentMode As Boolean
+            currentMode = False
+
+            If Now.Hour >= cboNight.SelectedItem Or Now.Hour <= cboDay.SelectedItem Then
+                night = True
+            Else
+                night = False
+            End If
+            ' If currentMode <> night Then
+
+            If night Then
+                'axfgcontrolctrl2.ExposureTimeAuto = "Off"
+                '  axfgcontrolctrl2.AcquisitionMode = "Continuous"
+
+                tbExposureTime.Text = tbNightExp.Text
+                tbGain.Text = tbNightAgain.Text
+                lblDayNight.Text = "night"
+                'night mode
+
+
+            Else
+                'day mode
+
+                tbExposureTime.Text = tbDayTimeExp.Text
+                tbGain.Text = "1"
+                lblDayNight.Text = "day"
+
+
+            End If
+            'End If
+            Dim err As QCamM_Err
+            'QCam.QCamM_SetParam(mSettings, QCamM_Param.qprmGain, CUInt((tbNightAgain.Text)))
+            ' QCam.QCamM_SetParam(mSettings, QCamM_Param.qprmExposure, tbExposureTime.Text)
+            'err = QCam.QCamM_SendSettingsToCam(mhCamera, mSettings)
+        Catch ex As Exception
+
+        End Try
     End Sub
 End Class
