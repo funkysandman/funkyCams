@@ -84,7 +84,7 @@ namespace DetectionServer
                                 // always close the stream
                                 if (ctx != null)
                                 {
-                                    ctx.Response.OutputStream.Close();
+                                    //ctx.Response.OutputStream.Close();
                                 }
                             }
                         }, _listener.GetContext());
