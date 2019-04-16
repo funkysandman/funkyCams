@@ -1137,6 +1137,7 @@ Public Class WebServer
                         '
                         Dim ms As New MemoryStream()
                         '  Dim ms2 As New MemoryStream()
+
                         b.Save(ms, myImageCodecInfo, myEncoderParameters)
                         ' d2.Save(ms2, Imaging.ImageFormat.Bmp)
                         ' mySVSVistekForm.PictureBox1.Image = b

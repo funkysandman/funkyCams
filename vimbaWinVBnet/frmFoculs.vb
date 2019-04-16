@@ -249,7 +249,7 @@ Public Class frmFoculs
 
         AxFGControlCtrl2.PixelFormat = 8
         AxFGControlCtrl2.Flip = 1
-        AxFGControlCtrl2.BytePerPacket = 1000
+        AxFGControlCtrl2.BytePerPacket = 700
         AxFGControlCtrl2.AcquisitionMode = "Continuous"
         AxFGControlCtrl2.SetExposureTimeString("75ms")
         Me.AxFGControlCtrl2.SetGain("", Val(Me.tbGain.Text))
@@ -548,7 +548,7 @@ Public Class frmFoculs
 
 
             End If
-            If Me.cbxMeteor.Checked Then
+            If Me.cbxMeteor.Checked And lblDayNight.Text.ToLower = "night" Then
                 ' md.examine(bm, filename)
                 'call azure service
                 Dim ms As New MemoryStream()

@@ -261,9 +261,9 @@ Partial Class frmQ
         Me.lblDayNight.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.lblDayNight.Location = New System.Drawing.Point(369, 245)
         Me.lblDayNight.Name = "lblDayNight"
-        Me.lblDayNight.Size = New System.Drawing.Size(35, 13)
+        Me.lblDayNight.Size = New System.Drawing.Size(19, 13)
         Me.lblDayNight.TabIndex = 85
-        Me.lblDayNight.Text = "night"
+        Me.lblDayNight.Text = "---"
         '
         'tbExposureTime
         '

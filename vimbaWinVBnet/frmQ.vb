@@ -188,6 +188,9 @@ Public Class frmQ
 
         Dim width As UInteger = myFrame.width
         Dim height As UInteger = myFrame.height
+        If Not bmp Is Nothing Then
+            bmp.Dispose()
+        End If
         bmp = New Bitmap(width, height, PixelFormat.Format8bppIndexed)
         Dim rawData(mFrame1.bufferSize) As Byte
         If mIsMono Then
@@ -276,14 +279,14 @@ Public Class frmQ
 
 
 
-        If cbMeteors.Checked Then
+        If cbMeteors.Checked And lblDayNight.Text.ToLower = "night" Then
             ' md.examine(bm, filename)
             'call azure service
             Dim ms As New MemoryStream()
             bmp.Save(ms, ImageFormat.Bmp)
 
             Dim contents = ms.ToArray()
-            Dim qe As New QueueEntry
+            Dim qe As New queueEntry
             qe.img = contents
             qe.filename = Path.GetFileName(filename)
             myDetectionQueue.Enqueue(qe)
@@ -301,6 +304,10 @@ Public Class frmQ
         End If
         QueueFrame(userData)
         running = False
+        Dim err As QCamM_Err
+        QCam.QCamM_SetParam(mSettings, QCamM_Param.qprmGain, CUInt((tbGain.Text)))
+        QCam.QCamM_SetParam(mSettings, QCamM_Param.qprmExposure, tbExposureTime.Text)
+        err = QCam.QCamM_SendSettingsToCam(mhCamera, mSettings)
         'mDisplayPanel.Invalidate()
     End Sub
     Public Sub processDetection()
@@ -554,5 +561,19 @@ Public Class frmQ
         Catch ex As Exception
 
         End Try
+    End Sub
+
+    Private Sub lblDayNight_Click(sender As Object, e As EventArgs) Handles lblDayNight.Click
+
+    End Sub
+
+    Private Sub lblDayNight_TextChanged(sender As Object, e As EventArgs) Handles lblDayNight.TextChanged
+        Dim err As QCamM_Err
+
+
+        QCam.QCamM_SetParam(mSettings, QCamM_Param.qprmGain, CUInt((tbGain.Text)))
+            QCam.QCamM_SetParam(mSettings, QCamM_Param.qprmExposure, tbExposureTime.Text)
+            err = QCam.QCamM_SendSettingsToCam(mhCamera, mSettings)
+
     End Sub
 End Class
