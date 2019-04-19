@@ -239,7 +239,7 @@ Public Class frmFoculs
         Button2.Enabled = False
         Call Timer1_Tick(sender, e)
 
-        '
+
         AxFGControlCtrl2.ExposureTimeAuto = "Off"
         AxFGControlCtrl2.SetLUTKneePoint(0, 525, 1290)
         AxFGControlCtrl2.SetLUTKneePoint(1, 1290, 1980)
@@ -255,10 +255,10 @@ Public Class frmFoculs
         Me.AxFGControlCtrl2.SetGain("", Val(Me.tbGain.Text))
         Me.AxFGControlCtrl2.SetExposureTimeString(tbExposureTime.Text)
         If (night) Then
-            AxFGControlCtrl2.KneeLUTEnable = True
+            AxFGControlCtrl2.KneeLUTEnable = Me.cbKneeLut.Checked
             AxFGControlCtrl2.ExposureTimeAuto = "Off"
         Else
-            AxFGControlCtrl2.KneeLUTEnable = False
+            AxFGControlCtrl2.KneeLUTEnable = Me.cbKneeLut.Checked
             AxFGControlCtrl2.ExposureTimeAuto = "Off"
             AxFGControlCtrl2.AcquisitionMode = "Continuous"
             AxFGControlCtrl2.AutoExposure = 20
@@ -575,6 +575,20 @@ Public Class frmFoculs
             ' myForm.writeline("error on firewire image received:" & ex.Message)
         End Try
     End Sub
+
+    Private Sub lblDayNight_TextChanged(sender As Object, e As EventArgs) Handles lblDayNight.TextChanged
+        Try
+            Me.AxFGControlCtrl2.SetGain("", Val(Me.tbGain.Text))
+            Me.AxFGControlCtrl2.SetExposureTimeString(tbExposureTime.Text)
+        Catch
+        End Try
+
+
+    End Sub
+
+    'Private Sub lblDayNight_Click(sender As Object, e As EventArgs) Handles lblDayNight.Click
+
+    'End Sub
 
     'Private Sub Button7_Click(sender As Object, e As EventArgs) Handles Button7.Click
     '    initCamera()

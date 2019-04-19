@@ -12,8 +12,8 @@ Imports QCamManagedDriver
 
 Public Class frmQimaging
         Inherits System.Windows.Forms.Form
-
-        Private mCamList As QCamM_CamListItem()
+    Private bmp As Bitmap
+    Private mCamList As QCamM_CamListItem()
         Private mhCamera As IntPtr
         Private mDisplayPanel As myPanel
         Private mIsMono As Boolean
@@ -420,7 +420,7 @@ Public Class frmQimaging
 
         Dim width As UInteger = myFrame.width
         Dim height As UInteger = myFrame.height
-        Dim bmp As Bitmap
+
 
         If mIsMono Then
             bmp = New Bitmap(CInt(width), CInt(height), CInt(width), PixelFormat.Format8bppIndexed, myFrame.pBuffer)

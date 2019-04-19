@@ -12,8 +12,9 @@ Partial Class frmQ
             QCam.QCamM_ListCameras(mCamList, listLen)
 
             If (listLen > 0) AndAlso (mCamList(0).isOpen = 1) Then
-
+                Debug.Print("closing camera")
                 QCam.QCamM_CloseCamera(mhCamera)
+                Debug.Print("camera closed")
             End If
             If disposing AndAlso components IsNot Nothing Then
                 components.Dispose()
@@ -253,7 +254,7 @@ Partial Class frmQ
         Me.tbNightAgain.Name = "tbNightAgain"
         Me.tbNightAgain.Size = New System.Drawing.Size(47, 20)
         Me.tbNightAgain.TabIndex = 90
-        Me.tbNightAgain.Text = "4000"
+        Me.tbNightAgain.Text = "3600"
         '
         'lblDayNight
         '
@@ -272,7 +273,7 @@ Partial Class frmQ
         Me.tbExposureTime.Name = "tbExposureTime"
         Me.tbExposureTime.Size = New System.Drawing.Size(45, 20)
         Me.tbExposureTime.TabIndex = 84
-        Me.tbExposureTime.Text = "5000000"
+        Me.tbExposureTime.Text = "4000000"
         '
         'Label4
         '
@@ -297,7 +298,7 @@ Partial Class frmQ
         Me.tbNightExp.Name = "tbNightExp"
         Me.tbNightExp.Size = New System.Drawing.Size(45, 20)
         Me.tbNightExp.TabIndex = 81
-        Me.tbNightExp.Text = "5000000"
+        Me.tbNightExp.Text = "4000000"
         '
         'tbDayTimeExp
         '
@@ -366,7 +367,7 @@ Partial Class frmQ
         'Timer1
         '
         Me.Timer1.Enabled = True
-        Me.Timer1.Interval = 10000
+        Me.Timer1.Interval = 1000
         '
         'Timer2
         '
