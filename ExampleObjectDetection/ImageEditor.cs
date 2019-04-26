@@ -65,7 +65,7 @@ namespace ExampleCommon
 		public void Dispose ()
 		{
 			if (_image != null) {
-				_image.Save (_outputFile);
+				//_image.Save (_outputFile);
 
 				if (_graphics != null) {
 					_graphics.Dispose ();
