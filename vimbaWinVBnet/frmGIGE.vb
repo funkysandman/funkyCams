@@ -203,7 +203,7 @@ Public Class frmGIGE
 
 
 
-        If cbMeteors.Checked And lblDayNight.Text.ToLower = "night" Then
+        If cbMeteors.Checked Then 'And lblDayNight.Text.ToLower = "night" Then
             ' md.examine(bm, filename)
             'call azure service
             Dim ms As New MemoryStream()

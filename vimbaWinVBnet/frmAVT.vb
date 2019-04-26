@@ -244,7 +244,7 @@ Public Class frmAVT
 
 
         End If
-        If cbMeteors.Checked And lblDayNight.Text = "night" Then
+        If cbMeteors.Checked Then ' And lblDayNight.Text = "night" Then
             ' md.examine(bm, filename)
             'call azure service
             Dim ms As New MemoryStream()
@@ -718,6 +718,10 @@ Public Class frmAVT
                 v.m_Camera.LoadCameraSettings(Application.StartupPath & "\day_gc1380ch.xml")
             End If
         End If
+
+    End Sub
+
+    Private Sub lblDayNight_Click(sender As Object, e As EventArgs) Handles lblDayNight.Click
 
     End Sub
 End Class
