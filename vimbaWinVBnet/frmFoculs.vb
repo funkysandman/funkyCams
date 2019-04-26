@@ -249,7 +249,7 @@ Public Class frmFoculs
 
         AxFGControlCtrl2.PixelFormat = 8
         AxFGControlCtrl2.Flip = 1
-        AxFGControlCtrl2.BytePerPacket = 700
+        AxFGControlCtrl2.BytePerPacket = 600
         AxFGControlCtrl2.AcquisitionMode = "Continuous"
         AxFGControlCtrl2.SetExposureTimeString("75ms")
         Me.AxFGControlCtrl2.SetGain("", Val(Me.tbGain.Text))
@@ -416,12 +416,14 @@ Public Class frmFoculs
         While (meteorCheckRunning)
             If myDetectionQueue.Count > 0 Then
                 aQE = myDetectionQueue.Dequeue()
+
                 CallAzureMeteorDetection(aQE.img, aQE.filename)
 
-                aQE = Nothing
 
-            End If
-            Console.WriteLine("in the queue:{0}", myDetectionQueue.Count)
+                    aQE = Nothing
+
+                End If
+                Console.WriteLine("in the queue:{0}", myDetectionQueue.Count)
             Thread.Sleep(100)
         End While
 
@@ -548,7 +550,7 @@ Public Class frmFoculs
 
 
             End If
-            If Me.cbxMeteor.Checked And lblDayNight.Text.ToLower = "night" Then
+            If Me.cbxMeteor.Checked Then 'And lblDayNight.Text.ToLower = "night" Then
                 ' md.examine(bm, filename)
                 'call azure service
                 Dim ms As New MemoryStream()
@@ -558,7 +560,9 @@ Public Class frmFoculs
                 Dim qe As New queueEntry
                 qe.img = contents
                 qe.filename = Path.GetFileName(filename)
-                myDetectionQueue.Enqueue(qe)
+                If myDetectionQueue.Count < 10 Then
+                    myDetectionQueue.Enqueue(qe)
+                End If
 
                 ms.Close()
 

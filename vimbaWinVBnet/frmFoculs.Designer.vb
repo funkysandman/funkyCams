@@ -327,6 +327,8 @@ Partial Class frmFoculs
         'cbKneeLut
         '
         Me.cbKneeLut.AutoSize = True
+        Me.cbKneeLut.Checked = True
+        Me.cbKneeLut.CheckState = System.Windows.Forms.CheckState.Checked
         Me.cbKneeLut.Location = New System.Drawing.Point(589, 76)
         Me.cbKneeLut.Name = "cbKneeLut"
         Me.cbKneeLut.Size = New System.Drawing.Size(81, 17)

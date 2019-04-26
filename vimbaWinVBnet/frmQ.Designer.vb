@@ -254,7 +254,7 @@ Partial Class frmQ
         Me.tbNightAgain.Name = "tbNightAgain"
         Me.tbNightAgain.Size = New System.Drawing.Size(47, 20)
         Me.tbNightAgain.TabIndex = 90
-        Me.tbNightAgain.Text = "3600"
+        Me.tbNightAgain.Text = "4000"
         '
         'lblDayNight
         '
@@ -378,7 +378,7 @@ Partial Class frmQ
         '
         'TimerAcquistionRate
         '
-        Me.TimerAcquistionRate.Interval = 5000
+        Me.TimerAcquistionRate.Interval = 1000
         '
         'frmQ
         '

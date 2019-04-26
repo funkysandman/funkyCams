@@ -105,27 +105,27 @@ Public Class frmQimaging
         '
         'button1
         '
-        Me.button1.Location = New System.Drawing.Point(7, 17)
+        Me.button1.Location = New System.Drawing.Point(6, 15)
         Me.button1.Name = "button1"
-        Me.button1.Size = New System.Drawing.Size(96, 37)
+        Me.button1.Size = New System.Drawing.Size(80, 32)
         Me.button1.TabIndex = 1
         Me.button1.Text = "GrabFrame"
         '
         'checkBox1
         '
-        Me.checkBox1.Location = New System.Drawing.Point(7, 61)
+        Me.checkBox1.Location = New System.Drawing.Point(6, 53)
         Me.checkBox1.Name = "checkBox1"
-        Me.checkBox1.Size = New System.Drawing.Size(96, 23)
+        Me.checkBox1.Size = New System.Drawing.Size(80, 20)
         Me.checkBox1.TabIndex = 3
         Me.checkBox1.Text = "Streaming"
         '
         'tbExposure
         '
-        Me.tbExposure.Location = New System.Drawing.Point(4, 22)
+        Me.tbExposure.Location = New System.Drawing.Point(3, 19)
         Me.tbExposure.Maximum = 1000
         Me.tbExposure.Minimum = 10
         Me.tbExposure.Name = "tbExposure"
-        Me.tbExposure.Size = New System.Drawing.Size(124, 56)
+        Me.tbExposure.Size = New System.Drawing.Size(104, 45)
         Me.tbExposure.TabIndex = 4
         Me.tbExposure.TickFrequency = 100
         Me.tbExposure.TickStyle = System.Windows.Forms.TickStyle.Both
@@ -134,9 +134,9 @@ Public Class frmQimaging
         'lblExposureVal
         '
         Me.lblExposureVal.AutoSize = True
-        Me.lblExposureVal.Location = New System.Drawing.Point(139, 37)
+        Me.lblExposureVal.Location = New System.Drawing.Point(116, 32)
         Me.lblExposureVal.Name = "lblExposureVal"
-        Me.lblExposureVal.Size = New System.Drawing.Size(46, 17)
+        Me.lblExposureVal.Size = New System.Drawing.Size(35, 13)
         Me.lblExposureVal.TabIndex = 6
         Me.lblExposureVal.Text = "10 ms"
         '
@@ -147,9 +147,9 @@ Public Class frmQimaging
         Me.panel1.Controls.Add(Me.gbExposure)
         Me.panel1.Controls.Add(Me.gbAcquisition)
         Me.panel1.Dock = System.Windows.Forms.DockStyle.Bottom
-        Me.panel1.Location = New System.Drawing.Point(0, 522)
+        Me.panel1.Location = New System.Drawing.Point(0, 533)
         Me.panel1.Name = "panel1"
-        Me.panel1.Size = New System.Drawing.Size(698, 85)
+        Me.panel1.Size = New System.Drawing.Size(698, 74)
         Me.panel1.TabIndex = 7
         '
         'gbInfo
@@ -157,9 +157,9 @@ Public Class frmQimaging
         Me.gbInfo.Controls.Add(Me.lblSerNum)
         Me.gbInfo.Controls.Add(Me.lblCameraModel)
         Me.gbInfo.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.gbInfo.Location = New System.Drawing.Point(510, 0)
+        Me.gbInfo.Location = New System.Drawing.Point(425, 0)
         Me.gbInfo.Name = "gbInfo"
-        Me.gbInfo.Size = New System.Drawing.Size(188, 85)
+        Me.gbInfo.Size = New System.Drawing.Size(273, 74)
         Me.gbInfo.TabIndex = 10
         Me.gbInfo.TabStop = False
         Me.gbInfo.Text = "Info"
@@ -167,18 +167,18 @@ Public Class frmQimaging
         'lblSerNum
         '
         Me.lblSerNum.AutoSize = True
-        Me.lblSerNum.Location = New System.Drawing.Point(8, 38)
+        Me.lblSerNum.Location = New System.Drawing.Point(7, 33)
         Me.lblSerNum.Name = "lblSerNum"
-        Me.lblSerNum.Size = New System.Drawing.Size(48, 17)
+        Me.lblSerNum.Size = New System.Drawing.Size(36, 13)
         Me.lblSerNum.TabIndex = 2
         Me.lblSerNum.Text = "Serial:"
         '
         'lblCameraModel
         '
         Me.lblCameraModel.AutoSize = True
-        Me.lblCameraModel.Location = New System.Drawing.Point(7, 18)
+        Me.lblCameraModel.Location = New System.Drawing.Point(6, 16)
         Me.lblCameraModel.Name = "lblCameraModel"
-        Me.lblCameraModel.Size = New System.Drawing.Size(50, 17)
+        Me.lblCameraModel.Size = New System.Drawing.Size(39, 13)
         Me.lblCameraModel.TabIndex = 1
         Me.lblCameraModel.Text = "Model:"
         '
@@ -187,9 +187,9 @@ Public Class frmQimaging
         Me.gbGain.Controls.Add(Me.lblGainVal)
         Me.gbGain.Controls.Add(Me.tbGain)
         Me.gbGain.Dock = System.Windows.Forms.DockStyle.Left
-        Me.gbGain.Location = New System.Drawing.Point(324, 0)
+        Me.gbGain.Location = New System.Drawing.Point(270, 0)
         Me.gbGain.Name = "gbGain"
-        Me.gbGain.Size = New System.Drawing.Size(186, 85)
+        Me.gbGain.Size = New System.Drawing.Size(155, 74)
         Me.gbGain.TabIndex = 9
         Me.gbGain.TabStop = False
         Me.gbGain.Text = "Gain"
@@ -197,17 +197,17 @@ Public Class frmQimaging
         'lblGainVal
         '
         Me.lblGainVal.AutoSize = True
-        Me.lblGainVal.Location = New System.Drawing.Point(133, 38)
+        Me.lblGainVal.Location = New System.Drawing.Point(111, 33)
         Me.lblGainVal.Name = "lblGainVal"
-        Me.lblGainVal.Size = New System.Drawing.Size(16, 17)
+        Me.lblGainVal.Size = New System.Drawing.Size(13, 13)
         Me.lblGainVal.TabIndex = 1
         Me.lblGainVal.Text = "0"
         '
         'tbGain
         '
-        Me.tbGain.Location = New System.Drawing.Point(2, 22)
+        Me.tbGain.Location = New System.Drawing.Point(2, 19)
         Me.tbGain.Name = "tbGain"
-        Me.tbGain.Size = New System.Drawing.Size(125, 56)
+        Me.tbGain.Size = New System.Drawing.Size(104, 45)
         Me.tbGain.TabIndex = 0
         Me.tbGain.TickFrequency = 200
         Me.tbGain.TickStyle = System.Windows.Forms.TickStyle.Both
@@ -217,9 +217,9 @@ Public Class frmQimaging
         Me.gbExposure.Controls.Add(Me.tbExposure)
         Me.gbExposure.Controls.Add(Me.lblExposureVal)
         Me.gbExposure.Dock = System.Windows.Forms.DockStyle.Left
-        Me.gbExposure.Location = New System.Drawing.Point(113, 0)
+        Me.gbExposure.Location = New System.Drawing.Point(94, 0)
         Me.gbExposure.Name = "gbExposure"
-        Me.gbExposure.Size = New System.Drawing.Size(211, 85)
+        Me.gbExposure.Size = New System.Drawing.Size(176, 74)
         Me.gbExposure.TabIndex = 8
         Me.gbExposure.TabStop = False
         Me.gbExposure.Text = "Exposure"
@@ -231,22 +231,22 @@ Public Class frmQimaging
         Me.gbAcquisition.Dock = System.Windows.Forms.DockStyle.Left
         Me.gbAcquisition.Location = New System.Drawing.Point(0, 0)
         Me.gbAcquisition.Name = "gbAcquisition"
-        Me.gbAcquisition.Size = New System.Drawing.Size(113, 85)
+        Me.gbAcquisition.Size = New System.Drawing.Size(94, 74)
         Me.gbAcquisition.TabIndex = 7
         Me.gbAcquisition.TabStop = False
         Me.gbAcquisition.Text = "Acquisition"
         '
         'pictureBox1
         '
-        Me.pictureBox1.Location = New System.Drawing.Point(44, 40)
+        Me.pictureBox1.Location = New System.Drawing.Point(37, 35)
         Me.pictureBox1.Name = "pictureBox1"
-        Me.pictureBox1.Size = New System.Drawing.Size(608, 470)
+        Me.pictureBox1.Size = New System.Drawing.Size(506, 407)
         Me.pictureBox1.TabIndex = 8
         Me.pictureBox1.TabStop = False
         '
         'frmQimaging
         '
-        Me.AutoScaleBaseSize = New System.Drawing.Size(6, 15)
+        Me.AutoScaleBaseSize = New System.Drawing.Size(5, 13)
         Me.ClientSize = New System.Drawing.Size(698, 607)
         Me.Controls.Add(Me.pictureBox1)
         Me.Controls.Add(Me.panel1)

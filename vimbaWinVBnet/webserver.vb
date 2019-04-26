@@ -1091,7 +1091,7 @@ Public Class WebServer
 
                         Marshal.Copy(bytes, 0, ptr, bytes.Length)
                         b.UnlockBits(bmpData)
-                        'b.RotateFlip(RotateFlipType.Rotate180FlipNone) 'camera is upside down
+                        b.RotateFlip(RotateFlipType.Rotate180FlipNone) 'camera is upside down
                         If Not b Is Nothing Then
                             ' mySVSVistekForm.writeline("acquired last SVS Vistek image")
 
