@@ -213,7 +213,9 @@ Public Class frmGIGE
             Dim qe As New queueEntry
             qe.img = contents
             qe.filename = Path.GetFileName(filename)
-            myDetectionQueue.Enqueue(qe)
+            If myDetectionQueue.Count < 10 Then
+                myDetectionQueue.Enqueue(qe)
+            End If
 
             ms.Close()
         Else
