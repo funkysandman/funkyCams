@@ -982,7 +982,11 @@ Public Class frmQ
                     Threading.Thread.Sleep(1000)
                     Application.DoEvents()
                 End While
+
                 stopWatch.[Stop]()
+                If m_grabbedframe_err = QCamM_Err.qerrDriverFault Then
+                    m_grabbedframe = False
+                End If
                 If Not m_grabbedframe Then
                     QCam.QCamM_Abort(mhCamera)
                     t_grab.Abort()

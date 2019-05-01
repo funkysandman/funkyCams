@@ -1040,16 +1040,19 @@ Public Class WebServer
             If mySocket.Connected Then
                 Dim bReceive() As Byte = New [Byte](1024) {}
                 Dim i As Integer
-                Try
-                    i = mySocket.Receive(bReceive, bReceive.Length, 0)
-                Catch ex As Exception
-                    'socket blewup
-                    Debug.Print(ex.Message)
-                    restart = True
-                    Exit Do
-                End Try
+                'Try
+                i = mySocket.Receive(bReceive, bReceive.Length, 0)
+                    'Catch ex As Exception
+                    '    'socket blewup
+                    '    Debug.Print(ex.Message)
+                    '    restart = True
+                    '    mySocket.Close()
+                    '    mySocket = Nothing
+                    '    LocalTCPListener.Stop()
+                    '    Exit Do
+                    'End Try
 
-                Dim sBuffer As String = Encoding.ASCII.GetString(bReceive)
+                    Dim sBuffer As String = Encoding.ASCII.GetString(bReceive)
                 'find the GET request.
                 ' mySVSVistekForm.writeline("SVS Vistek image server connected")
                 If sBuffer.Contains("GET") And sBuffer.Contains("HTTP") Then
