@@ -142,7 +142,19 @@ Public Class frmQ
                 Marshal.Copy(rawData, 0, ptr, bytes)
                 m_Bitmaps(m_BitmapSelector).UnlockBits(bmpData)
                 m_Bitmaps(m_BitmapSelector).RotateFlip(RotateFlipType.Rotate180FlipNone)
+                ''Dim b As New Bitmap(m_Bitmaps(m_BitmapSelector))
+                '' myBitmap.Save("Shapes025.jpg", myImageCodecInfo, myEncoderParameters)
+                'Dim firstLocation As PointF = New PointF(10.0F, 10.0F)
+                'Dim firstText As String = String.Format("{0:dd-MMM-yyyy HH:mm:ss}", DateTime.Now)
+                ''b = bm.Clone
+                'Dim gr As Graphics = Graphics.FromImage(m_Bitmaps(m_BitmapSelector))
+                'Dim myFontLabels As New Font("Arial", 16, GraphicsUnit.Pixel)
+                'Dim myBrushLabels As New SolidBrush(Color.White)
 
+                'gr.DrawString(firstText, myFontLabels, Brushes.GreenYellow, firstLocation) '# last 2 number are X and Y coords.
+                'gr.Dispose()
+                'myFontLabels.Dispose()
+                'm_Bitmaps(m_BitmapSelector) = New Bitmap(b)
             Catch
 
                 Console.WriteLine("error during frame fill")
@@ -430,7 +442,7 @@ Public Class frmQ
 
 
 
-            If cbMeteors.Checked Then 'And lblDayNight.Text.ToLower = "night" Then
+            If cbMeteors.Checked And lblDayNight.Text.ToLower = "night" Then
                 ' md.examine(bm, filename)
                 'call azure service
                 Dim ms As New MemoryStream()
@@ -446,8 +458,8 @@ Public Class frmQ
 
                 ms.Close()
 
-                End If
-                If Me.cbSaveImages.Checked = True Then
+            End If
+            If Me.cbSaveImages.Checked = True Then
                 System.IO.Directory.CreateDirectory(Path.Combine(Me.tbPath.Text, folderName))
 
 
@@ -584,7 +596,7 @@ Public Class frmQ
 
 
 
-            If cbMeteors.Checked Then 'And lblDayNight.Text.ToLower = "night" Then
+            If cbMeteors.Checked And lblDayNight.Text.ToLower = "night" Then
                 ' md.examine(bm, filename)
                 'call azure service
                 Dim ms As New MemoryStream()

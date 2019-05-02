@@ -514,26 +514,26 @@ Public Class frmFoculs
 
             Marshal.Copy(rawData, 0, ptr, bytes)
             b8.UnlockBits(bmpData)
-            b8.RotateFlip(RotateFlipType.Rotate180FlipX)
-            b8.RotateFlip(RotateFlipType.Rotate180FlipY)
+            b8.RotateFlip(RotateFlipType.Rotate180FlipNone)
+            Dim b As New Bitmap(b8)
             ' myBitmap.Save("Shapes025.jpg", myImageCodecInfo, myEncoderParameters)
             Dim firstLocation As PointF = New PointF(10.0F, 10.0F)
             Dim firstText As String = String.Format("{0:dd-MMM-yyyy HH:mm:ss}", DateTime.Now)
             'b = bm.Clone
-            'Dim gr As Graphics = Graphics.FromImage(b8)
-            'Dim myFontLabels As New Font("Arial", 16, GraphicsUnit.Pixel)
-            'Dim myBrushLabels As New SolidBrush(Color.White)
+            Dim gr As Graphics = Graphics.FromImage(b)
+            Dim myFontLabels As New Font("Arial", 16, GraphicsUnit.Pixel)
+            Dim myBrushLabels As New SolidBrush(Color.White)
 
-            'gr.DrawString(firstText, myFontLabels, Brushes.GreenYellow, firstLocation) '# last 2 number are X and Y coords.
-            'gr.Dispose()
-            'myFontLabels.Dispose()
+            gr.DrawString(firstText, myFontLabels, Brushes.GreenYellow, firstLocation) '# last 2 number are X and Y coords.
+            gr.Dispose()
+            myFontLabels.Dispose()
             'object detection section test
             '
             'Dim t As New Threading.Thread(AddressOf checkForThings)
             ''t.Start()
             'If frames Mod 3 = 0 Then
 
-
+            b8 = New Bitmap(b)
             'End If
 
             Dim filename As String
@@ -550,7 +550,7 @@ Public Class frmFoculs
 
 
             End If
-            If Me.cbxMeteor.Checked Then 'And lblDayNight.Text.ToLower = "night" Then
+            If Me.cbxMeteor.Checked And lblDayNight.Text.ToLower = "night" Then
                 ' md.examine(bm, filename)
                 'call azure service
                 Dim ms As New MemoryStream()
