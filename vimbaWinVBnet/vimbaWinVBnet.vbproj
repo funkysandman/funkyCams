@@ -84,7 +84,7 @@
     <Reference Include="PresentationFramework" />
     <Reference Include="QCamManagedDriver, Version=2.0.12.5, Culture=neutral, PublicKeyToken=a952e79807cc2f57, processorArchitecture=x86">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\Program Files\QImaging\SDK\libs\AMD64\QCamManagedDriver\NETv4.0\QCamManagedDriver.dll</HintPath>
+      <HintPath>..\..\..\..\Program Files\QImaging\SDK\libs\AMD64\QCamManagedDriver\NETv4.0\QCamManagedDriver.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
@@ -98,12 +98,18 @@
     <Reference Include="System.Net.Http, Version=4.1.1.3, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Net.Http.4.3.4\lib\net46\System.Net.Http.dll</HintPath>
     </Reference>
-    <Reference Include="System.Runtime">
-      <HintPath>..\packages\System.Runtime.4.3.0\lib\net462\System.Runtime.dll</HintPath>
+    <Reference Include="System.Runtime, Version=4.1.1.1, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Runtime.4.3.1\lib\net462\System.Runtime.dll</HintPath>
+      <Private>True</Private>
       <Private>True</Private>
     </Reference>
     <Reference Include="System.Security.Cryptography.Algorithms">
       <HintPath>..\packages\System.Security.Cryptography.Algorithms.4.3.1\lib\net463\System.Security.Cryptography.Algorithms.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Security.Cryptography.X509Certificates, Version=4.1.1.2, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Security.Cryptography.X509Certificates.4.3.2\lib\net461\System.Security.Cryptography.X509Certificates.dll</HintPath>
+      <Private>True</Private>
       <Private>True</Private>
     </Reference>
     <Reference Include="System.Windows.Forms" />
@@ -349,10 +355,6 @@
     <ProjectReference Include="..\BaumerAPI\BaumerAPI.csproj">
       <Project>{782f80d9-c751-4664-a6be-f6f499bdd581}</Project>
       <Name>BaumerAPI</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\ExampleObjectDetection\ObjectDetection.csproj">
-      <Project>{69471b59-576d-446b-8df3-96ec783c0b6c}</Project>
-      <Name>ObjectDetection</Name>
     </ProjectReference>
     <ProjectReference Include="..\Pylon.NETSupportLibrary\Pylon.NETSupportLibrary.csproj">
       <Project>{3eafc9f5-d49f-4f9f-86c8-fbd231b07d2e}</Project>

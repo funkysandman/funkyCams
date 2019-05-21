@@ -7,6 +7,7 @@ using System.Collections;
 using System.IO;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.ServiceProcess;
 using System.Collections.Specialized;
 
 namespace DetectionServer
@@ -54,7 +55,7 @@ namespace DetectionServer
         {
             ThreadPool.QueueUserWorkItem(o =>
             {
-                Console.WriteLine("Webserver running...");
+               // Console.WriteLine("Webserver running...");
                 try
                 {
                     while (_listener.IsListening)
@@ -77,14 +78,14 @@ namespace DetectionServer
                             catch( Exception e)
                             {
                                 // ignored
-                                Console.WriteLine(e.Message);
+                                //Console.WriteLine(e.Message);
                             }
                             finally
                             {
                                 // always close the stream
                                 if (ctx != null)
                                 {
-                                    //ctx.Response.OutputStream.Close();
+                                    ctx.Response.OutputStream.Close();
                                 }
                             }
                         }, _listener.GetContext());
@@ -93,6 +94,7 @@ namespace DetectionServer
                 catch (Exception ex)
                 {
                     // ignored
+                   // Console.WriteLine(ex.Message);
                 }
             });
         }
@@ -112,12 +114,32 @@ namespace DetectionServer
         //private static Thread t = new Thread(processImages);
         private static object syncLock = new object();
         private static object syncLock2 = new object();
-
+        public static Boolean running = false;
         private static ImageCodecInfo jgpEncoder;
         private static EncoderParameters myEncoderParameters;
         private static EncoderParameter myEncoderParameter;
         private static System.Drawing.Imaging.Encoder myEncoder;
+        #region Nested classes to support running as service
+        public const string ServiceName = "DetectionServer";
+        public static DetectionServer ws = new DetectionServer(SendResponse, "http://192.168.1.192:7071/api/detection/");
+        public class Service : ServiceBase
+        {
+            public Service()
+            {
+                ServiceName = Program.ServiceName;
+            }
 
+            protected override void OnStart(string[] args)
+            {
+                Program.Start(args);
+            }
+
+            protected override void OnStop()
+            {
+                Program.Stop();
+            }
+        }
+        #endregion
         public class queueEntry
         {
             public byte[] img;
@@ -125,133 +147,7 @@ namespace DetectionServer
 
         }
 
-        //public static void processImages()
-        //{
-        //    // queueRunning = true;
-        //    //CloudBlobClient client;
-        //    //CloudBlobContainer container;
-        //    while (true)
-        //    {
-        //        if (qt.Count > 0)
-        //        {
-        //            //queueEntry anEntry = (queueEntry)qt.Dequeue();
-        //            //AzureMeteorDetect.queueEntry qe = (AzureMeteorDetect.queueEntry)anEntry;
-        //            queueEntry qe = new queueEntry();
-        //            popQueue(ref qe, true);
-        //            bool found = false;
-        //            float[,,] boxes = null;
-        //            float[,] scores = null;
-        //            float[,] classes = null;
-        //            float[] num = null;
-
-        //            Console.WriteLine("about to examine " + qe.filename);
-        //            Console.WriteLine("items in queue: {0} ",qt.Count);
-        //            //
-        //            if (!md.isLoaded())
-        //            {
-        //                md.LoadModel("frozen_inference_graph.pb", "object-detection.pbtxt");
-
-        //                myEncoder = System.Drawing.Imaging.Encoder.Quality;
-        //                jgpEncoder = GetEncoder(ImageFormat.Jpeg);
-        //                myEncoderParameters = new EncoderParameters(1);
-
-        //                myEncoderParameter = new EncoderParameter(myEncoder, 50L);
-        //                myEncoderParameters.Param[0] = myEncoderParameter;
-        //            }
-        //            DateTime start = DateTime.Now;
-        //            md.examine(qe.img, qe.filename, ref boxes, ref scores, ref classes, ref num, ref found);
-
-        //            Console.WriteLine("elapsed time: {0}", DateTime.Now - start);
-        //            //totalImagesProcessed++;
-
-        //            if (found)
-        //            {
-        //                //upload original image to file storage
-
-
-
-        //                Console.WriteLine("object detected");
-
-
-        //                //Microsoft.WindowsAzure.Storage
-        //                //    .CloudStorageAccount storageAccount = CloudStorageAccount
-        //                //    .Parse(ConfigurationManager.AppSettings["BlobConnectionString"]);
-
-        //                //Microsoft.WindowsAzure.Storage.CloudStorageAccount storageAccount = CloudStorageAccount.Parse("DefaultEndpointsProtocol=https;AccountName=meteorshots;AccountKey=M+rGNU1Ija+Zrs09fVL8FiVj+HVWkx1ji4MvRcSC0Yaa/G+A+MOdN3rAWWCMu8pLBBrFfxM8K4d68FBbsTOmYw==;EndpointSuffix=core.windows.net");
-        //                //client = storageAccount.CreateCloudBlobClient();
-        //                //container = client.GetContainerReference("found");
-
-
-
-
-
-        //                //container.CreateIfNotExistsAsync(
-        //                //  BlobContainerPublicAccessType.Blob,
-        //                //  new BlobRequestOptions(),
-        //                //  new OperationContext());
-        //               // qe.filename = qe.filename.Replace("bmp", "png");
-        //                qe.filename = qe.filename.Replace("jpg", "png");
-        //                qe.filename = Path.GetFileName(qe.filename);
-        //                // CloudBlockBlob blob = container.GetBlockBlobReference(Path.GetFileName(qe.filename));
-        //                //blob.Properties.ContentType = "image/png";
-        //                Bitmap b;
-        //                using (var imagems = new MemoryStream(qe.img))
-        //                {
-        //                    b = new Bitmap(imagems);
-        //                }
-        //                Console.WriteLine("about to save bmp");
-        //                Bitmap c = new Bitmap(b);
-        //                c.Save("e:\\found\\" + qe.filename);
-                        
-        //                b.Dispose();
-        //                qe.filename = qe.filename.Replace("png", "jpg");
-        //                md.DrawBoxes(boxes, scores, classes, ref c, qe.filename, .35, false);
-
-        //                Console.WriteLine("about to save jpg");
-        //                c.Save("e:\\found\\" + qe.filename, jgpEncoder, myEncoderParameters);
-
-
-        //                c.Dispose();
-                        
-        //            }
-        //            else { Console.WriteLine("nothing found"); }
-
-        //            //
-        //            qe = null;
-
-        //        }
-                
-        //    }
-        //    //queueRunning = false;
-
-        //}
-        //public class Startup : IExtensionConfigProvider
-        //{
-        //    public void Initialize(ExtensionConfigContext context)
-        //    {
-        //        // Put your intialization code here.
-        //    }
-        //}
-        //public static queueEntry popQueue(ref queueEntry qe, bool popoff)
-
-        //{
-        //    lock (syncLock2)
-        //    {
-        //        if (popoff)
-        //        {
-        //            queueEntry anEntry = (queueEntry)qt.Dequeue();
-        //            qe = (queueEntry)anEntry;
-        //        }
-        //        else
-        //        {
-
-        //            qt.Enqueue(qe);
-        //        }
-        //    }
-
-        //    return qe;
-        //}
-        private static ImageCodecInfo GetEncoder(ImageFormat format)
+          private static ImageCodecInfo GetEncoder(ImageFormat format)
         {
             ImageCodecInfo[] codecs = ImageCodecInfo.GetImageDecoders();
             foreach (ImageCodecInfo codec in codecs)
@@ -270,189 +166,176 @@ namespace DetectionServer
             //Console.WriteLine(request.ContentLength64);
 
 
-            
-            //string filename = request.GetQueryNameValuePairs()
-            //   .FirstOrDefault(q => string.Compare(q.Key, "file", true) == 0)
-            //   .Value;
-            //log.Info("file:" + filename);
-            //log.Info("images processed count:" + totalImagesProcessed);
-            //if (filename != null)
-            //{
-            //    // Get request body
-            string[] myParams = request.QueryString.GetValues("file");
+            try
+            {
+             
+                //    // Get request body
+                string[] myParams = request.QueryString.GetValues("file");
 
-            string filename = myParams[0];
+                string filename = myParams[0];
+                
+                //
+                ObjectDetection.TFDetector md = new ObjectDetection.TFDetector();
 
-
-
-            //
-                   ObjectDetection.TFDetector md = new ObjectDetection.TFDetector();
-
-
-        queueEntry qe = new queueEntry();
+                queueEntry qe = new queueEntry();
                 qe.filename = filename;
 
 
-            var ss = request.InputStream;
+                var ss = request.InputStream;
 
 
-            byte[] buffer = new byte[16000];
-            int totalCount = 0;
-            
-            while (true)
-            {
-                int currentCount = ss.Read(buffer, totalCount, buffer.Length - totalCount);
-                if (currentCount == 0)
-                    break;
+                //byte[] buffer = new byte[16000];
+                //int totalCount = 0;
 
-                totalCount += currentCount;
-                if (totalCount == buffer.Length)
-                    Array.Resize(ref buffer, buffer.Length * 2);
-            }
+                //while (true)
+                //{
+                //    int currentCount = ss.Read(buffer, totalCount, buffer.Length - totalCount);
+                //    if (currentCount == 0)
+                //        break;
 
-            Array.Resize(ref buffer, totalCount);
-            qe.img = buffer;
+                //    totalCount += currentCount;
+                //    if (totalCount == buffer.Length)
+                //        Array.Resize(ref buffer, buffer.Length * 2);
+                //}
 
-            //
-            bool found = false;
-            float[,,] boxes = null;
-            float[,] scores = null;
-            float[,] classes = null;
-            float[] num = null;
+                //Array.Resize(ref buffer, totalCount);
+                //qe.img = buffer;
 
-            Console.WriteLine("about to examine " + qe.filename);
-            //Console.WriteLine("items in queue: {0} ", qt.Count);
-            //
-            if (!md.isLoaded())
-            {
-                md.LoadModel("frozen_inference_graph.pb", "object-detection.pbtxt");
+                //
+                Image i = Bitmap.FromStream(ss);
+                bool found = false;
+                float[,,] boxes = null;
+                float[,] scores = null;
+                float[,] classes = null;
+                float[] num = null;
 
+                //Console.WriteLine("about to examine " + qe.filename);
+                //Console.WriteLine("items in queue: {0} ", qt.Count);
+                //
+                if (!md.isLoaded())
+                {
+                    md.LoadModel("frozen_inference_graph.pb", "object-detection.pbtxt");
+                }
                 myEncoder = System.Drawing.Imaging.Encoder.Quality;
                 jgpEncoder = GetEncoder(ImageFormat.Jpeg);
                 myEncoderParameters = new EncoderParameters(1);
 
                 myEncoderParameter = new EncoderParameter(myEncoder, 50L);
                 myEncoderParameters.Param[0] = myEncoderParameter;
-            }
-            DateTime start = DateTime.Now;
-            md.examine(qe.img, qe.filename, ref boxes, ref scores, ref classes, ref num, ref found);
+                
+                DateTime start = DateTime.Now;
 
-            Console.WriteLine("elapsed time: {0}", DateTime.Now - start);
-            //totalImagesProcessed++;
+                
+                md.examine(i, qe.filename, ref boxes, ref scores, ref classes, ref num, ref found);
 
-            if (found)
-            {
-                //upload original image to file storage
+                //Console.WriteLine("elapsed time: {0}", DateTime.Now - start);
+                //totalImagesProcessed++;
 
-
-
-                Console.WriteLine("object detected");
-
-
-                //Microsoft.WindowsAzure.Storage
-                //    .CloudStorageAccount storageAccount = CloudStorageAccount
-                //    .Parse(ConfigurationManager.AppSettings["BlobConnectionString"]);
-
-                //Microsoft.WindowsAzure.Storage.CloudStorageAccount storageAccount = CloudStorageAccount.Parse("DefaultEndpointsProtocol=https;AccountName=meteorshots;AccountKey=M+rGNU1Ija+Zrs09fVL8FiVj+HVWkx1ji4MvRcSC0Yaa/G+A+MOdN3rAWWCMu8pLBBrFfxM8K4d68FBbsTOmYw==;EndpointSuffix=core.windows.net");
-                //client = storageAccount.CreateCloudBlobClient();
-                //container = client.GetContainerReference("found");
-
-
-
-
-
-                //container.CreateIfNotExistsAsync(
-                //  BlobContainerPublicAccessType.Blob,
-                //  new BlobRequestOptions(),
-                //  new OperationContext());
-                qe.filename = qe.filename.Replace("bmp", "png");
-                qe.filename = qe.filename.Replace("jpg", "png");
-                qe.filename = Path.GetFileName(qe.filename);
-                // CloudBlockBlob blob = container.GetBlockBlobReference(Path.GetFileName(qe.filename));
-                //blob.Properties.ContentType = "image/png";
-                Bitmap b;
-                using (var imagems = new MemoryStream(qe.img))
+                if (found)
                 {
-                    b = new Bitmap(imagems);
+                    //upload original image to file storage
+
+
+
+                    //Console.WriteLine("object detected");
+
+
+
+                    qe.filename = qe.filename.Replace("bmp", "png");
+                    qe.filename = qe.filename.Replace("jpg", "png");
+                    qe.filename = Path.GetFileName(qe.filename);
+                    Bitmap b;
+                   // using (var imagems = new MemoryStream(qe.img))
+                   // {
+                        b = new Bitmap(i);
+                    //}
+                    //Console.WriteLine("about to save bmp");
+                    Bitmap c = new Bitmap(b);
+                    c.Save("e:\\found\\" + qe.filename);
+
+                    b.Dispose();
+                    qe.filename = qe.filename.Replace("png", "jpg");
+                    md.DrawBoxes(boxes, scores, classes, ref c, qe.filename, .35, false);
+
+                    //Console.WriteLine("about to save jpg");
+                    c.Save("e:\\found\\" + qe.filename, jgpEncoder, myEncoderParameters);
+
+
+                    c.Dispose();
+
                 }
-                Console.WriteLine("about to save bmp");
-                Bitmap c = new Bitmap(b);
-                c.Save("e:\\found\\" + qe.filename);
+                else
+                {
+                    //Console.WriteLine("nothing found");
+                    //Bitmap b;
+                    //using (var imagems = new MemoryStream(qe.img))
+                    //{
+                    //    b = new Bitmap(imagems);
+                    //}
+                    //Console.WriteLine("about to save bmp");
+                    //Bitmap c = new Bitmap(b);
+                    //c.Save("e:\\notfound\\" + qe.filename);
+                }
+                ss.Close();
 
-                b.Dispose();
-                qe.filename = qe.filename.Replace("png", "jpg");
-                md.DrawBoxes(boxes, scores, classes, ref c, qe.filename, .35, false);
-
-                Console.WriteLine("about to save jpg");
-                c.Save("e:\\found\\" + qe.filename, jgpEncoder, myEncoderParameters);
-
-
-                c.Dispose();
-
+                //
+                qe = null;
+                //
+            
+                //return string.Format("<HTML><BODY>My web page.<br>{0}</BODY></HTML>", DateTime.Now);
+                //get image and filename
+                return "ok";
             }
-            else
+            catch (Exception e)
             {
-                Console.WriteLine("nothing found");
-                //Bitmap b;
-                //using (var imagems = new MemoryStream(qe.img))
-                //{
-                //    b = new Bitmap(imagems);
-                //}
-                //Console.WriteLine("about to save bmp");
-                //Bitmap c = new Bitmap(b);
-                //c.Save("e:\\notfound\\" + qe.filename);
+                Console.WriteLine("sendresponse: " + e.Message);
+                return "ok";
             }
-
-            //
-            qe = null;
-            //
-            //lock (syncLock)
-            //{
-            //    popQueue(ref qe, false);
-            //    if (t.ThreadState != ThreadState.Running)
-            //    {
-
-
-
-            //        try
-            //        {
-
-
-
-
-            //            t.Start();
-            //            //log.Info("starting queue thread");
-
-            //        }
-            //        catch (Exception e)
-            //        {
-            //           // log.Info(e.Message);
-            //        }
-
-
-
-            //    }
-
-            //}
-
-            //return string.Format("<HTML><BODY>My web page.<br>{0}</BODY></HTML>", DateTime.Now);
-            //get image and filename
-            return "ok";
 
         }
 
+        private static void Start(string[] args)
+        {
+            // onstart code here
+            running = true;
+            ws.Run();
+            //Console.WriteLine("A simple webserver. Press a key to quit.");
+            //Console.ReadKey();
+            //while (running)
+            //{
+            //    System.Threading.Thread.Sleep(5000);
+            //}
 
+            //ws.Stop();
+        }
+
+        private static void Stop()
+        {
+            // onstop code here
+            //Console.WriteLine("A simple webserver. Press a key to quit.");
+            //Console.ReadKey();
+            running = false;
+            ws.Stop();
+        }
 
 
 
         private static void Main(string[] args)
         {
-
-            var ws = new DetectionServer(SendResponse, "http://192.168.1.192:7071/api/detection/");
-            ws.Run();
-            Console.WriteLine("A simple webserver. Press a key to quit.");
-            Console.ReadKey();
-            ws.Stop();
+            if (!Environment.UserInteractive)
+                // running as service
+                using (var service = new Service())
+                { 
+                    ServiceBase.Run(service);
+                }
+            else
+            {
+                
+                ws.Run();
+                //Console.WriteLine("A simple webserver. Press a key to quit.");
+                //Console.ReadKey();
+                ws.Stop();
+            }
         }
     }
 }
