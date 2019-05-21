@@ -1040,16 +1040,19 @@ Public Class WebServer
             If mySocket.Connected Then
                 Dim bReceive() As Byte = New [Byte](1024) {}
                 Dim i As Integer
-                Try
-                    i = mySocket.Receive(bReceive, bReceive.Length, 0)
-                Catch ex As Exception
-                    'socket blewup
-                    Debug.Print(ex.Message)
-                    restart = True
-                    Exit Do
-                End Try
+                'Try
+                i = mySocket.Receive(bReceive, bReceive.Length, 0)
+                    'Catch ex As Exception
+                    '    'socket blewup
+                    '    Debug.Print(ex.Message)
+                    '    restart = True
+                    '    mySocket.Close()
+                    '    mySocket = Nothing
+                    '    LocalTCPListener.Stop()
+                    '    Exit Do
+                    'End Try
 
-                Dim sBuffer As String = Encoding.ASCII.GetString(bReceive)
+                    Dim sBuffer As String = Encoding.ASCII.GetString(bReceive)
                 'find the GET request.
                 ' mySVSVistekForm.writeline("SVS Vistek image server connected")
                 If sBuffer.Contains("GET") And sBuffer.Contains("HTTP") Then
@@ -1080,7 +1083,7 @@ Public Class WebServer
                         bytes = myQIform.getLastImageArray()
 
 
-                        Dim BoundsRect = New Rectangle(0, 0, 1360, 1036)
+                        Dim BoundsRect = New Rectangle(0, 0, 1360 - 1, 1036 - 1)
                         Dim bmpData As System.Drawing.Imaging.BitmapData = b.LockBits(BoundsRect, System.Drawing.Imaging.ImageLockMode.[WriteOnly], b.PixelFormat)
 
                         Dim ptr As IntPtr = bmpData.Scan0
@@ -1217,7 +1220,7 @@ Public Class WebServer
                         sErrorMessage = "404 Error! File Does Not Exists..."
                         SendHeader(sHttpVersion, "", sErrorMessage.Length, " 404 Not Found", mySocket)
                         SendToBrowser(sErrorMessage, mySocket)
-                        'mySVSVistekBaumerForm.writeline("error encountered: " & ex.Message)
+                        Debug.Print("error encountered: " & ex.Message)
                     End Try
                 End If
 
