@@ -31,7 +31,7 @@ Public Class WebServer
     Private myQICam As QCamManagedDriver.QCam
     '' Private myBaslerCam As BaslerWrapper.Grabber
     Private mySVSVistekCam As SVCamApi.SVCamGrabber
-
+    Private _running As Boolean
     Private myForm As frmAVT
     Private myFWform As frmFoculs
     Private myQIform As frmQ
@@ -98,6 +98,14 @@ Public Class WebServer
         End Get
         Set(ByVal Value As String)
             LocalVirtualRoot = Value
+        End Set
+    End Property
+    Public Property running() As Boolean
+        Get
+            Return _running
+        End Get
+        Set(ByVal Value As Boolean)
+            _running = Value
         End Set
     End Property
 #End Region
@@ -412,8 +420,8 @@ Public Class WebServer
         Dim sPhysicalFilePath As String = ""
         Dim sFormattedMessage As String = ""
 
-
-        Do While True
+        running = True
+        Do While running
             'accept new socket connection
             LocalTCPListener.Start()
             myForm.writeline("starting listener")
@@ -1251,8 +1259,11 @@ Public Class WebServer
     End Function 'GetEncoderInfo
     Public Sub StopWebServer()
         Try
+            running = False
+            Application.DoEvents()
             LocalTCPListener.Stop()
             WebThread.Abort()
+
 
 
             'If Not (myFirewireCam Is Nothing) Then
