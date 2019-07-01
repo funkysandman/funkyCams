@@ -249,6 +249,40 @@ Public Class frmGIGE
         running = False
 
     End Sub
+    Private Sub startCapture()
+        gigeGrabber = New BaumerAPI.GIGEGrabber()
+        gigeGrabber.openCamera(cmbCam.SelectedItem)
+
+        gigeGrabber.useDarks = cbUseDarks.Checked
+        gigeGrabber.pixelCutOff = Val(tbCutoff.Text)
+        gigeGrabber.darkMultiplier = Val(tbMultiplier.Text)
+        'Timer2.Enabled = True
+
+
+        'If LCase(Me.lblDayNight.Text) = "day" Then
+        '    gigeGrabber.setParams(Val(Me.tbExposureTime.Text), Val(Me.tbDayGain.Text))
+        'Else
+        '    gigeGrabber.setParams(Val(Me.tbExposureTime.Text), Val(Me.tbNightAgain.Text))
+
+        'End If
+        ' myVistekImageGrabber.useDarks = cbUseDarks.Checked
+        ' myVistekImageGrabber.stopStreamingFF()
+        ' myVistekImageGrabber.startStreamingFF()
+        'gigeGrabber._darkmultiplier = Val(Me.tbMultiplier.Text)
+
+        gigeGrabber.startCapture(AddressOf received_frame)
+        mThread = New Thread(AddressOf startAcquisitionThread)
+        mThread.Name = "Camera thread"
+        mThread.Start()
+
+        TimerAcquistionRate.Enabled = True
+        startTime = Now
+        Timer2.Enabled = True
+        meteorCheckRunning = True
+
+
+
+    End Sub
     Public Async Function callAzureMeteorDetection(contents As Byte(), file As String) As Task
 
 
@@ -405,48 +439,46 @@ Public Class frmGIGE
 
 
             Dim currentMode As Boolean
-            currentMode = False
+            currentMode = True 'night
 
             If Now.Hour >= cboNight.SelectedItem Or Now.Hour <= cboDay.SelectedItem Then
                 currentMode = True
             Else
                 currentMode = False
             End If
-            If currentMode <> night Then
-                night = currentMode
-                If night Then
 
-                    tbExposureTime.Text = tbNightExp.Text
+            If currentMode Then
 
-                    'night mode
-                    ' If Not myWebServer Is Nothing Then
-                    If cbUseDarks.Checked Then
-                        ' gigeGrabber.useDarks = True
-                    Else
-                        ' gigeGrabber.useDarks = False
-                    End If
-                    'End If
-                    tbGain.Text = tbNightAgain.Text
-                    lblDayNight.Text = "night"
-                    ' gigeGrabber.setParams(Val(Me.tbExposureTime.Text), Val(Me.tbNightAgain.Text))
+                tbExposureTime.Text = tbNightExp.Text
 
+                'night mode
+                ' If Not myWebServer Is Nothing Then
+                If cbUseDarks.Checked Then
+                    ' gigeGrabber.useDarks = True
                 Else
-                    'day mode
+                    ' gigeGrabber.useDarks = False
+                End If
+                'End If
+                tbGain.Text = tbNightAgain.Text
+                lblDayNight.Text = "night"
+                ' gigeGrabber.setParams(Val(Me.tbExposureTime.Text), Val(Me.tbNightAgain.Text))
+                gigeGrabber.useDarks = cbUseDarks.Checked
+            Else
+                'day mode
 
-                    tbExposureTime.Text = tbDayTimeExp.Text
+                tbExposureTime.Text = tbDayTimeExp.Text
 
 
                     tbGain.Text = tbDayGain.Text
                     lblDayNight.Text = "day"
 
-
-
-                End If
-                'End If
-
-
-
+                gigeGrabber.useDarks = False
             End If
+            'End If
+
+
+
+
 
         Catch ex As Exception
 
@@ -456,10 +488,11 @@ Public Class frmGIGE
         Timer1.Enabled = True
     End Sub
 
-    Private Sub Button4_Click(sender As Object, e As EventArgs) Handles Button4.Click
+    Private Sub Button4_Click(sender As Object, e As EventArgs) Handles btnStart.Click
 
         Button2.Enabled = True
-        Button4.Enabled = False
+        btnStart.Enabled = False
+
         If Now.Hour >= cboNight.SelectedItem Or Now.Hour <= cboDay.SelectedItem Then
             night = True
         Else
@@ -502,38 +535,9 @@ Public Class frmGIGE
         End If
 
         mySVCam.closeCamera()
-
-        gigeGrabber = New BaumerAPI.GIGEGrabber()
-        gigeGrabber.openCamera(cmbCam.SelectedItem)
-        gigeGrabber.useDarks = cbUseDarks.Checked
-        gigeGrabber.pixelCutOff = Val(tbCutoff.Text)
-        gigeGrabber.darkMultiplier = Val(tbMultiplier.Text)
-        'Timer2.Enabled = True
-
-
-        If LCase(Me.lblDayNight.Text) = "day" Then
-            gigeGrabber.setParams(Val(Me.tbExposureTime.Text), Val(Me.tbDayGain.Text))
-        Else
-            gigeGrabber.setParams(Val(Me.tbExposureTime.Text), Val(Me.tbNightAgain.Text))
-
-        End If
-        ' myVistekImageGrabber.useDarks = cbUseDarks.Checked
-        ' myVistekImageGrabber.stopStreamingFF()
-        ' myVistekImageGrabber.startStreamingFF()
-        'gigeGrabber._darkmultiplier = Val(Me.tbMultiplier.Text)
-
-        gigeGrabber.startCapture(AddressOf received_frame)
-        mThread = New Thread(AddressOf startAcquisitionThread)
-        mThread.Name = "Camera thread"
-        mThread.Start()
-
-        TimerAcquistionRate.Enabled = True
-        startTime = Now
-        Timer2.Enabled = True
-        meteorCheckRunning = True
+        Me.startCapture()
         t = New Thread(AddressOf processDetection)
         t.Start()
-
     End Sub
     Private Sub startAcquisitionThread()
         Console.WriteLine("starting camera thread")
@@ -549,7 +553,7 @@ Public Class frmGIGE
         mThread.Abort()
         meteorCheckRunning = False
         Button3.Enabled = False
-        Button4.Enabled = True
+        btnStart.Enabled = True
     End Sub
 
     Private Sub Button7_Click(sender As Object, e As EventArgs)
@@ -585,12 +589,7 @@ Public Class frmGIGE
         End If
     End Sub
 
-    Private Sub tbGain_TextChanged(sender As Object, e As EventArgs) Handles tbGain.TextChanged
-        If Not gigeGrabber Is Nothing Then
-            gigeGrabber.setParams(Val(Me.tbExposureTime.Text), Val(Me.tbGain.Text))
-        End If
 
-    End Sub
 
     Private Sub Button2_Click(sender As Object, e As EventArgs) Handles Button2.Click
 
@@ -598,7 +597,10 @@ Public Class frmGIGE
 
     Private Sub cbUseDarks_CheckedChanged(sender As Object, e As EventArgs) Handles cbUseDarks.CheckedChanged
         If Not gigeGrabber Is Nothing Then
-            gigeGrabber.useDarks = cbUseDarks.Checked
+            If Me.lblDayNight.Text = "night" Then
+                gigeGrabber.useDarks = cbUseDarks.Checked
+            End If
+
         End If
 
     End Sub
@@ -613,5 +615,35 @@ Public Class frmGIGE
         If Not gigeGrabber Is Nothing Then
             gigeGrabber.darkMultiplier = Val(tbMultiplier.Text)
         End If
+    End Sub
+
+    Private Sub lblDayNight_TextChanged(sender As Object, e As EventArgs) Handles lblDayNight.TextChanged
+        If Not gigeGrabber Is Nothing Then
+            ' gigeGrabber.setParams(Val(Me.tbExposureTime.Text), Val(Me.tbNightAgain.Text))
+
+            myDetectionQueue.Clear()
+            gigeGrabber.stopAcquisition()
+            mThread.Abort()
+            'wait ten seconds
+            Thread.Sleep(10000)
+            gigeGrabber.closeCamera()
+            mySVCam.openCamera(cmbCam.SelectedIndex)
+
+            If LCase(Me.lblDayNight.Text) = "day" Then
+                gigeGrabber.useDarks = False
+                mySVCam.setParams(Val(Me.tbExposureTime.Text), Val(Me.tbDayGain.Text))
+            Else
+                gigeGrabber.useDarks = cbUseDarks.Checked
+                mySVCam.setParams(Val(Me.tbExposureTime.Text), Val(Me.tbNightAgain.Text))
+            End If
+
+            mySVCam.closeCamera()
+            startCapture()
+        End If
+
+    End Sub
+
+    Private Sub lblDayNight_Click(sender As Object, e As EventArgs) Handles lblDayNight.Click
+
     End Sub
 End Class

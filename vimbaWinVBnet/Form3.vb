@@ -27,8 +27,8 @@ Public Class Form3
         't.ApartmentState = ApartmentState.STA
         't.Start()
         'showFrmSVSVistek()
-        'frmSVSVistek.ShowDialog()
-        'Me.Close()
+        frmSVSVistek.ShowDialog()
+        Me.Close()
 
     End Sub
 

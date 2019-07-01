@@ -78,9 +78,15 @@ Public Class frmAVT
     End Sub
     Private Sub received_frame(sender As Object, args As FrameEventArgs)
 
-        ' b = New Bitmap(CInt(args.Frame.Width), CInt(args.Frame.Height), PixelFormat.Format24bppRgb)
-        b = args.Image
-        b.Tag = "orig"
+        b = New Bitmap(CInt(args.Frame.Width), CInt(args.Frame.Height), PixelFormat.Format24bppRgb)
+
+
+        'receive raw data and convert to color
+        Dim f As Frame
+        f = args.Frame
+
+        ' b = args.Image
+        ' b.Tag = "orig"
         running = True
         'start timeout timer
         writeline("received frame")
@@ -96,78 +102,99 @@ Public Class frmAVT
         writeline("got image " & Now)
 
         'darks
-        Dim d2 As Bitmap
+        ' Dim d2 As Bitmap
 
         If Me.cbUseDarks.Checked Then
             'd2 = Bitmap.FromFile(Application.StartupPath & "\dark.png")
             If dark Is Nothing Then
-                Dim fs As New FileStream(Application.StartupPath & "\dark.drk", FileMode.Open)
+                Dim fs As New FileStream(Application.StartupPath & "\dark_" & v.m_Camera.Id & ".raw", FileMode.Open)
                 'read dark from file
 
-                ReDim dark(b.Width * b.Height * 3)
+                ReDim dark(b.Width * b.Height * 2)
                 fs.Read(dark, 0, dark.Count)
                 fs.Close()
             End If
-
-            Dim raw As System.Drawing.Imaging.BitmapData = Nothing
-            ' 'Freeze the image in memory
-            raw = b.LockBits(New Rectangle(0, 0,
-             b.Width, b.Height),
-             System.Drawing.Imaging.ImageLockMode.ReadOnly,
-            b.PixelFormat)
-            Dim size As Integer = b.Width * b.Height * 3
-
-            Dim rawImage() As Byte = New Byte(size - 1) {}
-            ''Copy the image into the byte()
-            System.Runtime.InteropServices.Marshal.Copy(raw.Scan0, rawImage, 0, size)
+            Dim pixValue = 0
+            Dim darkValue = 0
+            Dim x
+            Try
 
 
-            Dim multiplier
-            multiplier = Val(Me.tbMultiplier.Text)
-            '
-            'subtract the dark
-            If cbUseDarks.Checked Then
-                Dim aByte As Integer
-                Try
+                For x = 0 To dark.Length - 2 Step 2
 
-                    Dim aNewValue As Byte
-                    Dim offset As Integer
-                    For aByte = 0 To size - 1
-                        If dark(aByte) > 220 Then
-                            aNewValue = CByte(Math.Max(0, CLng(rawImage(aByte)) - CLng(dark(aByte))))
-                            rawImage(aByte) = aNewValue
-                        End If
+                    pixValue = (f.Buffer(x + 1) * 256) + f.Buffer(x)
+                    darkValue = (dark(x + 1) * 256) + dark(x)
+                    If darkValue > 500 Then
+                        pixValue = Math.Max(0, pixValue - darkValue)
+                        f.Buffer(x + 1) = Int(pixValue / 256)
+                        f.Buffer(x) = pixValue And 255
+                    End If
 
-                    Next
-                    writeline("subtracted dark")
-                Catch ex As Exception
-                    MsgBox(ex.Message)
-                End Try
-            End If
-
-            Dim raw2 As System.Drawing.Imaging.BitmapData = Nothing
+                Next
+            Catch ex As Exception
+                Debug.Print(x)
+            End Try
 
 
-            ' 'Freeze the image in memory
-
-            'raw2 = d2.LockBits(New Rectangle(0, 0,
-            ' d2.Width, d2.Height),
+            'Dim raw As System.Drawing.Imaging.BitmapData = Nothing
+            '' 'Freeze the image in memory
+            'raw = b.LockBits(New Rectangle(0, 0,
+            ' b.Width, b.Height),
             ' System.Drawing.Imaging.ImageLockMode.ReadOnly,
-            'd2.PixelFormat)
-            'size = raw2.Height * raw2.Stride
+            'b.PixelFormat)
+            'Dim size As Integer = b.Width * b.Height * 3
 
-            ' Dim rawImage2() As Byte = New Byte(size - 1) {}
-            ' 'Copy the image into the byte()
-            System.Runtime.InteropServices.Marshal.Copy(rawImage, 0, raw.Scan0, size)
+            'Dim rawImage() As Byte = New Byte(size - 1) {}
+            '''Copy the image into the byte()
+            'System.Runtime.InteropServices.Marshal.Copy(raw.Scan0, rawImage, 0, size)
 
-            'If Not raw2 Is Nothing Then
-            '    ' Unfreeze the memory for the image
-            '    d2.UnlockBits(raw2)
+
+            'Dim multiplier
+            'multiplier = Val(Me.tbMultiplier.Text)
+            ''
+            ''subtract the dark
+            'If cbUseDarks.Checked Then
+            '    Dim aByte As Integer
+            '    Try
+
+            '        Dim aNewValue As Byte
+            '        Dim offset As Integer
+            '        For aByte = 0 To size - 1
+            '            If dark(aByte) > 220 Then
+            '                aNewValue = CByte(Math.Max(0, CLng(rawImage(aByte)) - CLng(dark(aByte))))
+            '                rawImage(aByte) = aNewValue
+            '            End If
+
+            '        Next
+            '        writeline("subtracted dark")
+            '    Catch ex As Exception
+            '        MsgBox(ex.Message)
+            '    End Try
             'End If
 
+            'Dim raw2 As System.Drawing.Imaging.BitmapData = Nothing
 
 
-            b.UnlockBits(raw)
+            '' 'Freeze the image in memory
+
+            ''raw2 = d2.LockBits(New Rectangle(0, 0,
+            '' d2.Width, d2.Height),
+            '' System.Drawing.Imaging.ImageLockMode.ReadOnly,
+            ''d2.PixelFormat)
+            ''size = raw2.Height * raw2.Stride
+
+            '' Dim rawImage2() As Byte = New Byte(size - 1) {}
+            '' 'Copy the image into the byte()
+            'System.Runtime.InteropServices.Marshal.Copy(rawImage, 0, raw.Scan0, size)
+
+            ''If Not raw2 Is Nothing Then
+            ''    ' Unfreeze the memory for the image
+            ''    d2.UnlockBits(raw2)
+            ''End If
+
+
+
+            'b.UnlockBits(raw)
 
 
 
@@ -205,13 +232,12 @@ Public Class frmAVT
 
         End If
 
-        'imageInUse = imageInUse + 1
         Dim iTotBytes As Integer = 0
         Dim sResponse As String = ""
-        'Dim fs As New FileStream(sPhysicalFilePath, FileMode.Open, FileAccess.Read, FileShare.Read)
-        '
 
+        'convert frame to bitmap
 
+        f.Fill(b)
 
         ' myBitmap.Save("Shapes025.jpg", myImageCodecInfo, myEncoderParameters)
         Dim firstLocation As PointF = New PointF(10.0F, 10.0F)
@@ -224,10 +250,7 @@ Public Class frmAVT
         gr.DrawString(firstText, myFontLabels, Brushes.GreenYellow, firstLocation) '# last 2 number are X and Y coords.
         gr.Dispose()
 
-        'object detection section test
-        '
-        'Dim t As New Threading.Thread(AddressOf checkForThings)
-        ''t.Start()
+
 
         Dim filename As String
         Dim folderName = String.Format("{0:yyyy-MMM-dd}", DateTime.Now)
@@ -277,8 +300,8 @@ Public Class frmAVT
                 aQE = Nothing
 
             End If
-            Console.WriteLine(myDetectionQueue.Count)
-
+            ' Console.WriteLine(myDetectionQueue.Count)
+            Application.DoEvents()
         End While
 
     End Sub
@@ -477,22 +500,22 @@ Public Class frmAVT
             'reader.Close()
             'b.Save(Application.StartupPath & "\dark.tif", System.Drawing.Imaging.ImageFormat.Tiff)
         Next
-        'average the pictures
+        'average the pictures (for 12 bit images)
         Dim imageValueTotal
         Dim newValue
-        For i = 0 To f.BufferSize - 1
+        For i = 0 To f.BufferSize - 1 Step 2
             imageValueTotal = 0
             For x = 0 To 9
-                imageValueTotal = imageValueTotal + darks(x).Buffer(i)
+                imageValueTotal = imageValueTotal + (darks(x).Buffer(i + 1) * 256) + darks(x).Buffer(i)
 
             Next
             newValue = Int(imageValueTotal / 10)
-            f.Buffer(i) = newValue
-
+            f.Buffer(i + 1) = Int(newValue / 256)
+            f.Buffer(i) = newValue And 255
         Next
 
 
-        Dim fs As New FileStream(Application.StartupPath & "\dark.drk", FileMode.Create)
+        Dim fs As New FileStream(Application.StartupPath & "\dark_" & v.m_Camera.Id & ".raw", FileMode.Create)
 
         Dim ms As New MemoryStream()
         fs.Write(f.Buffer, 0, f.BufferSize)
@@ -589,7 +612,7 @@ Public Class frmAVT
         If t Is Nothing Then
 
             t = New Thread(AddressOf processDetection)
-                t.Start()
+            t.Start()
 
         Else
             If Not t.IsAlive Then
@@ -599,12 +622,12 @@ Public Class frmAVT
         End If
 
 
-            'If Now.Hour >= ComboBox2.SelectedItem Or Now.Hour <= ComboBox1.SelectedItem Then
-            '    night = True 'night
-            'Else
-            '    night = False 'day
-            'End If
-            v.StartContinuousImageAcquisition(AddressOf Me.received_frame)
+        'If Now.Hour >= ComboBox2.SelectedItem Or Now.Hour <= ComboBox1.SelectedItem Then
+        '    night = True 'night
+        'Else
+        '    night = False 'day
+        'End If
+        v.StartContinuousImageAcquisition(AddressOf Me.received_frame)
 
         'myCam.StartContinuousImageAcquisition(1)
         'myCam.StartCapture()
