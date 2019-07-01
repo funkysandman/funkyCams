@@ -876,7 +876,7 @@ namespace pvcam_helper
             if (acqType == AcqTypes.ACQ_TYPE_SINGLE)
             {
 
-                //if a known number of frames (in this case 1 frame) is to be acquired, call
+                ////if a known number of frames (in this case 1 frame) is to be acquired, call
                 //pl_exp_setup_seq(), the second parameter ("1") can be changed to e.g. "1000"
                 //if 1000 frames need to be acquired, in that case the function will also return
                 //larger m_full_frame_size value since more memory will be needed to acquire 1000 frames

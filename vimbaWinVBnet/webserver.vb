@@ -37,7 +37,7 @@ Public Class WebServer
     Private myQIform As frmQ
 
     '  Private myBaslerForm As frmBasler
-    Private mySVSVistekForm As frmSVSVistek
+    Private mySVSVistekForm As Object
     Private mySVSVistekBaumerForm As frmGIGE
 
     Dim rawDark() As Byte
@@ -169,7 +169,7 @@ Public Class WebServer
 
         End Try
     End Sub
-    Public Sub StartWebServer(aCam As SVCamApi.SVCamGrabber, f As frmSVSVistek, port As Integer)
+    Public Sub StartWebServer(aCam As SVCamApi.SVCamGrabber, f As Object, port As Integer)
         Try
             LocalPort = port
             mySVSVistekForm = f

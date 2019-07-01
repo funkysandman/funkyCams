@@ -88,6 +88,7 @@ Public Class Camera
     Private v As VimbaHelper
     Friend Shared m_exposureTime As Integer
     Friend Shared m_gain As Integer
+    Friend Shared m_binning As Short
     Private camID As String
     Private f As AVT.VmbAPINET.Frame
     Friend Shared m_chosenPort As String
@@ -150,8 +151,9 @@ Public Class Camera
                 Me.ccdHeight = v.m_Camera.Features("Height").IntValue
                 Me.Gain = m_gain
                 Me.ExposureTime = m_exposureTime 'microseconds
-                'Me.BinX = v.m_Camera.Features("BinningHorizontal").IntValue
-                'Me.BinY = v.m_Camera.Features("BinningVertical").IntValue
+                Me.BinX = m_binning
+                Me.BinY = m_binning
+
 
             Catch ex As Exception
                 MsgBox(ex.Message)
@@ -159,7 +161,7 @@ Public Class Camera
 
 
 
-            pixelSize = 3.69 ' Constant for the pixel physical dimension
+            pixelSize = 3.75 ' Constant for the pixel physical dimension
 
             TL.LogMessage("Camera", "Completed initialisation")
         End If
@@ -209,26 +211,33 @@ Public Class Camera
     'Private Sub received_frame(sender As Object, args As FrameEventArgs)
 
     Private Sub StartExpose()
-        v.StartSingleFrameAcquisition(AddressOf Me.received_frame)
+        'v.StartSingleFrameAcquisition(AddressOf Me.received_frame)
+        v.StartContinuousFrameAcquisition(AddressOf Me.received_frame)
         myCameraState = CameraStates.cameraExposing
 
 
     End Sub
     Private Sub StopExpose()
 
-        System.Threading.Thread.Sleep(m_exposureTime * 1000)
-        v.StopSingleFrameAcquisition()
+        '  System.Threading.Thread.Sleep(m_exposureTime * 1000)
+
+        v.StopContinuousImageAcquisition()
+        myCameraState = CameraStates.cameraIdle
 
     End Sub
-    Private Sub received_frame(ByVal f As Frame)
+    Private Sub received_frame(f As Frame)
         Debug.WriteLine("received frame")
         Debug.WriteLine("frame status:" & f.ReceiveStatus)
-
+        ' MsgBox("got a frame:" & Now)
         ReDim cameraImageArray(f.Width - 1, f.Height - 1)
         cameraImageArray = ConvertFrameToImageAray(f)
         cameraImageReady = True
         Debug.WriteLine("processed frame")
-        v.m_Camera.RevokeFrame(f)
+        ' v.m_Camera.AnnounceFrame(f)
+        v.m_Camera.QueueFrame(f)
+        'v.m_Camera.StartContinuousImageAcquisition(1)
+        'v.m_Camera.StartCapture()
+        'v.m_Camera.Features("AcquisitionStart").RunCommand()
         'Try
         '    v.m_Camera.EndCapture()
         '    MsgBox("got a frame:" & Now)
@@ -417,6 +426,7 @@ Public Class Camera
             If v.m_Camera.Features.ContainsName("BinningHorizontal") Then
                 f = v.m_Camera.Features("BinningHorizontal")
                 f.IntValue = Convert.ToSingle(value)
+                v.m_Camera.Features("BinningHorizontal").IntValue = f.IntValue
             End If
         End Set
     End Property
@@ -434,6 +444,7 @@ Public Class Camera
             If v.m_Camera.Features.ContainsName("BinningVertical") Then
                 f = v.m_Camera.Features("BinningVertical")
                 f.IntValue = Convert.ToSingle(value)
+                v.m_Camera.Features("BinningVertical").IntValue = f.IntValue
             End If
         End Set
     End Property
@@ -459,8 +470,8 @@ Public Class Camera
         Get
             TL.LogMessage("CameraXSize Get", ccdWidth.ToString())
             Dim f As Feature
-            If v.m_Camera.Features.ContainsName("Width") Then
-                f = v.m_Camera.Features("Width")
+            If v.m_Camera.Features.ContainsName("SensorWidth") Then
+                f = v.m_Camera.Features("SensorWidth")
                 Return f.IntValue
             End If
         End Get
@@ -470,8 +481,8 @@ Public Class Camera
         Get
             TL.LogMessage("CameraYSize Get", ccdHeight.ToString())
             Dim f As Feature
-            If v.m_Camera.Features.ContainsName("Height") Then
-                f = v.m_Camera.Features("Height")
+            If v.m_Camera.Features.ContainsName("SensorHeight") Then
+                f = v.m_Camera.Features("SensorHeight")
                 Return f.IntValue
             End If
         End Get
@@ -615,6 +626,25 @@ Public Class Camera
 
         End Set
     End Property
+    Public Property Binning() As Short 'Implements ICameraV2
+        Get
+            Return m_binning
+        End Get
+        Set(value As Short)
+            m_binning = value
+            Dim f As Feature
+            If v.m_Camera.Features.ContainsName("BinningHorizontal") Then
+                f = v.m_Camera.Features("BinningHorizontal")
+                f.FloatValue = Convert.ToSingle(value)
+            End If
+            If v.m_Camera.Features.ContainsName("BinningVertical") Then
+                f = v.m_Camera.Features("BinningVertical")
+                f.IntValue = Convert.ToSingle(value)
+            End If
+
+
+        End Set
+    End Property
     Public Property ExposureTime() As Long
         Get
             Return m_exposureTime
@@ -622,7 +652,7 @@ Public Class Camera
         Set(value As Long)
             Try
                 m_exposureTime = value 'stored as seconds
-                ' v.m_Camera.Features("ExposureTimeAbs").FloatValue = Convert.ToDecimal(m_exposureTime * 1000000) 'uses microseconds
+                v.m_Camera.Features("ExposureTimeAbs").FloatValue = Convert.ToDouble(m_exposureTime * 1000000) 'uses microseconds
             Catch ex As Exception
                 MsgBox(ex.Message)
             End Try
@@ -882,40 +912,43 @@ Public Class Camera
         If (cameraNumY > ccdHeight) Then Throw New InvalidValueException("StartExposure", cameraNumY.ToString(), ccdHeight.ToString())
         If (cameraStartX > ccdWidth) Then Throw New InvalidValueException("StartExposure", cameraStartX.ToString(), ccdWidth.ToString())
         If (cameraStartY > ccdHeight) Then Throw New InvalidValueException("StartExposure", cameraStartY.ToString(), ccdHeight.ToString())
-        ExposureTime = Duration
 
-        cameraLastExposureDuration = Duration
-        exposureStart = DateTime.Now
-        'System.Threading.Thread.Sleep(Duration * 1000) ' Sleep for the duration to simulate exposure 
-        'TL.LogMessage("StartExposure", Duration.ToString() + " " + Light.ToString())
-        'Dim f As Frame
-        'Dim i As Image
+        If Not Me.CameraState = CameraStates.cameraExposing Then
+            ExposureTime = Duration
+            'MsgBox("start:" & Now)
+            cameraLastExposureDuration = Duration
+            exposureStart = DateTime.Now
+            'System.Threading.Thread.Sleep(Duration * 1000) ' Sleep for the duration to simulate exposure 
+            'TL.LogMessage("StartExposure", Duration.ToString() + " " + Light.ToString())
+            'Dim f As Frame
+            'Dim i As Image
 
-        'Try
-        '    v.m_Camera.AcquireSingleImage(f, 10000)
+            'Try
+            '    v.m_Camera.AcquireSingleImage(f, 10000)
 
-        '    'i = ConvertFrame(f)
-        '    'put image into imageArray
-        '    ReDim cameraImageArray(f.Width - 1, f.Height - 1)
-        '    cameraImageArray = ConvertFrameToImageAray(f)
+            '    'i = ConvertFrame(f)
+            '    'put image into imageArray
+            '    ReDim cameraImageArray(f.Width - 1, f.Height - 1)
+            '    cameraImageArray = ConvertFrameToImageAray(f)
 
-        'Catch ex As Exception
-        '    MsgBox(ex.Message)
-        'End Try
+            'Catch ex As Exception
+            '    MsgBox(ex.Message)
+            'End Try
 
-        'cameraImageReady = True
-        'Debug.Print("grabbing")
+            'cameraImageReady = True
+            'Debug.Print("grabbing")
 
-        cameraImageReady = False
-        Dim threadBegin As New Thread(AddressOf Me.StartExpose)
-        threadBegin.Start()
-
-        Dim threadEnd As New Thread(AddressOf Me.StopExpose)
-        threadEnd.Start()
-        ' myCameraState = CameraStates.cameraIdle
-        'While Not cameraImageReady
-        '    System.Threading.Thread.Sleep(Duration * 100)
-        'End While
+            cameraImageReady = False
+            'Dim threadBegin As New Thread(AddressOf Me.StartExpose)
+            'threadBegin.Start()
+            StartExpose()
+            'Dim threadEnd As New Thread(AddressOf Me.StopExpose)
+            'threadEnd.Start()
+            ' myCameraState = CameraStates.cameraIdle
+            'While Not cameraImageReady
+            '    System.Threading.Thread.Sleep(Duration * 100)
+            'End While
+        End If
 
     End Sub
 
@@ -943,7 +976,7 @@ Public Class Camera
     End Property
 
     Public Sub StopExposure() Implements ICameraV2.StopExposure
-        MsgBox("stopExposure")
+        '  MsgBox("stopExposure")
 
         v.StopContinuousImageAcquisition()
 
@@ -1131,7 +1164,26 @@ Public Class Camera
 
                     MsgBox(ex.Message)
                 End Try
+            Case VmbPixelFormatType.VmbPixelFormatMono8
+                Try
 
+                    For y As Integer = 0 To CInt(frame.Height) - 1
+                        pixelX = 0
+                        For x As Integer = 0 To CInt(frame.Width) - 1
+                            imgArr(pixelX, y) = frame.Buffer(x + y * frame.Width)
+
+                            ' imgArr(pixelX, y) = (frame.Buffer(x + y * frame.Width * 2) + frame.Buffer(x + 1 + y * frame.Width * 2) * 256)  ' stretch to 16bits
+
+                            pixelX = pixelX + 1
+
+                        Next
+
+                    Next
+                    Return imgArr
+                Catch ex As Exception
+
+                    MsgBox(ex.Message)
+                End Try
             Case VmbPixelFormatType.VmbPixelFormatBayerRG12
 
                 For y As Integer = 0 To CInt(frame.Height) - 1

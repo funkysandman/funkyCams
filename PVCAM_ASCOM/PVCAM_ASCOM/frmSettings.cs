@@ -91,7 +91,7 @@ namespace pvcam_helper
 
             InitializeComponent();
             ActiveCamera = p;
-            tbRoiYtrim.Text = ASCOM.Photometrics.Camera.ROIytrim;
+           // tbRoiYtrim.Text = ASCOM.Photometrics.Camera.ROIytrim;
             //FrameViewer = new FrmFrameView();
             SubscribeToReportMessages(ActiveCamera);
             SubscribeToAcquisitionNotifications(ActiveCamera);
@@ -1183,7 +1183,7 @@ namespace pvcam_helper
 
         private void btnOk_Click(object sender, EventArgs e)
         {
-            ASCOM.Photometrics.Camera.ROIytrim = tbRoiYtrim.Text;
+           // ASCOM.Photometrics.Camera.ROIytrim = tbRoiYtrim.Text;
             this.DialogResult = DialogResult.OK;
             this.Close();
 

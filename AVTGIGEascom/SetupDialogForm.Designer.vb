@@ -37,7 +37,7 @@ Partial Class SetupDialogForm
         Me.ComboBox2 = New System.Windows.Forms.ComboBox()
         Me.Label5 = New System.Windows.Forms.Label()
         Me.SerialPort1 = New System.IO.Ports.SerialPort(Me.components)
-        Me.ComboBox3 = New System.Windows.Forms.ComboBox()
+        Me.cboBinning = New System.Windows.Forms.ComboBox()
         Me.Label6 = New System.Windows.Forms.Label()
         Me.TableLayoutPanel1.SuspendLayout()
         CType(Me.PictureBox1, System.ComponentModel.ISupportInitialize).BeginInit()
@@ -174,22 +174,23 @@ Partial Class SetupDialogForm
         Me.Label5.TabIndex = 17
         Me.Label5.Text = "cooler com port:"
         '
-        'ComboBox3
+        'cboBinning
         '
-        Me.ComboBox3.FormattingEnabled = True
-        Me.ComboBox3.Location = New System.Drawing.Point(159, 265)
-        Me.ComboBox3.Name = "ComboBox3"
-        Me.ComboBox3.Size = New System.Drawing.Size(149, 24)
-        Me.ComboBox3.TabIndex = 18
+        Me.cboBinning.FormattingEnabled = True
+        Me.cboBinning.Items.AddRange(New Object() {"1", "2", "4"})
+        Me.cboBinning.Location = New System.Drawing.Point(156, 265)
+        Me.cboBinning.Name = "cboBinning"
+        Me.cboBinning.Size = New System.Drawing.Size(149, 24)
+        Me.cboBinning.TabIndex = 18
         '
         'Label6
         '
         Me.Label6.AutoSize = True
-        Me.Label6.Location = New System.Drawing.Point(16, 272)
+        Me.Label6.Location = New System.Drawing.Point(16, 265)
         Me.Label6.Name = "Label6"
-        Me.Label6.Size = New System.Drawing.Size(84, 17)
+        Me.Label6.Size = New System.Drawing.Size(90, 17)
         Me.Label6.TabIndex = 19
-        Me.Label6.Text = "pixel format:"
+        Me.Label6.Text = "pixel binning:"
         '
         'SetupDialogForm
         '
@@ -199,7 +200,7 @@ Partial Class SetupDialogForm
         Me.CancelButton = Me.Cancel_Button
         Me.ClientSize = New System.Drawing.Size(479, 383)
         Me.Controls.Add(Me.Label6)
-        Me.Controls.Add(Me.ComboBox3)
+        Me.Controls.Add(Me.cboBinning)
         Me.Controls.Add(Me.Label5)
         Me.Controls.Add(Me.ComboBox2)
         Me.Controls.Add(Me.tbExposure)
@@ -239,6 +240,6 @@ Partial Class SetupDialogForm
     Friend WithEvents ComboBox2 As ComboBox
     Friend WithEvents Label5 As Label
     Friend WithEvents SerialPort1 As IO.Ports.SerialPort
-    Friend WithEvents ComboBox3 As ComboBox
+    Friend WithEvents cboBinning As ComboBox
     Friend WithEvents Label6 As Label
 End Class
