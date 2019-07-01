@@ -103,7 +103,7 @@ namespace BaumerAPI
         BGAPI2.DataStreamList datastreamList = null;
         BGAPI2.DataStream mDataStream = null;
         string sDataStreamID = "";
-
+        
         BGAPI2.BufferList bufferList = null;
         BGAPI2.Buffer mBuffer = null;
 
@@ -114,7 +114,9 @@ namespace BaumerAPI
          FrameReceivedHandler m_frh;
         Boolean running = false;
         public byte[] masterDark;
-
+        public bool useDarks = false;
+        public int pixelCutOff = 3000;
+        public int darkMultiplier = 1;
         //public GIGEGRABBER()
         //{
         //    openCamera();
@@ -916,10 +918,57 @@ namespace BaumerAPI
             //apply darks:
             //if (useDarks)
             // {
-            for (int k = 0; k < imageBufferCopy.Length; k++)
+            int pixel1, pixel2, pixel3, pixel4;
+            int dpixel1, dpixel2, dpixel3, dpixel4;
+            byte byte1, byte2, byte3, byte4, byte5, byte6;
+            byte dbyte1, dbyte2, dbyte3, dbyte4, dbyte5, dbyte6;
+           //File.WriteAllBytes("test.raw",imageBufferCopy);
+            for (int k = 0; k < imageBufferCopy.Length-1; k=k+3)
             {
-                if ((masterDark[k]) > 250)
-                    imageBufferCopy[k] = (byte)Math.Max(0, imageBufferCopy[k] - 0.75 * (masterDark[k]));
+                //unpack 2 pixels in 3 bytes
+                byte1 = imageBufferCopy[k];
+                byte2 = imageBufferCopy[k+1]; 
+                byte3 = imageBufferCopy[k+2];
+
+
+                dbyte1 = masterDark[k];
+                dbyte2 = masterDark[k + 1];
+                dbyte3 = masterDark[k + 2];
+
+
+                pixel1 = (byte1 << 4) | ((byte2 & 0b1111_0000) >> 4);
+                pixel2 =  ((byte2 & 0b0000_1111) << 8 ) | byte3;
+
+
+                dpixel1 = (dbyte1 << 4) | ((dbyte2 & 0b1111_0000) >> 4);
+                dpixel2 = ((dbyte2 & 0b0000_1111) << 8) | dbyte3;
+
+                if (useDarks)
+                { 
+                if (dpixel1>pixelCutOff)
+                {
+                    pixel1 = Math.Max(0, pixel1 - dpixel1/darkMultiplier);
+                }
+                if (dpixel2 > pixelCutOff)
+                {
+                    pixel2 = Math.Max(0, pixel2 - dpixel2/ darkMultiplier);
+                }
+                }
+
+                byte1 = (byte)(pixel1 >> 4);
+                byte2 = (byte)(pixel1 & 0b1111);
+                byte2 = (byte)(byte2 << 4);
+                byte2 = (byte)(byte2 | (pixel2 >> 8));
+                byte3 = (byte)(pixel2 & 0b11111111);
+               
+
+                imageBufferCopy[k] = byte1;
+                imageBufferCopy[k + 1] =byte2;
+                imageBufferCopy[k + 2] = byte3;
+
+
+                //if ((masterDark[k]) > 250)
+                //    imageBufferCopy[k] = (byte)Math.Max(0, imageBufferCopy[k] - 0.75 * (masterDark[k]));
 
             }
             //copy back to buffer

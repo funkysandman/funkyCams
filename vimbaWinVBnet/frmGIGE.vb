@@ -57,110 +57,126 @@ Public Class frmGIGE
         'darks
         Dim d2 As Bitmap
 
-        If Me.cbUseDarks.Checked And False Then 'darks are processed before they arrive here...
-            'd2 = Bitmap.FromFile(Application.StartupPath & "\dark.png")
-            'If dark Is Nothing Then
-            '    Dim fs As New FileStream(Application.StartupPath & "\dark.drk", FileMode.Open)
-            '    'read dark from file
+        'If Me.cbUseDarks.Checked And True Then 'darks are processed before they arrive here...
+        '    'd2 = Bitmap.FromFile(Application.StartupPath & "\masterDarkSVS.bmp")
+        '    'If dark Is Nothing Then
+        '    '    Dim fs As New FileStream(Application.StartupPath & "\masterDarkSVS.png", FileMode.Open)
+        '    '    'read dark from file
 
-            '    ReDim dark(b.Width * b.Height * 3)
-            '    fs.Read(dark, 0, dark.Count)
-            '    fs.Close()
-            'End If
+        '    '    ReDim dark(b.Width * b.Height * 3)
+        '    '    fs.Read(dark, 0, dark.Count)
+        '    '    fs.Close()
+        '    'End If
+        '    'Dim darkraw As System.Drawing.Imaging.BitmapData = Nothing
+        '    ' 'Freeze the image in memory
 
-            Dim raw As System.Drawing.Imaging.BitmapData = Nothing
-            ' 'Freeze the image in memory
-            raw = bm.LockBits(New Rectangle(0, 0,
-             bm.Width, bm.Height),
-             System.Drawing.Imaging.ImageLockMode.ReadOnly,
-            bm.PixelFormat)
-            Dim size As Integer = bm.Width * b.Height
+        '    '' darkraw = d2.LockBits(New Rectangle(0, 0,
+        '    'd2.Width, d2.Height),
+        '    'System.Drawing.Imaging.ImageLockMode.ReadOnly,
+        '    'd2.PixelFormat)
+        '    Dim raw As System.Drawing.Imaging.BitmapData = Nothing
+        '    ' 'Freeze the image in memory
 
-            Dim rawImage() As Byte = New Byte(size - 1) {}
-            ''Copy the image into the byte()
-            System.Runtime.InteropServices.Marshal.Copy(raw.Scan0, rawImage, 0, size)
+        '    raw = bm.LockBits(New Rectangle(0, 0,
+        '     bm.Width, bm.Height),
+        '     System.Drawing.Imaging.ImageLockMode.ReadOnly,
+        '    bm.PixelFormat)
+        '    Dim size As Integer = bm.Width * b.Height * 3
 
-
-            'Dim multiplier
-            'multiplier = Val(Me.tbMultiplier.Text)
-            ''
-            ''subtract the dark
-            'Dim aByte As Integer
-            'Try
-
-            '    Dim aNewValue As Byte
-            '    Dim offset As Integer
-            '    For aByte = 0 To size - 1
-
-            '        aNewValue = CByte(Math.Max(0, CLng(rawImage(aByte)) - CLng(dark(aByte)) * 0.75))
-            '        rawImage(aByte) = aNewValue
-
-            '    Next
-            '    writeline("subtracted dark")
-            'Catch ex As Exception
-            '    MsgBox(ex.Message)
-            'End Try
-            Dim raw2 As System.Drawing.Imaging.BitmapData = Nothing
+        '    Dim rawImagebytes() As Byte = New Byte(size - 1) {}
+        '    Dim rawDarkbytes() As Byte = New Byte(size - 1) {}
+        '    ''Copy the image into the byte()
+        '    System.Runtime.InteropServices.Marshal.Copy(raw.Scan0, rawImagebytes, 0, size - 1)
+        '    System.Runtime.InteropServices.Marshal.Copy(darkraw.Scan0, rawDarkbytes, 0, size - 1)
 
 
-            ' 'Freeze the image in memory
+        '    Dim multiplier
+        '    multiplier = Val(Me.tbMultiplier.Text)
+        '    '
+        '    'subtract the dark
+        '    Dim aByte As Integer
+        '    Try
 
-            'raw2 = d2.LockBits(New Rectangle(0, 0,
-            ' d2.Width, d2.Height),
-            ' System.Drawing.Imaging.ImageLockMode.ReadOnly,
-            'd2.PixelFormat)
-            'size = raw2.Height * raw2.Stride
+        '        Dim aNewValue As Byte
+        '        Dim offset As Integer
+        '        For aByte = 0 To size - 1 Step 3
 
-            ' Dim rawImage2() As Byte = New Byte(size - 1) {}
-            ' 'Copy the image into the byte()
-            System.Runtime.InteropServices.Marshal.Copy(rawImage, 0, raw.Scan0, size)
+        '            ' aNewValue = rawImagebytes(aByte)
+        '            'rawImagebytes(aByte) = aNewValue
+        '            For j = 0 To 2
+        '                If rawDarkbytes(aByte + j) > 30 Then
+        '                    aNewValue = CByte(Math.Max(0, CLng(rawImagebytes(aByte + j)) - CLng(rawDarkbytes(aByte + j))))
 
-            'If Not raw2 Is Nothing Then
-            '    ' Unfreeze the memory for the image
-            '    d2.UnlockBits(raw2)
-            'End If
+        '                    rawImagebytes(aByte + j) = aNewValue
+        '                End If
+        '            Next
 
-
-            'copy buffer into bitmap
-
-
-            '' Lock the bitmap's bits.  
-            'Dim rect As New Rectangle(0, 0, b.Width, b.Height)
-            'Dim bmpData As System.Drawing.Imaging.BitmapData = b.LockBits(rect, System.Drawing.Imaging.ImageLockMode.ReadWrite, b.PixelFormat)
-
-            '    ' Get the address of the first line.
-            '    Dim ptr As IntPtr = bmpData.Scan0
-
-            '    ' Declare an array to hold the bytes of the bitmap.
-            '    ' This code is specific to a bitmap with 24 bits per pixels.
-            '    Dim bytes As Integer = Math.Abs(bmpData.Stride) * b.Height
-            '    Dim rgbValues(bytes - 1) As Byte
-
-            '    '' Copy the RGB values into the array.
-            '    'System.Runtime.InteropServices.Marshal.Copy(ptr, rgbValues, 0, bytes)
-
-            '    '' Set every third value to 255. A 24bpp image will look red.
-            '    'For counter As Integer = 2 To rgbValues.Length - 1 Step 3
-            '    '    rgbValues(counter) = 255
-            '    'Next
-
-            '    ' Copy the RGB values back to the bitmap
-            '    System.Runtime.InteropServices.Marshal.Copy(dark, 0, ptr, dark.Count)
-
-            ' Unlock the bits.
-            bm.UnlockBits(raw)
+        '        Next
+        '            writeline("subtracted dark")
+        '    Catch ex As Exception
+        '        MsgBox(ex.Message)
+        '    End Try
+        'Dim raw2 As System.Drawing.Imaging.BitmapData = Nothing
 
 
+        ' 'Freeze the image in memory
+        ' Dim size As Integer
+        'raw2 = d2.LockBits(New Rectangle(0, 0,
+        ' d2.Width, d2.Height),
+        ' System.Drawing.Imaging.ImageLockMode.ReadOnly,
+        'd2.PixelFormat)
+        'Size = raw2.Height * raw2.Stride
+
+        'Dim rawImage2() As Byte = New Byte(Size - 1) {}
+        'Copy the image into the byte()
+        'System.Runtime.InteropServices.Marshal.Copy(rawImagebytes, 0, raw.Scan0, size)
+
+        'If Not raw2 Is Nothing Then
+        '    ' Unfreeze the memory for the image
+        '    d2.UnlockBits(raw2)
+        'End If
+
+
+        'copy buffer into bitmap
+
+
+        '' Lock the bitmap's bits.  
+        'Dim rect As New Rectangle(0, 0, b.Width, b.Height)
+        'Dim bmpData As System.Drawing.Imaging.BitmapData = b.LockBits(rect, System.Drawing.Imaging.ImageLockMode.ReadWrite, b.PixelFormat)
+
+        '    ' Get the address of the first line.
+        '    Dim ptr As IntPtr = bmpData.Scan0
+
+        '    ' Declare an array to hold the bytes of the bitmap.
+        '    ' This code is specific to a bitmap with 24 bits per pixels.
+        '    Dim bytes As Integer = Math.Abs(bmpData.Stride) * b.Height
+        '    Dim rgbValues(bytes - 1) As Byte
+
+        '    '' Copy the RGB values into the array.
+        '    'System.Runtime.InteropServices.Marshal.Copy(ptr, rgbValues, 0, bytes)
+
+        '    '' Set every third value to 255. A 24bpp image will look red.
+        '    'For counter As Integer = 2 To rgbValues.Length - 1 Step 3
+        '    '    rgbValues(counter) = 255
+        '    'Next
+
+        '    ' Copy the RGB values back to the bitmap
+        '    System.Runtime.InteropServices.Marshal.Copy(dark, 0, ptr, dark.Count)
+
+        '' Unlock the bits.
+        'bm.UnlockBits(raw)
 
 
 
-        Else '
+
+
+        'Else '
 
 
 
 
 
-        End If
+        'End If
 
         'imageInUse = imageInUse + 1
         Dim iTotBytes As Integer = 0
@@ -203,7 +219,7 @@ Public Class frmGIGE
 
 
 
-        If cbMeteors.Checked Then
+        If cbMeteors.Checked And lblDayNight.Text.ToLower = "night" Then
             ' md.examine(bm, filename)
             'call azure service
             Dim ms As New MemoryStream()
@@ -213,7 +229,9 @@ Public Class frmGIGE
             Dim qe As New queueEntry
             qe.img = contents
             qe.filename = Path.GetFileName(filename)
-            myDetectionQueue.Enqueue(qe)
+            If myDetectionQueue.Count < 10 Then
+                myDetectionQueue.Enqueue(qe)
+            End If
 
             ms.Close()
         Else
@@ -312,7 +330,7 @@ Public Class frmGIGE
 
     End Sub
 
-    Private Sub Button1_Click(sender As Object, e As EventArgs) Handles Button1.Click
+    Private Sub Button1_Click(sender As Object, e As EventArgs)
         'open the camera
 
     End Sub
@@ -375,8 +393,8 @@ Public Class frmGIGE
     End Sub
 
     Private Sub Button6_Click(sender As Object, e As EventArgs) Handles Button6.Click
-        Button6.Enabled = True
-        Button4.Enabled = False
+        Button5.Enabled = True
+        Button6.Enabled = False
         myWebServer.StopWebServer()
     End Sub
 
@@ -399,7 +417,7 @@ Public Class frmGIGE
                 If night Then
 
                     tbExposureTime.Text = tbNightExp.Text
-                    lblDayNight.Text = "night"
+
                     'night mode
                     ' If Not myWebServer Is Nothing Then
                     If cbUseDarks.Checked Then
@@ -408,15 +426,19 @@ Public Class frmGIGE
                         ' gigeGrabber.useDarks = False
                     End If
                     'End If
-                    gigeGrabber.setParams(Val(Me.tbExposureTime.Text), Val(Me.tbNightAgain.Text))
+                    tbGain.Text = tbNightAgain.Text
+                    lblDayNight.Text = "night"
+                    ' gigeGrabber.setParams(Val(Me.tbExposureTime.Text), Val(Me.tbNightAgain.Text))
 
                 Else
                     'day mode
 
                     tbExposureTime.Text = tbDayTimeExp.Text
 
+
+                    tbGain.Text = tbDayGain.Text
                     lblDayNight.Text = "day"
-                    gigeGrabber.setParams(Val(Me.tbExposureTime.Text), Val(Me.tbDayGain.Text))
+
 
 
                 End If
@@ -437,7 +459,7 @@ Public Class frmGIGE
     Private Sub Button4_Click(sender As Object, e As EventArgs) Handles Button4.Click
 
         Button2.Enabled = True
-        Button1.Enabled = False
+        Button4.Enabled = False
         If Now.Hour >= cboNight.SelectedItem Or Now.Hour <= cboDay.SelectedItem Then
             night = True
         Else
@@ -483,8 +505,9 @@ Public Class frmGIGE
 
         gigeGrabber = New BaumerAPI.GIGEGrabber()
         gigeGrabber.openCamera(cmbCam.SelectedItem)
-
-
+        gigeGrabber.useDarks = cbUseDarks.Checked
+        gigeGrabber.pixelCutOff = Val(tbCutoff.Text)
+        gigeGrabber.darkMultiplier = Val(tbMultiplier.Text)
         'Timer2.Enabled = True
 
 
@@ -525,10 +548,11 @@ Public Class frmGIGE
         gigeGrabber.stopAcquisition()
         mThread.Abort()
         meteorCheckRunning = False
-
+        Button3.Enabled = False
+        Button4.Enabled = True
     End Sub
 
-    Private Sub Button7_Click(sender As Object, e As EventArgs) Handles Button7.Click
+    Private Sub Button7_Click(sender As Object, e As EventArgs)
         Dim test As New Bitmap("img_09Nov2018-021150.bmp")
         Dim filename As String
         Dim folderName = String.Format("{0:yyyy-MMM-dd}", DateTime.Now)
@@ -558,6 +582,36 @@ Public Class frmGIGE
 
         Else
             ' md.LoadModel("c:\tmp\frozen_inference_graph.pb", "c:\tmp\object-detection.pbtxt")
+        End If
+    End Sub
+
+    Private Sub tbGain_TextChanged(sender As Object, e As EventArgs) Handles tbGain.TextChanged
+        If Not gigeGrabber Is Nothing Then
+            gigeGrabber.setParams(Val(Me.tbExposureTime.Text), Val(Me.tbGain.Text))
+        End If
+
+    End Sub
+
+    Private Sub Button2_Click(sender As Object, e As EventArgs) Handles Button2.Click
+
+    End Sub
+
+    Private Sub cbUseDarks_CheckedChanged(sender As Object, e As EventArgs) Handles cbUseDarks.CheckedChanged
+        If Not gigeGrabber Is Nothing Then
+            gigeGrabber.useDarks = cbUseDarks.Checked
+        End If
+
+    End Sub
+
+    Private Sub tbCutoff_TextChanged(sender As Object, e As EventArgs) Handles tbCutoff.TextChanged
+        If Not gigeGrabber Is Nothing Then
+            gigeGrabber.pixelCutOff = Val(tbCutoff.Text)
+        End If
+    End Sub
+
+    Private Sub tbMultiplier_TextChanged(sender As Object, e As EventArgs) Handles tbMultiplier.TextChanged
+        If Not gigeGrabber Is Nothing Then
+            gigeGrabber.darkMultiplier = Val(tbMultiplier.Text)
         End If
     End Sub
 End Class

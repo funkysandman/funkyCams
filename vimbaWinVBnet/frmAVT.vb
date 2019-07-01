@@ -244,7 +244,7 @@ Public Class frmAVT
 
 
         End If
-        If cbMeteors.Checked Then
+        If cbMeteors.Checked And lblDayNight.Text = "night" Then
             ' md.examine(bm, filename)
             'call azure service
             Dim ms As New MemoryStream()
@@ -254,7 +254,9 @@ Public Class frmAVT
             Dim qe As New queueEntry
             qe.img = contents
             qe.filename = Path.GetFileName(filename)
-            myDetectionQueue.Enqueue(qe)
+            If myDetectionQueue.Count < 10 Then
+                myDetectionQueue.Enqueue(qe)
+            End If
             'myDetectionQueue.Enqueue(New queueEntry(contents,))
             'callAzureMeteorDetection(contents, Path.GetFileName(filename))
             ms.Close()
@@ -311,7 +313,7 @@ Public Class frmAVT
     End Function
 
     Public Sub writeline(s As String)
-        Console.WriteLine("AVT GigE: " & v.m_Camera.Id & ":" & s)
+        'Console.WriteLine("AVT GigE: " & v.m_Camera.Id & ":" & s)
     End Sub
 
     Private Sub startup()
@@ -357,17 +359,17 @@ Public Class frmAVT
                 If night Then
 
                     'tbExposureTime.Text = tbNightExp.Text
-                    'lblDayNight.Text = "night"
+                    lblDayNight.Text = "night"
                     ''night mode
                     ''   m_CCamera.setGainExposure(Val(Me.tbNightAgain.Text), Val(Me.tbExposureTime.Text))
-                    v.m_Camera.LoadCameraSettings(Application.StartupPath & "\night_gc1380ch.xml")
+
                 Else
-                    v.m_Camera.LoadCameraSettings(Application.StartupPath & "\day_gc1380ch.xml")
+                    'v.m_Camera.LoadCameraSettings(Application.StartupPath & "\day_gc1380ch.xml")
                     'day mode
 
                     'tbExposureTime.Text = tbDayTimeExp.Text
 
-                    'lblDayNight.Text = "day"
+                    lblDayNight.Text = "day"
                     '' m_CCamera.setGainExposure(Val(Me.tbDayGain.Text), Val(Me.tbExposureTime.Text))
 
 
@@ -578,22 +580,31 @@ Public Class frmAVT
         '    cbCam.Focus()
         '    Exit Sub
 
-        'End If
         Button7.Enabled = False
-        Button8.Enabled = True
-        startTime = Now
+            Button8.Enabled = True
+            startTime = Now
         Timer1.Enabled = True
         Timer3.Enabled = True
         meteorCheckRunning = True
-        t = New Thread(AddressOf processDetection)
-        t.Start()
+        If t Is Nothing Then
 
-        'If Now.Hour >= ComboBox2.SelectedItem Or Now.Hour <= ComboBox1.SelectedItem Then
-        '    night = True 'night
-        'Else
-        '    night = False 'day
-        'End If
-        v.StartContinuousImageAcquisition(AddressOf Me.received_frame)
+            t = New Thread(AddressOf processDetection)
+                t.Start()
+
+        Else
+            If Not t.IsAlive Then
+                t = New Thread(AddressOf processDetection)
+                t.Start()
+            End If
+        End If
+
+
+            'If Now.Hour >= ComboBox2.SelectedItem Or Now.Hour <= ComboBox1.SelectedItem Then
+            '    night = True 'night
+            'Else
+            '    night = False 'day
+            'End If
+            v.StartContinuousImageAcquisition(AddressOf Me.received_frame)
 
         'myCam.StartContinuousImageAcquisition(1)
         'myCam.StartCapture()
@@ -602,6 +613,7 @@ Public Class frmAVT
     Private Sub Button8_Click(sender As Object, e As EventArgs) Handles Button8.Click
         Button7.Enabled = True
         Button8.Enabled = False
+
         v.StopContinuousImageAcquisition()
         meteorCheckRunning = False
         'myCam.StopContinuousImageAcquisition()
@@ -710,9 +722,18 @@ Public Class frmAVT
 
 
 
+    Private Sub lblDayNight_TextChanged(sender As Object, e As EventArgs) Handles lblDayNight.TextChanged
+        If Not v Is Nothing Then
+            If lblDayNight.Text = "night" Then
+                v.m_Camera.LoadCameraSettings(Application.StartupPath & "\night_gc1380ch.xml")
+            Else
+                v.m_Camera.LoadCameraSettings(Application.StartupPath & "\day_gc1380ch.xml")
+            End If
+        End If
 
+    End Sub
 
+    Private Sub lblDayNight_Click(sender As Object, e As EventArgs) Handles lblDayNight.Click
 
-
-
+    End Sub
 End Class

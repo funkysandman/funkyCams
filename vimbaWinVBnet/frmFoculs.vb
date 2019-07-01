@@ -239,7 +239,7 @@ Public Class frmFoculs
         Button2.Enabled = False
         Call Timer1_Tick(sender, e)
 
-        '
+
         AxFGControlCtrl2.ExposureTimeAuto = "Off"
         AxFGControlCtrl2.SetLUTKneePoint(0, 525, 1290)
         AxFGControlCtrl2.SetLUTKneePoint(1, 1290, 1980)
@@ -249,16 +249,16 @@ Public Class frmFoculs
 
         AxFGControlCtrl2.PixelFormat = 8
         AxFGControlCtrl2.Flip = 1
-        AxFGControlCtrl2.BytePerPacket = 1000
+        AxFGControlCtrl2.BytePerPacket = 600
         AxFGControlCtrl2.AcquisitionMode = "Continuous"
         AxFGControlCtrl2.SetExposureTimeString("75ms")
         Me.AxFGControlCtrl2.SetGain("", Val(Me.tbGain.Text))
         Me.AxFGControlCtrl2.SetExposureTimeString(tbExposureTime.Text)
         If (night) Then
-            AxFGControlCtrl2.KneeLUTEnable = True
+            AxFGControlCtrl2.KneeLUTEnable = Me.cbKneeLut.Checked
             AxFGControlCtrl2.ExposureTimeAuto = "Off"
         Else
-            AxFGControlCtrl2.KneeLUTEnable = False
+            AxFGControlCtrl2.KneeLUTEnable = Me.cbKneeLut.Checked
             AxFGControlCtrl2.ExposureTimeAuto = "Off"
             AxFGControlCtrl2.AcquisitionMode = "Continuous"
             AxFGControlCtrl2.AutoExposure = 20
@@ -416,12 +416,14 @@ Public Class frmFoculs
         While (meteorCheckRunning)
             If myDetectionQueue.Count > 0 Then
                 aQE = myDetectionQueue.Dequeue()
+
                 CallAzureMeteorDetection(aQE.img, aQE.filename)
 
-                aQE = Nothing
 
-            End If
-            Console.WriteLine("in the queue:{0}", myDetectionQueue.Count)
+                    aQE = Nothing
+
+                End If
+                Console.WriteLine("in the queue:{0}", myDetectionQueue.Count)
             Thread.Sleep(100)
         End While
 
@@ -512,26 +514,26 @@ Public Class frmFoculs
 
             Marshal.Copy(rawData, 0, ptr, bytes)
             b8.UnlockBits(bmpData)
-            b8.RotateFlip(RotateFlipType.Rotate180FlipX)
-            b8.RotateFlip(RotateFlipType.Rotate180FlipY)
+            b8.RotateFlip(RotateFlipType.Rotate180FlipNone)
+            Dim b As New Bitmap(b8)
             ' myBitmap.Save("Shapes025.jpg", myImageCodecInfo, myEncoderParameters)
             Dim firstLocation As PointF = New PointF(10.0F, 10.0F)
             Dim firstText As String = String.Format("{0:dd-MMM-yyyy HH:mm:ss}", DateTime.Now)
             'b = bm.Clone
-            'Dim gr As Graphics = Graphics.FromImage(b8)
-            'Dim myFontLabels As New Font("Arial", 16, GraphicsUnit.Pixel)
-            'Dim myBrushLabels As New SolidBrush(Color.White)
+            Dim gr As Graphics = Graphics.FromImage(b)
+            Dim myFontLabels As New Font("Arial", 16, GraphicsUnit.Pixel)
+            Dim myBrushLabels As New SolidBrush(Color.White)
 
-            'gr.DrawString(firstText, myFontLabels, Brushes.GreenYellow, firstLocation) '# last 2 number are X and Y coords.
-            'gr.Dispose()
-            'myFontLabels.Dispose()
+            gr.DrawString(firstText, myFontLabels, Brushes.GreenYellow, firstLocation) '# last 2 number are X and Y coords.
+            gr.Dispose()
+            myFontLabels.Dispose()
             'object detection section test
             '
             'Dim t As New Threading.Thread(AddressOf checkForThings)
             ''t.Start()
             'If frames Mod 3 = 0 Then
 
-
+            b8 = New Bitmap(b)
             'End If
 
             Dim filename As String
@@ -548,7 +550,7 @@ Public Class frmFoculs
 
 
             End If
-            If Me.cbxMeteor.Checked Then
+            If Me.cbxMeteor.Checked And lblDayNight.Text.ToLower = "night" Then
                 ' md.examine(bm, filename)
                 'call azure service
                 Dim ms As New MemoryStream()
@@ -558,7 +560,9 @@ Public Class frmFoculs
                 Dim qe As New queueEntry
                 qe.img = contents
                 qe.filename = Path.GetFileName(filename)
-                myDetectionQueue.Enqueue(qe)
+                If myDetectionQueue.Count < 10 Then
+                    myDetectionQueue.Enqueue(qe)
+                End If
 
                 ms.Close()
 
@@ -575,6 +579,20 @@ Public Class frmFoculs
             ' myForm.writeline("error on firewire image received:" & ex.Message)
         End Try
     End Sub
+
+    Private Sub lblDayNight_TextChanged(sender As Object, e As EventArgs) Handles lblDayNight.TextChanged
+        Try
+            Me.AxFGControlCtrl2.SetGain("", Val(Me.tbGain.Text))
+            Me.AxFGControlCtrl2.SetExposureTimeString(tbExposureTime.Text)
+        Catch
+        End Try
+
+
+    End Sub
+
+    'Private Sub lblDayNight_Click(sender As Object, e As EventArgs) Handles lblDayNight.Click
+
+    'End Sub
 
     'Private Sub Button7_Click(sender As Object, e As EventArgs) Handles Button7.Click
     '    initCamera()

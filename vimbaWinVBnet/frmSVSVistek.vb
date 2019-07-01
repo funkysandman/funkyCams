@@ -18,7 +18,7 @@ Public Class frmSVSVistek
     Private startTime As DateTime
     Private gotFrameTime As DateTime
     Private dark() As Byte
-    Private md As New ObjectDetection.TFDetector()
+    ' Private md As New ObjectDetection.TFDetector()
     Private myImageCodecInfo As ImageCodecInfo
     Private myEncoder As System.Drawing.Imaging.Encoder
     Private myEncoderParameter As EncoderParameter
@@ -201,12 +201,12 @@ Public Class frmSVSVistek
 
 
         End If
-        If cbMeteors.Checked Then
-            md.examine(b, filename)
-        Else
-            md.examine(b)
-            md.drawBoxesOnly(b)
-        End If
+        'If cbMeteors.Checked Then
+        '    md.examine(b, filename)
+        'Else
+        '    md.examine(b)
+        '    md.drawBoxesOnly(b)
+        'End If
         running = False
         gotFrameTime = Now
 
@@ -534,7 +534,7 @@ Public Class frmSVSVistek
 
         mySVCam.stopAcquisitionThread()
         mySVCam = Nothing
-        md = Nothing
+        'md = Nothing
         myWebServer.StopWebServer()
         myWebServer = Nothing
 

@@ -431,10 +431,16 @@ namespace AsynchronousGrab
             {
                 throw new Exception("No camera open.");
             }
+            // 
+            //this.MyCamera.StopContinuousImageAcquisition();
 
             // Close camera
+            this.MyCamera.EndCapture();
+        
             this.m_timeoutThread.Abort();
-            this.ReleaseCamera();
+            this.MyCamera.Close();
+            this.MyCamera.Open(VmbAccessModeType.VmbAccessModeFull);
+            
         }
 
         /// <summary>

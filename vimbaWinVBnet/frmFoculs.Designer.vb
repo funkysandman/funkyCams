@@ -53,6 +53,7 @@ Partial Class frmFoculs
         Me.Label5 = New System.Windows.Forms.Label()
         Me.tbPath = New System.Windows.Forms.TextBox()
         Me.cbxMeteor = New System.Windows.Forms.CheckBox()
+        Me.cbKneeLut = New System.Windows.Forms.CheckBox()
         CType(Me.AxFGControlCtrl2, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
         '
@@ -253,10 +254,6 @@ Partial Class frmFoculs
         Me.lblDayNight.TabIndex = 25
         Me.lblDayNight.Text = "night"
         '
-        'AxFGControlCtrl1
-        '
-
-        '
         'AxFGControlCtrl2
         '
         Me.AxFGControlCtrl2.Enabled = True
@@ -327,11 +324,24 @@ Partial Class frmFoculs
         Me.cbxMeteor.Text = "detect meteors"
         Me.cbxMeteor.UseVisualStyleBackColor = True
         '
+        'cbKneeLut
+        '
+        Me.cbKneeLut.AutoSize = True
+        Me.cbKneeLut.Checked = True
+        Me.cbKneeLut.CheckState = System.Windows.Forms.CheckState.Checked
+        Me.cbKneeLut.Location = New System.Drawing.Point(589, 76)
+        Me.cbKneeLut.Name = "cbKneeLut"
+        Me.cbKneeLut.Size = New System.Drawing.Size(81, 17)
+        Me.cbKneeLut.TabIndex = 105
+        Me.cbKneeLut.Text = "cbKneeLut "
+        Me.cbKneeLut.UseVisualStyleBackColor = True
+        '
         'frmFoculs
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.ClientSize = New System.Drawing.Size(685, 465)
+        Me.Controls.Add(Me.cbKneeLut)
         Me.Controls.Add(Me.cbxMeteor)
         Me.Controls.Add(Me.cbSaveImages)
         Me.Controls.Add(Me.Button10)
@@ -396,4 +406,5 @@ Partial Class frmFoculs
     Friend WithEvents Label5 As System.Windows.Forms.Label
     Friend WithEvents tbPath As System.Windows.Forms.TextBox
     Friend WithEvents cbxMeteor As System.Windows.Forms.CheckBox
+    Friend WithEvents cbKneeLut As CheckBox
 End Class

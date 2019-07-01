@@ -139,29 +139,29 @@ namespace CSharpPreviewManDrv
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(7, 17);
+            this.button1.Location = new System.Drawing.Point(6, 15);
             this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(96, 37);
+            this.button1.Size = new System.Drawing.Size(80, 32);
             this.button1.TabIndex = 1;
             this.button1.Text = "GrabFrame";
             this.button1.Click += new System.EventHandler(this.OnGrabFrame);
             // 
             // checkBox1
             // 
-            this.checkBox1.Location = new System.Drawing.Point(7, 61);
+            this.checkBox1.Location = new System.Drawing.Point(6, 53);
             this.checkBox1.Name = "checkBox1";
-            this.checkBox1.Size = new System.Drawing.Size(96, 23);
+            this.checkBox1.Size = new System.Drawing.Size(80, 20);
             this.checkBox1.TabIndex = 3;
             this.checkBox1.Text = "Streaming";
             this.checkBox1.Click += new System.EventHandler(this.OnStream);
             // 
             // tbExposure
             // 
-            this.tbExposure.Location = new System.Drawing.Point(4, 22);
+            this.tbExposure.Location = new System.Drawing.Point(3, 19);
             this.tbExposure.Maximum = 1000;
             this.tbExposure.Minimum = 10;
             this.tbExposure.Name = "tbExposure";
-            this.tbExposure.Size = new System.Drawing.Size(124, 56);
+            this.tbExposure.Size = new System.Drawing.Size(104, 45);
             this.tbExposure.TabIndex = 4;
             this.tbExposure.TickFrequency = 100;
             this.tbExposure.TickStyle = System.Windows.Forms.TickStyle.Both;
@@ -171,9 +171,9 @@ namespace CSharpPreviewManDrv
             // lblExposureVal
             // 
             this.lblExposureVal.AutoSize = true;
-            this.lblExposureVal.Location = new System.Drawing.Point(139, 37);
+            this.lblExposureVal.Location = new System.Drawing.Point(116, 32);
             this.lblExposureVal.Name = "lblExposureVal";
-            this.lblExposureVal.Size = new System.Drawing.Size(46, 17);
+            this.lblExposureVal.Size = new System.Drawing.Size(35, 13);
             this.lblExposureVal.TabIndex = 6;
             this.lblExposureVal.Text = "10 ms";
             // 
@@ -184,9 +184,9 @@ namespace CSharpPreviewManDrv
             this.panel1.Controls.Add(this.gbExposure);
             this.panel1.Controls.Add(this.gbAcquisition);
             this.panel1.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.panel1.Location = new System.Drawing.Point(0, 547);
+            this.panel1.Location = new System.Drawing.Point(0, 558);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(712, 86);
+            this.panel1.Size = new System.Drawing.Size(712, 75);
             this.panel1.TabIndex = 7;
             // 
             // gbInfo
@@ -194,9 +194,9 @@ namespace CSharpPreviewManDrv
             this.gbInfo.Controls.Add(this.lblSerNum);
             this.gbInfo.Controls.Add(this.lblCameraModel);
             this.gbInfo.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.gbInfo.Location = new System.Drawing.Point(510, 0);
+            this.gbInfo.Location = new System.Drawing.Point(425, 0);
             this.gbInfo.Name = "gbInfo";
-            this.gbInfo.Size = new System.Drawing.Size(202, 86);
+            this.gbInfo.Size = new System.Drawing.Size(287, 75);
             this.gbInfo.TabIndex = 10;
             this.gbInfo.TabStop = false;
             this.gbInfo.Text = "Info";
@@ -204,18 +204,18 @@ namespace CSharpPreviewManDrv
             // lblSerNum
             // 
             this.lblSerNum.AutoSize = true;
-            this.lblSerNum.Location = new System.Drawing.Point(8, 38);
+            this.lblSerNum.Location = new System.Drawing.Point(7, 33);
             this.lblSerNum.Name = "lblSerNum";
-            this.lblSerNum.Size = new System.Drawing.Size(48, 17);
+            this.lblSerNum.Size = new System.Drawing.Size(36, 13);
             this.lblSerNum.TabIndex = 2;
             this.lblSerNum.Text = "Serial:";
             // 
             // lblCameraModel
             // 
             this.lblCameraModel.AutoSize = true;
-            this.lblCameraModel.Location = new System.Drawing.Point(7, 18);
+            this.lblCameraModel.Location = new System.Drawing.Point(6, 16);
             this.lblCameraModel.Name = "lblCameraModel";
-            this.lblCameraModel.Size = new System.Drawing.Size(50, 17);
+            this.lblCameraModel.Size = new System.Drawing.Size(39, 13);
             this.lblCameraModel.TabIndex = 1;
             this.lblCameraModel.Text = "Model:";
             // 
@@ -224,9 +224,9 @@ namespace CSharpPreviewManDrv
             this.gbGain.Controls.Add(this.lblGainVal);
             this.gbGain.Controls.Add(this.tbGain);
             this.gbGain.Dock = System.Windows.Forms.DockStyle.Left;
-            this.gbGain.Location = new System.Drawing.Point(324, 0);
+            this.gbGain.Location = new System.Drawing.Point(270, 0);
             this.gbGain.Name = "gbGain";
-            this.gbGain.Size = new System.Drawing.Size(186, 86);
+            this.gbGain.Size = new System.Drawing.Size(155, 75);
             this.gbGain.TabIndex = 9;
             this.gbGain.TabStop = false;
             this.gbGain.Text = "Gain";
@@ -234,17 +234,17 @@ namespace CSharpPreviewManDrv
             // lblGainVal
             // 
             this.lblGainVal.AutoSize = true;
-            this.lblGainVal.Location = new System.Drawing.Point(133, 38);
+            this.lblGainVal.Location = new System.Drawing.Point(111, 33);
             this.lblGainVal.Name = "lblGainVal";
-            this.lblGainVal.Size = new System.Drawing.Size(16, 17);
+            this.lblGainVal.Size = new System.Drawing.Size(13, 13);
             this.lblGainVal.TabIndex = 1;
             this.lblGainVal.Text = "0";
             // 
             // tbGain
             // 
-            this.tbGain.Location = new System.Drawing.Point(2, 22);
+            this.tbGain.Location = new System.Drawing.Point(2, 19);
             this.tbGain.Name = "tbGain";
-            this.tbGain.Size = new System.Drawing.Size(125, 56);
+            this.tbGain.Size = new System.Drawing.Size(104, 45);
             this.tbGain.TabIndex = 0;
             this.tbGain.TickFrequency = 200;
             this.tbGain.TickStyle = System.Windows.Forms.TickStyle.Both;
@@ -256,9 +256,9 @@ namespace CSharpPreviewManDrv
             this.gbExposure.Controls.Add(this.tbExposure);
             this.gbExposure.Controls.Add(this.lblExposureVal);
             this.gbExposure.Dock = System.Windows.Forms.DockStyle.Left;
-            this.gbExposure.Location = new System.Drawing.Point(113, 0);
+            this.gbExposure.Location = new System.Drawing.Point(94, 0);
             this.gbExposure.Name = "gbExposure";
-            this.gbExposure.Size = new System.Drawing.Size(211, 86);
+            this.gbExposure.Size = new System.Drawing.Size(176, 75);
             this.gbExposure.TabIndex = 8;
             this.gbExposure.TabStop = false;
             this.gbExposure.Text = "Exposure";
@@ -270,22 +270,22 @@ namespace CSharpPreviewManDrv
             this.gbAcquisition.Dock = System.Windows.Forms.DockStyle.Left;
             this.gbAcquisition.Location = new System.Drawing.Point(0, 0);
             this.gbAcquisition.Name = "gbAcquisition";
-            this.gbAcquisition.Size = new System.Drawing.Size(113, 86);
+            this.gbAcquisition.Size = new System.Drawing.Size(94, 75);
             this.gbAcquisition.TabIndex = 7;
             this.gbAcquisition.TabStop = false;
             this.gbAcquisition.Text = "Acquisition";
             // 
             // pictureBox1
             // 
-            this.pictureBox1.Location = new System.Drawing.Point(44, 40);
+            this.pictureBox1.Location = new System.Drawing.Point(37, 35);
             this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(608, 470);
+            this.pictureBox1.Size = new System.Drawing.Size(506, 407);
             this.pictureBox1.TabIndex = 8;
             this.pictureBox1.TabStop = false;
             // 
             // Form1
             // 
-            this.AutoScaleBaseSize = new System.Drawing.Size(6, 15);
+            this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
             this.ClientSize = new System.Drawing.Size(712, 633);
             this.Controls.Add(this.pictureBox1);
             this.Controls.Add(this.panel1);
