@@ -41,7 +41,7 @@ Partial Class frmGIGE
         Me.tbMultiplier = New System.Windows.Forms.TextBox()
         Me.Button3 = New System.Windows.Forms.Button()
         Me.Button2 = New System.Windows.Forms.Button()
-        Me.Button4 = New System.Windows.Forms.Button()
+        Me.btnStart = New System.Windows.Forms.Button()
         Me.cbSaveImages = New System.Windows.Forms.CheckBox()
         Me.Label8 = New System.Windows.Forms.Label()
         Me.Label7 = New System.Windows.Forms.Label()
@@ -215,14 +215,14 @@ Partial Class frmGIGE
         Me.Button2.Text = "take darks"
         Me.Button2.UseVisualStyleBackColor = True
         '
-        'Button4
+        'btnStart
         '
-        Me.Button4.Location = New System.Drawing.Point(28, 120)
-        Me.Button4.Name = "Button4"
-        Me.Button4.Size = New System.Drawing.Size(62, 23)
-        Me.Button4.TabIndex = 94
-        Me.Button4.Text = "Start snapshots"
-        Me.Button4.UseVisualStyleBackColor = True
+        Me.btnStart.Location = New System.Drawing.Point(28, 120)
+        Me.btnStart.Name = "btnStart"
+        Me.btnStart.Size = New System.Drawing.Size(62, 23)
+        Me.btnStart.TabIndex = 94
+        Me.btnStart.Text = "Start snapshots"
+        Me.btnStart.UseVisualStyleBackColor = True
         '
         'cbSaveImages
         '
@@ -371,7 +371,7 @@ Partial Class frmGIGE
         Me.tbCutoff.Name = "tbCutoff"
         Me.tbCutoff.Size = New System.Drawing.Size(42, 20)
         Me.tbCutoff.TabIndex = 105
-        Me.tbCutoff.Text = "3500"
+        Me.tbCutoff.Text = "500"
         '
         'Label1
         '
@@ -478,7 +478,7 @@ Partial Class frmGIGE
         Me.Controls.Add(Me.tbMultiplier)
         Me.Controls.Add(Me.Button3)
         Me.Controls.Add(Me.Button2)
-        Me.Controls.Add(Me.Button4)
+        Me.Controls.Add(Me.btnStart)
         Me.Controls.Add(Me.cbSaveImages)
         Me.Controls.Add(Me.Label8)
         Me.Controls.Add(Me.Label7)
@@ -526,7 +526,7 @@ Partial Class frmGIGE
     Friend WithEvents tbMultiplier As TextBox
     Friend WithEvents Button3 As Button
     Friend WithEvents Button2 As Button
-    Friend WithEvents Button4 As Button
+    Friend WithEvents btnStart As Button
     Friend WithEvents cbSaveImages As CheckBox
     Friend WithEvents Label8 As Label
     Friend WithEvents Label7 As Label

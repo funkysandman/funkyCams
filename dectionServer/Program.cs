@@ -268,10 +268,7 @@ namespace DetectionServer
                 {
                     //Console.WriteLine("nothing found");
                     //Bitmap b;
-                    //using (var imagems = new MemoryStream(qe.img))
-                    //{
-                    //    b = new Bitmap(imagems);
-                    //}
+                    //b = new Bitmap(i);
                     //Console.WriteLine("about to save bmp");
                     //Bitmap c = new Bitmap(b);
                     //c.Save("e:\\notfound\\" + qe.filename);
@@ -333,7 +330,7 @@ namespace DetectionServer
                 
                 ws.Run();
                 //Console.WriteLine("A simple webserver. Press a key to quit.");
-                //Console.ReadKey();
+                Console.ReadKey();
                 ws.Stop();
             }
         }

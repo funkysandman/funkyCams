@@ -314,11 +314,11 @@ namespace BaumerAPI
 
             
         }
-        public void setParams(int duration, float aGain)
+        public void setParams(int duration, int aGain)
         {
 
             mDevice.RemoteNodeList["ExposureTime"].Value = duration;
-
+            mDevice.RemoteNodeList["GainRaw"].Value = aGain;
             mDevice.RemoteNodeList["AcquisitionMode"].Value = "Continuous";
 
            
@@ -671,6 +671,13 @@ namespace BaumerAPI
             System.Console.Write("######################\r\n\r\n");
         }
 
+        public void closeCamera()
+        { 
+                mDevice.Close();
+                mInterface.Close();
+                mSystem.Close();
+        }
+
         public void startCapture(FrameReceivedHandler frh)
         {
             m_frh = frh;
@@ -897,7 +904,43 @@ namespace BaumerAPI
 
         }
 
+         int reversebits(int aNum,bool lsb)
+        {
+            int newNum = 0;
+            if (lsb)
+            {
+                newNum = Math.Sign(aNum & 0b1000_0000_0000) * (1);
+                newNum = newNum + (Math.Sign(aNum & 0b0100_0000_0000) * (2));
+                newNum = newNum + (Math.Sign(aNum & 0b0010_0000_0000) * (4));
+                newNum = newNum + (Math.Sign(aNum & 0b0001_0000_0000) * (8));
+                newNum = newNum + (Math.Sign(aNum & 0b0000_1000_0000) * (16));
+                newNum = newNum + (Math.Sign(aNum & 0b0000_0100_0000) * (32));
+                newNum = newNum + (Math.Sign(aNum & 0b0000_0010_0000) * (64));
+                newNum = newNum + (Math.Sign(aNum & 0b0000_0001_0000) * (128));
+                newNum = newNum + (Math.Sign(aNum & 0b0000_0000_1000) * (256));
+                newNum = newNum + (Math.Sign(aNum & 0b0000_0000_0100) * (512));
+                newNum = newNum + (Math.Sign(aNum & 0b0000_0000_0010) * (1024));
+                newNum = newNum + (Math.Sign(aNum & 0b0000_0000_0001) * (2048));
+            }
+            else
+            {
+                newNum = Math.Sign(aNum & 0b1000_0000_0000) * (2048);
+                newNum = newNum + (Math.Sign(aNum & 0b0100_0000_0000) * (1024));
+                newNum = newNum + (Math.Sign(aNum & 0b0010_0000_0000) * (512));
+                newNum = newNum + (Math.Sign(aNum & 0b0001_0000_0000) * (256));
+                newNum = newNum + (Math.Sign(aNum & 0b0000_1000_0000) * (128));
+                newNum = newNum + (Math.Sign(aNum & 0b0000_0100_0000) * (64));
+                newNum = newNum + (Math.Sign(aNum & 0b0000_0010_0000) * (32));
+                newNum = newNum + (Math.Sign(aNum & 0b0000_0001_0000) * (16));
+                newNum = newNum + (Math.Sign(aNum & 0b0000_0000_1000) * (8));
+                newNum = newNum + (Math.Sign(aNum & 0b0000_0000_0100) * (4));
+                newNum = newNum + (Math.Sign(aNum & 0b0000_0000_0010) * (2));
+                newNum = newNum + (Math.Sign(aNum & 0b0000_0000_0001) * (1));
+            }
 
+
+            return newNum;
+        }
         void processImage(BGAPI2.Buffer mBufferFilled)
     {
         //load image into Bitmap
@@ -922,49 +965,60 @@ namespace BaumerAPI
             int dpixel1, dpixel2, dpixel3, dpixel4;
             byte byte1, byte2, byte3, byte4, byte5, byte6;
             byte dbyte1, dbyte2, dbyte3, dbyte4, dbyte5, dbyte6;
-           //File.WriteAllBytes("test.raw",imageBufferCopy);
-            for (int k = 0; k < imageBufferCopy.Length-1; k=k+3)
+            string filename;
+
+            filename = String.Format("{0}{1:ddMMMyyyy-HHmmss}.raw", "dark_", DateTime.Now);
+          // File.WriteAllBytes(filename,imageBufferCopy);
+            for (int k = 0; k < imageBufferCopy.Length-1; k=k+1)
             {
                 //unpack 2 pixels in 3 bytes
                 byte1 = imageBufferCopy[k];
-                byte2 = imageBufferCopy[k+1]; 
-                byte3 = imageBufferCopy[k+2];
+               // byte2 = imageBufferCopy[k+1]; 
+               // byte3 = imageBufferCopy[k+2];
 
 
                 dbyte1 = masterDark[k];
-                dbyte2 = masterDark[k + 1];
-                dbyte3 = masterDark[k + 2];
+                //  dbyte2 = masterDark[k + 1];
+                //  dbyte3 = masterDark[k + 2];
 
 
-                pixel1 = (byte1 << 4) | ((byte2 & 0b1111_0000) >> 4);
-                pixel2 =  ((byte2 & 0b0000_1111) << 8 ) | byte3;
+                //  pixel1 = (byte1 << 4) | ((byte2 & 0b1111_0000) >> 4);
+                //  pixel2 =  ((byte2 & 0b0000_1111) << 8 ) | byte3;
 
 
-                dpixel1 = (dbyte1 << 4) | ((dbyte2 & 0b1111_0000) >> 4);
-                dpixel2 = ((dbyte2 & 0b0000_1111) << 8) | dbyte3;
+                //  dpixel1 = (dbyte1 << 4) | ((dbyte2 & 0b1111_0000) >> 4);
+                //  dpixel2 = ((dbyte2 & 0b0000_1111) << 8) | dbyte3;
 
+                //pixel1 = reversebits(pixel1,true);
+                //pixel2 = reversebits(pixel2,true);
+                //dpixel1 = reversebits(dpixel1,true);
+                //dpixel2 = reversebits(dpixel2,true);
+                pixel1 = (byte1 & 0b1111_0000) >> 4;
+                dpixel1 = (dbyte1 & 0b1111_0000) >> 4;
+                pixel2 = (byte1 & 0b0000_1111);
+                dpixel2 = (dbyte1 & 0b0000_1111);
                 if (useDarks)
-                { 
-                if (dpixel1>pixelCutOff)
                 {
-                    pixel1 = Math.Max(0, pixel1 - dpixel1/darkMultiplier);
-                }
-                if (dpixel2 > pixelCutOff)
-                {
-                    pixel2 = Math.Max(0, pixel2 - dpixel2/ darkMultiplier);
-                }
-                }
 
-                byte1 = (byte)(pixel1 >> 4);
-                byte2 = (byte)(pixel1 & 0b1111);
-                byte2 = (byte)(byte2 << 4);
-                byte2 = (byte)(byte2 | (pixel2 >> 8));
-                byte3 = (byte)(pixel2 & 0b11111111);
+                    //pixel1 = Math.Min(pixel1 + 50, 4095);
+                   // if (dpixel1 > pixelCutOff) { 
+                    pixel1 = Math.Max(pixel1 - dpixel1, 0);
+                  //  }
+
+                 //   if (dpixel2 > pixelCutOff)
+                 //   {
+                        pixel2 = Math.Max(pixel2 - dpixel2, 0);
+                 //   }
+                }
+                //pixel1 = reversebits(pixel1,true);
+                //pixel2 = reversebits(pixel2,true);
+
+                byte1 = (byte)(pixel1 << 4);
+                byte1 = (byte)(byte1 + (pixel2));
                
 
                 imageBufferCopy[k] = byte1;
-                imageBufferCopy[k + 1] =byte2;
-                imageBufferCopy[k + 2] = byte3;
+
 
 
                 //if ((masterDark[k]) > 250)
