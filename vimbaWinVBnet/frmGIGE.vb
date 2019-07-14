@@ -490,7 +490,7 @@ Public Class frmGIGE
 
     Private Sub Button4_Click(sender As Object, e As EventArgs) Handles btnStart.Click
 
-        Button2.Enabled = True
+
         btnStart.Enabled = False
 
         If Now.Hour >= cboNight.SelectedItem Or Now.Hour <= cboDay.SelectedItem Then
@@ -591,7 +591,7 @@ Public Class frmGIGE
 
 
 
-    Private Sub Button2_Click(sender As Object, e As EventArgs) Handles Button2.Click
+    Private Sub Button2_Click(sender As Object, e As EventArgs)
 
     End Sub
 
@@ -645,5 +645,14 @@ Public Class frmGIGE
 
     Private Sub lblDayNight_Click(sender As Object, e As EventArgs) Handles lblDayNight.Click
 
+    End Sub
+
+    Private Sub CheckBox1_CheckedChanged(sender As Object, e As EventArgs) Handles cbMakeDarks.CheckedChanged
+        If Not gigeGrabber Is Nothing Then
+            If Me.lblDayNight.Text = "night" Then
+                gigeGrabber.makeDarks = cbMakeDarks.Checked
+            End If
+
+        End If
     End Sub
 End Class
