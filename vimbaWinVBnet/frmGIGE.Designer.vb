@@ -40,7 +40,6 @@ Partial Class frmGIGE
         Me.cmbCam = New System.Windows.Forms.ComboBox()
         Me.tbMultiplier = New System.Windows.Forms.TextBox()
         Me.Button3 = New System.Windows.Forms.Button()
-        Me.Button2 = New System.Windows.Forms.Button()
         Me.btnStart = New System.Windows.Forms.Button()
         Me.cbSaveImages = New System.Windows.Forms.CheckBox()
         Me.Label8 = New System.Windows.Forms.Label()
@@ -68,6 +67,7 @@ Partial Class frmGIGE
         Me.Label13 = New System.Windows.Forms.Label()
         Me.Label14 = New System.Windows.Forms.Label()
         Me.Label15 = New System.Windows.Forms.Label()
+        Me.cbMakeDarks = New System.Windows.Forms.CheckBox()
         CType(Me.PictureBox1, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
         '
@@ -205,15 +205,6 @@ Partial Class frmGIGE
         Me.Button3.TabIndex = 96
         Me.Button3.Text = "Stop"
         Me.Button3.UseVisualStyleBackColor = True
-        '
-        'Button2
-        '
-        Me.Button2.Location = New System.Drawing.Point(555, 304)
-        Me.Button2.Name = "Button2"
-        Me.Button2.Size = New System.Drawing.Size(64, 38)
-        Me.Button2.TabIndex = 95
-        Me.Button2.Text = "take darks"
-        Me.Button2.UseVisualStyleBackColor = True
         '
         'btnStart
         '
@@ -454,11 +445,22 @@ Partial Class frmGIGE
         Me.Label15.TabIndex = 114
         Me.Label15.Text = "camera:"
         '
+        'cbMakeDarks
+        '
+        Me.cbMakeDarks.AutoSize = True
+        Me.cbMakeDarks.Location = New System.Drawing.Point(455, 308)
+        Me.cbMakeDarks.Name = "cbMakeDarks"
+        Me.cbMakeDarks.Size = New System.Drawing.Size(81, 17)
+        Me.cbMakeDarks.TabIndex = 115
+        Me.cbMakeDarks.Text = "make darks"
+        Me.cbMakeDarks.UseVisualStyleBackColor = True
+        '
         'frmGIGE
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.ClientSize = New System.Drawing.Size(627, 408)
+        Me.Controls.Add(Me.cbMakeDarks)
         Me.Controls.Add(Me.Label15)
         Me.Controls.Add(Me.Label14)
         Me.Controls.Add(Me.Label13)
@@ -477,7 +479,6 @@ Partial Class frmGIGE
         Me.Controls.Add(Me.cmbCam)
         Me.Controls.Add(Me.tbMultiplier)
         Me.Controls.Add(Me.Button3)
-        Me.Controls.Add(Me.Button2)
         Me.Controls.Add(Me.btnStart)
         Me.Controls.Add(Me.cbSaveImages)
         Me.Controls.Add(Me.Label8)
@@ -525,7 +526,6 @@ Partial Class frmGIGE
     Friend WithEvents cmbCam As ComboBox
     Friend WithEvents tbMultiplier As TextBox
     Friend WithEvents Button3 As Button
-    Friend WithEvents Button2 As Button
     Friend WithEvents btnStart As Button
     Friend WithEvents cbSaveImages As CheckBox
     Friend WithEvents Label8 As Label
@@ -553,4 +553,5 @@ Partial Class frmGIGE
     Friend WithEvents Label13 As Label
     Friend WithEvents Label14 As Label
     Friend WithEvents Label15 As Label
+    Friend WithEvents cbMakeDarks As CheckBox
 End Class

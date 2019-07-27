@@ -104,7 +104,7 @@ Public Class frmAVT
         'darks
         ' Dim d2 As Bitmap
 
-        If Me.cbUseDarks.Checked Then
+        If Me.cbUseDarks.Checked And lblDayNight.Text = "night" Then
             'd2 = Bitmap.FromFile(Application.StartupPath & "\dark.png")
             If dark Is Nothing Then
                 Dim fs As New FileStream(Application.StartupPath & "\dark_" & v.m_Camera.Id & ".raw", FileMode.Open)

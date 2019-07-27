@@ -115,6 +115,7 @@ namespace BaumerAPI
         Boolean running = false;
         public byte[] masterDark;
         public bool useDarks = false;
+        public bool makeDarks = false;
         public int pixelCutOff = 3000;
         public int darkMultiplier = 1;
         //public GIGEGRABBER()
@@ -968,7 +969,10 @@ namespace BaumerAPI
             string filename;
 
             filename = String.Format("{0}{1:ddMMMyyyy-HHmmss}.raw", "dark_", DateTime.Now);
-          // File.WriteAllBytes(filename,imageBufferCopy);
+            if (makeDarks)
+            {
+                 File.WriteAllBytes(filename,imageBufferCopy);
+            }
             for (int k = 0; k < imageBufferCopy.Length-1; k=k+1)
             {
                 //unpack 2 pixels in 3 bytes
