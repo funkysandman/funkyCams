@@ -361,7 +361,7 @@ Public Class Camera
     Public ReadOnly Property CanAsymmetricBin() As Boolean Implements ICameraV2.CanAsymmetricBin
         Get
             TL.LogMessage("CanAsymmetricBin Get", False.ToString())
-            Return False
+            Return True
         End Get
     End Property
 
@@ -601,14 +601,14 @@ Public Class Camera
     Public ReadOnly Property MaxBinX() As Short Implements ICameraV2.MaxBinX
         Get
             TL.LogMessage("MaxBinX Get", "1")
-            Return 1
+            Return 2
         End Get
     End Property
 
     Public ReadOnly Property MaxBinY() As Short Implements ICameraV2.MaxBinY
         Get
             TL.LogMessage("MaxBinY Get", "1")
-            Return 1
+            Return 2
         End Get
     End Property
 

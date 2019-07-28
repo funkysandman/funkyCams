@@ -34,7 +34,7 @@ Partial Class Form3
         'Button1
         '
         Me.Button1.Location = New System.Drawing.Point(21, 48)
-        Me.Button1.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.Button1.Margin = New System.Windows.Forms.Padding(4)
         Me.Button1.Name = "Button1"
         Me.Button1.Size = New System.Drawing.Size(149, 47)
         Me.Button1.TabIndex = 0
@@ -43,8 +43,9 @@ Partial Class Form3
         '
         'Button2
         '
-        Me.Button2.Location = New System.Drawing.Point(224, 48)
-        Me.Button2.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.Button2.Enabled = False
+        Me.Button2.Location = New System.Drawing.Point(224, 142)
+        Me.Button2.Margin = New System.Windows.Forms.Padding(4)
         Me.Button2.Name = "Button2"
         Me.Button2.Size = New System.Drawing.Size(149, 47)
         Me.Button2.TabIndex = 1
@@ -54,7 +55,7 @@ Partial Class Form3
         'Button3
         '
         Me.Button3.Location = New System.Drawing.Point(427, 48)
-        Me.Button3.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.Button3.Margin = New System.Windows.Forms.Padding(4)
         Me.Button3.Name = "Button3"
         Me.Button3.Size = New System.Drawing.Size(149, 47)
         Me.Button3.TabIndex = 2
@@ -64,7 +65,7 @@ Partial Class Form3
         'Button4
         '
         Me.Button4.Location = New System.Drawing.Point(633, 48)
-        Me.Button4.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.Button4.Margin = New System.Windows.Forms.Padding(4)
         Me.Button4.Name = "Button4"
         Me.Button4.Size = New System.Drawing.Size(149, 47)
         Me.Button4.TabIndex = 3
@@ -74,7 +75,7 @@ Partial Class Form3
         'Button5
         '
         Me.Button5.Location = New System.Drawing.Point(21, 142)
-        Me.Button5.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.Button5.Margin = New System.Windows.Forms.Padding(4)
         Me.Button5.Name = "Button5"
         Me.Button5.Size = New System.Drawing.Size(149, 47)
         Me.Button5.TabIndex = 4
@@ -84,7 +85,7 @@ Partial Class Form3
         'Button6
         '
         Me.Button6.Location = New System.Drawing.Point(633, 142)
-        Me.Button6.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.Button6.Margin = New System.Windows.Forms.Padding(4)
         Me.Button6.Name = "Button6"
         Me.Button6.Size = New System.Drawing.Size(149, 47)
         Me.Button6.TabIndex = 5
@@ -93,12 +94,12 @@ Partial Class Form3
         '
         'Button7
         '
-        Me.Button7.Location = New System.Drawing.Point(224, 142)
+        Me.Button7.Location = New System.Drawing.Point(224, 48)
         Me.Button7.Margin = New System.Windows.Forms.Padding(4)
         Me.Button7.Name = "Button7"
         Me.Button7.Size = New System.Drawing.Size(149, 47)
         Me.Button7.TabIndex = 6
-        Me.Button7.Text = "QImaging Camera"
+        Me.Button7.Text = "Coolsnap Camera"
         Me.Button7.UseVisualStyleBackColor = True
         '
         'Form3
@@ -113,7 +114,7 @@ Partial Class Form3
         Me.Controls.Add(Me.Button3)
         Me.Controls.Add(Me.Button2)
         Me.Controls.Add(Me.Button1)
-        Me.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.Margin = New System.Windows.Forms.Padding(4)
         Me.Name = "Form3"
         Me.Text = "sky watcher"
         Me.ResumeLayout(False)
