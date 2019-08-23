@@ -29,6 +29,7 @@ Partial Class Form3
         Me.Button5 = New System.Windows.Forms.Button()
         Me.Button6 = New System.Windows.Forms.Button()
         Me.Button7 = New System.Windows.Forms.Button()
+        Me.btnToup = New System.Windows.Forms.Button()
         Me.SuspendLayout()
         '
         'Button1
@@ -69,11 +70,12 @@ Partial Class Form3
         Me.Button4.Name = "Button4"
         Me.Button4.Size = New System.Drawing.Size(149, 47)
         Me.Button4.TabIndex = 3
-        Me.Button4.Text = "SVS Vistek Camera"
+        Me.Button4.Text = "Point Grey Camera"
         Me.Button4.UseVisualStyleBackColor = True
         '
         'Button5
         '
+        Me.Button5.Enabled = False
         Me.Button5.Location = New System.Drawing.Point(21, 142)
         Me.Button5.Margin = New System.Windows.Forms.Padding(4)
         Me.Button5.Name = "Button5"
@@ -102,11 +104,22 @@ Partial Class Form3
         Me.Button7.Text = "Coolsnap Camera"
         Me.Button7.UseVisualStyleBackColor = True
         '
+        'btnToup
+        '
+        Me.btnToup.Location = New System.Drawing.Point(427, 142)
+        Me.btnToup.Margin = New System.Windows.Forms.Padding(4)
+        Me.btnToup.Name = "btnToup"
+        Me.btnToup.Size = New System.Drawing.Size(149, 47)
+        Me.btnToup.TabIndex = 7
+        Me.btnToup.Text = "Toupcam Camera"
+        Me.btnToup.UseVisualStyleBackColor = True
+        '
         'Form3
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(8.0!, 16.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.ClientSize = New System.Drawing.Size(857, 231)
+        Me.Controls.Add(Me.btnToup)
         Me.Controls.Add(Me.Button7)
         Me.Controls.Add(Me.Button6)
         Me.Controls.Add(Me.Button5)
@@ -127,4 +140,5 @@ Partial Class Form3
     Friend WithEvents Button5 As Button
     Friend WithEvents Button6 As Button
     Friend WithEvents Button7 As Button
+    Friend WithEvents btnToup As Button
 End Class

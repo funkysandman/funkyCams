@@ -11,7 +11,7 @@
     <AssemblyName>vimbaWinVBnet</AssemblyName>
     <FileAlignment>512</FileAlignment>
     <MyType>WindowsForms</MyType>
-    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <TargetFrameworkProfile />
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
@@ -77,6 +77,9 @@
     <Reference Include="QCamManagedDriver">
       <HintPath>..\..\..\Program Files\QImaging\SDK\libs\AMD64\QCamManagedDriver\NETv4.0\QCamManagedDriver.dll</HintPath>
     </Reference>
+    <Reference Include="SpinnakerNETd_v140">
+      <HintPath>..\..\..\Program Files\Point Grey Research\Spinnaker\bin64\vs2015\SpinnakerNETd_v140.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Deployment" />
@@ -114,6 +117,18 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="device.vb" />
+    <Compile Include="frmPointGrey.Designer.vb">
+      <DependentUpon>frmPointGrey.vb</DependentUpon>
+    </Compile>
+    <Compile Include="frmPointGrey.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmToupcam.Designer.vb">
+      <DependentUpon>frmToupcam.vb</DependentUpon>
+    </Compile>
+    <Compile Include="frmToupcam.vb">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="frmAVTastro.Designer.vb">
       <DependentUpon>frmAVTastro.vb</DependentUpon>
     </Compile>
@@ -176,9 +191,17 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
     <Compile Include="program.vb" />
+    <Compile Include="Toupcam.vb" />
     <Compile Include="webserver.vb" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="frmPointGrey.resx">
+      <DependentUpon>frmPointGrey.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmToupcam.resx">
+      <DependentUpon>frmToupcam.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
     <EmbeddedResource Include="frmAVTastro.resx">
       <DependentUpon>frmAVTastro.vb</DependentUpon>
       <SubType>Designer</SubType>

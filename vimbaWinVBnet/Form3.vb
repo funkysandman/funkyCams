@@ -28,6 +28,9 @@ Public Class Form3
         't.Start()
         'showFrmSVSVistek()
         'frmSVSVistek.ShowDialog()
+        Dim f As New frmPointGrey
+        Me.Hide()
+        f.ShowDialog()
         Me.Close()
 
     End Sub
@@ -54,6 +57,13 @@ Public Class Form3
 
     Private Sub Button7_Click(sender As Object, e As EventArgs) Handles Button7.Click
         Dim f As New frmCoolsnap
+        Me.Hide()
+        f.ShowDialog()
+        Me.Close()
+    End Sub
+
+    Private Sub btnToup_Click(sender As Object, e As EventArgs) Handles btnToup.Click
+        Dim f As New frmToupcam
         Me.Hide()
         f.ShowDialog()
         Me.Close()
