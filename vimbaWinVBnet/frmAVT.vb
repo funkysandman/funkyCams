@@ -106,6 +106,9 @@ Public Class frmAVT
 
         If Me.cbUseDarks.Checked And lblDayNight.Text = "night" Then
             'd2 = Bitmap.FromFile(Application.StartupPath & "\dark.png")
+            Dim pixValue = 0
+            Dim darkValue = 0
+            Dim x
             If dark Is Nothing Then
                 Dim fs As New FileStream(Application.StartupPath & "\dark_" & v.m_Camera.Id & ".raw", FileMode.Open)
                 'read dark from file
@@ -113,24 +116,44 @@ Public Class frmAVT
                 ReDim dark(b.Width * b.Height * 2)
                 fs.Read(dark, 0, dark.Count)
                 fs.Close()
+                For x = 0 To dark.Length - 2 Step 2
+
+
+                    darkValue = (dark(x + 1) * 256) + dark(x)
+
+                    If darkValue > 500 Then
+                        darkValue = CInt(darkValue * Val(tbMultiplier.Text))
+
+                        dark(x + 1) = (darkValue And &HFF00) >> 8
+                        dark(x) = darkValue And &HFF
+                    End If
+
+                Next
             End If
-            Dim pixValue = 0
-            Dim darkValue = 0
-            Dim x
+
             Try
+
+                Dim t As TimeSpan
+                Dim t2 As Date
+                t2 = Now
 
 
                 For x = 0 To dark.Length - 2 Step 2
 
                     pixValue = (f.Buffer(x + 1) * 256) + f.Buffer(x)
                     darkValue = (dark(x + 1) * 256) + dark(x)
+
                     If darkValue > 500 Then
+
                         pixValue = Math.Max(0, pixValue - darkValue)
                         f.Buffer(x + 1) = Int(pixValue / 256)
                         f.Buffer(x) = pixValue And 255
+
                     End If
 
                 Next
+                t = Now - t2
+                Debug.Print(t.ToString)
             Catch ex As Exception
                 Debug.Print(x)
             End Try
@@ -722,6 +745,7 @@ Public Class frmAVT
     End Sub
 
     Private Sub tbMultiplier_TextChanged(sender As Object, e As EventArgs) Handles tbMultiplier.TextChanged
+        dark = Nothing
 
     End Sub
 

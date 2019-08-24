@@ -117,7 +117,7 @@ namespace BaumerAPI
         public bool useDarks = false;
         public bool makeDarks = false;
         public int pixelCutOff = 3000;
-        public int darkMultiplier = 1;
+        public double darkMultiplier = 1.0;
         //public GIGEGRABBER()
         //{
         //    openCamera();
@@ -999,8 +999,11 @@ namespace BaumerAPI
                 //dpixel2 = reversebits(dpixel2,true);
                 pixel1 = (byte1 & 0b1111_0000) >> 4;
                 dpixel1 = (dbyte1 & 0b1111_0000) >> 4;
+                dpixel1 = Convert.ToInt32(Convert.ToDouble(dpixel1) * darkMultiplier);
+
                 pixel2 = (byte1 & 0b0000_1111);
                 dpixel2 = (dbyte1 & 0b0000_1111);
+                dpixel2 = Convert.ToInt32(Convert.ToDouble(dpixel2) * darkMultiplier);
                 if (useDarks)
                 {
 
