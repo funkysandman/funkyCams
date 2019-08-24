@@ -367,13 +367,16 @@ namespace BaumerAPI
 
 
             //OPEN THE FIRST SYSTEM IN THE LIST WITH A CAMERA CONNECTED
-            try
+            
+           
+            foreach (KeyValuePair<string, BGAPI2.System> sys_pair in BGAPI2.SystemList.Instance)
             {
-                foreach (KeyValuePair<string, BGAPI2.System> sys_pair in BGAPI2.SystemList.Instance)
+                try
+
                 {
                     System.Console.Write("SYSTEM\r\n");
                     System.Console.Write("######\r\n\r\n");
-
+                    
                     try
                     {
                         sys_pair.Value.Open();
@@ -436,8 +439,8 @@ namespace BaumerAPI
                                     {
                                         System.Console.Write("5.1.13   Close interface ({0} cameras found) \r\n\r\n", deviceList.Count);
                                         ifc_pair.Value.Close();//close interface
-                                        sys_pair.Value.Close();//close system too
-                                        throw new ArgumentNullException("no camera found");
+                                       // sys_pair.Value.Close();//close system too
+                                        System.Console.Write("no camera found");
                                        
                                     }
                                     else
@@ -495,7 +498,7 @@ namespace BaumerAPI
                         System.Console.Write(" ResourceInUseException {0} \r\n", ex.GetErrorDescription());
                     }
                 }
-            }
+           
             catch (BGAPI2.Exceptions.IException ex)
             {
                 returnCode = (0 == returnCode) ? 1 : returnCode;
@@ -503,7 +506,7 @@ namespace BaumerAPI
                 System.Console.Write("ErrorDescription: {0} \r\n", ex.GetErrorDescription());
                 System.Console.Write("in function:      {0} \r\n", ex.GetFunctionName());
             }
-
+            }
             if (sSystemID == "")
             {
                 System.Console.Write(" No System found \r\n");
@@ -580,9 +583,10 @@ namespace BaumerAPI
             System.Console.Write("######\r\n\r\n");
 
             //OPEN THE FIRST CAMERA IN THE LIST
-            try
+            foreach (KeyValuePair<string, BGAPI2.Device> dev_pair in deviceList)
+
             {
-                foreach (KeyValuePair<string, BGAPI2.Device> dev_pair in deviceList)
+                try
                 {
                     try
                     {
@@ -594,41 +598,41 @@ namespace BaumerAPI
                         System.Console.Write("          Device TLType:          {0}\r\n", dev_pair.Value.TLType);
                         System.Console.Write("          Device AccessStatus:    {0}\r\n", dev_pair.Value.AccessStatus);
                         System.Console.Write("          Device UserID:          {0}\r\n\r\n", dev_pair.Value.DisplayName);
-                        if (dev_pair.Value.Model==camid)
+                        if (dev_pair.Value.Model == camid)
                         {
-                        dev_pair.Value.Open();
-                        sDeviceID = dev_pair.Key;
-                        System.Console.Write("        Opened device - RemoteNodeList Information \r\n");
-                        System.Console.Write("          Device AccessStatus:    {0}\r\n", dev_pair.Value.AccessStatus);
+                            dev_pair.Value.Open();
+                            sDeviceID = dev_pair.Key;
+                            System.Console.Write("        Opened device - RemoteNodeList Information \r\n");
+                            System.Console.Write("          Device AccessStatus:    {0}\r\n", dev_pair.Value.AccessStatus);
 
-                        //SERIAL NUMBER
-                        if (dev_pair.Value.RemoteNodeList.GetNodePresent("DeviceSerialNumber") == true)
-                            System.Console.Write("          DeviceSerialNumber:     {0}\r\n", (string)dev_pair.Value.RemoteNodeList["DeviceSerialNumber"].Value);
-                        else if (dev_pair.Value.RemoteNodeList.GetNodePresent("DeviceID") == true)
-                            System.Console.Write("          DeviceID (SN):          {0}\r\n", (string)dev_pair.Value.RemoteNodeList["DeviceID"].Value);
-                        else
-                            System.Console.Write("          SerialNumber:           Not Available.\r\n");
+                            //SERIAL NUMBER
+                            if (dev_pair.Value.RemoteNodeList.GetNodePresent("DeviceSerialNumber") == true)
+                                System.Console.Write("          DeviceSerialNumber:     {0}\r\n", (string)dev_pair.Value.RemoteNodeList["DeviceSerialNumber"].Value);
+                            else if (dev_pair.Value.RemoteNodeList.GetNodePresent("DeviceID") == true)
+                                System.Console.Write("          DeviceID (SN):          {0}\r\n", (string)dev_pair.Value.RemoteNodeList["DeviceID"].Value);
+                            else
+                                System.Console.Write("          SerialNumber:           Not Available.\r\n");
 
-                        //DISPLAY DEVICEMANUFACTURERINFO
-                        if (dev_pair.Value.RemoteNodeList.GetNodePresent("DeviceManufacturerInfo") == true)
-                            System.Console.Write("          DeviceManufacturerInfo: {0}\r\n", (string)dev_pair.Value.RemoteNodeList["DeviceManufacturerInfo"].Value);
+                            //DISPLAY DEVICEMANUFACTURERINFO
+                            if (dev_pair.Value.RemoteNodeList.GetNodePresent("DeviceManufacturerInfo") == true)
+                                System.Console.Write("          DeviceManufacturerInfo: {0}\r\n", (string)dev_pair.Value.RemoteNodeList["DeviceManufacturerInfo"].Value);
 
-                        //DISPLAY DEVICEFIRMWAREVERSION OR DEVICEVERSION
-                        if (dev_pair.Value.RemoteNodeList.GetNodePresent("DeviceFirmwareVersion") == true)
-                            System.Console.Write("          DeviceFirmwareVersion:  {0}\r\n", (string)dev_pair.Value.RemoteNodeList["DeviceFirmwareVersion"].Value);
-                        else if (dev_pair.Value.RemoteNodeList.GetNodePresent("DeviceVersion") == true)
-                            System.Console.Write("          DeviceVersion:          {0}\r\n", (string)dev_pair.Value.RemoteNodeList["DeviceVersion"].Value);
-                        else
-                            System.Console.Write("          DeviceVersion:          Not Available.\r\n");
+                            //DISPLAY DEVICEFIRMWAREVERSION OR DEVICEVERSION
+                            if (dev_pair.Value.RemoteNodeList.GetNodePresent("DeviceFirmwareVersion") == true)
+                                System.Console.Write("          DeviceFirmwareVersion:  {0}\r\n", (string)dev_pair.Value.RemoteNodeList["DeviceFirmwareVersion"].Value);
+                            else if (dev_pair.Value.RemoteNodeList.GetNodePresent("DeviceVersion") == true)
+                                System.Console.Write("          DeviceVersion:          {0}\r\n", (string)dev_pair.Value.RemoteNodeList["DeviceVersion"].Value);
+                            else
+                                System.Console.Write("          DeviceVersion:          Not Available.\r\n");
 
-                        if (dev_pair.Value.TLType == "GEV")
-                        {
-                            System.Console.Write("          GevCCP:                 {0}\r\n", (string)dev_pair.Value.RemoteNodeList["GevCCP"].Value);
-                            System.Console.Write("          GevCurrentIPAddress:    {0}.{1}.{2}.{3}\r\n", ((long)dev_pair.Value.RemoteNodeList["GevCurrentIPAddress"].Value & 0xff000000) >> 24, ((long)dev_pair.Value.RemoteNodeList["GevCurrentIPAddress"].Value & 0x00ff0000) >> 16, ((long)dev_pair.Value.RemoteNodeList["GevCurrentIPAddress"].Value & 0x0000ff00) >> 8, ((long)dev_pair.Value.RemoteNodeList["GevCurrentIPAddress"].Value & 0x000000ff));
-                            System.Console.Write("          GevCurrentSubnetMask:   {0}.{1}.{2}.{3}\r\n", ((long)dev_pair.Value.RemoteNodeList["GevCurrentSubnetMask"].Value & 0xff000000) >> 24, ((long)dev_pair.Value.RemoteNodeList["GevCurrentSubnetMask"].Value & 0x00ff0000) >> 16, ((long)dev_pair.Value.RemoteNodeList["GevCurrentSubnetMask"].Value & 0x0000ff00) >> 8, ((long)dev_pair.Value.RemoteNodeList["GevCurrentSubnetMask"].Value & 0x000000ff));
-                        }
-                        System.Console.Write("          \r\n");
-                        break;
+                            if (dev_pair.Value.TLType == "GEV")
+                            {
+                                System.Console.Write("          GevCCP:                 {0}\r\n", (string)dev_pair.Value.RemoteNodeList["GevCCP"].Value);
+                                System.Console.Write("          GevCurrentIPAddress:    {0}.{1}.{2}.{3}\r\n", ((long)dev_pair.Value.RemoteNodeList["GevCurrentIPAddress"].Value & 0xff000000) >> 24, ((long)dev_pair.Value.RemoteNodeList["GevCurrentIPAddress"].Value & 0x00ff0000) >> 16, ((long)dev_pair.Value.RemoteNodeList["GevCurrentIPAddress"].Value & 0x0000ff00) >> 8, ((long)dev_pair.Value.RemoteNodeList["GevCurrentIPAddress"].Value & 0x000000ff));
+                                System.Console.Write("          GevCurrentSubnetMask:   {0}.{1}.{2}.{3}\r\n", ((long)dev_pair.Value.RemoteNodeList["GevCurrentSubnetMask"].Value & 0xff000000) >> 24, ((long)dev_pair.Value.RemoteNodeList["GevCurrentSubnetMask"].Value & 0x00ff0000) >> 16, ((long)dev_pair.Value.RemoteNodeList["GevCurrentSubnetMask"].Value & 0x0000ff00) >> 8, ((long)dev_pair.Value.RemoteNodeList["GevCurrentSubnetMask"].Value & 0x000000ff));
+                            }
+                            System.Console.Write("          \r\n");
+                            break;
                         }
                     }
                     catch (BGAPI2.Exceptions.ResourceInUseException ex)
@@ -644,15 +648,15 @@ namespace BaumerAPI
                         System.Console.Write(" AccessDeniedException {0} \r\n", ex.GetErrorDescription());
                     }
                 }
-            }
-            catch (BGAPI2.Exceptions.IException ex)
-            {
-                returnCode = (0 == returnCode) ? 1 : returnCode;
-                System.Console.Write("ExceptionType:    {0} \r\n", ex.GetType());
-                System.Console.Write("ErrorDescription: {0} \r\n", ex.GetErrorDescription());
-                System.Console.Write("in function:      {0} \r\n", ex.GetFunctionName());
-            }
 
+                catch (BGAPI2.Exceptions.IException ex)
+                {
+                    returnCode = (0 == returnCode) ? 1 : returnCode;
+                    System.Console.Write("ExceptionType:    {0} \r\n", ex.GetType());
+                    System.Console.Write("ErrorDescription: {0} \r\n", ex.GetErrorDescription());
+                    System.Console.Write("in function:      {0} \r\n", ex.GetFunctionName());
+                }
+            }
             if (sDeviceID == "")
             {
                 System.Console.Write(" No Device found \r\n");

@@ -34,9 +34,9 @@ Name: "{cf}\ASCOM\Uninstall\Camera\ASCOMAVTGigE"
 ; TODO: Add subfolders below {app} as needed (e.g. Name: "{app}\MyFolder")
 
 [Files]
-Source: "C:\source\cameraProjects\funkyCams\AVTGIGEascom\bin\Release\ASCOM.AVTGIGE.Camera.dll"; DestDir: "{app}"
+Source: "C:\source\funkyCams\AVTGIGEascom\bin\Debug\ASCOM.AVTGIGE.Camera.dll"; DestDir: "{app}"
 ; Require a read-me HTML to appear after installation, maybe driver's Help doc
-Source: "C:\source\cameraProjects\funkyCams\AVTGIGEascom\ReadMe.htm"; DestDir: "{app}"; Flags: isreadme
+Source: "C:\source\funkyCams\AVTGIGEascom\ReadMe.htm"; DestDir: "{app}"; Flags: isreadme
 ; TODO: Add other files needed by your driver here (add subfolders above)
 
 
