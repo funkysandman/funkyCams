@@ -682,8 +682,12 @@ Public Class frmPointGrey
         '
         'if exposure is less than 1 second then turn on framerate
         Dim iAcquisitionFrameRateEnable As IBool = m_nodeMap.GetNode(Of IBool)("AcquisitionFrameRateEnabled")
-        Dim iAcquisitionFrameRateOn As IEnum = m_nodeMap.GetNode(Of IEnum)("AcquisitionFrameRateAuto")
+        Dim iAcquisitionFrameRateAuto As IEnum = m_nodeMap.GetNode(Of IEnum)("AcquisitionFrameRateAuto")
         Dim iAcquisitionFrameRate As IFloat = m_nodeMap.GetNode(Of IFloat)("AcquisitionFrameRate")
+        If iAcquisitionFrameRateAuto.IsWritable Then
+            iAcquisitionFrameRateAuto.Value = "Off"
+        End If
+
         If ExposureTimeToSet < 1000000 Then
 
 
