@@ -75,10 +75,10 @@
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="QCamManagedDriver">
-      <HintPath>..\..\..\Program Files\QImaging\SDK\libs\AMD64\QCamManagedDriver\NETv4.0\QCamManagedDriver.dll</HintPath>
+      <HintPath>..\..\..\..\Program Files\QImaging\SDK\libs\AMD64\QCamManagedDriver\NETv4.0\QCamManagedDriver.dll</HintPath>
     </Reference>
     <Reference Include="SpinnakerNETd_v140">
-      <HintPath>..\..\..\Program Files\Point Grey Research\Spinnaker\bin64\vs2015\SpinnakerNETd_v140.dll</HintPath>
+      <HintPath>..\..\..\..\Program Files\Point Grey Research\Spinnaker\bin64\vs2015\SpinnakerNETd_v140.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />

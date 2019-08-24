@@ -255,11 +255,11 @@ Public Class frmPointGrey
 
                 Dim convertedImage As IManagedImage = image.Convert(PixelFormatEnums.BayerRG8, ColorProcessingAlgorithm.NEAREST_NEIGHBOR)
 
-                convertedImage.ConvertToBitmapSource(PixelFormatEnums.RGB8, convertedImage)
+            convertedImage.ConvertToWriteAbleBitmap(PixelFormatEnums.RGB8, convertedImage)
 
 
-                'red/blue channels mixed up
-                Dim channelR As Byte
+            'red/blue channels mixed up
+            Dim channelR As Byte
                 For i = 0 To convertedImage.ManagedData.Length - 3 Step 3
                     channelR = convertedImage.ManagedData(i + 2)
                     convertedImage.ManagedData(i + 2) = convertedImage.ManagedData(i)
@@ -304,7 +304,40 @@ Public Class frmPointGrey
 
             ' Must manually release the image to prevent buffers on the camera stream from filling up
             '  image.Release()
+            Dim filename As String
 
+            Dim folderName = String.Format("{0:yyyy-MMM-dd}", DateTime.Now)
+            filename = String.Format("{0}{1:ddMMMyyyy-HHmmss}.jpg", "imgq_", DateTime.Now)
+            filename = Path.Combine(myForm.tbPath.Text, folderName, filename)
+
+
+
+            If myForm.cbMeteors.Checked And myForm.lblDayNight.Text.ToLower = "night" Then
+                ' md.examine(bm, filename)
+                'call azure service
+                Dim ms As New MemoryStream()
+                ' convertedImage.ConvertToWriteAbleBitmap()
+                m_pics.Bitmap.Save(ms, ImageFormat.Bmp)
+
+                Dim contents = ms.ToArray()
+                Dim qe As New queueEntry
+                qe.img = contents
+                qe.filename = Path.GetFileName(filename)
+                If myForm.myDetectionQueue.Count < 10 Then
+                    myForm.myDetectionQueue.Enqueue(qe)
+                End If
+
+                ms.Close()
+
+            End If
+            If myForm.cbSaveImages.Checked = True Then
+                System.IO.Directory.CreateDirectory(Path.Combine(myForm.tbPath.Text, folderName))
+
+
+                m_pics.Bitmap.Save(filename, myForm.myImageCodecInfo, myForm.myEncoderParameters)
+
+
+            End If
 
             image.Release()
         End Sub
@@ -314,18 +347,25 @@ Public Class frmPointGrey
 
         Private m_Size As Integer = 0
 
-        Private m_Bitmaps As ManagedImage()
-
+        Private m_ManagedImages As ManagedImage()
+        Private m_Bitmaps As Bitmap()
         Private m_BitmapSelector As Integer = 0
 
         Private m_buffers()() As Byte
         Public Sub New(s As Integer)
 
             m_Size = s
-            m_Bitmaps = New ManagedImage(m_Size - 1) {}
+            m_ManagedImages = New ManagedImage(m_Size - 1) {}
+            m_Bitmaps = New Bitmap(m_Size - 1) {}
             ReDim m_buffers(m_Size - 1)
         End Sub
         Public ReadOnly Property Image As ManagedImage
+            Get
+                Debug.Print("getting managed image " & m_BitmapSelector)
+                Return m_ManagedImages(m_BitmapSelector)
+            End Get
+        End Property
+        Public ReadOnly Property Bitmap As Bitmap
             Get
                 Debug.Print("getting bitmap " & m_BitmapSelector)
                 Return m_Bitmaps(m_BitmapSelector)
@@ -342,7 +382,7 @@ Public Class frmPointGrey
         End Property
         Public Sub FillNextBitmap(b As ManagedImage)
             SwitchBitmap()
-            m_Bitmaps(m_BitmapSelector) = b
+            m_ManagedImages(m_BitmapSelector) = b
             'copy raw data into m_buffers
             Dim rawData(b.DataSize) As Byte
             ' Dim BoundsRect = New Rectangle(0, 0, b.Width, b.Height)
@@ -357,6 +397,29 @@ Public Class frmPointGrey
             'For i = 0 To rawData.Length - 1
             '    rawData(i) = Math.
             'Next
+            Dim bmp As New Bitmap(1920, 1200, PixelFormat.Format24bppRgb)
+            'Dim ncp As System.Drawing.Imaging.ColorPalette = b.Palette
+            'For j As Integer = 0 To 255
+            '    ncp.Entries(j) = System.Drawing.Color.FromArgb(255, j, j, j)
+            'Next
+            'b.Palette = ncp
+
+
+
+
+            Dim BoundsRect = New Rectangle(0, 0, 1920 - 1, 1200 - 1)
+            Dim bmpData As System.Drawing.Imaging.BitmapData = bmp.LockBits(BoundsRect, System.Drawing.Imaging.ImageLockMode.[WriteOnly], bmp.PixelFormat)
+
+            Dim ptr As IntPtr = bmpData.Scan0
+
+
+
+
+
+            Marshal.Copy(m_buffers(m_BitmapSelector), 0, ptr, m_buffers(m_BitmapSelector).Length - 1)
+            bmp.UnlockBits(bmpData)
+            m_Bitmaps(m_BitmapSelector) = bmp
+
         End Sub
         'Public Sub FillNextBitmap(frame As QCamM_Frame)
 
@@ -671,8 +734,10 @@ Public Class frmPointGrey
             Console.WriteLine("Unable to disable automatic exposure (entry retrieval). Aborting...{0}", NewLine)
             Exit Sub
         End If
+        'turn off autoexposure
+        iExposureAuto.Value = iExposureAutoOff.Symbolic
 
-        iExposureAuto.Value = iExposureAutoOff.Value
+        'iExposureAuto.Value = iExposureAutoOff.Value
         Dim iExposureTime As IFloat = m_nodeMap.GetNode(Of IFloat)("ExposureTime")
 
         If iExposureTime Is Nothing OrElse Not iExposureTime.IsWritable Then
@@ -681,11 +746,15 @@ Public Class frmPointGrey
         End If
         '
         'if exposure is less than 1 second then turn on framerate
+
         Dim iAcquisitionFrameRateEnable As IBool = m_nodeMap.GetNode(Of IBool)("AcquisitionFrameRateEnabled")
         Dim iAcquisitionFrameRateAuto As IEnum = m_nodeMap.GetNode(Of IEnum)("AcquisitionFrameRateAuto")
+        Dim iAcquisitionFrameRateAutoModeOff As IEnumEntry = iAcquisitionFrameRateAuto.GetEntryByName("Off")
+
         Dim iAcquisitionFrameRate As IFloat = m_nodeMap.GetNode(Of IFloat)("AcquisitionFrameRate")
         If iAcquisitionFrameRateAuto.IsWritable Then
-            iAcquisitionFrameRateAuto.Value = "Off"
+            iAcquisitionFrameRateAuto.Value = iAcquisitionFrameRateAutoModeOff.Symbolic
+
         End If
 
         If ExposureTimeToSet < 1000000 Then
@@ -796,8 +865,8 @@ Public Class frmPointGrey
         startTime = Now
         meteorCheckRunning = True
         Timer2.Enabled = True
-        't = New Thread(AddressOf processDetection)
-        't.Start()
+        t = New Thread(AddressOf processDetection)
+        t.Start()
     End Sub
 
     Private Sub Button8_Click(sender As Object, e As EventArgs) Handles Button8.Click
@@ -923,17 +992,17 @@ Public Class frmPointGrey
         'Dim x As New Bitmap(b)
         Debug.Print("get last image")
 
-        Dim x As New Bitmap(m_pics.Image.Width, m_pics.Image.Height, PixelFormat.Format32bppArgb)
-        Dim BoundsRect = New Rectangle(0, 0, m_pics.Image.Width, m_pics.Image.Height)
-        Dim bmpData As System.Drawing.Imaging.BitmapData = x.LockBits(BoundsRect, System.Drawing.Imaging.ImageLockMode.[WriteOnly], PixelFormat.Format32bppArgb)
-        Dim ptr As IntPtr = bmpData.Scan0
-        System.Runtime.InteropServices.Marshal.Copy(m_pics.ImageBytes, 0, ptr, m_pics.Image.DataSize) 'copy into bitmap
+        'Dim x As New Bitmap(m_pics.Image.Width, m_pics.Image.Height, PixelFormat.Format32bppArgb)
+        'Dim BoundsRect = New Rectangle(0, 0, m_pics.Image.Width, m_pics.Image.Height)
+        'Dim bmpData As System.Drawing.Imaging.BitmapData = x.LockBits(BoundsRect, System.Drawing.Imaging.ImageLockMode.[WriteOnly], PixelFormat.Format32bppArgb)
+        'Dim ptr As IntPtr = bmpData.Scan0
+        'System.Runtime.InteropServices.Marshal.Copy(m_pics.ImageBytes, 0, ptr, m_pics.Image.DataSize) 'copy into bitmap
 
 
-        x.UnlockBits(bmpData)
-        Return x
+        'x.UnlockBits(bmpData)
+        'Return x
 
-
+        Return m_pics.Bitmap
     End Function
     Public Function getLastImageArray() As Byte()
         Dim stopWatch As Stopwatch = New Stopwatch()

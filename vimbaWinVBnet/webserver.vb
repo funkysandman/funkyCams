@@ -1538,30 +1538,34 @@ Public Class WebServer
                         'Dim myWidth As Integer = 1360
                         'Dim myHeight As Integer = 1036
 
-                        Dim b As New Bitmap(1920, 1200, PixelFormat.Format24bppRgb)
-                        'Dim ncp As System.Drawing.Imaging.ColorPalette = b.Palette
-                        'For j As Integer = 0 To 255
-                        '    ncp.Entries(j) = System.Drawing.Color.FromArgb(255, j, j, j)
-                        'Next
-                        'b.Palette = ncp
+                        Dim b As Bitmap
+                        b = myPointGreyForm.getLastImage
 
 
-                        Dim bytes() As Byte
-
-                        bytes = myPointGreyForm.getLastImageArray()
-
-
-                        Dim BoundsRect = New Rectangle(0, 0, 1920 - 1, 1200 - 1)
-                        Dim bmpData As System.Drawing.Imaging.BitmapData = b.LockBits(BoundsRect, System.Drawing.Imaging.ImageLockMode.[WriteOnly], b.PixelFormat)
-
-                        Dim ptr As IntPtr = bmpData.Scan0
+                        '(1920, 1200, PixelFormat.Format24bppRgb)
+                        ''Dim ncp As System.Drawing.Imaging.ColorPalette = b.Palette
+                        ''For j As Integer = 0 To 255
+                        ''    ncp.Entries(j) = System.Drawing.Color.FromArgb(255, j, j, j)
+                        ''Next
+                        ''b.Palette = ncp
 
 
+                        'Dim bytes() As Byte
+
+                        'bytes = myPointGreyForm.getLastImageArray()
+
+
+                        'Dim BoundsRect = New Rectangle(0, 0, 1920 - 1, 1200 - 1)
+                        'Dim bmpData As System.Drawing.Imaging.BitmapData = b.LockBits(BoundsRect, System.Drawing.Imaging.ImageLockMode.[WriteOnly], b.PixelFormat)
+
+                        'Dim ptr As IntPtr = bmpData.Scan0
 
 
 
-                        Marshal.Copy(bytes, 0, ptr, bytes.Length - 1)
-                        b.UnlockBits(bmpData)
+
+
+                        'Marshal.Copy(bytes, 0, ptr, bytes.Length - 1)
+                        'b.UnlockBits(bmpData)
                         'b.RotateFlip(RotateFlipType.Rotate180FlipNone) 'camera is upside down
                         If Not b Is Nothing Then
                             ' mySVSVistekForm.writeline("acquired last SVS Vistek image")
