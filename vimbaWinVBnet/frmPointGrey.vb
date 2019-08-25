@@ -224,36 +224,37 @@ Public Class frmPointGrey
         ' in-depth comments on the acquisition of images.
         Protected Overrides Sub OnImageEvent(image As ManagedImage)
 
-
+            myForm.running = True
             Console.WriteLine("Image event occurred...")
 
             If image.IsIncomplete Then
                 Console.WriteLine("Image incomplete with image status {0}...{1}", image.ImageStatus, NewLine)
                 image.Release()
+                myForm.running = False
                 Exit Sub
             End If
 
             'image.Save("pgDark.raw")
             'darks
-            If myForm.cbUseDarks.Checked Then
-                    Dim dark As Byte()
-                    dark = File.ReadAllBytes("pgdark.raw")
-                    For i = 0 To image.DataSize - 1
-                        image.ManagedData(i) = CByte(Math.Max(0, CInt(image.ManagedData(i)) - CInt(dark(i))))
-                    Next
-                    '
+            If myForm.cbUseDarks.Checked And myForm.lblDayNight.Text = "night" Then
+                Dim dark As Byte()
+                dark = File.ReadAllBytes("pgdark.raw")
+                For i = 0 To image.DataSize - 1
+                    image.ManagedData(i) = CByte(Math.Max(0, CInt(image.ManagedData(i)) - CInt(dark(i))))
+                Next
+                '
 
 
 
-                    'copy managedData back to image
-                    Marshal.Copy(image.ManagedData, 0, image.DataPtr, image.DataSize - 1)
-                    ' Convert image
-                    'image.PixelFormat = PixelFormatEnums.BayerRG16
+                'copy managedData back to image
+                Marshal.Copy(image.ManagedData, 0, image.DataPtr, image.DataSize - 1)
+                ' Convert image
+                'image.PixelFormat = PixelFormatEnums.BayerRG16
 
-                End If
+            End If
 
 
-                Dim convertedImage As IManagedImage = image.Convert(PixelFormatEnums.BayerRG8, ColorProcessingAlgorithm.NEAREST_NEIGHBOR)
+            Dim convertedImage As IManagedImage = image.Convert(PixelFormatEnums.BayerRG8, ColorProcessingAlgorithm.NEAREST_NEIGHBOR)
 
             convertedImage.ConvertToWriteAbleBitmap(PixelFormatEnums.RGB8, convertedImage)
 
@@ -273,10 +274,10 @@ Public Class frmPointGrey
                 Console.WriteLine("Grabbed image {0}, width = {1}, height = {2}", imageCnt, image.Width, image.Height)
 
 
-                'store in ring bitmap
+            'store in ring bitmap
 
-                'running = True
-                If m_pics Is Nothing Then
+
+            If m_pics Is Nothing Then
                     m_pics = New RingBitmap(5)
                 End If
 
@@ -340,6 +341,7 @@ Public Class frmPointGrey
             End If
 
             image.Release()
+            myForm.running = False
         End Sub
     End Class
 
@@ -702,7 +704,7 @@ Public Class frmPointGrey
 
             End If
             Console.WriteLine("in the queue:{0}", myDetectionQueue.Count)
-            Thread.Sleep(100)
+            Thread.Sleep(200)
         End While
 
     End Sub
@@ -992,17 +994,17 @@ Public Class frmPointGrey
         'Dim x As New Bitmap(b)
         Debug.Print("get last image")
 
-        'Dim x As New Bitmap(m_pics.Image.Width, m_pics.Image.Height, PixelFormat.Format32bppArgb)
-        'Dim BoundsRect = New Rectangle(0, 0, m_pics.Image.Width, m_pics.Image.Height)
-        'Dim bmpData As System.Drawing.Imaging.BitmapData = x.LockBits(BoundsRect, System.Drawing.Imaging.ImageLockMode.[WriteOnly], PixelFormat.Format32bppArgb)
-        'Dim ptr As IntPtr = bmpData.Scan0
-        'System.Runtime.InteropServices.Marshal.Copy(m_pics.ImageBytes, 0, ptr, m_pics.Image.DataSize) 'copy into bitmap
+        Dim x As New Bitmap(m_pics.Image.Width, m_pics.Image.Height, PixelFormat.Format24bppRgb)
+        Dim BoundsRect = New Rectangle(0, 0, m_pics.Image.Width, m_pics.Image.Height)
+        Dim bmpData As System.Drawing.Imaging.BitmapData = x.LockBits(BoundsRect, System.Drawing.Imaging.ImageLockMode.[WriteOnly], x.PixelFormat)
+        Dim ptr As IntPtr = bmpData.Scan0
+        System.Runtime.InteropServices.Marshal.Copy(m_pics.ImageBytes, 0, ptr, m_pics.Image.DataSize) 'copy into bitmap
 
 
-        'x.UnlockBits(bmpData)
-        'Return x
+        x.UnlockBits(bmpData)
+        Return x
 
-        Return m_pics.Bitmap
+        'Return m_pics.Bitmap
     End Function
     Public Function getLastImageArray() As Byte()
         Dim stopWatch As Stopwatch = New Stopwatch()

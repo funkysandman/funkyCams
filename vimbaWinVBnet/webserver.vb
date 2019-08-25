@@ -1662,7 +1662,7 @@ Public Class WebServer
             End If
         Loop
         restart = False
-        StartListenQIFirewire()
+        StartListenPointGrey()
     End Sub
     Private Sub StartListenCoolsnapFirewire()
         Dim iStartPos As Integer
