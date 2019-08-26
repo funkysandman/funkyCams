@@ -58,8 +58,6 @@ Partial Class frmPointGrey
         Me.Label11 = New System.Windows.Forms.Label()
         Me.tbGain = New System.Windows.Forms.TextBox()
         Me.Timer1 = New System.Windows.Forms.Timer(Me.components)
-        Me.Timer2 = New System.Windows.Forms.Timer(Me.components)
-        Me.Timer3 = New System.Windows.Forms.Timer(Me.components)
         Me.TimerAcquistionRate = New System.Windows.Forms.Timer(Me.components)
         CType(Me.PictureBox1, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
@@ -103,7 +101,7 @@ Partial Class frmPointGrey
         'Button10
         '
         Me.Button10.Location = New System.Drawing.Point(320, 338)
-        Me.Button10.Margin = New System.Windows.Forms.Padding(2, 2, 2, 2)
+        Me.Button10.Margin = New System.Windows.Forms.Padding(2)
         Me.Button10.Name = "Button10"
         Me.Button10.Size = New System.Drawing.Size(36, 18)
         Me.Button10.TabIndex = 70
@@ -123,7 +121,7 @@ Partial Class frmPointGrey
         'tbPath
         '
         Me.tbPath.Location = New System.Drawing.Point(56, 338)
-        Me.tbPath.Margin = New System.Windows.Forms.Padding(2, 2, 2, 2)
+        Me.tbPath.Margin = New System.Windows.Forms.Padding(2)
         Me.tbPath.Name = "tbPath"
         Me.tbPath.Size = New System.Drawing.Size(252, 20)
         Me.tbPath.TabIndex = 68
@@ -133,7 +131,7 @@ Partial Class frmPointGrey
         '
         Me.Button8.Enabled = False
         Me.Button8.Location = New System.Drawing.Point(479, 273)
-        Me.Button8.Margin = New System.Windows.Forms.Padding(2, 2, 2, 2)
+        Me.Button8.Margin = New System.Windows.Forms.Padding(2)
         Me.Button8.Name = "Button8"
         Me.Button8.Size = New System.Drawing.Size(77, 25)
         Me.Button8.TabIndex = 63
@@ -144,7 +142,7 @@ Partial Class frmPointGrey
         'Button7
         '
         Me.Button7.Location = New System.Drawing.Point(386, 273)
-        Me.Button7.Margin = New System.Windows.Forms.Padding(2, 2, 2, 2)
+        Me.Button7.Margin = New System.Windows.Forms.Padding(2)
         Me.Button7.Name = "Button7"
         Me.Button7.Size = New System.Drawing.Size(77, 25)
         Me.Button7.TabIndex = 62
@@ -361,13 +359,6 @@ Partial Class frmPointGrey
         Me.Timer1.Enabled = True
         Me.Timer1.Interval = 1000
         '
-        'Timer2
-        '
-        Me.Timer2.Interval = 1000
-        '
-        'Timer3
-        '
-        '
         'TimerAcquistionRate
         '
         Me.TimerAcquistionRate.Interval = 1000
@@ -409,7 +400,7 @@ Partial Class frmPointGrey
         Me.Controls.Add(Me.Label1)
         Me.Controls.Add(Me.Button2)
         Me.Controls.Add(Me.PictureBox1)
-        Me.Margin = New System.Windows.Forms.Padding(2, 2, 2, 2)
+        Me.Margin = New System.Windows.Forms.Padding(2)
         Me.Name = "frmPointGrey"
         Me.Text = "frmPointGrey"
         CType(Me.PictureBox1, System.ComponentModel.ISupportInitialize).EndInit()
@@ -450,8 +441,6 @@ Partial Class frmPointGrey
     Friend WithEvents Label11 As Label
     Friend WithEvents tbGain As TextBox
     Friend WithEvents Timer1 As Timer
-    Friend WithEvents Timer2 As Timer
-    Friend WithEvents Timer3 As Timer
     Friend WithEvents TimerAcquistionRate As Timer
     Public WithEvents cbUseDarks As CheckBox
 End Class

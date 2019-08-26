@@ -31,6 +31,7 @@ Public Class frmPointGrey
     Private lblGainVal As Label
     Private running As Boolean
     Private gbInfo As GroupBox
+
     Private lblCameraModel As Label
     Private bmp As Bitmap
     Private imageBytes As Byte()
@@ -216,6 +217,8 @@ Public Class frmPointGrey
             If iDeviceSerialNumber IsNot Nothing AndAlso iDeviceSerialNumber.IsReadable Then
                 deviceSerialNumber = iDeviceSerialNumber.Value
             End If
+            cam = Nothing
+
         End Sub
 
         ' This method defines an image event. In it, the image that
@@ -225,12 +228,18 @@ Public Class frmPointGrey
         Protected Overrides Sub OnImageEvent(image As ManagedImage)
 
             myForm.running = True
+            myForm.frames = myForm.frames + 1
+            If myForm.frames Mod 100 = 0 Then
+                myForm.startTime = Now
+                myForm.frames = 0
+            End If
             Console.WriteLine("Image event occurred...")
 
             If image.IsIncomplete Then
                 Console.WriteLine("Image incomplete with image status {0}...{1}", image.ImageStatus, NewLine)
                 image.Release()
                 myForm.running = False
+
                 Exit Sub
             End If
 
@@ -278,27 +287,13 @@ Public Class frmPointGrey
 
 
             If m_pics Is Nothing Then
-                    m_pics = New RingBitmap(5)
-                End If
+                m_pics = New RingBitmap(5)
+            End If
 
-                m_pics.FillNextBitmap(convertedImage)
+            m_pics.FillNextBitmap(convertedImage)
 
-                '' Create unique filename in order to save file
-                'Dim filename As String = "ImageEvents-VB-"
 
-                'If deviceSerialNumber <> "" Then
-                '    filename = filename + deviceSerialNumber + "-"
-                'End If
-
-                'filename = filename + Convert.ToString(imageCnt) + ".jpg"
-
-                '' Save image
-                'convertedImage.Save(filename)
-
-                'Console.WriteLine("Image saved at {0}{1}", filename, NewLine)
-
-                ' Incrememnt image counter
-                imageCnt += 1
+            imageCnt += 1
 
 
 
@@ -318,7 +313,11 @@ Public Class frmPointGrey
                 'call azure service
                 Dim ms As New MemoryStream()
                 ' convertedImage.ConvertToWriteAbleBitmap()
-                m_pics.Bitmap.Save(ms, ImageFormat.Bmp)
+                Dim b As Bitmap
+                b = myForm.getLastImage
+
+                b.Save(ms, ImageFormat.Bmp)
+                b.Dispose()
 
                 Dim contents = ms.ToArray()
                 Dim qe As New queueEntry
@@ -333,46 +332,48 @@ Public Class frmPointGrey
             End If
             If myForm.cbSaveImages.Checked = True Then
                 System.IO.Directory.CreateDirectory(Path.Combine(myForm.tbPath.Text, folderName))
+                Dim x As Bitmap
+                x = myForm.getLastImage
 
 
-                m_pics.Bitmap.Save(filename, myForm.myImageCodecInfo, myForm.myEncoderParameters)
-
+                x.Save(filename, myForm.myImageCodecInfo, myForm.myEncoderParameters)
+                x.Dispose()
 
             End If
-
             image.Release()
+
+            convertedImage.Dispose()
             myForm.running = False
+
+
         End Sub
     End Class
 
     Public Class RingBitmap
 
         Private m_Size As Integer = 0
-
-        Private m_ManagedImages As ManagedImage()
-        Private m_Bitmaps As Bitmap()
+        Private m_width As Integer = 0
+        Private m_height As Integer = 0
+        Private m_dataSize As Integer = 0
+        ' Private m_ManagedImages As ManagedImage()
+        'Private m_Bitmaps As Bitmap()
         Private m_BitmapSelector As Integer = 0
 
         Private m_buffers()() As Byte
         Public Sub New(s As Integer)
 
             m_Size = s
-            m_ManagedImages = New ManagedImage(m_Size - 1) {}
-            m_Bitmaps = New Bitmap(m_Size - 1) {}
+            ' m_ManagedImages = New ManagedImage(m_Size - 1) {}
+            ' m_Bitmaps = New Bitmap(m_Size - 1) {}
             ReDim m_buffers(m_Size - 1)
         End Sub
-        Public ReadOnly Property Image As ManagedImage
-            Get
-                Debug.Print("getting managed image " & m_BitmapSelector)
-                Return m_ManagedImages(m_BitmapSelector)
-            End Get
-        End Property
-        Public ReadOnly Property Bitmap As Bitmap
-            Get
-                Debug.Print("getting bitmap " & m_BitmapSelector)
-                Return m_Bitmaps(m_BitmapSelector)
-            End Get
-        End Property
+
+        'Public ReadOnly Property Bitmap As Bitmap
+        '    Get
+        '        Debug.Print("getting bitmap " & m_BitmapSelector)
+        '        Return m_Bitmaps(m_BitmapSelector)
+        '    End Get
+        'End Property
         Public ReadOnly Property ImageBytes As Byte()
             Get
                 Debug.Print("getting bitmap " & m_BitmapSelector)
@@ -382,9 +383,28 @@ Public Class frmPointGrey
                 Return m_buffers(m_BitmapSelector)
             End Get
         End Property
+        Public ReadOnly Property width As Integer
+            Get
+
+                Return m_width
+            End Get
+        End Property
+        Public ReadOnly Property height As Integer
+            Get
+
+                Return m_height
+            End Get
+        End Property
+        Public ReadOnly Property dataSize As Integer
+            Get
+
+                Return m_dataSize
+            End Get
+        End Property
         Public Sub FillNextBitmap(b As ManagedImage)
             SwitchBitmap()
-            m_ManagedImages(m_BitmapSelector) = b
+
+            ' m_ManagedImages(m_BitmapSelector) = b
             'copy raw data into m_buffers
             Dim rawData(b.DataSize) As Byte
             ' Dim BoundsRect = New Rectangle(0, 0, b.Width, b.Height)
@@ -394,33 +414,36 @@ Public Class frmPointGrey
             System.Runtime.InteropServices.Marshal.Copy(b.DataPtr, rawData, 0, b.DataSize) 'copy into array
 
             m_buffers(m_BitmapSelector) = rawData
+            m_width = b.Width
+            m_height = b.Height
+            m_dataSize = b.DataSize
             ' m_Bitmaps(m_BitmapSelector).UnlockBits(bmpData)
             'subtract darks
             'For i = 0 To rawData.Length - 1
             '    rawData(i) = Math.
             'Next
-            Dim bmp As New Bitmap(1920, 1200, PixelFormat.Format24bppRgb)
-            'Dim ncp As System.Drawing.Imaging.ColorPalette = b.Palette
-            'For j As Integer = 0 To 255
-            '    ncp.Entries(j) = System.Drawing.Color.FromArgb(255, j, j, j)
-            'Next
-            'b.Palette = ncp
+            'Dim bmp As New Bitmap(1920, 1200, PixelFormat.Format24bppRgb)
+            ''Dim ncp As System.Drawing.Imaging.ColorPalette = b.Palette
+            ''For j As Integer = 0 To 255
+            ''    ncp.Entries(j) = System.Drawing.Color.FromArgb(255, j, j, j)
+            ''Next
+            ''b.Palette = ncp
 
 
 
 
-            Dim BoundsRect = New Rectangle(0, 0, 1920 - 1, 1200 - 1)
-            Dim bmpData As System.Drawing.Imaging.BitmapData = bmp.LockBits(BoundsRect, System.Drawing.Imaging.ImageLockMode.[WriteOnly], bmp.PixelFormat)
+            'Dim BoundsRect = New Rectangle(0, 0, 1920 - 1, 1200 - 1)
+            'Dim bmpData As System.Drawing.Imaging.BitmapData = bmp.LockBits(BoundsRect, System.Drawing.Imaging.ImageLockMode.[WriteOnly], bmp.PixelFormat)
 
-            Dim ptr As IntPtr = bmpData.Scan0
-
-
+            'Dim ptr As IntPtr = bmpData.Scan0
 
 
 
-            Marshal.Copy(m_buffers(m_BitmapSelector), 0, ptr, m_buffers(m_BitmapSelector).Length - 1)
-            bmp.UnlockBits(bmpData)
-            m_Bitmaps(m_BitmapSelector) = bmp
+
+
+            'Marshal.Copy(m_buffers(m_BitmapSelector), 0, ptr, m_buffers(m_BitmapSelector).Length - 1)
+            'bmp.UnlockBits(bmpData)
+            'm_Bitmaps(m_BitmapSelector) = bmp
 
         End Sub
         'Public Sub FillNextBitmap(frame As QCamM_Frame)
@@ -703,7 +726,7 @@ Public Class frmPointGrey
                 aQE = Nothing
 
             End If
-            Console.WriteLine("in the queue:{0}", myDetectionQueue.Count)
+            'Console.WriteLine("in the queue:{0}", myDetectionQueue.Count)
             Thread.Sleep(200)
         End While
 
@@ -839,8 +862,7 @@ Public Class frmPointGrey
 
 
     Private Sub Button7_Click(sender As Object, e As EventArgs) Handles Button7.Click
-        'use settings
-        '  Dim err As QCamM_Err
+
         m_camRunning = True
         setExposure(CDbl(tbExposureTime.Text))
         setGain(CDbl(tbGain.Text))
@@ -849,24 +871,14 @@ Public Class frmPointGrey
 
 
 
-        'QCam.QCamM_SetParam(mSettings, QCamM_Param.qprmGain, CUInt((tbGain.Text)))
 
-
-        'QCam.QCamM_SetParam(mSettings, QCamM_Param.qprmExposure, tbExposureTime.Text)
-        'err = QCam.QCamM_SendSettingsToCam(mhCamera, mSettings)
-
-        If lblDayNight.Text = "night" Then
-            'StartStream()
-        Else
-            TimerAcquistionRate.Enabled = True
-        End If
-
+        TimerAcquistionRate.Enabled = True
         Button7.Enabled = False
         Button8.Enabled = True
 
         startTime = Now
         meteorCheckRunning = True
-        Timer2.Enabled = True
+
         t = New Thread(AddressOf processDetection)
         t.Start()
     End Sub
@@ -941,12 +953,7 @@ Public Class frmPointGrey
 
     End Sub
 
-    Private Sub Timer3_Tick(sender As Object, e As EventArgs) Handles Timer3.Tick
-        Dim seconds As Integer
 
-        seconds = DateDiff(DateInterval.Second, startTime, Now)
-        txtFps.Text = frames / seconds
-    End Sub
     Private Shared Function GetEncoderInfo(ByVal mimeType As String) As ImageCodecInfo
         Dim j As Integer
         Dim encoders() As ImageCodecInfo
@@ -994,11 +1001,11 @@ Public Class frmPointGrey
         'Dim x As New Bitmap(b)
         Debug.Print("get last image")
 
-        Dim x As New Bitmap(m_pics.Image.Width, m_pics.Image.Height, PixelFormat.Format24bppRgb)
-        Dim BoundsRect = New Rectangle(0, 0, m_pics.Image.Width, m_pics.Image.Height)
+        Dim x As New Bitmap(m_pics.width, m_pics.height, PixelFormat.Format24bppRgb)
+        Dim BoundsRect = New Rectangle(0, 0, m_pics.width, m_pics.height)
         Dim bmpData As System.Drawing.Imaging.BitmapData = x.LockBits(BoundsRect, System.Drawing.Imaging.ImageLockMode.[WriteOnly], x.PixelFormat)
         Dim ptr As IntPtr = bmpData.Scan0
-        System.Runtime.InteropServices.Marshal.Copy(m_pics.ImageBytes, 0, ptr, m_pics.Image.DataSize) 'copy into bitmap
+        System.Runtime.InteropServices.Marshal.Copy(m_pics.ImageBytes, 0, ptr, m_pics.dataSize) 'copy into bitmap
 
 
         x.UnlockBits(bmpData)
@@ -1114,80 +1121,11 @@ Public Class frmPointGrey
     End Sub
 
     Private Sub TimerAcquistionRate_Tick(sender As Object, e As EventArgs) Handles TimerAcquistionRate.Tick
-        ''take a picture
-        'If m_grabbing Then
-        '    Exit Sub
-        'End If
-        'm_grabbing = True
-        'Dim err As QCamM_Err = QCamM_Err.qerrSuccess
-        'Dim sizeInBytes As UInteger = 0
-        'Dim flags As Integer = 0
-        ''QCam.QCamM_GetInfo(mhCamera, QCamM_Info.qinfImageSize, sizeInBytes)
-        'Try
-        '    If Not mFrame1 Is Nothing Then
-        '        'msgbox("grabbing frame")
-        '        Dim frameSize As UInteger = 0
-        '        QCam.QCamM_GetInfo(mhCamera, QCamM_Info.qinfImageSize, frameSize)
-        '        QCam.QCamM_Free(mFrame1.pBuffer)
-        '        mFrame1.pBuffer = QCam.QCamM_Malloc(mFrame1.bufferSize)
-        '        Debug.Print("grab frame")
-        '        Dim t_grab As Thread
-        '        m_grabbedframe = False
-        '        t_grab = New Thread(AddressOf grabAframe)
-        '        t_grab.Start()
-        '        Dim stopWatch As Stopwatch = New Stopwatch()
-        '        stopWatch.Start()
 
-        '        While Not m_grabbedframe AndAlso stopWatch.ElapsedMilliseconds < 20000
-        '            Threading.Thread.Sleep(1000)
-        '            Application.DoEvents()
-        '        End While
+        Dim seconds As Integer
 
-        '        stopWatch.[Stop]()
-        '        If m_grabbedframe_err = QCamM_Err.qerrDriverFault Then
-        '            m_grabbedframe = False
-        '        End If
-        '        If Not m_grabbedframe Then
-        '            QCam.QCamM_Abort(mhCamera)
-        '            t_grab.Abort()
-
-        '            err = QCamM_Err.qerrCancelled
-        '            Debug.Print("programmatically aborted grabframe thread")
-        '            'what to do?  close camera?
-        '            QCam.QCamM_CloseCamera(mhCamera)
-        '            Debug.Print("closed camera")
-        '            QCam.QCamM_Free(mFrame1.pBuffer)
-        '            Debug.Print("released mframe1 buffer")
-        '            QCam.QCamM_Free(mFrame2.pBuffer)
-        '            Debug.Print("released mframe2 buffer")
-        '            'QCam.QCamM_ReleaseDriver()
-        '            'Debug.Print("released driver")
-        '            'now reopen
-        '            getCameraReady()
-        '            Debug.Print("recovering....")
-        '            m_grabbing = False
-        '            Exit Sub
-        '        End If
-
-
-        '    Else
-        '            TimerAcquistionRate.Enabled = False
-
-        '        'msgbox("mframe1 is noting")
-        '    End If
-
-        'Catch ex As Exception
-        '    'msgbox(ex.Message)
-        '    'msgbox("QCam error:" & err)
-        '    TimerAcquistionRate.Enabled = False
-
-        'End Try
-
-        'If err = QCamM_Err.qerrSuccess And m_grabbedframe_err = 0 Then
-        '    Call Me.singleframeCallback(mFrame1.pBuffer, 1, err, flags)
-        'End If
-        'm_grabbing = False
-
+        seconds = DateDiff(DateInterval.Second, startTime, Now)
+        txtFps.Text = frames / seconds
     End Sub
 
 
