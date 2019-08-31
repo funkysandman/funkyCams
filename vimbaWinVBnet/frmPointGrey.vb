@@ -303,7 +303,7 @@ Public Class frmPointGrey
             Dim filename As String
 
             Dim folderName = String.Format("{0:yyyy-MMM-dd}", DateTime.Now)
-            filename = String.Format("{0}{1:ddMMMyyyy-HHmmss}.jpg", "imgq_", DateTime.Now)
+            filename = String.Format("{0}{1:ddMMMyyyy-HHmmss}.jpg", "imgpg_", DateTime.Now)
             filename = Path.Combine(myForm.tbPath.Text, folderName, filename)
 
 
@@ -723,7 +723,7 @@ Public Class frmPointGrey
                 CallAzureMeteorDetection(aQE.img, aQE.filename)
 
 
-                aQE = Nothing
+                    aQE = Nothing
 
             End If
             'Console.WriteLine("in the queue:{0}", myDetectionQueue.Count)
@@ -740,10 +740,14 @@ Public Class frmPointGrey
         Dim client As New HttpClient()
 
         Dim byteContent = New ByteArrayContent(contents)
+        Try
 
-        Dim response = client.PostAsync(apiURL, byteContent)
-        Dim responseString = response.Result
 
+            Dim response = client.PostAsync(apiURL, byteContent)
+            Dim responseString = response.Result
+        Catch ex As Exception
+            Console.WriteLine("calling meteor detection:" & ex.Message)
+        End Try
     End Function
     Sub setExposure(ExposureTimeToSet As Double)
         Dim iExposureAuto As IEnum = m_nodeMap.GetNode(Of IEnum)("ExposureAuto")
@@ -992,9 +996,9 @@ Public Class frmPointGrey
         Dim stopWatch As Stopwatch = New Stopwatch()
         stopWatch.Start()
 
-        While running AndAlso stopWatch.ElapsedMilliseconds < 20000
+        'While running AndAlso stopWatch.ElapsedMilliseconds < 20000
 
-        End While
+        'End While
 
         stopWatch.[Stop]()
 

@@ -234,7 +234,7 @@ Public Class frmSVSVistek
         camThread = New Thread(AddressOf createCam)
         camThread.Name = "camera thread"
         camThread.Start()
-        dark = File.ReadAllBytes("masterdark.raw")
+
 
         cboNight.SelectedIndex = 1
         cboDay.SelectedIndex = 1
@@ -481,22 +481,22 @@ Public Class frmSVSVistek
     End Sub
 
     Private Sub Button2_Click(sender As Object, e As EventArgs) Handles Button2.Click
-        If LCase(Me.lblDayNight.Text) = "day" Then
-            '  myVistekImageGrabber.setParams(Val(Me.tbExposureTime.Text), Val(Me.tbDayGain.Text), Val(Me.tbDayDgain.Text), Val(Me.tbDayGamma.Text), 0)
-        Else
-            '  myVistekImageGrabber.setParams(Val(Me.tbExposureTime.Text), Val(Me.tbNightAgain.Text), Val(Me.tbNightDgain.Text), Val(Me.tbNightGamma.Text), 0)
 
-        End If
+        mySVCam.setParams(Val(Me.tbExposureTime.Text), Val(Me.tbNightAgain.Text))
 
 
         MsgBox("cover lens")
 
-        mySVCam.startAcquisitionThread_darks()
+        mySVCam.startAcquisitionThreadForDarks(AddressOf Me.received_frame)
 
     End Sub
 
     Private Sub cbUseDarks_CheckedChanged(sender As Object, e As EventArgs) Handles cbUseDarks.CheckedChanged
-
+        If cbUseDarks.Checked Then
+            mySVCam.useDarks = True
+        Else
+            mySVCam.useDarks = False
+        End If
     End Sub
 
     Private Sub Timer2_Tick(sender As Object, e As EventArgs) Handles Timer2.Tick
@@ -550,7 +550,9 @@ Public Class frmSVSVistek
 
     Private Sub cmbCam_SelectedIndexChanged(sender As Object, e As EventArgs) Handles cmbCam.SelectedIndexChanged
         mySVCam.openCamera(cmbCam.SelectedIndex)
+
     End Sub
+
 
     Private Shared Function GetEncoderInfo(ByVal mimeType As String) As ImageCodecInfo
         Dim j As Integer

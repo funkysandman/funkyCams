@@ -178,26 +178,26 @@ namespace SVCamApi
             cam.duration = duration;
             SVCamApi.SVcamApi.SVSCamApiReturn ret;
             phFeature = IntPtr.Zero;
-            ret = SVSCam.myApi.SVS_FeatureGetByName(cam.hRemoteDevice, "GainRaw", ref phFeature);
-            ret = SVSCam.myApi.SVS_FeatureSetValueInt64(cam.hRemoteDevice, phFeature, (int)aGain);
+            ret = SVSCam.myApi.SVS_FeatureGetByName(cam.hRemoteDevice, "Gain", ref phFeature);
+            ret = SVSCam.myApi.SVS_FeatureSetValueFloat(cam.hRemoteDevice, phFeature, (float)aGain);
 
             SVcamApi._SVCamFeaturInf info = new SVcamApi._SVCamFeaturInf();
-            SVSCam.myApi.SVS_FeatureGetByName(cam.hRemoteDevice, "GainRaw", ref phFeature);
-            cam.getFeatureValue(phFeature, ref info);
+            //SVSCam.myApi.SVS_FeatureGetByName(cam.hRemoteDevice, "GainRaw", ref phFeature);
+            //cam.getFeatureValue(phFeature, ref info);
 
-            phFeature = IntPtr.Zero;
-            SVSCam.myApi.SVS_FeatureGetByName(cam.hRemoteDevice, "ExposureTime", ref phFeature);
-            SVSCam.myApi.SVS_FeatureSetValueFloat(cam.hRemoteDevice, phFeature, duration);
+            //phFeature = IntPtr.Zero;
+            //SVSCam.myApi.SVS_FeatureGetByName(cam.hRemoteDevice, "ExposureTime", ref phFeature);
+            //SVSCam.myApi.SVS_FeatureSetValueFloat(cam.hRemoteDevice, phFeature, duration);
 
-            phFeature = IntPtr.Zero;
-            SVSCam.myApi.SVS_FeatureGetByName(cam.hRemoteDevice, "AcquisitionFrameRate", ref phFeature);
-            SVSCam.myApi.SVS_FeatureSetValueFloat(cam.hRemoteDevice, phFeature, Math.Min((float)999220 / duration, (float)2));
+            //phFeature = IntPtr.Zero;
+            //SVSCam.myApi.SVS_FeatureGetByName(cam.hRemoteDevice, "AcquisitionFrameRate", ref phFeature);
+            //SVSCam.myApi.SVS_FeatureSetValueFloat(cam.hRemoteDevice, phFeature, Math.Min((float)999220 / duration, (float)2));
 
-            phFeature = IntPtr.Zero;
-            SVSCam.myApi.SVS_FeatureGetByName(cam.hRemoteDevice, "PixelFormat", ref phFeature);
-            cam.getFeatureValue(phFeature, ref info);
+            //phFeature = IntPtr.Zero;
+            //SVSCam.myApi.SVS_FeatureGetByName(cam.hRemoteDevice, "PixelFormat", ref phFeature);
+            //cam.getFeatureValue(phFeature, ref info);
 
-            SVSCam.myApi.SVS_FeatureSetValueInt64(cam.hRemoteDevice, phFeature, (long)SV_GVSP_PIXEL_TYPE.SV_GVSP_PIX_BAYRG12_PACKED);
+            //SVSCam.myApi.SVS_FeatureSetValueInt64(cam.hRemoteDevice, phFeature, (long)SV_GVSP_PIXEL_TYPE.SV_GVSP_PIX_BAYRG12_PACKED);
 
  
             phFeature = IntPtr.Zero;
@@ -206,17 +206,17 @@ namespace SVCamApi
             SVSCam.myApi.SVS_FeatureGetByName(cam.hRemoteDevice, "ExposureAuto", ref phFeature);
             cam.getFeatureValue(phFeature, ref info);
 
-            if (duration > 100000)//only bother with autoexposure during the day with short shutter times
-            {
-                ret = SVSCam.myApi.SVS_FeatureSetValueInt64Enum(cam.hRemoteDevice, phFeature,(int) 0);
-               // ret = SVSCam.myApi.SVS_FeatureGetInfo(cam.hRemoteDevice, phFeature, ref fi);
-              //  ret = SVSCam.myApi.SVS_FeatureSetValueInt64(cam.hRemoteDevice, "ExposureAuto", ref phFeature);
-            }
-            else
-            {
-                //ret = SVSCam.myApi.SVS_FeatureSetValueInt64Enum(cam.hRemoteDevice, phFeature, (int) 1);
+            //if (duration > 100000)//only bother with autoexposure during the day with short shutter times
+            //{
+            //    ret = SVSCam.myApi.SVS_FeatureSetValueInt64Enum(cam.hRemoteDevice, phFeature,(int) 0);
+            //   // ret = SVSCam.myApi.SVS_FeatureGetInfo(cam.hRemoteDevice, phFeature, ref fi);
+            //  //  ret = SVSCam.myApi.SVS_FeatureSetValueInt64(cam.hRemoteDevice, "ExposureAuto", ref phFeature);
+            //}
+            //else
+            //{
+            //    //ret = SVSCam.myApi.SVS_FeatureSetValueInt64Enum(cam.hRemoteDevice, phFeature, (int) 1);
                
-            }
+            //}
 
 
         }
@@ -281,9 +281,16 @@ namespace SVCamApi
                 loadMasterDark();
             }
 
-            private void loadMasterDark()
+            public void loadMasterDark()
             {
-                masterDark = File.ReadAllBytes("masterdark.raw");
+                try
+                { 
+                masterDark = File.ReadAllBytes("masterSVSdark.raw");
+                }
+                catch
+                {
+
+                }
 
             }
             ~Camera()
@@ -495,7 +502,7 @@ namespace SVCamApi
                     
                     while (ret!= SVcamApi.SVSCamApiReturn.SV_ERROR_SUCCESS)
                     { 
-                        ret = myApi.SVS_StreamWaitForNewBuffer(hStream, ref Imagptr2, ref hBuffer, timeout);
+                        ret = myApi.SVS_StreamWaitForNewBuffer(hStream, ref Imagptr2, ref hBuffer, 10000);
                         Console.WriteLine("finished streamWaitForNewBuffer");
                         if (ret == SVcamApi.SVSCamApiReturn.SV_ERROR_SUCCESS)
                         {
@@ -1014,26 +1021,11 @@ namespace SVCamApi
                     {
                         if (isImgRGB)
                         {
-
-                            myApi.SVS_UtilBufferBayerToRGB32(ImageInfo, ref imagebufferRGB[currentIdex].imagebytes[0], imagebufferRGB[currentIdex].dataLegth);
-                        }
-                        else
-                        {
-                            System.Runtime.InteropServices.Marshal.Copy(ImageInfo.pImagePtr, imagebufferMono[currentIdex].imagebytes, 0, imagebufferMono[currentIdex].dataLegth);
-                        }
-                    }
-
-                    //---12 bit Format-------------------------------------------------------------------------------------------------------------------
-
-                    else if (((int)ImageInfo.iPixelType & SVCamApi.SVcamApi.DefineConstants.SV_GVSP_PIX_EFFECTIVE_PIXELSIZE_MASK) == SVCamApi.SVcamApi.DefineConstants.SV_GVSP_PIX_OCCUPY12BIT)
-                    {
-                        if (isImgRGB)
-                        {
-                            //subtract raw darks before debayer
+                            
                             imagebufferStruct rawImage = new imagebufferStruct();
-                            rawImage.imagebytes = new byte[imagebufferRGB[currentIdex].dataLegth / 2];
+                            rawImage.imagebytes = new byte[imagebufferRGB[currentIdex].dataLegth / 3];
                             //rawImage.imagebytes = ImageInfo.pImagePtr;
-                            Marshal.Copy(ImageInfo.pImagePtr, rawImage.imagebytes, 0, imagebufferRGB[currentIdex].dataLegth / 2);
+                            Marshal.Copy(ImageInfo.pImagePtr, rawImage.imagebytes, 0, imagebufferRGB[currentIdex].dataLegth  / 3);
                             //subtract darks
                             //load dark array from file
                             //
@@ -1041,7 +1033,94 @@ namespace SVCamApi
                             int x;
                             if (useDarks)
                             {
-                                for (int k = 0; k < imagebufferRGB[currentIdex].dataLegth / 2; k++)
+
+                                loadMasterDark();
+                                for (int k = 0; k < imagebufferRGB[currentIdex].dataLegth  / 3; k++)
+                                {
+                                    //if ((masterDark[k]) > 250)
+                                        rawImage.imagebytes[k] = (byte)Math.Max(0, rawImage.imagebytes[k] - _darkmultiplier * (masterDark[k]));
+
+                                }
+                            }
+                            //subtract dark
+
+                            //copy back to imageInfo
+                            Marshal.Copy(rawImage.imagebytes, 0, ImageInfo.pImagePtr, imagebufferRGB[currentIdex].dataLegth  / 3);
+
+                            //debayer buffer into RGB
+                            myApi.SVS_UtilBufferBayerToRGB(ImageInfo, ref imagebufferRGB[currentIdex].imagebytes[0], imagebufferRGB[currentIdex].dataLegth);
+
+
+                            //do image stuff here
+                            if (m_saveLocal)
+                            {
+                                string filename = string.Format("{0}-{1:ddMMMyyyy-HHmmss}.jpg", "image", DateTime.Now);
+                                try
+                                {
+                                    ImageCodecInfo jpgEncoder = GetEncoder(ImageFormat.Jpeg);
+                                    b = new Bitmap(this.imageSizeX, this.imageSizeY, PixelFormat.Format24bppRgb);
+                                    BitmapData bmpData = b.LockBits(new Rectangle(0, 0, b.Width, b.Height), ImageLockMode.WriteOnly, b.PixelFormat);
+
+                                    Console.WriteLine("about to copy buffer into bitmapdata");
+                                    Marshal.Copy(imagebufferRGB[currentIdex].imagebytes, 0, bmpData.Scan0, imagebufferRGB[currentIdex].imagebytes.Length);
+                                    Console.WriteLine("copied buffer into bitmapdata");
+
+
+                                    b.UnlockBits(bmpData);
+
+                                    //raise event to host that we have a bitmap
+
+                                    FrameReceivedHandler frameReceivedHandler = this.m_FrameReceivedHandler;
+                                    Console.WriteLine("setup frameReceiveHandler");
+                                    if (null != frameReceivedHandler && null != b)
+                                    {
+                                        // Report image to user
+                                        frameReceivedHandler(this, new FrameEventArgs(b));
+
+
+                                    }
+                                }
+                                catch (Exception e)
+                                {
+                                    Console.WriteLine("SVS Vistek: " + e.Message);
+                                }
+                            }
+
+
+                            //
+                        }
+
+                        else
+                        {
+
+                            if (ImageInfo.pImagePtr != null)
+                            {
+                                // Convert to 8 bit 
+                                myApi.SVS_UtilBuffer12BitTo8Bit(ImageInfo, ref imagebufferMono[currentIdex].imagebytes[0], imagebufferMono[currentIdex].dataLegth);
+                            }
+                        }
+                    }
+
+
+                    //---16 bit Format-------------------------------------------------------------------------------------------------------------------
+
+                    else if (((int)ImageInfo.iPixelType & SVCamApi.SVcamApi.DefineConstants.SV_GVSP_PIX_EFFECTIVE_PIXELSIZE_MASK) == SVCamApi.SVcamApi.DefineConstants.SV_GVSP_PIX_OCCUPY16BIT)
+                    {
+                        if (isImgRGB)
+                        {
+                            //subtract raw darks before debayer
+                            imagebufferStruct rawImage = new imagebufferStruct();
+                            rawImage.imagebytes = new byte[imagebufferRGB[currentIdex].dataLegth*2/3 ];
+                            //rawImage.imagebytes = ImageInfo.pImagePtr;
+                            Marshal.Copy(ImageInfo.pImagePtr, rawImage.imagebytes, 0, imagebufferRGB[currentIdex].dataLegth * 2 / 3);
+                            //subtract darks
+                            //load dark array from file
+                            //
+                            Random r = new Random();
+                            int x;
+                            if (useDarks)
+                            {
+                                for (int k = 0; k < imagebufferRGB[currentIdex].dataLegth * 2 / 3; k++)
                                 {
                                     if ((masterDark[k]) > 250)
                                         rawImage.imagebytes[k] = (byte)Math.Max(0, rawImage.imagebytes[k] - _darkmultiplier * (masterDark[k]));
@@ -1051,11 +1130,11 @@ namespace SVCamApi
                             //subtract dark
 
                             //copy back to imageInfo
-                            Marshal.Copy(rawImage.imagebytes, 0, ImageInfo.pImagePtr, imagebufferRGB[currentIdex].dataLegth / 2);
+                            Marshal.Copy(rawImage.imagebytes, 0, ImageInfo.pImagePtr, imagebufferRGB[currentIdex].dataLegth * 2 / 3);
 
                             //debayer buffer into RGB
                             myApi.SVS_UtilBufferBayerToRGB(ImageInfo, ref imagebufferRGB[currentIdex].imagebytes[0], imagebufferRGB[currentIdex].dataLegth);
-
+                           
 
                             //do image stuff here
                             if (m_saveLocal)
@@ -1406,20 +1485,20 @@ namespace SVCamApi
 
 
         //    buttonStop_Click(this, null);
-        public void openCamera()
+        //public void openCamera()
 
 
-        {
+        //{
 
             
-            //find svs cam
-            for (int i = 0; i < SVSCam.Camlist.Count - 1; i++)
-            {
-                //SVSCam.Camlist.ElementAt(i).
-            }
-            current_selected_cam = SVSCam.Camlist.ElementAt(0);
-            current_selected_cam.openConnection();
-        }
+        //    //find svs cam
+        //    for (int i = 0; i < SVSCam.Camlist.Count - 1; i++)
+        //    {
+        //        //SVSCam.Camlist.ElementAt(i).
+        //    }
+        //    current_selected_cam = SVSCam.Camlist.ElementAt(0);
+        //    current_selected_cam.openConnection();
+        //}
         public void openCamera(int i)
 
 
@@ -1430,6 +1509,8 @@ namespace SVCamApi
 
             current_selected_cam = SVSCam.Camlist.ElementAt(i);
             current_selected_cam.openConnection();
+            prepareCamera(current_selected_cam);
+
         }
 
         public void closeCamera()
@@ -1558,7 +1639,38 @@ namespace SVCamApi
                 current_selected_cam.acquisitionStart(1, frh);
 
                 acqThreadIsRuning = true;
-                acqThread = new Thread(new ThreadStart(acqTHread));
+                acqThread = new Thread(new ThreadStart(acqTHreadTriggerWidth));
+                acqThread.Start();
+            }
+            catch
+            {
+                acqThreadIsRuning = false;
+                Console.WriteLine("problem starting acquisition Thread");
+            }
+        }
+        public void startAcquisitionThreadForDarks(FrameReceivedHandler frh)
+        {
+
+            try
+            {
+                SVcamApi.SVSCamApiReturn ret;
+                ret = current_selected_cam.openConnection();
+                if (ret != SVcamApi.SVSCamApiReturn.SV_ERROR_SUCCESS)
+                    return;
+                m_frh = frh;
+                ret = current_selected_cam.StreamingChannelOpen();
+                if (ret != SVcamApi.SVSCamApiReturn.SV_ERROR_SUCCESS)
+
+                {
+                    Console.WriteLine("could not open channel {0}", ret);
+                    current_selected_cam.closeConnection();
+                    return;
+                }
+
+                current_selected_cam.acquisitionStart(1, frh);
+
+                acqThreadIsRuning = true;
+                acqThread = new Thread(new ThreadStart(acqTHread_darks));
                 acqThread.Start();
             }
             catch
@@ -1583,8 +1695,7 @@ namespace SVCamApi
         {
 
             acqThreadIsRuning = false;
-            current_selected_cam.StreamingChannelClose();
-            current_selected_cam.closeConnection();
+
             //acqThread.Abort();
 
             //if (current_selected_cam.bufferInfoDest.pImagePtr != IntPtr.Zero)
@@ -1634,6 +1745,93 @@ namespace SVCamApi
             acqThread = new Thread(new ThreadStart(acqTHread_darks));
             acqThread.Start();
         }
+        public void prepareCamera(Camera cam)
+        {
+            IntPtr phFeature = IntPtr.Zero;
+            
+            SVCamApi.SVcamApi.SVSCamApiReturn ret;
+
+            phFeature = IntPtr.Zero;
+            int pValue = 0;
+            string subFeatureName = null;
+
+            cam.featureInfolist = new Queue<SVcamApi._SVCamFeaturInf>();
+
+            SVcamApi._SVCamFeaturInf info = new SVcamApi._SVCamFeaturInf();
+            //    ret = SVSCam.myApi.SVS_FeatureGetByName(cam.hRemoteDevice, "PayloadSize", ref phFeature);
+            //cam.getFeatureValue(info.hFeature, ref info);
+            //ret = SVSCam.myApi.SVS_FeatureGetInfo(cam.hRemoteDevice, phFeature, ref info.SVFeaturInf);
+            ////setup pixel depth
+            //ret = SVSCam.myApi.SVS_FeatureGetByName(cam.hRemoteDevice, "PixelFormat", ref phFeature);
+            //ret = SVSCam.myApi.SVS_FeatureGetInfo(cam.hRemoteDevice, phFeature, ref info.SVFeaturInf);
+            //cam.getFeatureValue(info.hFeature, ref info);
+
+            cam.featureInfolist.Clear();
+
+            cam.featureInfolist = new Queue<SVcamApi._SVCamFeaturInf>();
+
+
+            // ret = SVSCam.myApi.SVS_FeatureGetInfo(cam.hRemoteDevice, phFeature, ref info.SVFeaturInf);
+            // ret = SVSCam.myApi.SVS_FeatureListRefresh(cam.hRemoteDevice);
+            cam.getDeviceFeatureList(SVcamApi.SV_FEATURE_VISIBILITY.SV_Guru);
+
+
+            for (int j = 1; j < cam.featureInfolist.Count; j++)
+            {
+                if (cam.featureInfolist.ElementAt(j).SVFeaturInf.displayName == "Pixel Format")
+                {
+                    ret = SVSCam.myApi.SVS_FeatureEnumSubFeatures(cam.hRemoteDevice, cam.featureInfolist.ElementAt(j).hFeature, 3, ref subFeatureName, 512, ref pValue);
+                    ret = SVSCam.myApi.SVS_FeatureSetValueInt64Enum(cam.hRemoteDevice, cam.featureInfolist.ElementAt(j).hFeature, pValue);
+                    Console.WriteLine("set pixel format");
+                    
+                }
+                if (cam.featureInfolist.ElementAt(j).SVFeaturInf.displayName == "PayloadSize")
+                {
+                    Console.WriteLine("payloadsize");
+                }
+            }
+
+            cam.featureInfolist = new Queue<SVcamApi._SVCamFeaturInf>();
+            ret = SVSCam.myApi.SVS_FeatureListRefresh(cam.hRemoteDevice);
+            Application.DoEvents();
+            ret = SVSCam.myApi.SVS_FeatureGetByName(cam.hRemoteDevice, "PayloadSize", ref phFeature);
+            cam.getFeatureValue(phFeature, ref info);
+
+            ret = SVSCam.myApi.SVS_FeatureGetByName(cam.hRemoteDevice, "TriggerActivation", ref phFeature);
+            Console.WriteLine(ret);
+            ret = SVSCam.myApi.SVS_FeatureGetInfo(cam.hRemoteDevice, phFeature, ref info.SVFeaturInf);
+
+            //ret =SVSCam.myApi.SVS_FeatureSetValueString(cam.hRemoteDevice,phFeature, "Rising Edge");
+            ret = SVSCam.myApi.SVS_FeatureSetValueInt64Enum(cam.hRemoteDevice, phFeature, 0);//rising edge
+            Console.WriteLine(ret);
+            //set packet delay
+            ret = SVSCam.myApi.SVS_FeatureGetByName(cam.hRemoteDevice, "GevSCPD", ref phFeature);
+            ret = SVSCam.myApi.SVS_FeatureGetInfo(cam.hRemoteDevice, phFeature, ref info.SVFeaturInf);
+            ret = SVSCam.myApi.SVS_FeatureSetValueInt64(cam.hRemoteDevice, phFeature, 1000);//packet delay
+            //turn on triggerwidth
+            ret = SVSCam.myApi.SVS_FeatureGetByName(cam.hRemoteDevice, "ExposureMode", ref phFeature);
+            ret = SVSCam.myApi.SVS_FeatureGetInfo(cam.hRemoteDevice, phFeature, ref info.SVFeaturInf);
+            ret = SVSCam.myApi.SVS_FeatureSetValueInt64Enum(cam.hRemoteDevice, phFeature, 1);//triggerWidth
+            phFeature = IntPtr.Zero;
+            //turn trigger mode on
+            ret = SVSCam.myApi.SVS_FeatureGetByName(cam.hRemoteDevice, "TriggerMode", ref phFeature);
+            ret = SVSCam.myApi.SVS_FeatureGetInfo(cam.hRemoteDevice, phFeature, ref info.SVFeaturInf);
+            ret = SVSCam.myApi.SVS_FeatureSetValueInt64Enum(cam.hRemoteDevice, phFeature, 1);//On
+            phFeature = IntPtr.Zero;
+            //turn trigger source
+            ret = SVSCam.myApi.SVS_FeatureGetByName(cam.hRemoteDevice, "TriggerSource", ref phFeature);
+            ret = SVSCam.myApi.SVS_FeatureGetInfo(cam.hRemoteDevice, phFeature, ref info.SVFeaturInf);
+            ret = SVSCam.myApi.SVS_FeatureSetValueInt64Enum(cam.hRemoteDevice, phFeature, 1);//Line1
+            phFeature = IntPtr.Zero;
+
+            ret = SVSCam.myApi.SVS_FeatureGetByName(cam.hRemoteDevice, "PayloadSize", ref phFeature);
+            ret = SVSCam.myApi.SVS_FeatureGetInfo(cam.hRemoteDevice, phFeature, ref info.SVFeaturInf);
+            cam.featureInfolist.Clear();
+
+            cam.featureInfolist = new Queue<SVcamApi._SVCamFeaturInf>();
+
+        }
+
         public void acqTHread_darks()
         {
 
@@ -1642,8 +1840,12 @@ namespace SVCamApi
             int numDarks = 10;
 
             int pDestLength = 0;
+            prepareCamera(cam);
             for (int d = 0; d < numDarks; d++)
             {
+                //take pic
+                expose(cam);
+                //
                 if (!cam.grab())
                     continue;
                 Console.WriteLine("inside while loop");
@@ -1682,6 +1884,7 @@ namespace SVCamApi
                 for (int d = 0; d < numDarks; d++)
                 {
                     totalPixel = totalPixel + cam.imagebufferDark[d].imagebytes[pxl];
+                  
                 }
                 cam.masterDark[pxl] = (byte)(totalPixel / numDarks);
             }
@@ -1696,10 +1899,11 @@ namespace SVCamApi
 
 
 
-            string folderName = string.Format("{0:yyyy-MMM-dd}", DateTime.Now);
-            System.IO.Directory.CreateDirectory(Path.Combine("f:\\image", folderName));
-            Console.WriteLine("SVS Vistek: saving master darks");
-            File.WriteAllBytes(Path.Combine("f:\\image", folderName, "masterDark.raw"), cam.masterDark);
+            //string folderName = string.Format("{0:yyyy-MMM-dd}", DateTime.Now);
+            //System.IO.Directory.CreateDirectory(Path.Combine("e:\\image", folderName));
+            //Console.WriteLine("SVS Vistek: saving master darks");
+            //File.WriteAllBytes(Path.Combine("e:\\image", folderName, "masterDark.raw"), cam.masterDark);
+            File.WriteAllBytes( "masterSVSDark.raw", cam.masterDark);
             Console.WriteLine("done with darks");
 
         }
@@ -1744,6 +1948,108 @@ namespace SVCamApi
                 cam.imageSizeY = sizeY;
                 cam.addnewImageData2(cam.bufferInfoDest, isImgRGB);
                 cam.isrgb = isImgRGB;
+                    //
+                }
+
+
+            }
+            Console.WriteLine("acqThreadIsRuning no more");
+            //try to restart camera
+            //current_selected_cam.is_opened = false;
+            //Console.WriteLine("closing channel");
+            //current_selected_cam.StreamingChannelClose();
+            ////close camera
+            //int i = curentCamIndex;
+            //Console.WriteLine("closing connection");
+            //current_selected_cam.closeConnection();
+            current_selected_cam.acquisitionStop();
+            current_selected_cam.is_opened = false;
+            current_selected_cam.StreamingChannelClose();
+
+
+            //openCamera(curentCamIndex);
+            //
+            //current_selected_cam.StreamingChannelClose();
+            //current_selected_cam.StreamingChannelOpen();
+
+
+
+        }
+        public enum Trigger_mode
+        {
+            sv_rising = 0, 
+            sv_falling = 2
+        }
+        public void expose(Camera cam)
+        {
+            SVCamApi.SVcamApi.SVSCamApiReturn ret;
+            IntPtr phFeature = IntPtr.Zero;
+            //cam.getFeatureValue(hFeature, hInfo);
+            ret = SVSCam.myApi.SVS_FeatureGetByName(cam.hRemoteDevice, "TriggerActivation", ref phFeature);
+            ret = SVSCam.myApi.SVS_FeatureSetValueInt64Enum(cam.hRemoteDevice, phFeature, 1);//falling edge
+            if (ret == SVcamApi.SVSCamApiReturn.SV_ERROR_SUCCESS)
+            {
+                Console.WriteLine("falling edge");
+            }
+            else
+            {
+                Console.WriteLine(ret);
+            }
+
+            Thread.Sleep(cam.duration / 1000);
+            //trigger off
+            ret = SVSCam.myApi.SVS_FeatureSetValueInt64Enum(cam.hRemoteDevice, phFeature, 0);//rising edge
+            if (ret == SVcamApi.SVSCamApiReturn.SV_ERROR_SUCCESS)
+                Console.WriteLine("rising edge");
+        }
+        public void acqTHreadTriggerWidth()
+        {
+            Console.WriteLine("starting acqThread trigger width");
+
+
+            IntPtr phFeature = IntPtr.Zero;
+            Camera cam = current_selected_cam;
+            SVCamApi.SVcamApi.SVSCamApiReturn ret;
+            
+            while (acqThreadIsRuning)
+            {
+                //trigger on
+                expose(cam);
+                if (!cam.grab())
+                {
+                    stopAcquisitionThread();
+                    Console.WriteLine("stopped acquisition");
+
+                    startAcquisitionThread(m_frh);
+                    Console.WriteLine("called start acquisition");
+                    return;
+
+                }
+                else
+                {
+                    Console.WriteLine("inside while loop");
+
+                    // Check if a RGB image( Bayer buffer format) arrived
+                    bool isImgRGB = false;
+                    int pDestLength = (int)(cam.bufferInfoDest.iImageSize);
+                    int sizeX = (int)cam.bufferInfoDest.iSizeX;
+                    int sizeY = (int)cam.bufferInfoDest.iSizeY;
+
+                    CurrentID = Convert.ToString(cam.bufferInfoDest.iImageId);
+
+                    if (((int)cam.bufferInfoDest.iPixelType & SVCamApi.SVcamApi.DefineConstants.SV_GVSP_PIX_ID_MASK) >= 8)
+                    {
+                        isImgRGB = true;
+                        pDestLength = 3 * pDestLength;
+                    }
+                    if (!isImgRGB)
+                        isImgRGB = false;
+
+                    this.initializeBuffer(isImgRGB, sizeX, sizeY);
+                    cam.imageSizeX = sizeX;
+                    cam.imageSizeY = sizeY;
+                    cam.addnewImageData2(cam.bufferInfoDest, isImgRGB);
+                    cam.isrgb = isImgRGB;
                     //
                 }
 

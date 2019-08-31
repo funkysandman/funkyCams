@@ -288,7 +288,7 @@ Partial Class frmPointGrey
         Me.tbNightExp.Name = "tbNightExp"
         Me.tbNightExp.Size = New System.Drawing.Size(45, 20)
         Me.tbNightExp.TabIndex = 81
-        Me.tbNightExp.Text = "5000000"
+        Me.tbNightExp.Text = "7500000"
         '
         'tbDayTimeExp
         '
@@ -296,7 +296,7 @@ Partial Class frmPointGrey
         Me.tbDayTimeExp.Name = "tbDayTimeExp"
         Me.tbDayTimeExp.Size = New System.Drawing.Size(45, 20)
         Me.tbDayTimeExp.TabIndex = 80
-        Me.tbDayTimeExp.Text = "2000"
+        Me.tbDayTimeExp.Text = "2500"
         '
         'Label9
         '

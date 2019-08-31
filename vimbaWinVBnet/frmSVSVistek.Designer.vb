@@ -81,13 +81,11 @@ Partial Class frmSVSVistek
         Me.tbPort.Name = "tbPort"
         Me.tbPort.Size = New System.Drawing.Size(50, 20)
         Me.tbPort.TabIndex = 9
-        Me.tbPort.Text = "8083"
+        Me.tbPort.Text = "8050"
         '
         'cbUseDarks
         '
         Me.cbUseDarks.AutoSize = True
-        Me.cbUseDarks.Checked = True
-        Me.cbUseDarks.CheckState = System.Windows.Forms.CheckState.Checked
         Me.cbUseDarks.Location = New System.Drawing.Point(317, 384)
         Me.cbUseDarks.Name = "cbUseDarks"
         Me.cbUseDarks.Size = New System.Drawing.Size(110, 17)
@@ -274,7 +272,7 @@ Partial Class frmSVSVistek
         Me.tbNightAgain.Name = "tbNightAgain"
         Me.tbNightAgain.Size = New System.Drawing.Size(47, 20)
         Me.tbNightAgain.TabIndex = 31
-        Me.tbNightAgain.Text = "27"
+        Me.tbNightAgain.Text = "18"
         '
         'Label7
         '
@@ -379,7 +377,7 @@ Partial Class frmSVSVistek
         Me.tbPath.Name = "tbPath"
         Me.tbPath.Size = New System.Drawing.Size(252, 20)
         Me.tbPath.TabIndex = 42
-        Me.tbPath.Text = "c:\image"
+        Me.tbPath.Text = "c:\imageSVS"
         '
         'cbMeteors
         '
