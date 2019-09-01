@@ -68,4 +68,11 @@ Public Class Form3
         f.ShowDialog()
         Me.Close()
     End Sub
+
+    Private Sub Button8_Click(sender As Object, e As EventArgs) Handles Button8.Click
+        Dim f As New frmSVSVistek
+        Me.Hide()
+        f.ShowDialog()
+        Me.Close()
+    End Sub
 End Class

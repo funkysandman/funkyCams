@@ -43,7 +43,7 @@ Public Class WebServer
     Private myPointGreyForm As frmPointGrey
     Private restart As Boolean = False
     '  Private myBaslerForm As frmBasler
-    Private mySVSVistekForm As Object
+    Private mySVSVistekForm As frmSVSVistek
     Private mySVSVistekBaumerForm As frmGIGE
 
     Dim rawDark() As Byte
@@ -1508,17 +1508,17 @@ Public Class WebServer
             If mySocket.Connected Then
                 Dim bReceive() As Byte = New [Byte](1024) {}
                 Dim i As Integer
-                'Try
-                i = mySocket.Receive(bReceive, bReceive.Length, 0)
-                'Catch ex As Exception
-                '    'socket blewup
-                '    Debug.Print(ex.Message)
-                '    restart = True
-                '    mySocket.Close()
-                '    mySocket = Nothing
-                '    LocalTCPListener.Stop()
-                '    Exit Do
-                'End Try
+                Try
+                    i = mySocket.Receive(bReceive, bReceive.Length, 0)
+                Catch ex As Exception
+                    'socket blewup
+                    Debug.Print(ex.Message)
+                    restart = True
+                    mySocket.Close()
+                    mySocket = Nothing
+                    LocalTCPListener.Stop()
+                    Exit Do
+                End Try
 
                 Dim sBuffer As String = Encoding.ASCII.GetString(bReceive)
                 'find the GET request.

@@ -174,7 +174,8 @@ namespace BaumerAPI
                     { 
                     while (running) 
                     {
-                        mBufferFilled = mDataStream.GetFilledBuffer(15000); // image polling timeout 1000 msec
+                        mBufferFilled = mDataStream.GetFilledBuffer(25000); // image polling timeout 1000 msec
+                        
                         retryClose = 0;
                         retryOpen = 0;
                         retryStart = 0;
@@ -290,8 +291,9 @@ namespace BaumerAPI
                         else if (mBufferFilled.IsIncomplete == true)
                         {
                             System.Console.Write("Error: Image is incomplete\r\n");
-                            // queue buffer again
-                            mBufferFilled.QueueBuffer();
+                        // queue buffer again
+                       
+                        mBufferFilled.QueueBuffer();
                         }
                         else
                         {

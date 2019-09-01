@@ -126,6 +126,12 @@
     <Compile Include="frmPointGrey.vb">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="frmSVSVistek.Designer.vb">
+      <DependentUpon>frmSVSVistek.vb</DependentUpon>
+    </Compile>
+    <Compile Include="frmSVSVistek.vb">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="frmToupcam.Designer.vb">
       <DependentUpon>frmToupcam.vb</DependentUpon>
     </Compile>
@@ -200,6 +206,9 @@
   <ItemGroup>
     <EmbeddedResource Include="frmPointGrey.resx">
       <DependentUpon>frmPointGrey.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmSVSVistek.resx">
+      <DependentUpon>frmSVSVistek.vb</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="frmToupcam.resx">
       <DependentUpon>frmToupcam.vb</DependentUpon>
