@@ -31,7 +31,7 @@ Public Class frmToupcam
     Dim myEncoderParameters As EncoderParameters
     Dim t As Thread
     Dim meteorCheckRunning As Boolean = False
-
+    Dim takingDarks As Boolean = False
 
     Private cam_ As Toupcam = Nothing
     Private bmp_ As Bitmap = Nothing
@@ -184,12 +184,31 @@ Public Class frmToupcam
             Dim bmpdata As BitmapData = bmp_.LockBits(New Rectangle(0, 0, bmp_.Width, bmp_.Height), ImageLockMode.[WriteOnly], bmp_.PixelFormat)
 
             Dim info As New Toupcam.FrameInfoV2
-            cam_.PullImageV2(bmpdata.Scan0, 8, info)
+            Dim ptr As IntPtr
+            ptr = bmpdata.Scan0
+            cam_.PullImageV2(ptr, 8, info)
+            Dim numBytes As Integer = info.width * info.height
+            Dim rawData(numBytes) As Byte
+            System.Runtime.InteropServices.Marshal.Copy(ptr, rawData, 0, numBytes)
             'subtract darks
+            If cbUseDarks.Checked Then
+                dark = File.ReadAllBytes("toupdark.raw")
 
 
+                '
+                For x = 0 To numBytes - 1
+                    rawData(x) = CByte(Math.Max(0, CLng(rawData(x)) - CLng(dark(x))))
+
+                Next
+
+            End If
+            System.Runtime.InteropServices.Marshal.Copy(rawData, 0, bmpdata.Scan0, numBytes)
             bmp_.UnlockBits(bmpdata)
-
+            Dim ncp As System.Drawing.Imaging.ColorPalette = bmp_.Palette
+            For j As Integer = 0 To 255
+                ncp.Entries(j) = System.Drawing.Color.FromArgb(255, j, j, j)
+            Next
+            bmp_.Palette = ncp
             m_pics.FillNextBitmap(bmp_)
 
             Dim firstLocation As PointF = New PointF(10.0F, 10.0F)
@@ -274,7 +293,10 @@ Public Class frmToupcam
                     OnEventExposure()
                     Exit Select
                 Case Toupcam.eEVENT.EVENT_IMAGE
-                    OnEventImage()
+                    If Not takingDarks Then
+                        OnEventImage()
+                    End If
+
                     Exit Select
                 Case Toupcam.eEVENT.EVENT_STILLIMAGE
                     OnEventStillImage()
@@ -640,7 +662,8 @@ Public Class frmToupcam
                     tbGain.Text = tbDayGain.Text
                     lblDayNight.Text = "day"
                     '' m_CCamera.setGainExposure(Val(Me.tbDayGain.Text), Val(Me.tbExposureTime.Text))
-
+                    cam_.put_ExpoTime(Val(Me.tbExposureTime.Text))
+                    cam_.put_ExpoAGain(Val(tbGain.Text))
 
 
                 End If
@@ -777,51 +800,60 @@ Public Class frmToupcam
     End Sub
 
     Private Sub Button2_Click(sender As Object, e As EventArgs) Handles Button2.Click
-        MsgBox("cover lens cap")
-        Button2.Enabled = False
-        Dim f As Frame
-        Dim darks(10) As Frame
+        takingDarks = True
+        Try
 
 
-        'For i = 0 To 9
+            Dim numDarks As Integer = 10
+            Dim numBytes As Integer = 0
+            MsgBox("cover lens")
+            cam_.put_ExpoTime(Val(Me.tbExposureTime.Text))
+            cam_.put_ExpoAGain(Val(tbGain.Text))
 
-        '    v.m_Camera.AcquireSingleImage(f, 10000)
-        '    darks(i) = f
-        '    'Dim reader As New BinaryReader(ms)
-        '    'Dim bytes() As Byte = New Byte(ms.Length) {}
-        '    'reader.BaseStream.Position = 0
+            Dim ptr As IntPtr
+            Dim pInfo As Toupcam.FrameInfoV2
+            Dim w, h As Integer
+            cam_.StartPullModeWithWndMsg(Me.Handle, MSG_CAMEVENT)
+            While Not (cam_.PullImageV2(ptr, 8, pInfo))
+                Application.DoEvents()
+            End While
 
-        '    'While reader.BaseStream.Position < reader.BaseStream.Length
-        '    '    reader.Read(bytes, 0, bytes.Length)
+            bmp_ = New Bitmap(pInfo.width, pInfo.height, PixelFormat.Format8bppIndexed)
+            numBytes = pInfo.width * pInfo.height
+            Dim bmpdata As BitmapData = bmp_.LockBits(New Rectangle(0, 0, pInfo.width, pInfo.height), ImageLockMode.[WriteOnly], bmp_.PixelFormat)
+            ptr = bmpdata.Scan0
 
-        '    '    'sResponse = sResponse & Encoding.ASCII.GetString(bytes, 0, reader.BaseStream.Length)
-        '    '    'iTotBytes = reader.BaseStream.Length
-        '    'End While
-        '    'reader.Close()
-        '    'b.Save(Application.StartupPath & "\dark.tif", System.Drawing.Imaging.ImageFormat.Tiff)
-        'Next
-        ''average the pictures (for 12 bit images)
-        Dim imageValueTotal
-        Dim newValue
-        For i = 0 To f.BufferSize - 1 Step 2
-            imageValueTotal = 0
-            For x = 0 To 9
-                imageValueTotal = imageValueTotal + (darks(x).Buffer(i + 1) * 256) + darks(x).Buffer(i)
+            Dim darks(numBytes) As Integer
+            Dim darkBytes(numBytes) As Byte
+            System.Runtime.InteropServices.Marshal.Copy(ptr, darkBytes, 0, numBytes)
+
+            For i = 1 To numDarks
+                cam_.put_ExpoTime(Val(Me.tbExposureTime.Text))
+                cam_.put_ExpoAGain(Val(tbGain.Text))
+                cam_.StartPullModeWithWndMsg(Me.Handle, MSG_CAMEVENT)
+                While Not (cam_.PullImageV2(ptr, 8, pInfo))
+                    Application.DoEvents()
+                End While
+                System.Runtime.InteropServices.Marshal.Copy(ptr, darkBytes, 0, numBytes)
+                Debug.Print("image - {0}", i)
+                For x = 0 To numBytes - 1
+                    darks(x) = darks(x) + CInt(darkBytes(x))
+                Next
 
             Next
-            newValue = Int(imageValueTotal / 10)
-            f.Buffer(i + 1) = Int(newValue / 256)
-            f.Buffer(i) = newValue And 255
-        Next
-
-
-        'Dim fs As New FileStream(Application.StartupPath & "\dark_" & v.m_Camera.Id & ".raw", FileMode.Create)
-
-        Dim ms As New MemoryStream()
-        'fs.Write(f.Buffer, 0, f.BufferSize)
-        'fs.Close()
-        MsgBox("done")
-        Button2.Enabled = True
+            ptr = Nothing
+            bmp_.UnlockBits(bmpdata)
+            For i = 0 To numBytes - 1
+                darkBytes(i) = CByte(darks(i) / numDarks)
+            Next
+            File.WriteAllBytes("toupDark.raw", darkBytes)
+            cam_.Stop()
+            MsgBox("finished darks")
+            takingDarks = False
+        Catch ex As Exception
+            MsgBox("error taking darks:" & ex.Message)
+            takingDarks = False
+        End Try
     End Sub
 
     'Private Sub Button3_Click(sender As Object, e As EventArgs) Handles Button3.Click
@@ -1046,11 +1078,11 @@ Public Class frmToupcam
 
 
 
-    Private Sub lblDayNight_TextChanged(sender As Object, e As EventArgs)
+    Private Sub lblDayNight_TextChanged(sender As Object, e As EventArgs) Handles lblDayNight.TextChanged
         If Not cam_ Is Nothing Then
             'If lblDayNight.Text = "night" Then
             cam_.put_ExpoTime(Val(Me.tbExposureTime.Text))
-                cam_.put_ExpoAGain(Val(tbGain.Text))
+            cam_.put_ExpoAGain(Val(tbGain.Text))
             '
         End If
 
@@ -1065,9 +1097,7 @@ Public Class frmToupcam
         End If
     End Sub
 
-    Private Sub lblDayNight_Click_1(sender As Object, e As EventArgs) Handles lblDayNight.Click
+    Private Sub lblDayNight_Click(sender As Object, e As EventArgs) Handles lblDayNight.Click
 
     End Sub
-
-
 End Class

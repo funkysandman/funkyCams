@@ -246,10 +246,12 @@ Public Class frmPointGrey
             'image.Save("pgDark.raw")
             'darks
             If myForm.cbUseDarks.Checked And myForm.lblDayNight.Text = "night" Then
-                Dim dark As Byte()
-                dark = File.ReadAllBytes("pgdark.raw")
+                If myForm.dark Is Nothing Then
+                    myForm.dark = File.ReadAllBytes("pgdark.raw")
+                End If
+
                 For i = 0 To image.DataSize - 1
-                    image.ManagedData(i) = CByte(Math.Max(0, CInt(image.ManagedData(i)) - CInt(dark(i))))
+                    image.ManagedData(i) = CByte(Math.Max(0, CInt(image.ManagedData(i)) - CInt(myForm.dark(i))))
                 Next
                 '
 

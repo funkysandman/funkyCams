@@ -260,12 +260,6 @@
       <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\ExampleObjectDetection\ObjectDetection.csproj">
-      <Project>{69471b59-576d-446b-8df3-96ec783c0b6c}</Project>
-      <Name>ObjectDetection</Name>
-    </ProjectReference>
-  </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PreBuildEvent>
