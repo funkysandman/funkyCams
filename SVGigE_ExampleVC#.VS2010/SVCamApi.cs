@@ -591,7 +591,9 @@ namespace SVCamApi
             internal static unsafe
             SVSCamApiReturn SVLibSystemOpen(uint uiIndex, void* phSystemOut)
             {
-                return IntPtr.Size == 8 /* 64bit */ ? SVLibSystemOpen_64(uiIndex, phSystemOut) : SVLibSystemOpen_32(uiIndex, phSystemOut);
+
+                 return IntPtr.Size == 8 /* 64bit */ ? SVLibSystemOpen_64(uiIndex, phSystemOut) : SVLibSystemOpen_32(uiIndex, phSystemOut);
+                //return SVLibSystemOpen_64(uiIndex, phSystemOut);
             }
 
 
