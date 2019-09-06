@@ -1509,7 +1509,7 @@ namespace SVCamApi
 
             current_selected_cam = SVSCam.Camlist.ElementAt(i);
             current_selected_cam.openConnection();
-            prepareCamera(current_selected_cam);
+            
 
         }
 
@@ -1745,7 +1745,7 @@ namespace SVCamApi
             acqThread = new Thread(new ThreadStart(acqTHread_darks));
             acqThread.Start();
         }
-        public void prepareCamera(Camera cam)
+        public void prepareCameraForTriggerWidth(Camera cam)
         {
             IntPtr phFeature = IntPtr.Zero;
             
@@ -1840,7 +1840,7 @@ namespace SVCamApi
             int numDarks = 10;
 
             int pDestLength = 0;
-            prepareCamera(cam);
+            prepareCameraForTriggerWidth(cam);
             for (int d = 0; d < numDarks; d++)
             {
                 //take pic

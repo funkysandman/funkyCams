@@ -725,7 +725,7 @@ Public Class frmPointGrey
                 CallAzureMeteorDetection(aQE.img, aQE.filename)
 
 
-                    aQE = Nothing
+                aQE = Nothing
 
             End If
             'Console.WriteLine("in the queue:{0}", myDetectionQueue.Count)
@@ -747,6 +747,8 @@ Public Class frmPointGrey
 
             Dim response = client.PostAsync(apiURL, byteContent)
             Dim responseString = response.Result
+            byteContent = Nothing
+
         Catch ex As Exception
             Console.WriteLine("calling meteor detection:" & ex.Message)
         End Try
@@ -1340,5 +1342,7 @@ Public Class frmPointGrey
         MsgBox("finished darks")
     End Sub
 
-
+    Private Sub Button1_Click(sender As Object, e As EventArgs) Handles Button1.Click
+        GC.Collect()
+    End Sub
 End Class

@@ -679,10 +679,14 @@ namespace BaumerAPI
         }
 
         public void closeCamera()
-        { 
-                mDevice.Close();
-                mInterface.Close();
-                mSystem.Close();
+        {
+            foreach (KeyValuePair<string, BGAPI2.DataStream> dst_pair in mDevice.DataStreams)
+            {
+                dst_pair.Value.Close();
+            }
+                //mDevice.Close();
+                //mInterface.Close();
+                //mSystem.Close();
         }
 
         public void startCapture(FrameReceivedHandler frh)

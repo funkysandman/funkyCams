@@ -59,6 +59,7 @@ Partial Class frmPointGrey
         Me.tbGain = New System.Windows.Forms.TextBox()
         Me.Timer1 = New System.Windows.Forms.Timer(Me.components)
         Me.TimerAcquistionRate = New System.Windows.Forms.Timer(Me.components)
+        Me.Button1 = New System.Windows.Forms.Button()
         CType(Me.PictureBox1, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
         '
@@ -363,11 +364,23 @@ Partial Class frmPointGrey
         '
         Me.TimerAcquistionRate.Interval = 1000
         '
+        'Button1
+        '
+        Me.Button1.Location = New System.Drawing.Point(442, 84)
+        Me.Button1.Margin = New System.Windows.Forms.Padding(2)
+        Me.Button1.Name = "Button1"
+        Me.Button1.RightToLeft = System.Windows.Forms.RightToLeft.Yes
+        Me.Button1.Size = New System.Drawing.Size(77, 25)
+        Me.Button1.TabIndex = 96
+        Me.Button1.Text = "garbage collect"
+        Me.Button1.UseVisualStyleBackColor = True
+        '
         'frmPointGrey
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.ClientSize = New System.Drawing.Size(580, 447)
+        Me.Controls.Add(Me.Button1)
         Me.Controls.Add(Me.tbGain)
         Me.Controls.Add(Me.Label8)
         Me.Controls.Add(Me.Label7)
@@ -443,4 +456,5 @@ Partial Class frmPointGrey
     Friend WithEvents Timer1 As Timer
     Friend WithEvents TimerAcquistionRate As Timer
     Public WithEvents cbUseDarks As CheckBox
+    Friend WithEvents Button1 As Button
 End Class

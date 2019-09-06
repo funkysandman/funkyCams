@@ -250,8 +250,10 @@ Public Class frmGIGE
 
     End Sub
     Private Sub startCapture()
-        gigeGrabber = New BaumerAPI.GIGEGrabber()
-        gigeGrabber.openCamera(cmbCam.SelectedItem)
+        If gigeGrabber Is Nothing Then
+            gigeGrabber = New BaumerAPI.GIGEGrabber()
+            gigeGrabber.openCamera(cmbCam.SelectedItem)
+        End If
 
         gigeGrabber.useDarks = cbUseDarks.Checked
         gigeGrabber.pixelCutOff = Val(tbCutoff.Text)
@@ -492,14 +494,14 @@ Public Class frmGIGE
 
 
         btnStart.Enabled = False
-
+        Button3.Enabled = True
         If Now.Hour >= cboNight.SelectedItem Or Now.Hour <= cboDay.SelectedItem Then
             night = True
         Else
             night = False
         End If
-        If night Then
 
+        If night Then
             tbExposureTime.Text = tbNightExp.Text
             lblDayNight.Text = "night"
             'night mode
@@ -550,6 +552,7 @@ Public Class frmGIGE
 
     Private Sub Button3_Click(sender As Object, e As EventArgs) Handles Button3.Click
         gigeGrabber.stopAcquisition()
+        gigeGrabber.closeCamera()
         mThread.Abort()
         meteorCheckRunning = False
         Button3.Enabled = False
