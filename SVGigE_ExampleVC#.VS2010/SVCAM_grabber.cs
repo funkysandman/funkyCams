@@ -2067,6 +2067,7 @@ namespace SVCamApi
             current_selected_cam.acquisitionStop();
             current_selected_cam.is_opened = false;
             current_selected_cam.StreamingChannelClose();
+            current_selected_cam.closeConnection();
 
 
             //openCamera(curentCamIndex);

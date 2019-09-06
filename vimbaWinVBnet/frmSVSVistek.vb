@@ -533,6 +533,7 @@ Public Class frmSVSVistek
         On Error Resume Next
 
         mySVCam.stopAcquisitionThread()
+        mySVCam.closeCamera()
         mySVCam = Nothing
         'md = Nothing
         myWebServer.StopWebServer()
