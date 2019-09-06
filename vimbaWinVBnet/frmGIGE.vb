@@ -529,7 +529,7 @@ Public Class frmGIGE
         Next
         'cmbCam.SelectedIndex = 0
         mySVCam.openCamera(cmbCam.SelectedIndex)
-
+        mySVCam.prepareCameraForTimed(mySVCam.current_selected_cam)
         If LCase(Me.lblDayNight.Text) = "day" Then
             mySVCam.setParams(Val(Me.tbExposureTime.Text), Val(Me.tbDayGain.Text))
         Else
