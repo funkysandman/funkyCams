@@ -266,7 +266,7 @@ namespace DetectionServer
                 }
                 else
                 {
-                    //Console.WriteLine("nothing found");
+                    Console.WriteLine("nothing found");
                     //Bitmap b;
                     //b = new Bitmap(i);
                     //Console.WriteLine("about to save bmp");
