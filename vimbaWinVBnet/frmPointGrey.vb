@@ -248,10 +248,15 @@ Public Class frmPointGrey
             If myForm.cbUseDarks.Checked And myForm.lblDayNight.Text = "night" Then
                 If myForm.dark Is Nothing Then
                     myForm.dark = File.ReadAllBytes("pgdark.raw")
-                End If
 
+                    'For i = 0 To myForm.dark.Length - 1
+                    '    myForm.dark(i) = CByte(CInt(myForm.dark(i)) * mult)
+                    'Next
+                End If
+                Dim mult As Long
+                mult = Val(myForm.tbMultiplier.Text)
                 For i = 0 To image.DataSize - 1
-                    image.ManagedData(i) = CByte(Math.Max(0, CInt(image.ManagedData(i)) - CInt(myForm.dark(i))))
+                    image.ManagedData(i) = CByte(Math.Max(0, CInt(image.ManagedData(i)) - CInt(myForm.dark(i)) * mult))
                 Next
                 '
 

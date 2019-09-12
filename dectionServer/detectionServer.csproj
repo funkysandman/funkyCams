@@ -90,6 +90,9 @@
     <Content Include="frozen_inference_graph_latest.pb">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="frozen_inference_graph_prev.pb">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="frozen_inference_graph.pb">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

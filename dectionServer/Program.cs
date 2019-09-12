@@ -214,7 +214,7 @@ namespace DetectionServer
                 //
                 if (!md.isLoaded())
                 {
-                    md.LoadModel("frozen_inference_graph.pb", "object-detection.pbtxt");
+                    md.LoadModel(AppDomain.CurrentDomain.BaseDirectory + "frozen_inference_graph.pb", "object-detection.pbtxt");
                 }
                 myEncoder = System.Drawing.Imaging.Encoder.Quality;
                 jgpEncoder = GetEncoder(ImageFormat.Jpeg);
