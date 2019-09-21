@@ -4,14 +4,14 @@ item {
   display_name: "meteor"
 }
 item {
-  name: "cloud"
+  name: "plane"
   id: 2
-  display_name: "cloud"
+  display_name: "plane"
 }
 item {
-  name: "plane"
+  name: "satellite"
   id: 3
-  display_name: "plane"
+  display_name: "satellite"
 }
 item {
   name: "flare"

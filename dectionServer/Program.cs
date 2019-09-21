@@ -214,7 +214,7 @@ namespace DetectionServer
                 //
                 if (!md.isLoaded())
                 {
-                    md.LoadModel(AppDomain.CurrentDomain.BaseDirectory + "frozen_inference_graph.pb", "object-detection.pbtxt");
+                    md.LoadModel(AppDomain.CurrentDomain.BaseDirectory + "frozen_inference_graph.pb", AppDomain.CurrentDomain.BaseDirectory + "object-detection.pbtxt");
                 }
                 myEncoder = System.Drawing.Imaging.Encoder.Quality;
                 jgpEncoder = GetEncoder(ImageFormat.Jpeg);
@@ -239,8 +239,22 @@ namespace DetectionServer
 
                     //Console.WriteLine("object detected");
 
+                    //put score at front of filename
+                    float highscore = scores[0, 0];
+                    for (int x = 0; x < scores.Length - 1; x++)
+                    {
+                        if (classes[0,x]==1)
+                        {
+                            //found a meteor
+                            highscore = scores[0, x];
+                            break ;
+                        }
+                    }
+                       
+                    
+                    string hs = highscore.ToString(".00");
 
-
+                    qe.filename = hs.Substring(1) + qe.filename;
                     qe.filename = qe.filename.Replace("bmp", "png");
                     qe.filename = qe.filename.Replace("jpg", "png");
                     qe.filename = Path.GetFileName(qe.filename);

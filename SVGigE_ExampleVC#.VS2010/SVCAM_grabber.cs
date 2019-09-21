@@ -1037,9 +1037,13 @@ namespace SVCamApi
                                 loadMasterDark();
                                 for (int k = 0; k < imagebufferRGB[currentIdex].dataLegth  / 3; k++)
                                 {
-                                    //if ((masterDark[k]) > 250)
+                                    if ( masterDark[k]<230)
+                                    { 
                                         rawImage.imagebytes[k] = (byte)Math.Max(0, rawImage.imagebytes[k] - _darkmultiplier * (masterDark[k]));
-
+                                    }
+                                    else {
+                                        rawImage.imagebytes[k] = rawImage.imagebytes[Math.Max(0, k - 2)]; //nearest neighbour
+                                    }
                                 }
                             }
                             //subtract dark
@@ -1394,7 +1398,7 @@ namespace SVCamApi
                     cam.acquisitionStop();
                     cam.StreamingChannelClose();
                     cam.closeConnection();
-                    cam.featureInfolist.Clear();
+                   // cam.featureInfolist.Clear();
                 }
 
 
@@ -1755,7 +1759,7 @@ namespace SVCamApi
             int pValue = 0;
             string subFeatureName = null;
 
-            cam.featureInfolist = new Queue<SVcamApi._SVCamFeaturInf>();
+            //cam.featureInfolist = new Queue<SVcamApi._SVCamFeaturInf>();
 
             SVcamApi._SVCamFeaturInf info = new SVcamApi._SVCamFeaturInf();
             //    ret = SVSCam.myApi.SVS_FeatureGetByName(cam.hRemoteDevice, "PayloadSize", ref phFeature);
@@ -1766,36 +1770,39 @@ namespace SVCamApi
             //ret = SVSCam.myApi.SVS_FeatureGetInfo(cam.hRemoteDevice, phFeature, ref info.SVFeaturInf);
             //cam.getFeatureValue(info.hFeature, ref info);
 
-            cam.featureInfolist.Clear();
+           // cam.featureInfolist.Clear();
 
-            cam.featureInfolist = new Queue<SVcamApi._SVCamFeaturInf>();
+            //cam.featureInfolist = new Queue<SVcamApi._SVCamFeaturInf>();
 
 
             // ret = SVSCam.myApi.SVS_FeatureGetInfo(cam.hRemoteDevice, phFeature, ref info.SVFeaturInf);
             // ret = SVSCam.myApi.SVS_FeatureListRefresh(cam.hRemoteDevice);
-            cam.getDeviceFeatureList(SVcamApi.SV_FEATURE_VISIBILITY.SV_Guru);
+            //cam.getDeviceFeatureList(SVcamApi.SV_FEATURE_VISIBILITY.SV_Guru);
 
 
-            for (int j = 1; j < cam.featureInfolist.Count; j++)
-            {
-                if (cam.featureInfolist.ElementAt(j).SVFeaturInf.displayName == "Pixel Format")
-                {
-                    ret = SVSCam.myApi.SVS_FeatureEnumSubFeatures(cam.hRemoteDevice, cam.featureInfolist.ElementAt(j).hFeature, 3, ref subFeatureName, 512, ref pValue);
-                    ret = SVSCam.myApi.SVS_FeatureSetValueInt64Enum(cam.hRemoteDevice, cam.featureInfolist.ElementAt(j).hFeature, pValue);
-                    Console.WriteLine("set pixel format");
+            //for (int j = 1; j < cam.featureInfolist.Count; j++)
+            //{
+            //    if (cam.featureInfolist.ElementAt(j).SVFeaturInf.displayName == "Pixel Format")
+            //    {
+            //        ret = SVSCam.myApi.SVS_FeatureEnumSubFeatures(cam.hRemoteDevice, cam.featureInfolist.ElementAt(j).hFeature, 3, ref subFeatureName, 512, ref pValue);
+            //        ret = SVSCam.myApi.SVS_FeatureSetValueInt64Enum(cam.hRemoteDevice, cam.featureInfolist.ElementAt(j).hFeature, pValue);
+            //        Console.WriteLine("set pixel format");
                     
-                }
-                if (cam.featureInfolist.ElementAt(j).SVFeaturInf.displayName == "PayloadSize")
-                {
-                    Console.WriteLine("payloadsize");
-                }
-            }
-
-            cam.featureInfolist = new Queue<SVcamApi._SVCamFeaturInf>();
-            ret = SVSCam.myApi.SVS_FeatureListRefresh(cam.hRemoteDevice);
-            Application.DoEvents();
-            ret = SVSCam.myApi.SVS_FeatureGetByName(cam.hRemoteDevice, "PayloadSize", ref phFeature);
-            cam.getFeatureValue(phFeature, ref info);
+            //    }
+            //    if (cam.featureInfolist.ElementAt(j).SVFeaturInf.displayName == "PayloadSize")
+            //    {
+            //        Console.WriteLine("payloadsize");
+            //    }
+            //}
+            ret = SVSCam.myApi.SVS_FeatureGetByName(cam.hRemoteDevice, "PixelFormat", ref phFeature);
+            ret = SVSCam.myApi.SVS_FeatureEnumSubFeatures(cam.hRemoteDevice, phFeature, 3, ref subFeatureName, 512, ref pValue);
+            ret = SVSCam.myApi.SVS_FeatureSetValueInt64Enum(cam.hRemoteDevice, phFeature, pValue);
+            //cam.getFeatureValue(phFeature, ref info);
+            //cam.featureInfolist = new Queue<SVcamApi._SVCamFeaturInf>();
+            //ret = SVSCam.myApi.SVS_FeatureListRefresh(cam.hRemoteDevice);
+            //Application.DoEvents();
+            //ret = SVSCam.myApi.SVS_FeatureGetByName(cam.hRemoteDevice, "PayloadSize", ref phFeature);
+            //cam.getFeatureValue(phFeature, ref info);
 
             ret = SVSCam.myApi.SVS_FeatureGetByName(cam.hRemoteDevice, "TriggerActivation", ref phFeature);
             Console.WriteLine(ret);
@@ -1824,11 +1831,11 @@ namespace SVCamApi
             ret = SVSCam.myApi.SVS_FeatureSetValueInt64Enum(cam.hRemoteDevice, phFeature, 1);//Line1
             phFeature = IntPtr.Zero;
 
-            ret = SVSCam.myApi.SVS_FeatureGetByName(cam.hRemoteDevice, "PayloadSize", ref phFeature);
-            ret = SVSCam.myApi.SVS_FeatureGetInfo(cam.hRemoteDevice, phFeature, ref info.SVFeaturInf);
-            cam.featureInfolist.Clear();
+           // ret = SVSCam.myApi.SVS_FeatureGetByName(cam.hRemoteDevice, "PayloadSize", ref phFeature);
+           // ret = SVSCam.myApi.SVS_FeatureGetInfo(cam.hRemoteDevice, phFeature, ref info.SVFeaturInf);
+            //cam.featureInfolist.Clear();
 
-            cam.featureInfolist = new Queue<SVcamApi._SVCamFeaturInf>();
+            //cam.featureInfolist = new Queue<SVcamApi._SVCamFeaturInf>();
 
         }
 
@@ -1854,7 +1861,7 @@ namespace SVCamApi
             //ret = SVSCam.myApi.SVS_FeatureGetInfo(cam.hRemoteDevice, phFeature, ref info.SVFeaturInf);
             //cam.getFeatureValue(info.hFeature, ref info);
 
-            cam.featureInfolist.Clear();
+           // cam.featureInfolist.Clear();
 
             cam.featureInfolist = new Queue<SVcamApi._SVCamFeaturInf>();
 
@@ -1917,7 +1924,7 @@ namespace SVCamApi
 
             ret = SVSCam.myApi.SVS_FeatureGetByName(cam.hRemoteDevice, "PayloadSize", ref phFeature);
             ret = SVSCam.myApi.SVS_FeatureGetInfo(cam.hRemoteDevice, phFeature, ref info.SVFeaturInf);
-            cam.featureInfolist.Clear();
+          //  cam.featureInfolist.Clear();
 
             cam.featureInfolist = new Queue<SVcamApi._SVCamFeaturInf>();
 
@@ -2076,6 +2083,8 @@ namespace SVCamApi
             SVCamApi.SVcamApi.SVSCamApiReturn ret;
             IntPtr phFeature = IntPtr.Zero;
             //cam.getFeatureValue(hFeature, hInfo);
+           
+            //
             ret = SVSCam.myApi.SVS_FeatureGetByName(cam.hRemoteDevice, "TriggerActivation", ref phFeature);
             ret = SVSCam.myApi.SVS_FeatureSetValueInt64Enum(cam.hRemoteDevice, phFeature, 1);//falling edge
             if (ret == SVcamApi.SVSCamApiReturn.SV_ERROR_SUCCESS)

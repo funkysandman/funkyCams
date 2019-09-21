@@ -25,7 +25,7 @@ namespace ObjectDetection
         private static string _catalogPath;
         private static string _modelPath;
         private static TFGraph graph;
-        private static double MIN_SCORE_FOR_OBJECT_HIGHLIGHTING = 0.1;
+        private static double MIN_SCORE_FOR_OBJECT_HIGHLIGHTING = 0.20;
         private static TFSession mySession;
         private TFTensor tensor;
         private TFSession.Runner runner;
@@ -1055,15 +1055,15 @@ namespace ObjectDetection
                         }
 
                         int value = Convert.ToInt32(classes[i, j]);
-                        if (value == 1) { 
+                         if (value == 1) { 
                         CatalogItem catalogItem = _catalog.FirstOrDefault(item => item.Id == value);
                         //if (flip)
                         //{ editor.AddBoxFlip(xmin, xmax, ymin, ymax, $"{catalogItem.DisplayName}: {(scores[i, j] * 100).ToString("0")}%"); }
                         //else
                         //{
                             editor.AddBox(xmin, xmax, ymin, ymax, $"{catalogItem.DisplayName} : {(scores[i, j] * 100).ToString("0")}%");
+                        }
                         //}
-                    }
                     }
                 }
             }
