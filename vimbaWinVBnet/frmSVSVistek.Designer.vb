@@ -272,7 +272,7 @@ Partial Class frmSVSVistek
         Me.tbNightAgain.Name = "tbNightAgain"
         Me.tbNightAgain.Size = New System.Drawing.Size(47, 20)
         Me.tbNightAgain.TabIndex = 31
-        Me.tbNightAgain.Text = "18"
+        Me.tbNightAgain.Text = "27"
         '
         'Label7
         '

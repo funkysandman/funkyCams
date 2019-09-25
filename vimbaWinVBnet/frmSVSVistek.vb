@@ -4,12 +4,12 @@ Imports System.Runtime.InteropServices
 Imports System.Drawing
 Imports System.Drawing.Imaging
 Imports System.Threading
-
+Imports System.Net.Http
 Public Class frmSVSVistek
 
     Dim night As Boolean = False
     Private myWebServer As WebServer
-    'Private myVistekImageGrabber As New SVS_Wrapper.SVS_Vistek_Grabber
+    Dim myDetectionQueue As New Queue(Of QueueEntry)
     Private mySVCam As SVCamApi.SVCamGrabber
     Private killing As Boolean = False
     Private b As Bitmap
@@ -18,13 +18,19 @@ Public Class frmSVSVistek
     Private startTime As DateTime
     Private gotFrameTime As DateTime
     Private dark() As Byte
-    ' Private md As New ObjectDetection.TFDetector()
+    Private meteorCheckRunning As Boolean = False
     Private myImageCodecInfo As ImageCodecInfo
     Private myEncoder As System.Drawing.Imaging.Encoder
     Private myEncoderParameter As EncoderParameter
     Private myEncoderParameters As EncoderParameters
     Private camThread As Thread
+    Private t As Thread
+    Private Class queueEntry
 
+        Public img As Byte()
+        Public filename As String
+
+    End Class
 
     Private Sub createCam()
         mySVCam = New SVCamApi.SVCamGrabber
@@ -188,7 +194,7 @@ Public Class frmSVSVistek
 
         Dim filename As String
         Dim folderName = String.Format("{0:yyyy-MMM-dd}", DateTime.Now)
-        filename = String.Format("{0}{1:ddMMMyyyy-HHmmss}.jpg", "img_", DateTime.Now)
+        filename = String.Format("{0}{1:ddMMMyyyy-HHmmss}.jpg", "imgsvs_", DateTime.Now)
         filename = Path.Combine(Me.tbPath.Text, folderName, filename)
 
 
@@ -201,12 +207,27 @@ Public Class frmSVSVistek
 
 
         End If
-        'If cbMeteors.Checked Then
-        '    md.examine(b, filename)
-        'Else
-        '    md.examine(b)
-        '    md.drawBoxesOnly(b)
-        'End If
+        If cbMeteors.Checked And lblDayNight.Text.ToLower = "night" Then
+            ' md.examine(bm, filename)
+            'call azure service
+            Dim ms As New MemoryStream()
+            ' convertedImage.ConvertToWriteAbleBitmap()
+
+
+            b.Save(ms, ImageFormat.Bmp)
+            b.Dispose()
+
+            Dim contents = ms.ToArray()
+            Dim qe As New queueEntry
+            qe.img = contents
+            qe.filename = Path.GetFileName(filename)
+            If myDetectionQueue.Count < 10 Then
+                myDetectionQueue.Enqueue(qe)
+            End If
+
+            ms.Close()
+
+        End If
         running = False
         gotFrameTime = Now
 
@@ -466,13 +487,13 @@ Public Class frmSVSVistek
             mySVCam.setParams(Val(Me.tbExposureTime.Text), Val(Me.tbNightAgain.Text))
 
         End If
-        ' myVistekImageGrabber.useDarks = cbUseDarks.Checked
-        ' myVistekImageGrabber.stopStreamingFF()
-        ' myVistekImageGrabber.startStreamingFF()
+
         mySVCam._darkmultiplier = Val(Me.tbMultiplier.Text)
         mySVCam.m_saveLocal = True
         mySVCam.startAcquisitionThread(AddressOf Me.received_frame)
-
+        meteorCheckRunning = True
+        t = New Thread(AddressOf processDetection)
+        t.Start()
 
     End Sub
 
@@ -538,7 +559,7 @@ Public Class frmSVSVistek
         'md = Nothing
         myWebServer.StopWebServer()
         myWebServer = Nothing
-
+        meteorCheckRunning = False
     End Sub
 
     Private Sub tbMultiplier_TextChanged(sender As Object, e As EventArgs) Handles tbMultiplier.TextChanged
@@ -587,4 +608,41 @@ Public Class frmSVSVistek
         seconds = DateDiff(DateInterval.Second, startTime, Now)
         txtFps.Text = frames / seconds
     End Sub
+    Public Sub processDetection()
+        Dim aQE As QueueEntry
+        While (meteorCheckRunning)
+            If myDetectionQueue.Count > 0 Then
+                aQE = myDetectionQueue.Dequeue()
+
+                CallAzureMeteorDetection(aQE.img, aQE.filename)
+
+
+                aQE = Nothing
+
+            End If
+            'Console.WriteLine("in the queue:{0}", myDetectionQueue.Count)
+            Thread.Sleep(200)
+        End While
+
+    End Sub
+    Public Async Function CallAzureMeteorDetection(contents As Byte(), file As String) As Task
+
+
+        '        Dim apiURL As String = "https://azuremeteordetect20181212113628.azurewebsites.net/api/detection?code=zi3Lrr58mJB3GTut0lktSLIzb08E1dLkHXAbX6s07bd46IoZmm1vqQ==&file=" + file
+        Dim apiURL As String = "http://192.168.1.192:7071/api/detection?file=" + file
+
+        Dim client As New HttpClient()
+
+        Dim byteContent = New ByteArrayContent(contents)
+        Try
+
+
+            Dim response = client.PostAsync(apiURL, byteContent)
+            Dim responseString = response.Result
+            byteContent = Nothing
+
+        Catch ex As Exception
+            Console.WriteLine("calling meteor detection:" & ex.Message)
+        End Try
+    End Function
 End Class
