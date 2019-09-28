@@ -6,3 +6,4 @@
     Public width As Int16
     Public height As Int16
 End Class
+

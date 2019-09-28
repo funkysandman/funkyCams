@@ -6,6 +6,7 @@ Imports System.Timers
 Imports System.ComponentModel
 Imports System.Net.Http
 Imports System.Threading
+Imports System.Collections.Specialized
 
 Public Class frmToupcam
     'Dim v As New AVT.VmbAPINET.Vimba
@@ -599,8 +600,10 @@ Public Class frmToupcam
         '        Dim apiURL As String = "https://azuremeteordetect20181212113628.azurewebsites.net/api/detection?code=zi3Lrr58mJB3GTut0lktSLIzb08E1dLkHXAbX6s07bd46IoZmm1vqQ==&file=" + file
         Dim apiURL As String = "http://192.168.1.192:7071/api/detection"
         Dim myUriBuilder As New UriBuilder(apiURL)
-        Dim query
-        query = myUriBuilder.Query
+
+
+        Dim query As NameValueCollection = Web.HttpUtility.ParseQueryString(String.Empty)
+
         query("file") = qe.filename
         query("dateTaken") = qe.dateTaken.ToString("MM/dd/yyyy hh:mm tt")
         query("cameraID") = qe.cameraID
@@ -760,30 +763,30 @@ Public Class frmToupcam
             'trackBar3.SetRange(200, 2500)
             OnEventTempTint()
 
-                Dim resnum As UInteger = cam_.ResolutionNumber
-                Dim eSize As UInteger = 0
-                If cam_.get_eSize(eSize) Then
-                    For i As UInteger = 0 To resnum - 1
-                        Dim w As Integer = 0, h As Integer = 0
-                        If cam_.get_Resolution(i, w, h) Then
+            Dim resnum As UInteger = cam_.ResolutionNumber
+            Dim eSize As UInteger = 0
+            If cam_.get_eSize(eSize) Then
+                For i As UInteger = 0 To resnum - 1
+                    Dim w As Integer = 0, h As Integer = 0
+                    If cam_.get_Resolution(i, w, h) Then
                         ' cboDay.Items.Add(w.ToString() & "*" & h.ToString())
                     End If
-                    Next
+                Next
                 ' cboDay.SelectedIndex = CInt(eSize)
 
                 Dim width As Integer = 0, height As Integer = 0
-                    If cam_.get_Size(width, height) Then
+                If cam_.get_Size(width, height) Then
                     bmp_ = New Bitmap(width, height, PixelFormat.Format8bppIndexed)
                     If Not cam_.StartPullModeWithWndMsg(Me.Handle, MSG_CAMEVENT) Then
-                            MessageBox.Show("failed to start device")
-                        Else
-                            Dim autoexpo As Boolean = True
-                            cam_.get_AutoExpoEnable(autoexpo)
+                        MessageBox.Show("failed to start device")
+                    Else
+                        Dim autoexpo As Boolean = True
+                        cam_.get_AutoExpoEnable(autoexpo)
 
-                    End If
                     End If
                 End If
             End If
+        End If
 
 
 

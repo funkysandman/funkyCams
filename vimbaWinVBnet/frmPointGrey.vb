@@ -12,7 +12,7 @@ Imports System.Net.Http
 Imports System.Environment
 Imports SpinnakerNET
 Imports SpinnakerNET.GenApi
-
+Imports System.Collections.Specialized
 
 Public Class frmPointGrey
     Dim myDetectionQueue As New Queue(Of queueEntry)
@@ -153,10 +153,10 @@ Public Class frmPointGrey
             Dim deviceSerialNumber As String = "grasshopper"
             Console.WriteLine("Image event occurred...")
 
-                If image.IsIncomplete Then
-                    Console.WriteLine("Image incomplete with image status {0}...{1}", image.ImageStatus, NewLine)
+            If image.IsIncomplete Then
+                Console.WriteLine("Image incomplete with image status {0}...{1}", image.ImageStatus, NewLine)
 
-                Else
+            Else
                 ' Convert image
                 Using convertedImage As IManagedImage = image.Convert(PixelFormatEnums.BayerRG8, ColorProcessingAlgorithm.HQ_LINEAR)
 
@@ -183,8 +183,8 @@ Public Class frmPointGrey
                 End Using
             End If
 
-                ' Must manually release the image to prevent buffers on the camera stream from filling up
-                image.Release()
+            ' Must manually release the image to prevent buffers on the camera stream from filling up
+            image.Release()
 
             ' End If
         End Sub
@@ -273,17 +273,17 @@ Public Class frmPointGrey
 
             'red/blue channels mixed up
             Dim channelR As Byte
-                For i = 0 To convertedImage.ManagedData.Length - 3 Step 3
-                    channelR = convertedImage.ManagedData(i + 2)
-                    convertedImage.ManagedData(i + 2) = convertedImage.ManagedData(i)
-                    convertedImage.ManagedData(i) = channelR
-                Next
+            For i = 0 To convertedImage.ManagedData.Length - 3 Step 3
+                channelR = convertedImage.ManagedData(i + 2)
+                convertedImage.ManagedData(i + 2) = convertedImage.ManagedData(i)
+                convertedImage.ManagedData(i) = channelR
+            Next
 
-                Marshal.Copy(convertedImage.ManagedData, 0, convertedImage.DataPtr, convertedImage.DataSize - 1)
+            Marshal.Copy(convertedImage.ManagedData, 0, convertedImage.DataPtr, convertedImage.DataSize - 1)
 
 
-                ' Print image information
-                Console.WriteLine("Grabbed image {0}, width = {1}, height = {2}", imageCnt, image.Width, image.Height)
+            ' Print image information
+            Console.WriteLine("Grabbed image {0}, width = {1}, height = {2}", imageCnt, image.Width, image.Height)
 
 
             'store in ring bitmap
@@ -553,15 +553,15 @@ Public Class frmPointGrey
 
 
             Try
-                    ' Run example
-                    m_cam = managedCamera
-                    m_cam.Init()
-                    m_nodeMap = m_cam.GetNodeMap()
-                    m_nodeMapTLDevice = m_cam.GetTLDeviceNodeMap()
-                Catch ex As SpinnakerException
-                    Console.WriteLine("Error: {0}", ex.Message)
-                    Return False
-                End Try
+                ' Run example
+                m_cam = managedCamera
+                m_cam.Init()
+                m_nodeMap = m_cam.GetNodeMap()
+                m_nodeMapTLDevice = m_cam.GetTLDeviceNodeMap()
+            Catch ex As SpinnakerException
+                Console.WriteLine("Error: {0}", ex.Message)
+                Return False
+            End Try
 
 
         Next
@@ -744,8 +744,10 @@ Public Class frmPointGrey
         '        Dim apiURL As String = "https://azuremeteordetect20181212113628.azurewebsites.net/api/detection?code=zi3Lrr58mJB3GTut0lktSLIzb08E1dLkHXAbX6s07bd46IoZmm1vqQ==&file=" + file
         Dim apiURL As String = "http://192.168.1.192:7071/api/detection"
         Dim myUriBuilder As New UriBuilder(apiURL)
-        Dim query
-        query = myUriBuilder.Query
+
+
+        Dim query As NameValueCollection = Web.HttpUtility.ParseQueryString(String.Empty)
+
         query("file") = qe.filename
         query("dateTaken") = qe.dateTaken.ToString("MM/dd/yyyy hh:mm tt")
         query("cameraID") = qe.cameraID
@@ -831,7 +833,7 @@ Public Class frmPointGrey
 
         Else 'long exposure
             iAcquisitionFrameRateEnable.Value = False
-           ' iAcquisitionFrameRateOn.Value = "Off"
+            ' iAcquisitionFrameRateOn.Value = "Off"
 
             'If iAcquisitionFrameRate Is Nothing OrElse Not iAcquisitionFrameRate.IsReadable Then
             '    Console.WriteLine("Unable to retrieve frame rate. Aborting...")

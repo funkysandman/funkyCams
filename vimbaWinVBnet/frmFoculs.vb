@@ -5,6 +5,7 @@ Imports System.Drawing.Imaging
 Imports System.Threading
 Imports System.Net.Http
 Imports AxFGControlLib
+Imports System.Collections.Specialized
 
 Public Class frmFoculs
     Dim myDetectionQueue As New Queue(Of queueEntry)
@@ -188,8 +189,10 @@ Public Class frmFoculs
         '        Dim apiURL As String = "https://azuremeteordetect20181212113628.azurewebsites.net/api/detection?code=zi3Lrr58mJB3GTut0lktSLIzb08E1dLkHXAbX6s07bd46IoZmm1vqQ==&file=" + file
         Dim apiURL As String = "http://192.168.1.192:7071/api/detection"
         Dim myUriBuilder As New UriBuilder(apiURL)
-        Dim query
-        query = myUriBuilder.Query
+
+
+        Dim query As NameValueCollection = Web.HttpUtility.ParseQueryString(String.Empty)
+
         query("file") = qe.filename
         query("dateTaken") = qe.dateTaken.ToString("MM/dd/yyyy hh:mm tt")
         query("cameraID") = qe.cameraID
@@ -434,8 +437,8 @@ Public Class frmFoculs
 
                 aQE = Nothing
 
-                End If
-                Console.WriteLine("in the queue:{0}", myDetectionQueue.Count)
+            End If
+            Console.WriteLine("in the queue:{0}", myDetectionQueue.Count)
             Thread.Sleep(100)
         End While
 
