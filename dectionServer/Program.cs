@@ -8,6 +8,7 @@ using System.IO;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.ServiceProcess;
+using System.Xml.Linq;
 using System.Collections.Specialized;
 
 namespace DetectionServer
@@ -144,6 +145,8 @@ namespace DetectionServer
         {
             public byte[] img;
             public string filename;
+            public string cameraID;
+            public string dateTaken;
 
         }
 
@@ -173,14 +176,45 @@ namespace DetectionServer
                 string[] myParams = request.QueryString.GetValues("file");
 
                 string filename = myParams[0];
-                
+                myParams = request.QueryString.GetValues("cameraID");
+
+                string cameraID;
+                if (myParams==null)
+                {
+                    cameraID = "unknown";
+                }
+                else
+                {
+                    cameraID = myParams[0];
+                }
+                myParams = request.QueryString.GetValues("dateTaken");
+                string dateTaken;
+                if (myParams == null)
+                {
+                    dateTaken = "unknown";
+                }
+                else
+                {
+                    dateTaken = myParams[0];
+                }
                 //
                 ObjectDetection.TFDetector md = new ObjectDetection.TFDetector();
 
                 queueEntry qe = new queueEntry();
                 qe.filename = filename;
+                qe.dateTaken = dateTaken;
+                qe.cameraID = cameraID;
 
-
+                if (qe.dateTaken == null)
+                {
+                    qe.dateTaken = DateTime.Now.ToString("MM/dd/yyyy hh:mm tt");
+                    
+                }
+                        
+                if (qe.cameraID == null)
+                {
+                    qe.cameraID = "unknown";
+                }
                 var ss = request.InputStream;
 
 
@@ -266,11 +300,20 @@ namespace DetectionServer
                     //Console.WriteLine("about to save bmp");
                     Bitmap c = new Bitmap(b);
                     c.Save("e:\\found\\" + qe.filename);
-
+                    string width, height;
+                    width = Convert.ToString(c.Width);
+                    height = Convert.ToString(c.Height);
                     b.Dispose();
+                    XElement boxxml = md.GetBoxesXML(boxes, scores, classes, qe.filename,width,height);
                     qe.filename = qe.filename.Replace("png", "jpg");
+                    
+                   
+                    boxxml.FirstNode.AddAfterSelf(new XElement("camera", qe.cameraID));
+                    boxxml.FirstNode.AddAfterSelf(new XElement("dateTaken", qe.dateTaken));
+                    boxxml.Save("e:\\found\\" + qe.filename.Replace("jpg", "xml"));
                     md.DrawBoxes(boxes, scores, classes, ref c, qe.filename, .35, false);
 
+                    
                     //Console.WriteLine("about to save jpg");
                     c.Save("e:\\found\\" + qe.filename, jgpEncoder, myEncoderParameters);
 

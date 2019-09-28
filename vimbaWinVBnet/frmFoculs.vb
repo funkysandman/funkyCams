@@ -21,12 +21,7 @@ Public Class frmFoculs
     Private meteorCheckRunning As Boolean = False
     Private bmp As Bitmap
     Private t As Thread
-    Private Class queueEntry
 
-        Public img As Byte()
-        Public filename As String
-
-    End Class
     Public Function getLastImage() As Bitmap
 
         Dim stopWatch As Stopwatch = New Stopwatch()
@@ -187,20 +182,37 @@ Public Class frmFoculs
     '        ' myForm.writeline("error on firewire image received:" & ex.Message)
     '    End Try
     'End Sub
-    Public Async Function CallAzureMeteorDetection(contents As Byte(), file As String) As Task
+    Public Async Function CallAzureMeteorDetection(qe As queueEntry) As Task
 
 
         '        Dim apiURL As String = "https://azuremeteordetect20181212113628.azurewebsites.net/api/detection?code=zi3Lrr58mJB3GTut0lktSLIzb08E1dLkHXAbX6s07bd46IoZmm1vqQ==&file=" + file
-        Dim apiURL As String = "http://192.168.1.192:7071/api/detection?file=" + file
+        Dim apiURL As String = "http://192.168.1.192:7071/api/detection"
+        Dim myUriBuilder As New UriBuilder(apiURL)
+        Dim query
+        query = myUriBuilder.Query
+        query("file") = qe.filename
+        query("dateTaken") = qe.dateTaken.ToString("MM/dd/yyyy hh:mm tt")
+        query("cameraID") = qe.cameraID
+        query("width") = qe.width
+        query("height") = qe.height
+        myUriBuilder.Query = query.ToString
+
 
         Dim client As New HttpClient()
 
-        Dim byteContent = New ByteArrayContent(contents)
+        Dim byteContent = New ByteArrayContent(qe.img)
+        Try
 
-        Dim response = client.PostAsync(apiURL, byteContent)
-        Dim responseString = response.Result
 
+            Dim response = client.PostAsync(myUriBuilder.ToString, byteContent)
+            Dim responseString = response.Result
+            byteContent = Nothing
+
+        Catch ex As Exception
+            Console.WriteLine("calling meteor detection:" & ex.Message)
+        End Try
     End Function
+
 
     Private Sub Form2_Load(sender As Object, e As EventArgs) Handles MyBase.Load
 
@@ -417,10 +429,10 @@ Public Class frmFoculs
             If myDetectionQueue.Count > 0 Then
                 aQE = myDetectionQueue.Dequeue()
 
-                CallAzureMeteorDetection(aQE.img, aQE.filename)
+                CallAzureMeteorDetection(aQE)
 
 
-                    aQE = Nothing
+                aQE = Nothing
 
                 End If
                 Console.WriteLine("in the queue:{0}", myDetectionQueue.Count)
@@ -560,6 +572,11 @@ Public Class frmFoculs
                 Dim qe As New queueEntry
                 qe.img = contents
                 qe.filename = Path.GetFileName(filename)
+                qe.dateTaken = Now
+                qe.cameraID = "Foculus Camera"
+                qe.width = b8.Width
+                qe.height = b8.Height
+
                 If myDetectionQueue.Count < 10 Then
                     myDetectionQueue.Enqueue(qe)
                 End If

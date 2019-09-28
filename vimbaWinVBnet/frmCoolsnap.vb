@@ -59,12 +59,7 @@ Public Class frmCoolsnap
     Private m_grabbedframe As Boolean
     Private m_grabbedframe_err As Integer = 0
 
-    Private Class queueEntry
 
-        Public img As Byte()
-        Public filename As String
-
-    End Class
 
     Public Class RingBitmap
 
@@ -558,7 +553,7 @@ Public Class frmCoolsnap
             If myDetectionQueue.Count > 0 Then
                 aQE = myDetectionQueue.Dequeue()
 
-                CallAzureMeteorDetection(aQE.img, aQE.filename)
+                CallAzureMeteorDetection(aQE)
 
 
                 aQE = Nothing
@@ -569,20 +564,35 @@ Public Class frmCoolsnap
         End While
 
     End Sub
-    Public Async Function CallAzureMeteorDetection(contents As Byte(), file As String) As Task
+    Public Async Function CallAzureMeteorDetection(qe As queueEntry) As Task
 
 
         '        Dim apiURL As String = "https://azuremeteordetect20181212113628.azurewebsites.net/api/detection?code=zi3Lrr58mJB3GTut0lktSLIzb08E1dLkHXAbX6s07bd46IoZmm1vqQ==&file=" + file
-        Dim apiURL As String = "http://192.168.1.192:7071/api/detection?file=" + file
+        Dim apiURL As String = "http://192.168.1.192:7071/api/detection"
+        Dim myUriBuilder As New UriBuilder(apiURL)
+        Dim query
+        query = myUriBuilder.Query
+        query("file") = qe.filename
+        query("dateTaken") = qe.dateTaken.ToString("MM/dd/yyyy hh:mm tt")
+        query("cameraID") = qe.cameraID
+        myUriBuilder.Query = query.ToString
+
 
         Dim client As New HttpClient()
 
-        Dim byteContent = New ByteArrayContent(contents)
+        Dim byteContent = New ByteArrayContent(qe.img)
+        Try
 
-        Dim response = client.PostAsync(apiURL, byteContent)
-        Dim responseString = response.Result
 
+            Dim response = client.PostAsync(myUriBuilder.ToString, byteContent)
+            Dim responseString = response.Result
+            byteContent = Nothing
+
+        Catch ex As Exception
+            Console.WriteLine("calling meteor detection:" & ex.Message)
+        End Try
     End Function
+
 
     'Public Sub GrabFrame()
     '    Dim width, height As UInteger
@@ -807,6 +817,11 @@ Public Class frmCoolsnap
                 Dim qe As New queueEntry
                 qe.img = contents
                 qe.filename = Path.GetFileName(filename)
+                qe.dateTaken = Now
+                qe.cameraID = "Coolsnap Camera"
+                qe.width = myCam.LastBMP.Width
+                qe.height = myCam.LastBMP.Height
+
                 If myDetectionQueue.Count < 10 Then
                     myDetectionQueue.Enqueue(qe)
                 End If

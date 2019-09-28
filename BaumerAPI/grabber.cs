@@ -912,8 +912,27 @@ namespace BaumerAPI
         private void loadMasterDark()
         {
             masterDark = File.ReadAllBytes("masterdark.raw");
+            ////apply lut
+            //int[] lut = new int[4095];
+            //double arg = 500;
+            //double slope;
+            //slope = 4096 / (4096 - arg);
+            //for (int i =0;i<4096;i++)
+            //{
+            //    lut[i] = Convert.ToInt32(Math.Max(0, Convert.ToDouble(i) * slope - arg * slope));
 
-        }
+
+            //}
+          
+            //for (int i =0;i<masterDark.Length;i++)
+            //{
+            //    dpixel1 = (dbyte1 & 0b1111_0000) >> 4;
+            //    dpixel1 = Convert.ToInt32(Convert.ToDouble(dpixel1) * darkMultiplier);
+
+            //}
+
+
+    }
 
          int reversebits(int aNum,bool lsb)
         {
@@ -983,60 +1002,62 @@ namespace BaumerAPI
             {
                  File.WriteAllBytes(filename,imageBufferCopy);
             }
-            for (int k = 0; k < imageBufferCopy.Length-1; k=k+1)
+            for (int k = 0; k < imageBufferCopy.Length - 1; k = k + 3)
             {
                 //unpack 2 pixels in 3 bytes
                 byte1 = imageBufferCopy[k];
-               // byte2 = imageBufferCopy[k+1]; 
-               // byte3 = imageBufferCopy[k+2];
+                byte2 = imageBufferCopy[k + 1];
+                byte3 = imageBufferCopy[k + 2];
 
 
                 dbyte1 = masterDark[k];
-                //  dbyte2 = masterDark[k + 1];
-                //  dbyte3 = masterDark[k + 2];
+                dbyte2 = masterDark[k + 1];
+                dbyte3 = masterDark[k + 2];
 
 
-                //  pixel1 = (byte1 << 4) | ((byte2 & 0b1111_0000) >> 4);
-                //  pixel2 =  ((byte2 & 0b0000_1111) << 8 ) | byte3;
+                pixel1 = (byte1 << 4) | ((byte2 & 0b1111_0000) >> 4);
+                pixel2 = ((byte2 & 0b0000_1111) << 8) | byte3;
 
 
-                //  dpixel1 = (dbyte1 << 4) | ((dbyte2 & 0b1111_0000) >> 4);
-                //  dpixel2 = ((dbyte2 & 0b0000_1111) << 8) | dbyte3;
+                dpixel1 = (dbyte1 << 4) | ((dbyte2 & 0b1111_0000) >> 4);
+                dpixel2 = ((dbyte2 & 0b0000_1111) << 8) | dbyte3;
 
                 //pixel1 = reversebits(pixel1,true);
                 //pixel2 = reversebits(pixel2,true);
                 //dpixel1 = reversebits(dpixel1,true);
                 //dpixel2 = reversebits(dpixel2,true);
-                pixel1 = (byte1 & 0b1111_0000) >> 4;
-                dpixel1 = (dbyte1 & 0b1111_0000) >> 4;
+                //pixel1 = (byte1 & 0b1111_0000) >> 4;
+                //dpixel1 = (dbyte1 & 0b1111_0000) >> 4;
                 dpixel1 = Convert.ToInt32(Convert.ToDouble(dpixel1) * darkMultiplier);
 
-                pixel2 = (byte1 & 0b0000_1111);
-                dpixel2 = (dbyte1 & 0b0000_1111);
                 dpixel2 = Convert.ToInt32(Convert.ToDouble(dpixel2) * darkMultiplier);
+
                 if (useDarks)
                 {
 
                     //pixel1 = Math.Min(pixel1 + 50, 4095);
-                   // if (dpixel1 > pixelCutOff) { 
+                    // if (dpixel1 > pixelCutOff) { 
                     pixel1 = Math.Max(pixel1 - dpixel1, 0);
-                  //  }
+                    //  }
 
-                 //   if (dpixel2 > pixelCutOff)
-                 //   {
-                        pixel2 = Math.Max(pixel2 - dpixel2, 0);
-                 //   }
+                    //   if (dpixel2 > pixelCutOff)
+                    //   {
+                    pixel2 = Math.Max(pixel2 - dpixel2, 0);
+                    //   }
                 }
                 //pixel1 = reversebits(pixel1,true);
                 //pixel2 = reversebits(pixel2,true);
 
-                byte1 = (byte)(pixel1 << 4);
-                byte1 = (byte)(byte1 + (pixel2));
+                byte1 = (byte)(pixel1 >> 4);
+                byte2 = (byte)(pixel1 & 0xFFFF);
+                byte2 = (byte)((byte)(pixel2 >> 8) + byte2);
+                byte3 = (byte)(pixel2 & 0xFFFF);
+
                
 
                 imageBufferCopy[k] = byte1;
-
-
+                imageBufferCopy[k+1] = byte1;
+                imageBufferCopy[k+2] = byte1;
 
                 //if ((masterDark[k]) > 250)
                 //    imageBufferCopy[k] = (byte)Math.Max(0, imageBufferCopy[k] - 0.75 * (masterDark[k]));

@@ -19,12 +19,13 @@ item {
   display_name: "flare"
 }
 item {
-  name: "tree"
+  name: "flarecurve"
   id: 5
-  display_name: "tree"
+  display_name: "flarecurve"
 }
 item {
-  name: "satellite"
+  name: "flarespike"
   id: 6
-  display_name: "satellite"
+  display_name: "flarespike"
 }
+

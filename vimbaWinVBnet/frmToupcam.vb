@@ -249,6 +249,11 @@ Public Class frmToupcam
                 Dim qe As New queueEntry
                 qe.img = contents
                 qe.filename = Path.GetFileName(filename)
+                qe.dateTaken = Now
+                qe.cameraID = "Toupcam Camera"
+                qe.width = bmp_.Width
+                qe.height = bmp_.Height
+
                 If myDetectionQueue.Count < 10 Then
                     myDetectionQueue.Enqueue(qe)
                 End If
@@ -321,12 +326,7 @@ Public Class frmToupcam
             End If
         End If
     End Sub
-    Private Class queueEntry
 
-        Public img As Byte()
-        Public filename As String
-
-    End Class
     Public Sub New()
 
         ' This call is required by the designer.
@@ -581,7 +581,7 @@ Public Class frmToupcam
         While (meteorCheckRunning)
             If myDetectionQueue.Count > 0 Then
                 aQE = myDetectionQueue.Dequeue()
-                callAzureMeteorDetection(aQE.img, aQE.filename)
+                CallAzureMeteorDetection(aQE)
 
                 aQE = Nothing
 
@@ -593,21 +593,37 @@ Public Class frmToupcam
     End Sub
 
 
-    Public Async Function callAzureMeteorDetection(contents As Byte(), file As String) As Task
+    Public Async Function CallAzureMeteorDetection(qe As queueEntry) As Task
+
 
         '        Dim apiURL As String = "https://azuremeteordetect20181212113628.azurewebsites.net/api/detection?code=zi3Lrr58mJB3GTut0lktSLIzb08E1dLkHXAbX6s07bd46IoZmm1vqQ==&file=" + file
-        Dim apiURL As String = "http://192.168.1.192:7071/api/detection?file=" + file
+        Dim apiURL As String = "http://192.168.1.192:7071/api/detection"
+        Dim myUriBuilder As New UriBuilder(apiURL)
+        Dim query
+        query = myUriBuilder.Query
+        query("file") = qe.filename
+        query("dateTaken") = qe.dateTaken.ToString("MM/dd/yyyy hh:mm tt")
+        query("cameraID") = qe.cameraID
+        query("width") = qe.width
+        query("height") = qe.height
+        myUriBuilder.Query = query.ToString
 
 
+        Dim client As New HttpClient()
 
-        Using byteContent = New ByteArrayContent(contents)
+        Dim byteContent = New ByteArrayContent(qe.img)
+        Try
 
-            Dim response = client.PostAsync(apiURL, byteContent)
+
+            Dim response = client.PostAsync(myUriBuilder.ToString, byteContent)
             Dim responseString = response.Result
-            Console.WriteLine(contents.Length)
-        End Using
+            byteContent = Nothing
 
+        Catch ex As Exception
+            Console.WriteLine("calling meteor detection:" & ex.Message)
+        End Try
     End Function
+
     Public Function getLastImage() As Bitmap
         Dim s As Stopwatch
         Dim stopWatch As Stopwatch = New Stopwatch()

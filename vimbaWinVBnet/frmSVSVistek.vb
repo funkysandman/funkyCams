@@ -25,13 +25,199 @@ Public Class frmSVSVistek
     Private myEncoderParameters As EncoderParameters
     Private camThread As Thread
     Private t As Thread
-    Private Class queueEntry
 
-        Public img As Byte()
-        Public filename As String
+    Shared m_pics As RingBitmap
 
+
+    Public Class RingBitmap
+
+        Private m_Size As Integer = 0
+        Private m_width As Integer = 0
+        Private m_height As Integer = 0
+        Private m_dataSize As Integer = 0
+        ' Private m_ManagedImages As ManagedImage()
+        'Private m_Bitmaps As Bitmap()
+        Private m_BitmapSelector As Integer = 0
+
+        Private m_buffers()() As Byte
+        Public Sub New(s As Integer)
+
+            m_Size = s
+            ' m_ManagedImages = New ManagedImage(m_Size - 1) {}
+            ' m_Bitmaps = New Bitmap(m_Size - 1) {}
+            ReDim m_buffers(m_Size - 1)
+        End Sub
+
+        'Public ReadOnly Property Bitmap As Bitmap
+        '    Get
+        '        Debug.Print("getting bitmap " & m_BitmapSelector)
+        '        Return m_Bitmaps(m_BitmapSelector)
+        '    End Get
+        'End Property
+        Public ReadOnly Property ImageBytes As Byte()
+            Get
+                Debug.Print("getting bitmap " & m_BitmapSelector)
+                'copy raw data to byte array
+
+
+                Return m_buffers(m_BitmapSelector)
+            End Get
+        End Property
+        Public ReadOnly Property width As Integer
+            Get
+
+                Return m_width
+            End Get
+        End Property
+        Public ReadOnly Property height As Integer
+            Get
+
+                Return m_height
+            End Get
+        End Property
+        Public ReadOnly Property dataSize As Integer
+            Get
+
+                Return m_dataSize
+            End Get
+        End Property
+        Public Sub FillNextBitmap(b As Bitmap)
+            SwitchBitmap()
+
+            ' m_ManagedImages(m_BitmapSelector) = b
+            'copy raw data into m_buffers
+            Dim rawData(b.Width * b.Height * 3) As Byte
+            Dim BoundsRect = New Rectangle(0, 0, b.Width, b.Height)
+            Dim bmpData As System.Drawing.Imaging.BitmapData = b.LockBits(BoundsRect, System.Drawing.Imaging.ImageLockMode.[WriteOnly], b.PixelFormat)
+            Dim ptr As IntPtr = bmpData.Scan0
+            'System.Runtime.InteropServices.Marshal.Copy(b.DataPtr, ptr, 0, b.DataSize) 'copy into bitmap
+            System.Runtime.InteropServices.Marshal.Copy(ptr, rawData, 0, rawData.Length - 1) 'copy into array
+
+            m_buffers(m_BitmapSelector) = rawData
+            m_width = b.Width
+            m_height = b.Height
+            m_dataSize = rawData.Length
+            ' m_Bitmaps(m_BitmapSelector).UnlockBits(bmpData)
+            'subtract darks
+            'For i = 0 To rawData.Length - 1
+            '    rawData(i) = Math.
+            'Next
+            'Dim bmp As New Bitmap(1920, 1200, PixelFormat.Format24bppRgb)
+            ''Dim ncp As System.Drawing.Imaging.ColorPalette = b.Palette
+            ''For j As Integer = 0 To 255
+            ''    ncp.Entries(j) = System.Drawing.Color.FromArgb(255, j, j, j)
+            ''Next
+            ''b.Palette = ncp
+
+
+
+
+            'Dim BoundsRect = New Rectangle(0, 0, 1920 - 1, 1200 - 1)
+            'Dim bmpData As System.Drawing.Imaging.BitmapData = bmp.LockBits(BoundsRect, System.Drawing.Imaging.ImageLockMode.[WriteOnly], bmp.PixelFormat)
+
+            'Dim ptr As IntPtr = bmpData.Scan0
+
+
+
+
+
+            'Marshal.Copy(m_buffers(m_BitmapSelector), 0, ptr, m_buffers(m_BitmapSelector).Length - 1)
+            'bmp.UnlockBits(bmpData)
+            'm_Bitmaps(m_BitmapSelector) = bmp
+
+        End Sub
+        'Public Sub FillNextBitmap(frame As QCamM_Frame)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        '    ' switch to Bitmap object which Is currently Not in use by GUI
+        '    SwitchBitmap()
+        '    Debug.Print("fillnextbitmap bitmapselector: " & m_BitmapSelector)
+        '    Try
+
+        '        If (m_Bitmaps(m_BitmapSelector) Is Nothing) Then
+        '            Debug.Print("making new bitmap")
+        '            m_Bitmaps(m_BitmapSelector) = New Bitmap(frame.width, frame.height, PixelFormat.Format8bppIndexed)
+        '            Dim ncp As System.Drawing.Imaging.ColorPalette = m_Bitmaps(m_BitmapSelector).Palette
+        '            For j As Integer = 0 To 255
+        '                ncp.Entries(j) = System.Drawing.Color.FromArgb(255, j, j, j)
+        '            Next
+        '            m_Bitmaps(m_BitmapSelector).Palette = ncp
+        '        End If
+
+        '        'If (m_buffers(m_BitmapSelector) Is Nothing) Then
+        '        '    m_buffers(m_BitmapSelector) = New Byte()
+        '        'End If
+        '    Catch
+        '    End Try
+
+        '    Try
+        '        'copy frame into bitmap
+        '        Dim rawData(frame.bufferSize) As Byte
+
+
+
+        '        Marshal.Copy(frame.pBuffer, rawData, 0, frame.bufferSize)
+
+        '        m_buffers(m_BitmapSelector) = rawData
+
+        '        Dim BoundsRect = New Rectangle(0, 0, frame.width, frame.height)
+        '        Dim bmpData As System.Drawing.Imaging.BitmapData = m_Bitmaps(m_BitmapSelector).LockBits(BoundsRect, System.Drawing.Imaging.ImageLockMode.[WriteOnly], m_Bitmaps(m_BitmapSelector).PixelFormat)
+
+        '        Dim ptr As IntPtr = bmpData.Scan0
+
+        '        Dim bytes As Integer = frame.bufferSize
+        '        For i = 1 To 100
+        '            Debug.Print(rawData(i))
+        '        Next
+
+
+        '        Marshal.Copy(rawData, 0, ptr, bytes)
+        '        m_Bitmaps(m_BitmapSelector).UnlockBits(bmpData)
+        '        m_Bitmaps(m_BitmapSelector).RotateFlip(RotateFlipType.Rotate180FlipNone)
+        '        ''Dim b As New Bitmap(m_Bitmaps(m_BitmapSelector))
+        '        '' myBitmap.Save("Shapes025.jpg", myImageCodecInfo, myEncoderParameters)
+        '        'Dim firstLocation As PointF = New PointF(10.0F, 10.0F)
+        '        'Dim firstText As String = String.Format("{0:dd-MMM-yyyy HH:mm:ss}", DateTime.Now)
+        '        ''b = bm.Clone
+        '        'Dim gr As Graphics = Graphics.FromImage(m_Bitmaps(m_BitmapSelector))
+        '        'Dim myFontLabels As New Font("Arial", 16, GraphicsUnit.Pixel)
+        '        'Dim myBrushLabels As New SolidBrush(Color.White)
+
+        '        'gr.DrawString(firstText, myFontLabels, Brushes.GreenYellow, firstLocation) '# last 2 number are X and Y coords.
+        '        'gr.Dispose()
+        '        'myFontLabels.Dispose()
+        '        'm_Bitmaps(m_BitmapSelector) = New Bitmap(b)
+        '    Catch
+
+        '        Console.WriteLine("error during frame fill")
+        '    End Try
+
+
+        'End Sub
+        Private Sub SwitchBitmap()
+            m_BitmapSelector += 1
+
+            If m_Size = m_BitmapSelector Then
+                m_BitmapSelector = 0
+            End If
+        End Sub
     End Class
-
     Private Sub createCam()
         mySVCam = New SVCamApi.SVCamGrabber
 
@@ -171,6 +357,12 @@ Public Class frmSVSVistek
         '
 
 
+        If m_pics Is Nothing Then
+            m_pics = New RingBitmap(5)
+        End If
+
+        m_pics.FillNextBitmap(b)
+
 
         ' myBitmap.Save("Shapes025.jpg", myImageCodecInfo, myEncoderParameters)
         Dim firstLocation As PointF = New PointF(10.0F, 10.0F)
@@ -221,6 +413,10 @@ Public Class frmSVSVistek
             Dim qe As New queueEntry
             qe.img = contents
             qe.filename = Path.GetFileName(filename)
+            qe.dateTaken = Now
+            qe.cameraID = "SVS Vistek Camera"
+            qe.width = b.Width
+            qe.height = b.Height
             If myDetectionQueue.Count < 10 Then
                 myDetectionQueue.Enqueue(qe)
             End If
@@ -234,21 +430,29 @@ Public Class frmSVSVistek
     End Sub
 
     Public Function getLastImage() As Bitmap
-
         Dim stopWatch As Stopwatch = New Stopwatch()
         stopWatch.Start()
 
-        While running AndAlso stopWatch.ElapsedMilliseconds < 20000
+        'While running AndAlso stopWatch.ElapsedMilliseconds < 20000
 
-        End While
+        'End While
 
         stopWatch.[Stop]()
-        If DateDiff(DateInterval.Minute, Now, b.Tag) > 1 Then
-            Return Nothing
-        Else
-            Return b
-        End If
 
+        'Dim x As New Bitmap(b)
+        Debug.Print("get last image")
+
+        Dim x As New Bitmap(m_pics.width, m_pics.height, PixelFormat.Format24bppRgb)
+        Dim BoundsRect = New Rectangle(0, 0, m_pics.width, m_pics.height)
+        Dim bmpData As System.Drawing.Imaging.BitmapData = x.LockBits(BoundsRect, System.Drawing.Imaging.ImageLockMode.[WriteOnly], x.PixelFormat)
+        Dim ptr As IntPtr = bmpData.Scan0
+        System.Runtime.InteropServices.Marshal.Copy(m_pics.ImageBytes, 0, ptr, m_pics.dataSize - 1) 'copy into bitmap
+
+
+        x.UnlockBits(bmpData)
+        Return x
+
+        'Return m_pics.Bitmap
     End Function
     Private Sub Form2_Load(sender As Object, e As EventArgs) Handles MyBase.Load
 
@@ -614,7 +818,7 @@ Public Class frmSVSVistek
             If myDetectionQueue.Count > 0 Then
                 aQE = myDetectionQueue.Dequeue()
 
-                CallAzureMeteorDetection(aQE.img, aQE.filename)
+                CallAzureMeteorDetection(aQE)
 
 
                 aQE = Nothing
@@ -625,19 +829,29 @@ Public Class frmSVSVistek
         End While
 
     End Sub
-    Public Async Function CallAzureMeteorDetection(contents As Byte(), file As String) As Task
+    Public Async Function CallAzureMeteorDetection(qe As queueEntry) As Task
 
 
         '        Dim apiURL As String = "https://azuremeteordetect20181212113628.azurewebsites.net/api/detection?code=zi3Lrr58mJB3GTut0lktSLIzb08E1dLkHXAbX6s07bd46IoZmm1vqQ==&file=" + file
-        Dim apiURL As String = "http://192.168.1.192:7071/api/detection?file=" + file
+        Dim apiURL As String = "http://192.168.1.192:7071/api/detection"
+        Dim myUriBuilder As New UriBuilder(apiURL)
+        Dim query
+        query = myUriBuilder.Query
+        query("file") = qe.filename
+        query("dateTaken") = qe.dateTaken.ToString("MM/dd/yyyy hh:mm tt")
+        query("cameraID") = qe.cameraID
+        query("width") = qe.width
+        query("height") = qe.height
+        myUriBuilder.Query = query.ToString
+
 
         Dim client As New HttpClient()
 
-        Dim byteContent = New ByteArrayContent(contents)
+        Dim byteContent = New ByteArrayContent(qe.img)
         Try
 
 
-            Dim response = client.PostAsync(apiURL, byteContent)
+            Dim response = client.PostAsync(myUriBuilder.ToString, byteContent)
             Dim responseString = response.Result
             byteContent = Nothing
 
@@ -645,4 +859,5 @@ Public Class frmSVSVistek
             Console.WriteLine("calling meteor detection:" & ex.Message)
         End Try
     End Function
+
 End Class

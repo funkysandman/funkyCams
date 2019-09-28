@@ -58,12 +58,7 @@ Public Class frmQ
     Private m_grabbedframe As Boolean
     Private m_grabbedframe_err As Integer = 0
 
-    Private Class queueEntry
 
-        Public img As Byte()
-        Public filename As String
-
-    End Class
 
     Public Class RingBitmap
 
@@ -452,6 +447,10 @@ Public Class frmQ
                 Dim qe As New queueEntry
                 qe.img = contents
                 qe.filename = Path.GetFileName(filename)
+                qe.dateTaken = Now
+                qe.cameraID = "Qimaging Camera"
+                qe.width = myFrame.width
+                qe.height = myFrame.height
                 If myDetectionQueue.Count < 10 Then
                     myDetectionQueue.Enqueue(qe)
                 End If
@@ -606,8 +605,12 @@ Public Class frmQ
                 Dim qe As New queueEntry
                 qe.img = contents
                 qe.filename = Path.GetFileName(filename)
-                myDetectionQueue.Enqueue(qe)
+                qe.width = m_pics.Image.Width
+                qe.height = m_pics.Image.Height
 
+                myDetectionQueue.Enqueue(qe)
+                qe.dateTaken = Now
+                qe.cameraID = "Qimaging Camera"
                 ms.Close()
 
             End If
@@ -638,10 +641,10 @@ Public Class frmQ
             If myDetectionQueue.Count > 0 Then
                 aQE = myDetectionQueue.Dequeue()
 
-                CallAzureMeteorDetection(aQE.img, aQE.filename)
+                CallAzureMeteorDetection(aQE)
 
 
-                    aQE = Nothing
+                aQE = Nothing
 
                 End If
                 Console.WriteLine("in the queue:{0}", myDetectionQueue.Count)
@@ -649,20 +652,37 @@ Public Class frmQ
         End While
 
     End Sub
-    Public Async Function CallAzureMeteorDetection(contents As Byte(), file As String) As Task
+    Public Async Function CallAzureMeteorDetection(qe As queueEntry) As Task
 
 
         '        Dim apiURL As String = "https://azuremeteordetect20181212113628.azurewebsites.net/api/detection?code=zi3Lrr58mJB3GTut0lktSLIzb08E1dLkHXAbX6s07bd46IoZmm1vqQ==&file=" + file
-        Dim apiURL As String = "http://192.168.1.192:7071/api/detection?file=" + file
+        Dim apiURL As String = "http://192.168.1.192:7071/api/detection"
+        Dim myUriBuilder As New UriBuilder(apiURL)
+        Dim query
+        query = myUriBuilder.Query
+        query("file") = qe.filename
+        query("dateTaken") = qe.dateTaken.ToString("MM/dd/yyyy hh:mm tt")
+        query("cameraID") = qe.cameraID
+        query("width") = qe.width
+        query("height") = qe.height
+        myUriBuilder.Query = query.ToString
+
 
         Dim client As New HttpClient()
 
-        Dim byteContent = New ByteArrayContent(contents)
+        Dim byteContent = New ByteArrayContent(qe.img)
+        Try
 
-        Dim response = client.PostAsync(apiURL, byteContent)
-        Dim responseString = response.Result
 
+            Dim response = client.PostAsync(myUriBuilder.ToString, byteContent)
+            Dim responseString = response.Result
+            byteContent = Nothing
+
+        Catch ex As Exception
+            Console.WriteLine("calling meteor detection:" & ex.Message)
+        End Try
     End Function
+
 
     Public Sub GrabFrame()
         Dim width, height As UInteger

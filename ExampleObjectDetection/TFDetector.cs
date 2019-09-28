@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.IO;
-
+using System.Xml.Linq;
 using ExampleCommon;
 using Mono.Options;
 using System.Reflection;
@@ -25,7 +25,7 @@ namespace ObjectDetection
         private static string _catalogPath;
         private static string _modelPath;
         private static TFGraph graph;
-        private static double MIN_SCORE_FOR_OBJECT_HIGHLIGHTING = 0.20;
+        private static double MIN_SCORE_FOR_OBJECT_HIGHLIGHTING = 0.2;
         private static TFSession mySession;
         private TFTensor tensor;
         private TFSession.Runner runner;
@@ -1069,6 +1069,85 @@ namespace ObjectDetection
             }
             drawingBoxes = false;
         }
+
+        public XElement GetBoxesXML(float[,,] boxes, float[,] scores, float[,] classes, string outputFile,string width, string height)
+
+        {
+
+            var x = boxes.GetLength(0);
+            var y = boxes.GetLength(1);
+            var z = boxes.GetLength(2);
+            XElement xmlTree = new XElement("annotation");
+
+            float ymin = 0, xmin = 0, ymax = 0, xmax = 0;
+            XElement aFilename = new XElement("filename");
+            aFilename.Value = outputFile;
+            xmlTree.Add(aFilename);
+            XElement aSize = new XElement("size");
+            aSize.Add(new XElement("width",width));
+            aSize.Add(new XElement("height",height));
+            aSize.Add(new XElement("depth","1"));
+            xmlTree.Add(aSize);
+
+            for (int i = 0; i < x; i++)
+            {
+                for (int j = 0; j < y; j++)
+                {
+                    if (scores[i, j] < MIN_SCORE_FOR_OBJECT_HIGHLIGHTING) continue;
+
+                    XElement anObject = new XElement("object");
+                    int value = Convert.ToInt32(classes[i, j]);
+                    CatalogItem catalogItem = _catalog.FirstOrDefault(item => item.Id == value);
+                    anObject.Add(new XElement("name",catalogItem.DisplayName));
+                    XElement bndBox = new XElement("bndbox");
+
+
+
+
+                    for (int k = 0; k < z; k++)
+                    {
+                        var box = boxes[i, j, k];
+                        switch (k)
+                        {
+                            case 0:
+                                ymin = box;
+                                break;
+                            case 1:
+                                xmin = box;
+                                break;
+                            case 2:
+                                ymax = box;
+                                break;
+                            case 3:
+                                xmax = box;
+                                break;
+                        }
+
+                    }
+                    bndBox.Add(new XElement("xmin", Convert.ToString(Convert.ToInt16(xmin * Convert.ToInt32(width)))));
+                    bndBox.Add(new XElement("ymin", Convert.ToString(Convert.ToInt16(ymin * Convert.ToInt32(height)))));
+                    bndBox.Add(new XElement("xmax", Convert.ToString(Convert.ToInt16(xmax * Convert.ToInt32(width)))));
+                    bndBox.Add(new XElement("ymax", Convert.ToString(Convert.ToInt16(ymax * Convert.ToInt32(height)))));
+                    anObject.Add(bndBox);
+                    xmlTree.Add(anObject);
+                    //if (value == 1)
+                    //    {
+                    //        ///CatalogItem catalogItem = _catalog.FirstOrDefault(item => item.Id == value);
+                    //        //if (flip)
+                    //        //{ editor.AddBoxFlip(xmin, xmax, ymin, ymax, $"{catalogItem.DisplayName}: {(scores[i, j] * 100).ToString("0")}%"); }
+                    //        //else
+                    //        //{
+                    //      //  editor.AddBox(xmin, xmax, ymin, ymax, $"{catalogItem.DisplayName} : {(scores[i, j] * 100).ToString("0")}%");
+                    //    }
+                    //    //}
+                    //}
+                }
+
+            }
+            return xmlTree;
+
+        }
+
 
         private ImageCodecInfo GetEncoder(ImageFormat format)
         {

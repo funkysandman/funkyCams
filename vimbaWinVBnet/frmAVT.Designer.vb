@@ -171,7 +171,7 @@ Partial Class frmAVT
         Me.tbMultiplier.Name = "tbMultiplier"
         Me.tbMultiplier.Size = New System.Drawing.Size(36, 20)
         Me.tbMultiplier.TabIndex = 12
-        Me.tbMultiplier.Text = "1.0"
+        Me.tbMultiplier.Text = "150"
         '
         'tbPort
         '

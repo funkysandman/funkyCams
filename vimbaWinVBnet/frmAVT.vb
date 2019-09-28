@@ -35,12 +35,6 @@ Public Class frmAVT
     Dim t As Thread
     Dim meteorCheckRunning As Boolean = False
 
-    Private Class queueEntry
-
-        Public img As Byte()
-        Public filename As String
-
-    End Class
     Public Sub New()
 
         ' This call is required by the designer.
@@ -76,6 +70,12 @@ Public Class frmAVT
 
 
     End Sub
+    Function darkFunction(pixeld As Long, arg As Long, slope As Long) As Int16
+        Dim subtract
+
+        subtract = Math.Max(0, arg - pixeld * slope)
+        Return Math.Max(0, subtract)
+    End Function
     Private Sub received_frame(sender As Object, args As FrameEventArgs)
 
         b = New Bitmap(CInt(args.Frame.Width), CInt(args.Frame.Height), PixelFormat.Format24bppRgb)
@@ -106,8 +106,8 @@ Public Class frmAVT
 
         If Me.cbUseDarks.Checked And lblDayNight.Text = "night" Then
             'd2 = Bitmap.FromFile(Application.StartupPath & "\dark.png")
-            Dim pixValue = 0
-            Dim darkValue = 0
+            Dim pixValue As Int16 = 0
+            Dim darkValue As Int16 = 0
             Dim x
             If dark Is Nothing Then
                 Dim fs As New FileStream(Application.StartupPath & "\dark_" & v.m_Camera.Id & ".raw", FileMode.Open)
@@ -116,17 +116,24 @@ Public Class frmAVT
                 ReDim dark(b.Width * b.Height * 2)
                 fs.Read(dark, 0, dark.Count)
                 fs.Close()
+                Dim slope
+                Dim arg As Int16 = Val(tbMultiplier.Text)
+                slope = 4096 / (4096 - arg)
+                Dim lut(4095) As Int16
+                For i = 0 To 4095
+                    lut(i) = Math.Max(0, CInt(i * slope) - arg * slope)
+                Next
                 For x = 0 To dark.Length - 2 Step 2
 
 
                     darkValue = (dark(x + 1) * 256) + dark(x)
 
-                    If darkValue > 500 Then
-                        darkValue = CInt(darkValue * Val(tbMultiplier.Text))
+                    ' If darkValue > 500 Then
+                    darkValue = lut(darkValue)
 
-                        dark(x + 1) = (darkValue And &HFF00) >> 8
-                        dark(x) = darkValue And &HFF
-                    End If
+                    dark(x + 1) = (darkValue And &HFF00) >> 8
+                    dark(x) = darkValue And &HFF
+                    ' End If
 
                 Next
             End If
@@ -143,13 +150,14 @@ Public Class frmAVT
                     pixValue = (f.Buffer(x + 1) * 256) + f.Buffer(x)
                     darkValue = (dark(x + 1) * 256) + dark(x)
 
-                    If darkValue > 500 Then
+                    ' If darkValue > 500 Then
 
-                        pixValue = Math.Max(0, pixValue - darkValue)
-                        f.Buffer(x + 1) = Int(pixValue / 256)
-                        f.Buffer(x) = pixValue And 255
+                    pixValue = Math.Max(0, pixValue - darkValue)
+                    ' pixValue = darkFunction(pixValue, darkValue, 100)
+                    f.Buffer(x + 1) = Int(pixValue / 256)
+                    f.Buffer(x) = pixValue And 255
 
-                    End If
+                    ' End If
 
                 Next
                 t = Now - t2
@@ -222,6 +230,9 @@ Public Class frmAVT
 
 
         Else '
+
+            dark = Nothing
+
             'copy buffer into bitmap
             'b = New Bitmap(CInt(args.Frame.Width), CInt(args.Frame.Height), PixelFormat.Format24bppRgb)
 
@@ -262,6 +273,7 @@ Public Class frmAVT
 
         f.Fill(b)
 
+
         ' myBitmap.Save("Shapes025.jpg", myImageCodecInfo, myEncoderParameters)
         Dim firstLocation As PointF = New PointF(10.0F, 10.0F)
         Dim firstText As String = String.Format("{0:dd-MMM-yyyy HH:mm:ss}", DateTime.Now)
@@ -300,6 +312,11 @@ Public Class frmAVT
             Dim qe As New queueEntry
             qe.img = contents
             qe.filename = Path.GetFileName(filename)
+            qe.dateTaken = Now
+            qe.cameraID = "AVT-" & myCamID
+            qe.width = b.Width
+            qe.height = b.Height
+
             If myDetectionQueue.Count < 10 Then
                 myDetectionQueue.Enqueue(qe)
             End If
@@ -318,7 +335,7 @@ Public Class frmAVT
         While (meteorCheckRunning)
             If myDetectionQueue.Count > 0 Then
                 aQE = myDetectionQueue.Dequeue()
-                callAzureMeteorDetection(aQE.img, aQE.filename)
+                CallAzureMeteorDetection(aQE)
 
                 aQE = Nothing
 
@@ -330,20 +347,35 @@ Public Class frmAVT
     End Sub
 
 
-    Public Async Function callAzureMeteorDetection(contents As Byte(), file As String) As Task
+    Public Async Function CallAzureMeteorDetection(qe As queueEntry) As Task
+
 
         '        Dim apiURL As String = "https://azuremeteordetect20181212113628.azurewebsites.net/api/detection?code=zi3Lrr58mJB3GTut0lktSLIzb08E1dLkHXAbX6s07bd46IoZmm1vqQ==&file=" + file
-        Dim apiURL As String = "http://192.168.1.192:7071/api/detection?file=" + file
+        Dim apiURL As String = "http://192.168.1.192:7071/api/detection"
+        Dim myUriBuilder As New UriBuilder(apiURL)
+        Dim query
+        query = myUriBuilder.Query
+        query("file") = qe.filename
+        query("dateTaken") = qe.dateTaken.ToString("MM/dd/yyyy hh:mm tt")
+        query("cameraID") = qe.cameraID
+        query("width") = qe.width
+        query("height") = qe.height
+        myUriBuilder.Query = query.ToString
 
 
+        Dim client As New HttpClient()
 
-        Using byteContent = New ByteArrayContent(contents)
+        Dim byteContent = New ByteArrayContent(qe.img)
+        Try
 
-            Dim response = client.PostAsync(apiURL, byteContent)
+
+            Dim response = client.PostAsync(myUriBuilder.ToString, byteContent)
             Dim responseString = response.Result
-            Console.WriteLine(contents.Length)
-        End Using
+            byteContent = Nothing
 
+        Catch ex As Exception
+            Console.WriteLine("calling meteor detection:" & ex.Message)
+        End Try
     End Function
     Public Function getLastImage() As Bitmap
         Dim s As Stopwatch
