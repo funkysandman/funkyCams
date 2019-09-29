@@ -778,7 +778,8 @@ Public Class frmSVSVistek
 
     Private Sub cmbCam_SelectedIndexChanged(sender As Object, e As EventArgs) Handles cmbCam.SelectedIndexChanged
         mySVCam.openCamera(cmbCam.SelectedIndex)
-        mySVCam.prepareCameraForTriggerWidth(mySVCam.current_selected_cam)
+        ' mySVCam.prepareCameraForTriggerWidth(mySVCam.current_selected_cam)
+        mySVCam.prepareCameraForTimed(mySVCam.current_selected_cam)
 
     End Sub
 

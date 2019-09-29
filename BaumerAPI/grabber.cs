@@ -1049,7 +1049,7 @@ namespace BaumerAPI
                 //pixel2 = reversebits(pixel2,true);
 
                 byte1 = (byte)(pixel1 >> 4);
-                byte2 = (byte)(pixel1 & 0xFFFF);
+                byte2 = (byte)((pixel1 & 0xFF)<<4);
                 byte2 = (byte)((byte)(pixel2 >> 8) + byte2);
                 byte3 = (byte)(pixel2 & 0xFFFF);
 
@@ -1104,14 +1104,16 @@ namespace BaumerAPI
         //copy into bitmap
         Rectangle rect = new Rectangle(0, 0, (int)mTransformImage.Width, (int)mTransformImage.Height);
         b = new Bitmap((int)mTransformImage.Width, (int)mTransformImage.Height, PixelFormat.Format24bppRgb);
+          
         System.Drawing.Imaging.BitmapData bmpData = b.LockBits(rect, System.Drawing.Imaging.ImageLockMode.ReadWrite, b.PixelFormat);
         //                            int bytes2 = Math.Abs(bmpData2.Stride) * dark.Height;
         //                            byte[] camRGBValues = new byte[bytes2];
         IntPtr ptr = bmpData.Scan0;
         System.Runtime.InteropServices.Marshal.Copy(transformImageBufferCopy, 0, ptr, transformImageBufferCopy.Length);
-        //
-        //report image to handler
-        //FrameReceivedHandler frameReceivedHandler = this.m_FrameReceivedHandler;
+            //
+            //report image to handler
+            //FrameReceivedHandler frameReceivedHandler = this.m_FrameReceivedHandler;
+        
         Console.WriteLine("setup frameReceiveHandler");
         if (null != m_frh && null != b)
         {
