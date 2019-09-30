@@ -1056,8 +1056,8 @@ namespace BaumerAPI
                
 
                 imageBufferCopy[k] = byte1;
-                imageBufferCopy[k+1] = byte1;
-                imageBufferCopy[k+2] = byte1;
+                imageBufferCopy[k+1] = byte2;
+                imageBufferCopy[k+2] = byte3;
 
                 //if ((masterDark[k]) > 250)
                 //    imageBufferCopy[k] = (byte)Math.Max(0, imageBufferCopy[k] - 0.75 * (masterDark[k]));

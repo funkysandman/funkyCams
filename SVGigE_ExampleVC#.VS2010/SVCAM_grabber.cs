@@ -166,6 +166,7 @@ namespace SVCamApi
             SV_GVSP_PIX_GRAY8 = (DefineConstants.SV_GVSP_PIX_MONO | DefineConstants.SV_GVSP_PIX_OCCUPY8BIT),
 
         }
+
         public void setParams(int duration, float aGain)
         {
 
@@ -302,7 +303,43 @@ namespace SVCamApi
                 }
                 closeConnection();
             }
+            int reversebits(int aNum, bool lsb)
+            {
+                int newNum = 0;
+                if (lsb)
+                {
+                    newNum = Math.Sign(aNum & 0b1000_0000_0000) * (1);
+                    newNum = newNum + (Math.Sign(aNum & 0b0100_0000_0000) * (2));
+                    newNum = newNum + (Math.Sign(aNum & 0b0010_0000_0000) * (4));
+                    newNum = newNum + (Math.Sign(aNum & 0b0001_0000_0000) * (8));
+                    newNum = newNum + (Math.Sign(aNum & 0b0000_1000_0000) * (16));
+                    newNum = newNum + (Math.Sign(aNum & 0b0000_0100_0000) * (32));
+                    newNum = newNum + (Math.Sign(aNum & 0b0000_0010_0000) * (64));
+                    newNum = newNum + (Math.Sign(aNum & 0b0000_0001_0000) * (128));
+                    newNum = newNum + (Math.Sign(aNum & 0b0000_0000_1000) * (256));
+                    newNum = newNum + (Math.Sign(aNum & 0b0000_0000_0100) * (512));
+                    newNum = newNum + (Math.Sign(aNum & 0b0000_0000_0010) * (1024));
+                    newNum = newNum + (Math.Sign(aNum & 0b0000_0000_0001) * (2048));
+                }
+                else
+                {
+                    newNum = Math.Sign(aNum & 0b1000_0000_0000) * (2048);
+                    newNum = newNum + (Math.Sign(aNum & 0b0100_0000_0000) * (1024));
+                    newNum = newNum + (Math.Sign(aNum & 0b0010_0000_0000) * (512));
+                    newNum = newNum + (Math.Sign(aNum & 0b0001_0000_0000) * (256));
+                    newNum = newNum + (Math.Sign(aNum & 0b0000_1000_0000) * (128));
+                    newNum = newNum + (Math.Sign(aNum & 0b0000_0100_0000) * (64));
+                    newNum = newNum + (Math.Sign(aNum & 0b0000_0010_0000) * (32));
+                    newNum = newNum + (Math.Sign(aNum & 0b0000_0001_0000) * (16));
+                    newNum = newNum + (Math.Sign(aNum & 0b0000_0000_1000) * (8));
+                    newNum = newNum + (Math.Sign(aNum & 0b0000_0000_0100) * (4));
+                    newNum = newNum + (Math.Sign(aNum & 0b0000_0000_0010) * (2));
+                    newNum = newNum + (Math.Sign(aNum & 0b0000_0000_0001) * (1));
+                }
 
+
+                return newNum;
+            }
 
             // Camera: Connection
             public SVcamApi.SVSCamApiReturn openConnection()
@@ -1134,7 +1171,7 @@ namespace SVCamApi
                                 filename = String.Format("{0}{1:ddMMMyyyy-HHmmss}.raw", "dark_", DateTime.Now);
                                 //if (makeDarks)
                                 //{
-                                //    File.WriteAllBytes(filename, imageBufferCopy);
+                               //    File.WriteAllBytes(filename, rawImage.imagebytes);
                                 //}
                                 for (int k = 0; k < imagebufferRGB[currentIdex].dataLegth /2 - 1; k = k + 3)
                                 {
@@ -1149,17 +1186,14 @@ namespace SVCamApi
                                     dbyte3 = masterDark[k + 2];
 
 
-                                    pixel1 = (byte1 << 4) | ((byte2 & 0b1111_0000) >> 4);
-                                    pixel2 = ((byte2 & 0b0000_1111) << 8) | byte3;
+                                    pixel1 = (byte1)<<4 | (byte2 & 0b0000_1111);
+                                    pixel2 = (byte3)<<4 | (byte2 & 0b1111_0000)>>4;
 
 
-                                    dpixel1 = (dbyte1 << 4) | ((dbyte2 & 0b1111_0000) >> 4);
-                                    dpixel2 = ((dbyte2 & 0b0000_1111) << 8) | dbyte3;
+                                    dpixel1 = (dbyte1) << 4 | (dbyte2 & 0b0000_1111);
+                                    dpixel2 = (dbyte3) << 4 | (dbyte2 & 0b1111_0000) >> 4;
 
-                                    //pixel1 = reversebits(pixel1,true);
-                                    //pixel2 = reversebits(pixel2,true);
-                                    //dpixel1 = reversebits(dpixel1,true);
-                                    //dpixel2 = reversebits(dpixel2,true);
+
                                     //pixel1 = (byte1 & 0b1111_0000) >> 4;
                                     //dpixel1 = (dbyte1 & 0b1111_0000) >> 4;
                                     dpixel1 = Convert.ToInt32(Convert.ToDouble(dpixel1) * _darkmultiplier);
@@ -1171,27 +1205,27 @@ namespace SVCamApi
 
                                         //pixel1 = Math.Min(pixel1 + 50, 4095);
                                         // if (dpixel1 > pixelCutOff) { 
-                                        pixel1 = Math.Max(pixel1 - dpixel1, 0);
+                                       pixel1 = Math.Max(pixel1 - dpixel1, 0);
                                         //  }
-
+                                       // pixel1 = dpixel1;
                                         //   if (dpixel2 > pixelCutOff)
                                         //   {
                                         pixel2 = Math.Max(pixel2 - dpixel2, 0);
+                                     //   pixel2 = dpixel2;
                                         //   }
                                     }
-                                    //pixel1 = reversebits(pixel1,true);
-                                    //pixel2 = reversebits(pixel2,true);
 
-                                    byte1 = (byte)(pixel1 >> 4);
-                                    byte2 = (byte)((pixel1 & 0xFF) << 4);
-                                    byte2 = (byte)((byte)(pixel2 >> 8) + byte2);
-                                    byte3 = (byte)(pixel2 & 0xFFFF);
+
+                                    byte1 = (byte)((pixel1 & 0xFF0)>>4);
+                                    byte2 = (byte)(pixel1 & 0xF);
+                                    byte2 = (byte)((pixel2 >> 8)<<4 + byte2);
+                                    byte3 = (byte)((pixel2 & 0xFF0)>>4);
 
 
 
                                     rawImage.imagebytes[k] = byte1;
-                                    rawImage.imagebytes[k + 1] = byte1;
-                                    rawImage.imagebytes[k + 2] = byte1;
+                                    rawImage.imagebytes[k + 1] = byte2;
+                                    rawImage.imagebytes[k + 2] = byte3;
 
                                     //if ((masterDark[k]) > 250)
                                     //    imageBufferCopy[k] = (byte)Math.Max(0, imageBufferCopy[k] - 0.75 * (masterDark[k]));
