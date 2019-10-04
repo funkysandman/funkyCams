@@ -305,17 +305,17 @@ namespace DetectionServer
                     height = Convert.ToString(c.Height);
                     b.Dispose();
                     XElement boxxml = md.GetBoxesXML(boxes, scores, classes, qe.filename,width,height);
-                    qe.filename = qe.filename.Replace("png", "jpg");
+                   
                     
                    
                     boxxml.FirstNode.AddAfterSelf(new XElement("camera", qe.cameraID));
                     boxxml.FirstNode.AddAfterSelf(new XElement("dateTaken", qe.dateTaken));
-                    boxxml.Save("e:\\found\\" + qe.filename.Replace("jpg", "xml"));
-                    md.DrawBoxes(boxes, scores, classes, ref c, qe.filename, .35, false);
+                    boxxml.Save("e:\\found\\" + qe.filename.Replace("png", "xml"));
+                   // md.DrawBoxes(boxes, scores, classes, ref c, qe.filename, .35, false);
 
-                    
+                    //qe.filename = qe.filename.Replace("png", "jpg");
                     //Console.WriteLine("about to save jpg");
-                    c.Save("e:\\found\\" + qe.filename, jgpEncoder, myEncoderParameters);
+                    //  c.Save("e:\\found\\" + qe.filename, jgpEncoder, myEncoderParameters);
 
 
                     c.Dispose();

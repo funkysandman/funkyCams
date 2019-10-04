@@ -20,7 +20,7 @@ namespace detectionTest
 
             DateTime from_date = DateTime.Now.AddHours(-1600000);
             DateTime to_date = DateTime.Now;
-            var directory = new DirectoryInfo("c:\\test");
+            var directory = new DirectoryInfo("E:\\imagesvs\\2019-Oct-03");
 
 
             var files = directory.GetFiles("*.jpg"); //.Where(file => file.LastWriteTime >= from_date && file.LastWriteTime <= to_date);

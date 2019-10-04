@@ -171,7 +171,7 @@ Partial Class frmAVT
         Me.tbMultiplier.Name = "tbMultiplier"
         Me.tbMultiplier.Size = New System.Drawing.Size(36, 20)
         Me.tbMultiplier.TabIndex = 12
-        Me.tbMultiplier.Text = "150"
+        Me.tbMultiplier.Text = "2000"
         '
         'tbPort
         '
@@ -334,9 +334,9 @@ Partial Class frmAVT
         Me.lblDayNight.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.lblDayNight.Location = New System.Drawing.Point(537, 245)
         Me.lblDayNight.Name = "lblDayNight"
-        Me.lblDayNight.Size = New System.Drawing.Size(35, 13)
+        Me.lblDayNight.Size = New System.Drawing.Size(15, 13)
         Me.lblDayNight.TabIndex = 86
-        Me.lblDayNight.Text = "night"
+        Me.lblDayNight.Text = "--"
         '
         'frmAVT
         '

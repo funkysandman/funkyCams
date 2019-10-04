@@ -60,6 +60,8 @@ Partial Class frmPointGrey
         Me.Timer1 = New System.Windows.Forms.Timer(Me.components)
         Me.TimerAcquistionRate = New System.Windows.Forms.Timer(Me.components)
         Me.Button1 = New System.Windows.Forms.Button()
+        Me.tbQ = New System.Windows.Forms.TextBox()
+        Me.Label2 = New System.Windows.Forms.Label()
         CType(Me.PictureBox1, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
         '
@@ -375,11 +377,30 @@ Partial Class frmPointGrey
         Me.Button1.Text = "garbage collect"
         Me.Button1.UseVisualStyleBackColor = True
         '
+        'tbQ
+        '
+        Me.tbQ.Location = New System.Drawing.Point(501, 415)
+        Me.tbQ.Name = "tbQ"
+        Me.tbQ.Size = New System.Drawing.Size(45, 20)
+        Me.tbQ.TabIndex = 97
+        Me.tbQ.Text = "0"
+        '
+        'Label2
+        '
+        Me.Label2.AutoSize = True
+        Me.Label2.Location = New System.Drawing.Point(446, 415)
+        Me.Label2.Name = "Label2"
+        Me.Label2.Size = New System.Drawing.Size(43, 13)
+        Me.Label2.TabIndex = 98
+        Me.Label2.Text = "queued"
+        '
         'frmPointGrey
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.ClientSize = New System.Drawing.Size(580, 447)
+        Me.Controls.Add(Me.Label2)
+        Me.Controls.Add(Me.tbQ)
         Me.Controls.Add(Me.Button1)
         Me.Controls.Add(Me.tbGain)
         Me.Controls.Add(Me.Label8)
@@ -457,4 +478,6 @@ Partial Class frmPointGrey
     Friend WithEvents TimerAcquistionRate As Timer
     Public WithEvents cbUseDarks As CheckBox
     Friend WithEvents Button1 As Button
+    Friend WithEvents tbQ As TextBox
+    Friend WithEvents Label2 As Label
 End Class

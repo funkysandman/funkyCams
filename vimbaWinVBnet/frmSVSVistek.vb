@@ -406,7 +406,7 @@ Public Class frmSVSVistek
             'call azure service
             Dim ms As New MemoryStream()
             ' convertedImage.ConvertToWriteAbleBitmap()
-
+            b.Save(ms, myImageCodecInfo, myEncoderParameters)
 
             b.Save(ms, ImageFormat.Bmp)
             b.Dispose()

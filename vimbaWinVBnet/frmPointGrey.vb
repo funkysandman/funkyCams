@@ -249,7 +249,7 @@ Public Class frmPointGrey
                     '    myForm.dark(i) = CByte(CInt(myForm.dark(i)) * mult)
                     'Next
                 End If
-                Dim mult As Long
+                Dim mult As Decimal
                 mult = Val(myForm.tbMultiplier.Text)
                 For i = 0 To image.DataSize - 1
                     image.ManagedData(i) = CByte(Math.Max(0, CInt(image.ManagedData(i)) - CInt(myForm.dark(i)) * mult))
@@ -266,20 +266,11 @@ Public Class frmPointGrey
             End If
 
 
-            Dim convertedImage As IManagedImage = image.Convert(PixelFormatEnums.BayerRG8, ColorProcessingAlgorithm.NEAREST_NEIGHBOR)
+            Dim convertedImage As IManagedImage = image.Convert(PixelFormatEnums.BGRa8, ColorProcessingAlgorithm.HQ_LINEAR)
 
-            convertedImage.ConvertToWriteAbleBitmap(PixelFormatEnums.RGB8, convertedImage)
+            'convertedImage.ConvertToWriteAbleBitmap(PixelFormatEnums.BGR8, convertedImage)
 
 
-            'red/blue channels mixed up
-            Dim channelR As Byte
-            For i = 0 To convertedImage.ManagedData.Length - 3 Step 3
-                channelR = convertedImage.ManagedData(i + 2)
-                convertedImage.ManagedData(i + 2) = convertedImage.ManagedData(i)
-                convertedImage.ManagedData(i) = channelR
-            Next
-
-            Marshal.Copy(convertedImage.ManagedData, 0, convertedImage.DataPtr, convertedImage.DataSize - 1)
 
 
             ' Print image information
@@ -319,7 +310,7 @@ Public Class frmPointGrey
                 Dim b As Bitmap
                 b = myForm.getLastImage
 
-                b.Save(ms, ImageFormat.Bmp)
+                b.Save(ms, myForm.myImageCodecInfo, myForm.myEncoderParameters)
                 b.Dispose()
 
                 Dim contents = ms.ToArray()
@@ -332,6 +323,7 @@ Public Class frmPointGrey
                 qe.height = image.Height
                 If myForm.myDetectionQueue.Count < 10 Then
                     myForm.myDetectionQueue.Enqueue(qe)
+
                 End If
 
                 ms.Close()
@@ -341,7 +333,6 @@ Public Class frmPointGrey
                 System.IO.Directory.CreateDirectory(Path.Combine(myForm.tbPath.Text, folderName))
                 Dim x As Bitmap
                 x = myForm.getLastImage
-
 
                 x.Save(filename, myForm.myImageCodecInfo, myForm.myEncoderParameters)
                 x.Dispose()
@@ -390,6 +381,21 @@ Public Class frmPointGrey
                 Return m_buffers(m_BitmapSelector)
             End Get
         End Property
+        Public ReadOnly Property ImageBytesBuffered As Byte()
+            Get
+                Debug.Print("getting bitmap " & m_BitmapSelector)
+                'copy raw data to byte array
+                Dim i As Integer
+                i = m_BitmapSelector - 2
+                If i < 0 Then
+                    i = i + 5
+                End If
+
+
+
+                Return m_buffers(i)
+            End Get
+        End Property
         Public ReadOnly Property width As Integer
             Get
 
@@ -424,33 +430,7 @@ Public Class frmPointGrey
             m_width = b.Width
             m_height = b.Height
             m_dataSize = b.DataSize
-            ' m_Bitmaps(m_BitmapSelector).UnlockBits(bmpData)
-            'subtract darks
-            'For i = 0 To rawData.Length - 1
-            '    rawData(i) = Math.
-            'Next
-            'Dim bmp As New Bitmap(1920, 1200, PixelFormat.Format24bppRgb)
-            ''Dim ncp As System.Drawing.Imaging.ColorPalette = b.Palette
-            ''For j As Integer = 0 To 255
-            ''    ncp.Entries(j) = System.Drawing.Color.FromArgb(255, j, j, j)
-            ''Next
-            ''b.Palette = ncp
-
-
-
-
-            'Dim BoundsRect = New Rectangle(0, 0, 1920 - 1, 1200 - 1)
-            'Dim bmpData As System.Drawing.Imaging.BitmapData = bmp.LockBits(BoundsRect, System.Drawing.Imaging.ImageLockMode.[WriteOnly], bmp.PixelFormat)
-
-            'Dim ptr As IntPtr = bmpData.Scan0
-
-
-
-
-
-            'Marshal.Copy(m_buffers(m_BitmapSelector), 0, ptr, m_buffers(m_BitmapSelector).Length - 1)
-            'bmp.UnlockBits(bmpData)
-            'm_Bitmaps(m_BitmapSelector) = bmp
+           
 
         End Sub
         'Public Sub FillNextBitmap(frame As QCamM_Frame)
@@ -765,6 +745,7 @@ Public Class frmPointGrey
             Dim response = client.PostAsync(myUriBuilder.ToString, byteContent)
             Dim responseString = response.Result
             byteContent = Nothing
+            qe.img = Nothing
 
         Catch ex As Exception
             Console.WriteLine("calling meteor detection:" & ex.Message)
@@ -932,7 +913,7 @@ Public Class frmPointGrey
         myEncoderParameters = New EncoderParameters(1)
 
         ' Save the bitmap as a JPEG file with quality level 25.
-        myEncoderParameter = New EncoderParameter(myEncoder, CType(85L, Int32))
+        myEncoderParameter = New EncoderParameter(myEncoder, CType(100L, Int32))
         myEncoderParameters.Param(0) = myEncoderParameter
         ' md.LoadModel("c:\tmp\frozen_inference_graph_orig.pb", "c:\tmp\mscoco_label_map.pbtxt")
     End Sub
@@ -1026,7 +1007,7 @@ Public Class frmPointGrey
         'Dim x As New Bitmap(b)
         Debug.Print("get last image")
 
-        Dim x As New Bitmap(m_pics.width, m_pics.height, PixelFormat.Format24bppRgb)
+        Dim x As New Bitmap(m_pics.width, m_pics.height)
         Dim BoundsRect = New Rectangle(0, 0, m_pics.width, m_pics.height)
         Dim bmpData As System.Drawing.Imaging.BitmapData = x.LockBits(BoundsRect, System.Drawing.Imaging.ImageLockMode.[WriteOnly], x.PixelFormat)
         Dim ptr As IntPtr = bmpData.Scan0
@@ -1151,6 +1132,7 @@ Public Class frmPointGrey
 
         seconds = DateDiff(DateInterval.Second, startTime, Now)
         txtFps.Text = frames / seconds
+        tbQ.Text = myDetectionQueue.Count
     End Sub
 
 
