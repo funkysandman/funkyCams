@@ -7,6 +7,7 @@ Imports System.ComponentModel
 Imports System.Net.Http
 Imports System.Threading
 Imports System.Collections.Specialized
+Imports vimbaWinVBnet.vimbaWinVBnet
 
 Public Class frmToupcam
     'Dim v As New AVT.VmbAPINET.Vimba
@@ -259,7 +260,7 @@ Public Class frmToupcam
                     myDetectionQueue.Enqueue(qe)
                 End If
                 'myDetectionQueue.Enqueue(New queueEntry(contents,))
-                'callAzureMeteorDetection(contents, Path.GetFileName(filename))
+                'Functions.CallAzureMeteorDetection(contents, Path.GetFileName(filename))
                 ms.Close()
             Else
                 ' md.examine(bm)
@@ -568,7 +569,7 @@ Public Class frmToupcam
     '            myDetectionQueue.Enqueue(qe)
     '        End If
     '        'myDetectionQueue.Enqueue(New queueEntry(contents,))
-    '        'callAzureMeteorDetection(contents, Path.GetFileName(filename))
+    '        'Functions.CallAzureMeteorDetection(contents, Path.GetFileName(filename))
     '        ms.Close()
     '    Else
     '        ' md.examine(bm)
@@ -582,7 +583,7 @@ Public Class frmToupcam
         While (meteorCheckRunning)
             If myDetectionQueue.Count > 0 Then
                 aQE = myDetectionQueue.Dequeue()
-                CallAzureMeteorDetection(aQE)
+                Functions.CallAzureMeteorDetection(aQE)
 
                 aQE = Nothing
 

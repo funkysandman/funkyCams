@@ -10,6 +10,9 @@ using System.Drawing.Imaging;
 using System.ServiceProcess;
 using System.Xml.Linq;
 using System.Collections.Specialized;
+using MeteorIngestAPI.Models;
+using System.Runtime.Serialization.Json;
+using Newtonsoft.Json;
 
 namespace DetectionServer
 {
@@ -120,6 +123,7 @@ namespace DetectionServer
         private static EncoderParameters myEncoderParameters;
         private static EncoderParameter myEncoderParameter;
         private static System.Drawing.Imaging.Encoder myEncoder;
+        private static double MIN_SCORE_FOR_OBJECT_HIGHLIGHTING = 0.1;
         #region Nested classes to support running as service
         public const string ServiceName = "DetectionServer";
         public static DetectionServer ws = new DetectionServer(SendResponse, "http://192.168.1.192:7071/api/detection/");
@@ -146,7 +150,7 @@ namespace DetectionServer
             public byte[] img;
             public string filename;
             public string cameraID;
-            public string dateTaken;
+            public DateTime dateTaken;
 
         }
 
@@ -188,14 +192,14 @@ namespace DetectionServer
                     cameraID = myParams[0];
                 }
                 myParams = request.QueryString.GetValues("dateTaken");
-                string dateTaken;
+                DateTime dateTaken;
                 if (myParams == null)
                 {
-                    dateTaken = "unknown";
+                    dateTaken = DateTime.Now;
                 }
                 else
                 {
-                    dateTaken = myParams[0];
+                    dateTaken = DateTime.ParseExact(myParams[0],"MM/dd/yyyy hh:mm tt",null);
                 }
                 //
                 ObjectDetection.TFDetector md = new ObjectDetection.TFDetector();
@@ -207,7 +211,7 @@ namespace DetectionServer
 
                 if (qe.dateTaken == null)
                 {
-                    qe.dateTaken = DateTime.Now.ToString("MM/dd/yyyy hh:mm tt");
+                    qe.dateTaken = DateTime.Now;
                     
                 }
                         
@@ -218,25 +222,27 @@ namespace DetectionServer
                 var ss = request.InputStream;
 
 
-                //byte[] buffer = new byte[16000];
-                //int totalCount = 0;
+                byte[] buffer = new byte[16000];
+                int totalCount = 0;
 
-                //while (true)
-                //{
-                //    int currentCount = ss.Read(buffer, totalCount, buffer.Length - totalCount);
-                //    if (currentCount == 0)
-                //        break;
+                while (true)
+                {
+                    int currentCount = ss.Read(buffer, totalCount, buffer.Length - totalCount);
+                    if (currentCount == 0)
+                        break;
 
-                //    totalCount += currentCount;
-                //    if (totalCount == buffer.Length)
-                //        Array.Resize(ref buffer, buffer.Length * 2);
-                //}
+                    totalCount += currentCount;
+                    if (totalCount == buffer.Length)
+                        Array.Resize(ref buffer, buffer.Length * 2);
+                }
 
-                //Array.Resize(ref buffer, totalCount);
-                //qe.img = buffer;
+                Array.Resize(ref buffer, totalCount);
+                qe.img = buffer;
 
-                //
-                Image i = Bitmap.FromStream(ss);
+                var imgms = new MemoryStream(buffer);
+                
+                Image img = new Bitmap(imgms);
+                
                 bool found = false;
                 float[,,] boxes = null;
                 float[,] scores = null;
@@ -254,13 +260,13 @@ namespace DetectionServer
                 jgpEncoder = GetEncoder(ImageFormat.Jpeg);
                 myEncoderParameters = new EncoderParameters(1);
 
-                myEncoderParameter = new EncoderParameter(myEncoder, 50L);
+                myEncoderParameter = new EncoderParameter(myEncoder, 99L);
                 myEncoderParameters.Param[0] = myEncoderParameter;
                 
                 DateTime start = DateTime.Now;
 
                 
-                md.examine(i, qe.filename, ref boxes, ref scores, ref classes, ref num, ref found);
+                md.examine(img, qe.filename, ref boxes, ref scores, ref classes, ref num, ref found);
 
                 //Console.WriteLine("elapsed time: {0}", DateTime.Now - start);
                 //totalImagesProcessed++;
@@ -275,12 +281,12 @@ namespace DetectionServer
 
                     //put score at front of filename
                     float highscore = scores[0, 0];
-                    for (int x = 0; x < scores.Length - 1; x++)
+                    for (int f = 0; f < scores.Length - 1; f++)
                     {
-                        if (classes[0,x]==1)
+                        if (classes[0,f]==1)
                         {
                             //found a meteor
-                            highscore = scores[0, x];
+                            highscore = scores[0, f];
                             break ;
                         }
                     }
@@ -289,17 +295,17 @@ namespace DetectionServer
                     string hs = highscore.ToString(".00");
 
                     qe.filename = hs.Substring(1) + qe.filename;
-                    qe.filename = qe.filename.Replace("bmp", "png");
-                    qe.filename = qe.filename.Replace("jpg", "png");
+                    qe.filename = qe.filename.Replace("bmp", "jpg");
+                    qe.filename = qe.filename.Replace("png", "jpg");
                     qe.filename = Path.GetFileName(qe.filename);
                     Bitmap b;
                    // using (var imagems = new MemoryStream(qe.img))
                    // {
-                        b = new Bitmap(i);
+                        b = new Bitmap(img);
                     //}
                     //Console.WriteLine("about to save bmp");
                     Bitmap c = new Bitmap(b);
-                    c.Save("e:\\found\\" + qe.filename);
+                    c.Save("e:\\found\\" + qe.filename, jgpEncoder, myEncoderParameters);
                     string width, height;
                     width = Convert.ToString(c.Width);
                     height = Convert.ToString(c.Height);
@@ -310,25 +316,171 @@ namespace DetectionServer
                    
                     boxxml.FirstNode.AddAfterSelf(new XElement("camera", qe.cameraID));
                     boxxml.FirstNode.AddAfterSelf(new XElement("dateTaken", qe.dateTaken));
-                    boxxml.Save("e:\\found\\" + qe.filename.Replace("png", "xml"));
-                   // md.DrawBoxes(boxes, scores, classes, ref c, qe.filename, .35, false);
+                    boxxml.Save("e:\\found\\" + qe.filename.Replace("jpg", "xml"));
 
-                    //qe.filename = qe.filename.Replace("png", "jpg");
-                    //Console.WriteLine("about to save jpg");
-                    //  c.Save("e:\\found\\" + qe.filename, jgpEncoder, myEncoderParameters);
+                    //create skyimage object
+
+                    SkyImage si = new SkyImage();
+                    si.width = c.Width;
+                    si.height = c.Height;
+                    si.camera = qe.cameraID;
+                    si.date = qe.dateTaken;
+                    si.filename = qe.filename;
+                    //si.skyImageId = DateTime.Now.Second;
+                    int skyObjectId = 0;
+                    int bbId = 0;
+                    si.detectedObjects = new List<SkyObjectDetection>();
+
+                    foreach (XElement xe in boxxml.Elements())
+                    {
+                        if (xe.Name == "object")
+                        {
+                            var newObject = new SkyObjectDetection();
+                            skyObjectId = skyObjectId + 1;
+                            //newObject.skyObjectID = skyObjectId;
+                            
+                            foreach (XElement xe2 in xe.Elements())
+                            {
+                                switch (xe2.Name.ToString())
+                                {
+                                    case "name":
+                                        newObject.skyObjectClass = xe2.Value;
+                                        break;
+                                    case "score":
+                                        newObject.score = Convert.ToDecimal(xe2.Value);
+                                        break;
+                                    case "bndbox":
+                                        var newBBox = new BoundingBox();
+                                        bbId++;
+                                        foreach (XElement xe3 in xe2.Elements())
+                                        {
+                                            switch (xe3.Name.ToString())
+                                            {
+
+                                                case "xmin":
+                                                    newBBox.xmin = int.Parse(xe3.Value);
+                                                    break;
+                                                case "xmax":
+                                                    newBBox.xmax = int.Parse(xe3.Value);
+                                                    break;
+                                                case "ymin":
+                                                    newBBox.ymin = int.Parse(xe3.Value);
+                                                    break;
+                                                case "ymax":
+                                                    newBBox.ymax = int.Parse(xe3.Value);
+                                                    break;
+                                                default:
+
+                                                    break;
+                                            }
+                                        }
+                                        //newBBox.boundingBoxId = bbId;
+                                        newObject.bbox = newBBox;
+                                        break;
+                                    default:
+                                        break;
+
+
+                                }
+                               
+
+                               
+                            }
+                            si.detectedObjects.Add(newObject);
+
+
+                        }
+
+                    }
+
+
+                    //push to cloud for further analysis
+                    System.Net.ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12;
+                    var httpWebRequest = (HttpWebRequest)WebRequest.Create("http://imageingest.azurewebsites.net/api/SkyImages");
+
+                    httpWebRequest.ContentType = "application/json";
+                    httpWebRequest.Method = "POST";
+
+                    var ims = new MemoryStream();
+                    string base64String = Convert.ToBase64String(buffer);
+                    var imgdata = new ImageData();
+
+                    imgdata.imageData = base64String;
+                    si.imageData = imgdata;
+                    var streamWriter = new StreamWriter(httpWebRequest.GetRequestStream());
+                    var ms = new MemoryStream();
+                    //string dateTimeFormat = "yyyy-MM-ddTHH:mm:ss.fffffffZ";
+                    //var jsonSerializerSettings = new DataContractJsonSerializerSettings
+                    //{
+                    //    DateTimeFormat = new System.Runtime.Serialization.DateTimeFormat(dateTimeFormat)
+                    //};
+                    var settings = new DataContractJsonSerializerSettings();
+
+
+
+                    settings.DateTimeFormat = new System.Runtime.Serialization.DateTimeFormat("yyyy-MM-ddTHH:mm:ss.fffZ");
+
+                    // var json = JsonConvert.SerializeObject(DateTime.Now, settings);
+
+                    var ser = new DataContractJsonSerializer(typeof(SkyImage), settings);
+                    ser.WriteObject(ms, si);
+                    ms.Position = 0;
+
+                    string json = Encoding.Default.GetString(ms.ToArray());
+
+                    streamWriter.Write(json);
+                    streamWriter.Flush();
+                    streamWriter.Close();
+                    File.WriteAllText("c:\\json.txt", json);
+                    ms.Close();
+                    var result = "";
+                    try
+                    {
+                        using (var response = httpWebRequest.GetResponse() as HttpWebResponse)
+                        {
+                            if (httpWebRequest.HaveResponse && response != null)
+                            {
+                                using (var reader = new StreamReader(response.GetResponseStream()))
+                                {
+                                    result = reader.ReadToEnd();
+                                    Console.WriteLine("sent to cloud");
+                                }
+                            }
+                        }
+                    }
+                    catch (WebException e)
+                    {
+                        if (e.Response != null)
+                        {
+                            using (var errorResponse = (HttpWebResponse)e.Response)
+                            {
+                                using (var reader = new StreamReader(errorResponse.GetResponseStream()))
+                                {
+                                    string error = reader.ReadToEnd();
+                                    result = error;
+                                }
+                            }
+
+                        }
+                    }
+
+
 
 
                     c.Dispose();
+
+                    //send to cloud
+
 
                 }
                 else
                 {
                     Console.WriteLine("nothing found");
-                    //Bitmap b;
-                    //b = new Bitmap(i);
-                    //Console.WriteLine("about to save bmp");
-                    //Bitmap c = new Bitmap(b);
-                    //c.Save("e:\\notfound\\" + qe.filename);
+                //    Bitmap b;
+                //    b = new Bitmap(i);
+                //    Console.WriteLine("about to save bmp");
+                //    Bitmap c = new Bitmap(b);
+                //    c.Save("e:\\notfound\\" + qe.filename);
                 }
                 ss.Close();
 

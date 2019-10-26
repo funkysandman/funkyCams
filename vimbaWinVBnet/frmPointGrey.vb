@@ -13,6 +13,7 @@ Imports System.Environment
 Imports SpinnakerNET
 Imports SpinnakerNET.GenApi
 Imports System.Collections.Specialized
+Imports vimbaWinVBnet.vimbaWinVBnet
 
 Public Class frmPointGrey
     Dim myDetectionQueue As New Queue(Of queueEntry)
@@ -430,7 +431,7 @@ Public Class frmPointGrey
             m_width = b.Width
             m_height = b.Height
             m_dataSize = b.DataSize
-           
+
 
         End Sub
         'Public Sub FillNextBitmap(frame As QCamM_Frame)
@@ -707,7 +708,7 @@ Public Class frmPointGrey
             If myDetectionQueue.Count > 0 Then
                 aQE = myDetectionQueue.Dequeue()
 
-                CallAzureMeteorDetection(aQE)
+                Functions.CallAzureMeteorDetection(aQE)
 
 
                 aQE = Nothing

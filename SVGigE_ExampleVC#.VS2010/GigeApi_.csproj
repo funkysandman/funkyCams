@@ -149,6 +149,9 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="bgapi2_genicam_dotnet">
+      <HintPath>..\vimbaWinVBnet\BaumerSDKlibs\bgapi2_genicam_dotnet.dll</HintPath>
+    </Reference>
     <Reference Include="System">
       <Name>System</Name>
     </Reference>

@@ -7,6 +7,7 @@ Imports System.Drawing.Imaging
 Imports System.Threading
 Imports System.Net.Http
 Imports System.Collections.Specialized
+Imports vimbaWinVBnet.vimbaWinVBnet
 
 Public Class frmGIGE
     Dim myDetectionQueue As New Queue(Of queueEntry)
@@ -325,7 +326,7 @@ Public Class frmGIGE
         While (meteorCheckRunning)
             If myDetectionQueue.Count > 0 Then
                 aQE = myDetectionQueue.Dequeue()
-                CallAzureMeteorDetection(aQE)
+                Functions.CallAzureMeteorDetection(aQE)
 
                 aQE = Nothing
 

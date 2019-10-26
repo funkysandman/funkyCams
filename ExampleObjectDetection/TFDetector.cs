@@ -25,7 +25,7 @@ namespace ObjectDetection
         private static string _catalogPath;
         private static string _modelPath;
         private static TFGraph graph;
-        private static double MIN_SCORE_FOR_OBJECT_HIGHLIGHTING = 0.2;
+        private static double MIN_SCORE_FOR_OBJECT_HIGHLIGHTING = 0.15;
         private static TFSession mySession;
         private TFTensor tensor;
         private TFSession.Runner runner;
@@ -1081,6 +1081,7 @@ namespace ObjectDetection
 
             float ymin = 0, xmin = 0, ymax = 0, xmax = 0;
             XElement aFilename = new XElement("filename");
+            outputFile.Replace("png", "jpg");
             aFilename.Value = outputFile;
             xmlTree.Add(aFilename);
             XElement aSize = new XElement("size");
@@ -1098,6 +1099,7 @@ namespace ObjectDetection
                     XElement anObject = new XElement("object");
                     int value = Convert.ToInt32(classes[i, j]);
                     CatalogItem catalogItem = _catalog.FirstOrDefault(item => item.Id == value);
+                    anObject.Add(new XElement("score", scores[i, j]));
                     anObject.Add(new XElement("name",catalogItem.DisplayName));
                     XElement bndBox = new XElement("bndbox");
 

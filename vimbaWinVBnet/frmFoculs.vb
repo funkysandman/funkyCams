@@ -6,6 +6,7 @@ Imports System.Threading
 Imports System.Net.Http
 Imports AxFGControlLib
 Imports System.Collections.Specialized
+Imports vimbaWinVBnet.vimbaWinVBnet
 
 Public Class frmFoculs
     Dim myDetectionQueue As New Queue(Of queueEntry)
@@ -168,7 +169,7 @@ Public Class frmFoculs
     '            b8.Save(ms, System.Drawing.Imaging.ImageFormat.Bmp)
 
     '            Dim contents = ms.ToArray()
-    '            CallAzureMeteorDetection(contents, filename)
+    '            Functions.CallAzureMeteorDetection(contents, filename)
     '            ms.Close()
     '        End If
 
@@ -432,7 +433,7 @@ Public Class frmFoculs
             If myDetectionQueue.Count > 0 Then
                 aQE = myDetectionQueue.Dequeue()
 
-                CallAzureMeteorDetection(aQE)
+                Functions.CallAzureMeteorDetection(aQE)
 
 
                 aQE = Nothing

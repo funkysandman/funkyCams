@@ -7,6 +7,7 @@ Imports System.ComponentModel
 Imports System.Net.Http
 Imports System.Threading
 Imports System.Collections.Specialized
+Imports vimbaWinVBnet.vimbaWinVBnet
 
 Public Class frmAVT
     'Dim v As New AVT.VmbAPINET.Vimba
@@ -319,7 +320,7 @@ Public Class frmAVT
                 myDetectionQueue.Enqueue(qe)
             End If
             'myDetectionQueue.Enqueue(New queueEntry(contents,))
-            'callAzureMeteorDetection(contents, Path.GetFileName(filename))
+            'Functions.CallAzureMeteorDetection(contents, Path.GetFileName(filename))
             ms.Close()
         Else
             ' md.examine(bm)
@@ -333,7 +334,7 @@ Public Class frmAVT
         While (meteorCheckRunning)
             If myDetectionQueue.Count > 0 Then
                 aQE = myDetectionQueue.Dequeue()
-                CallAzureMeteorDetection(aQE)
+                Functions.CallAzureMeteorDetection(aQE)
 
                 aQE = Nothing
 
@@ -345,38 +346,7 @@ Public Class frmAVT
     End Sub
 
 
-    Public Async Function CallAzureMeteorDetection(qe As queueEntry) As Task
 
-
-        '        Dim apiURL As String = "https://azuremeteordetect20181212113628.azurewebsites.net/api/detection?code=zi3Lrr58mJB3GTut0lktSLIzb08E1dLkHXAbX6s07bd46IoZmm1vqQ==&file=" + file
-        Dim apiURL As String = "http://192.168.1.192:7071/api/detection"
-        Dim myUriBuilder As New UriBuilder(apiURL)
-
-
-        Dim query As NameValueCollection = Web.HttpUtility.ParseQueryString(String.Empty)
-
-        query("file") = qe.filename
-        query("dateTaken") = qe.dateTaken.ToString("MM/dd/yyyy hh:mm tt")
-        query("cameraID") = qe.cameraID
-        query("width") = qe.width
-        query("height") = qe.height
-        myUriBuilder.Query = query.ToString
-
-
-        Dim client As New HttpClient()
-
-        Dim byteContent = New ByteArrayContent(qe.img)
-        Try
-
-
-            Dim response = client.PostAsync(myUriBuilder.ToString, byteContent)
-            Dim responseString = response.Result
-            byteContent = Nothing
-
-        Catch ex As Exception
-            Console.WriteLine("calling meteor detection:" & ex.Message)
-        End Try
-    End Function
     Public Function getLastImage() As Bitmap
         Dim s As Stopwatch
         Dim stopWatch As Stopwatch = New Stopwatch()
@@ -498,7 +468,7 @@ Public Class frmAVT
         myEncoderParameters = New EncoderParameters(1)
 
         ' Save the bitmap as a JPEG file with quality level 25.
-        myEncoderParameter = New EncoderParameter(myEncoder, CType(85L, Int32))
+        myEncoderParameter = New EncoderParameter(myEncoder, CType(100L, Int32))
         myEncoderParameters.Param(0) = myEncoderParameter
 
         Dim cams As List(Of CameraInfo)

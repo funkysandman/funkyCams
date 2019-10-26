@@ -11,6 +11,7 @@ Imports System.Threading
 Imports System.Net.Http
 Imports Photometrics.Pvcam
 Imports System.Collections.Specialized
+Imports vimbaWinVBnet.vimbaWinVBnet
 
 Public Class frmCoolsnap
     Dim myDetectionQueue As New Queue(Of queueEntry)
@@ -554,7 +555,7 @@ Public Class frmCoolsnap
             If myDetectionQueue.Count > 0 Then
                 aQE = myDetectionQueue.Dequeue()
 
-                CallAzureMeteorDetection(aQE)
+                Functions.CallAzureMeteorDetection(aQE)
 
 
                 aQE = Nothing

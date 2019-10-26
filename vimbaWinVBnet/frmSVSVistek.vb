@@ -6,6 +6,7 @@ Imports System.Drawing.Imaging
 Imports System.Threading
 Imports System.Net.Http
 Imports System.Collections.Specialized
+Imports vimbaWinVBnet.vimbaWinVBnet
 
 Public Class frmSVSVistek
 
@@ -247,110 +248,110 @@ Public Class frmSVSVistek
         'darks
         Dim d2 As Bitmap
 
-        If Me.cbUseDarks.Checked Then
-            'd2 = Bitmap.FromFile(Application.StartupPath & "\dark.png")
-            'If dark Is Nothing Then
-            '    Dim fs As New FileStream(Application.StartupPath & "\dark.drk", FileMode.Open)
-            '    'read dark from file
+        'If Me.cbUseDarks.Checked Then
+        '    'd2 = Bitmap.FromFile(Application.StartupPath & "\dark.png")
+        '    'If dark Is Nothing Then
+        '    '    Dim fs As New FileStream(Application.StartupPath & "\dark.drk", FileMode.Open)
+        '    '    'read dark from file
 
-            '    ReDim dark(b.Width * b.Height * 3)
-            '    fs.Read(dark, 0, dark.Count)
-            '    fs.Close()
-            'End If
+        '    '    ReDim dark(b.Width * b.Height * 3)
+        '    '    fs.Read(dark, 0, dark.Count)
+        '    '    fs.Close()
+        '    'End If
 
-            Dim raw As System.Drawing.Imaging.BitmapData = Nothing
-            ' 'Freeze the image in memory
-            raw = b.LockBits(New Rectangle(0, 0,
-             b.Width, b.Height),
-             System.Drawing.Imaging.ImageLockMode.ReadOnly,
-            b.PixelFormat)
-            Dim size As Integer = b.Width * b.Height
+        '    Dim raw As System.Drawing.Imaging.BitmapData = Nothing
+        '    ' 'Freeze the image in memory
+        '    raw = b.LockBits(New Rectangle(0, 0,
+        '     b.Width, b.Height),
+        '     System.Drawing.Imaging.ImageLockMode.ReadOnly,
+        '    b.PixelFormat)
+        '    Dim size As Integer = b.Width * b.Height
 
-            Dim rawImage() As Byte = New Byte(size - 1) {}
-            ''Copy the image into the byte()
-            System.Runtime.InteropServices.Marshal.Copy(raw.Scan0, rawImage, 0, size)
-
-
-            'Dim multiplier
-            'multiplier = Val(Me.tbMultiplier.Text)
-            ''
-            ''subtract the dark
-            'Dim aByte As Integer
-            'Try
-
-            '    Dim aNewValue As Byte
-            '    Dim offset As Integer
-            '    For aByte = 0 To size - 1
-
-            '        aNewValue = CByte(Math.Max(0, CLng(rawImage(aByte)) - CLng(dark(aByte)) * 0.75))
-            '        rawImage(aByte) = aNewValue
-
-            '    Next
-            '    writeline("subtracted dark")
-            'Catch ex As Exception
-            '    MsgBox(ex.Message)
-            'End Try
-            Dim raw2 As System.Drawing.Imaging.BitmapData = Nothing
+        '    Dim rawImage() As Byte = New Byte(size - 1) {}
+        '    ''Copy the image into the byte()
+        '    System.Runtime.InteropServices.Marshal.Copy(raw.Scan0, rawImage, 0, size)
 
 
-            ' 'Freeze the image in memory
+        '    'Dim multiplier
+        '    'multiplier = Val(Me.tbMultiplier.Text)
+        '    ''
+        '    ''subtract the dark
+        '    'Dim aByte As Integer
+        '    'Try
 
-            'raw2 = d2.LockBits(New Rectangle(0, 0,
-            ' d2.Width, d2.Height),
-            ' System.Drawing.Imaging.ImageLockMode.ReadOnly,
-            'd2.PixelFormat)
-            'size = raw2.Height * raw2.Stride
+        '    '    Dim aNewValue As Byte
+        '    '    Dim offset As Integer
+        '    '    For aByte = 0 To size - 1
 
-            ' Dim rawImage2() As Byte = New Byte(size - 1) {}
-            ' 'Copy the image into the byte()
-            System.Runtime.InteropServices.Marshal.Copy(rawImage, 0, raw.Scan0, size)
+        '    '        aNewValue = CByte(Math.Max(0, CLng(rawImage(aByte)) - CLng(dark(aByte)) * 0.75))
+        '    '        rawImage(aByte) = aNewValue
 
-            'If Not raw2 Is Nothing Then
-            '    ' Unfreeze the memory for the image
-            '    d2.UnlockBits(raw2)
-            'End If
-
-
-            'copy buffer into bitmap
-
-
-            '' Lock the bitmap's bits.  
-            'Dim rect As New Rectangle(0, 0, b.Width, b.Height)
-            'Dim bmpData As System.Drawing.Imaging.BitmapData = b.LockBits(rect, System.Drawing.Imaging.ImageLockMode.ReadWrite, b.PixelFormat)
-
-            '    ' Get the address of the first line.
-            '    Dim ptr As IntPtr = bmpData.Scan0
-
-            '    ' Declare an array to hold the bytes of the bitmap.
-            '    ' This code is specific to a bitmap with 24 bits per pixels.
-            '    Dim bytes As Integer = Math.Abs(bmpData.Stride) * b.Height
-            '    Dim rgbValues(bytes - 1) As Byte
-
-            '    '' Copy the RGB values into the array.
-            '    'System.Runtime.InteropServices.Marshal.Copy(ptr, rgbValues, 0, bytes)
-
-            '    '' Set every third value to 255. A 24bpp image will look red.
-            '    'For counter As Integer = 2 To rgbValues.Length - 1 Step 3
-            '    '    rgbValues(counter) = 255
-            '    'Next
-
-            '    ' Copy the RGB values back to the bitmap
-            '    System.Runtime.InteropServices.Marshal.Copy(dark, 0, ptr, dark.Count)
-
-            ' Unlock the bits.
-            b.UnlockBits(raw)
+        '    '    Next
+        '    '    writeline("subtracted dark")
+        '    'Catch ex As Exception
+        '    '    MsgBox(ex.Message)
+        '    'End Try
+        '    Dim raw2 As System.Drawing.Imaging.BitmapData = Nothing
 
 
+        '    ' 'Freeze the image in memory
+
+        '    'raw2 = d2.LockBits(New Rectangle(0, 0,
+        '    ' d2.Width, d2.Height),
+        '    ' System.Drawing.Imaging.ImageLockMode.ReadOnly,
+        '    'd2.PixelFormat)
+        '    'size = raw2.Height * raw2.Stride
+
+        '    ' Dim rawImage2() As Byte = New Byte(size - 1) {}
+        '    ' 'Copy the image into the byte()
+        '    System.Runtime.InteropServices.Marshal.Copy(rawImage, 0, raw.Scan0, size)
+
+        '    'If Not raw2 Is Nothing Then
+        '    '    ' Unfreeze the memory for the image
+        '    '    d2.UnlockBits(raw2)
+        '    'End If
 
 
+        '    'copy buffer into bitmap
 
-        Else '
+
+        '    '' Lock the bitmap's bits.  
+        '    'Dim rect As New Rectangle(0, 0, b.Width, b.Height)
+        '    'Dim bmpData As System.Drawing.Imaging.BitmapData = b.LockBits(rect, System.Drawing.Imaging.ImageLockMode.ReadWrite, b.PixelFormat)
+
+        '    '    ' Get the address of the first line.
+        '    '    Dim ptr As IntPtr = bmpData.Scan0
+
+        '    '    ' Declare an array to hold the bytes of the bitmap.
+        '    '    ' This code is specific to a bitmap with 24 bits per pixels.
+        '    '    Dim bytes As Integer = Math.Abs(bmpData.Stride) * b.Height
+        '    '    Dim rgbValues(bytes - 1) As Byte
+
+        '    '    '' Copy the RGB values into the array.
+        '    '    'System.Runtime.InteropServices.Marshal.Copy(ptr, rgbValues, 0, bytes)
+
+        '    '    '' Set every third value to 255. A 24bpp image will look red.
+        '    '    'For counter As Integer = 2 To rgbValues.Length - 1 Step 3
+        '    '    '    rgbValues(counter) = 255
+        '    '    'Next
+
+        '    '    ' Copy the RGB values back to the bitmap
+        '    '    System.Runtime.InteropServices.Marshal.Copy(dark, 0, ptr, dark.Count)
+
+        '    ' Unlock the bits.
+        '    b.UnlockBits(raw)
 
 
 
 
 
-        End If
+        'Else '
+
+
+
+
+
+        'End If
 
         'imageInUse = imageInUse + 1
         Dim iTotBytes As Integer = 0
@@ -408,8 +409,8 @@ Public Class frmSVSVistek
             ' convertedImage.ConvertToWriteAbleBitmap()
             b.Save(ms, myImageCodecInfo, myEncoderParameters)
 
-            b.Save(ms, ImageFormat.Bmp)
-            b.Dispose()
+
+
 
             Dim contents = ms.ToArray()
             Dim qe As New queueEntry
@@ -419,6 +420,7 @@ Public Class frmSVSVistek
             qe.cameraID = "SVS Vistek Camera"
             qe.width = b.Width
             qe.height = b.Height
+            b.Dispose()
             If myDetectionQueue.Count < 10 Then
                 myDetectionQueue.Enqueue(qe)
             End If
@@ -462,7 +464,7 @@ Public Class frmSVSVistek
         camThread.Name = "camera thread"
         camThread.Start()
 
-
+   
         cboNight.SelectedIndex = 1
         cboDay.SelectedIndex = 1
         While mySVCam Is Nothing
@@ -485,7 +487,7 @@ Public Class frmSVSVistek
         myEncoderParameters = New EncoderParameters(1)
 
         ' Save the bitmap as a JPEG file with quality level 25.
-        myEncoderParameter = New EncoderParameter(myEncoder, CType(85L, Int32))
+        myEncoderParameter = New EncoderParameter(myEncoder, CType(100L, Int32))
         myEncoderParameters.Param(0) = myEncoderParameter
         ' md.LoadModel("c:\tmp\frozen_inference_graph_orig.pb", "c:\tmp\mscoco_label_map.pbtxt")
     End Sub
@@ -696,7 +698,12 @@ Public Class frmSVSVistek
 
         mySVCam._darkmultiplier = Val(Me.tbMultiplier.Text)
         mySVCam.m_saveLocal = True
-        mySVCam.startAcquisitionThread(AddressOf Me.received_frame)
+        If Me.cbUseTrigger.Checked Then
+            mySVCam.startAcquisitionTriggerWidthThread(AddressOf Me.received_frame)
+        Else
+            mySVCam.startAcquisitionThread(AddressOf Me.received_frame)
+        End If
+
         meteorCheckRunning = True
         t = New Thread(AddressOf processDetection)
         t.Start()
@@ -713,8 +720,12 @@ Public Class frmSVSVistek
 
 
         MsgBox("cover lens")
+        If cbUseTrigger.Checked Then
+            mySVCam.startAcquisitionThreadTriggerWidthForDarks(AddressOf Me.received_frame)
+        Else
+            mySVCam.startAcquisitionThreadForDarks(AddressOf Me.received_frame)
+        End If
 
-        mySVCam.startAcquisitionThreadForDarks(AddressOf Me.received_frame)
 
     End Sub
 
@@ -778,8 +789,12 @@ Public Class frmSVSVistek
 
     Private Sub cmbCam_SelectedIndexChanged(sender As Object, e As EventArgs) Handles cmbCam.SelectedIndexChanged
         mySVCam.openCamera(cmbCam.SelectedIndex)
-        ' mySVCam.prepareCameraForTriggerWidth(mySVCam.current_selected_cam)
-        mySVCam.prepareCameraForTimed(mySVCam.current_selected_cam)
+        If Me.cbUseTrigger.Checked Then
+            mySVCam.prepareCameraForTriggerWidth(mySVCam.current_selected_cam)
+        Else
+
+            mySVCam.prepareCameraForTimed(mySVCam.current_selected_cam)
+        End If
 
     End Sub
 
@@ -821,7 +836,7 @@ Public Class frmSVSVistek
             If myDetectionQueue.Count > 0 Then
                 aQE = myDetectionQueue.Dequeue()
 
-                CallAzureMeteorDetection(aQE)
+                Functions.CallAzureMeteorDetection(aQE)
 
 
                 aQE = Nothing

@@ -91,7 +91,7 @@ namespace SVCamApi
         private float m_aGain;
         private float m_dGain;
         private float m_frameRate;
-
+        
         public class NativeMethods
         {
             [DllImport("kernel32.dll", EntryPoint = "CopyMemory", SetLastError = false)]
@@ -236,8 +236,8 @@ namespace SVCamApi
             public string camTemp = "";
             public IntPtr Imagptr = IntPtr.Zero;
             public int duration;
-
-         //   private ObjectDetection.TFDetector md = new ObjectDetection.TFDetector();
+            private BGAPI2.ImageProcessor imgProcessor = null;
+            //   private ObjectDetection.TFDetector md = new ObjectDetection.TFDetector();
             private FrameReceivedHandler m_FrameReceivedHandler = null;
             private Bitmap b;
             // private string m_savePath;
@@ -264,7 +264,7 @@ namespace SVCamApi
             public Queue<SVcamApi._SVCamFeaturInf> featureInfolist;
             public SVcamApi._SV_BUFFER_INFO bufferInfoDest = new SVcamApi._SV_BUFFER_INFO();
             public SVcamApi._SV_BUFFER_INFO bufferInfosrc = new SVcamApi._SV_BUFFER_INFO();
-
+            private SVcamApi.SVSCamApiReturn ret;
 
             public Camera(SVcamApi._SV_DEVICE_INFO _devinfo, SVcamApi _myApi)
 
@@ -278,15 +278,17 @@ namespace SVCamApi
                 myApi = _myApi;
                 bufferInfoDest.pImagePtr = IntPtr.Zero;
                 bufferInfosrc.pImagePtr = IntPtr.Zero;
+                imgProcessor = new BGAPI2.ImageProcessor();
                 // bufferInfosrc.pImagePtr = Marshal.AllocHGlobal(1920 * 1200 * 3);
-                loadMasterDark();
+                //loadMasterDark();
             }
 
             public void loadMasterDark()
             {
                 try
-                { 
-                masterDark = File.ReadAllBytes("masterdark.raw");
+                {
+                    string filename = string.Format("masterDark{0}.raw", devInfo.model);
+                    masterDark = File.ReadAllBytes(filename);
                 }
                 catch
                 {
@@ -1060,19 +1062,20 @@ namespace SVCamApi
                         {
 
                             imagebufferStruct rawImage = new imagebufferStruct();
-                            rawImage.imagebytes = new byte[imagebufferRGB[currentIdex].dataLegth / 3];
+                            rawImage.imagebytes = new byte[imageSizeX * imageSizeY];
                             //rawImage.imagebytes = ImageInfo.pImagePtr;
-                            Marshal.Copy(ImageInfo.pImagePtr, rawImage.imagebytes, 0, imagebufferRGB[currentIdex].dataLegth / 3);
+                            Marshal.Copy(ImageInfo.pImagePtr, rawImage.imagebytes, 0, imageSizeX*imageSizeY );
                             //subtract darks
                             //load dark array from file
                             //
+                            File.WriteAllBytes("8bittest.raw", rawImage.imagebytes);
                             Random r = new Random();
                             int x;
                             if (useDarks)
                             {
 
                                 loadMasterDark();
-                                for (int k = 0; k < imagebufferRGB[currentIdex].dataLegth / 3; k++)
+                                for (int k = 0; k < imageSizeX * imageSizeY; k++)
                                 {
                                     if (masterDark[k] < 230)
                                     {
@@ -1087,10 +1090,20 @@ namespace SVCamApi
                             //subtract dark
 
                             //copy back to imageInfo
-                            Marshal.Copy(rawImage.imagebytes, 0, ImageInfo.pImagePtr, imagebufferRGB[currentIdex].dataLegth / 3);
+                            Marshal.Copy(rawImage.imagebytes, 0, ImageInfo.pImagePtr, imageSizeX * imageSizeY);
 
                             //debayer buffer into RGB
-                            myApi.SVS_UtilBufferBayerToRGB(ImageInfo, ref imagebufferRGB[currentIdex].imagebytes[0], imagebufferRGB[currentIdex].dataLegth);
+                            //myApi.SVS_UtilBufferBayerToRGB(ImageInfo, ref imagebufferRGB[currentIdex].imagebytes[0], imageSizeX * imageSizeY );
+                            BGAPI2.Image mTransformImage = null;
+                            BGAPI2.Buffer mBufferFilled = new BGAPI2.Buffer();
+
+
+                            BGAPI2.Image mImage = imgProcessor.CreateImage((uint)imageSizeX, (uint)imageSizeY, "BayerRG8", ImageInfo.pImagePtr, (ulong)(imageSizeX * imageSizeY ));
+
+                            ulong imageBufferAddress = (ulong)ImageInfo.pImagePtr;
+                            mTransformImage = imgProcessor.CreateTransformedImage(mImage, "BGR8");
+
+                            Marshal.Copy(mTransformImage.Buffer, imagebufferRGB[currentIdex].imagebytes, 0, imageSizeX * imageSizeY*3 );
 
 
                             //do image stuff here
@@ -1104,7 +1117,7 @@ namespace SVCamApi
                                     BitmapData bmpData = b.LockBits(new Rectangle(0, 0, b.Width, b.Height), ImageLockMode.WriteOnly, b.PixelFormat);
 
                                     Console.WriteLine("about to copy buffer into bitmapdata");
-                                    Marshal.Copy(imagebufferRGB[currentIdex].imagebytes, 0, bmpData.Scan0, imagebufferRGB[currentIdex].imagebytes.Length);
+                                    Marshal.Copy(imagebufferRGB[currentIdex].imagebytes, 0, bmpData.Scan0, imageSizeX * imageSizeY*3);
                                     Console.WriteLine("copied buffer into bitmapdata");
 
 
@@ -1148,24 +1161,26 @@ namespace SVCamApi
                         if (isImgRGB)
                         {
                             //subtract raw darks before debayer
+                            
                             imagebufferStruct rawImage = new imagebufferStruct();
-                            rawImage.imagebytes = new byte[imagebufferRGB[currentIdex].dataLegth /2];
+                            rawImage.imagebytes = new byte[imagebufferRGB[currentIdex].dataLegth /4];
                             //rawImage.imagebytes = ImageInfo.pImagePtr;
-                            Marshal.Copy(ImageInfo.pImagePtr, rawImage.imagebytes, 0, imagebufferRGB[currentIdex].dataLegth /2);
+                            Marshal.Copy(ImageInfo.pImagePtr, rawImage.imagebytes, 0, imagebufferRGB[currentIdex].dataLegth /4);
                             //subtract darks
                             //load dark array from file
                             //
-                        
+                            
+                            //File.WriteAllBytes("test.raw", rawImage.imagebytes);
                             int x;
                             if (useDarks)
                             {
 
 
 
-                                int pixel1, pixel2, pixel3, pixel4;
-                                int dpixel1, dpixel2, dpixel3, dpixel4;
-                                byte byte1, byte2, byte3, byte4, byte5, byte6;
-                                byte dbyte1, dbyte2, dbyte3, dbyte4, dbyte5, dbyte6;
+                                int pixel1, pixel2;
+                                int dpixel1, dpixel2;
+                                byte byte1, byte2, byte3;
+                                byte dbyte1, dbyte2, dbyte3;
                                 string filename;
 
                                 filename = String.Format("{0}{1:ddMMMyyyy-HHmmss}.raw", "dark_", DateTime.Now);
@@ -1173,7 +1188,7 @@ namespace SVCamApi
                                 //{
                                //    File.WriteAllBytes(filename, rawImage.imagebytes);
                                 //}
-                                for (int k = 0; k < imagebufferRGB[currentIdex].dataLegth /2 - 1; k = k + 3)
+                                for (int k = 0; k < imageSizeX*imageSizeY*3/2 - 1; k = k + 3)
                                 {
                                     //unpack 2 pixels in 3 bytes
                                     byte1 = rawImage.imagebytes[k];
@@ -1239,12 +1254,12 @@ namespace SVCamApi
                                 //    }
                             }
                             //subtract dark
-
+                            //File.WriteAllBytes("test.raw", rawImage.imagebytes);
                             //copy back to imageInfo
-                            Marshal.Copy(rawImage.imagebytes, 0, ImageInfo.pImagePtr, imagebufferRGB[currentIdex].dataLegth /2);
+                            Marshal.Copy(rawImage.imagebytes, 0, ImageInfo.pImagePtr, imageSizeX*imageSizeY*3/2);
 
                             ////debayer buffer into RGB
-                            myApi.SVS_UtilBufferBayerToRGB(ImageInfo, ref imagebufferRGB[currentIdex].imagebytes[0], imagebufferRGB[currentIdex].dataLegth);
+                            ret=myApi.SVS_UtilBufferBayerToRGB(ImageInfo, ref imagebufferRGB[currentIdex].imagebytes[0], imageSizeX*imageSizeY*3);
 
 
                             //do image stuff here
@@ -1258,7 +1273,7 @@ namespace SVCamApi
                                     BitmapData bmpData = b.LockBits(new Rectangle(0, 0, b.Width, b.Height), ImageLockMode.WriteOnly, b.PixelFormat);
 
                                     Console.WriteLine("about to copy buffer into bitmapdata");
-                                    Marshal.Copy(imagebufferRGB[currentIdex].imagebytes, 0, bmpData.Scan0, imagebufferRGB[currentIdex].imagebytes.Length);
+                                    Marshal.Copy(imagebufferRGB[currentIdex].imagebytes, 0, bmpData.Scan0, imagebufferRGB[currentIdex].imagebytes.Length/2);
                                     Console.WriteLine("copied buffer into bitmapdata");
 
 
@@ -1294,52 +1309,79 @@ namespace SVCamApi
                             {
                                 //subtract raw darks before debayer
                                 imagebufferStruct rawImage = new imagebufferStruct();
-                                rawImage.imagebytes = new byte[imagebufferRGB[currentIdex].dataLegth * 2 / 3];
+                                rawImage.imagebytes = new byte[imagebufferRGB[currentIdex].dataLegth/3 ];
                                 //rawImage.imagebytes = ImageInfo.pImagePtr;
-                                Marshal.Copy(ImageInfo.pImagePtr, rawImage.imagebytes, 0, imagebufferRGB[currentIdex].dataLegth * 2 / 3);
-                                //subtract darks
-                                //load dark array from file
-                                //
+                                Marshal.Copy(ImageInfo.pImagePtr, rawImage.imagebytes, 0, imagebufferRGB[currentIdex].dataLegth /3);
+                            //subtract darks
+                            //load dark array from file
+                            //
+                            File.WriteAllBytes( "test.raw", rawImage.imagebytes);
                                 Random r = new Random();
                                 int x;
+                            int pixel,dpixel;
                                 if (useDarks)
                                 {
-                                    for (int k = 0; k < imagebufferRGB[currentIdex].dataLegth * 2 / 3; k++)
+                                    for (int k = 0; k < imagebufferRGB[currentIdex].dataLegth/3 ; k=k+2)
                                     {
-                                        if ((masterDark[k]) > 250)
-                                            rawImage.imagebytes[k] = (byte)Math.Max(0, rawImage.imagebytes[k] - _darkmultiplier * (masterDark[k]));
 
-                                    }
+                                    pixel = rawImage.imagebytes[k] + rawImage.imagebytes[k + 1] * 256;
+                                    dpixel = masterDark[k] + masterDark[k+1] * 256;
+                                    //Console.WriteLine(pixel);
+                                   // pixel = Math.Max(pixel - dpixel, 0);
+                                    //byte bb;
+                                    //bb = rawImage.imagebytes[k];
+                                    //rawImage.imagebytes[k] = rawImage.imagebytes[k + 1];
+                                    //rawImage.imagebytes[k + 1] = bb;
+
+                                    rawImage.imagebytes[k] = (byte)(pixel >> 8);
+                                    rawImage.imagebytes[k + 1] = (byte)(pixel & 0xFF00);
+                                    ////if ((masterDark[k]) > 250)
+
+                                    //    rawImage.imagebytes[k] = (byte)Math.Max(0, rawImage.imagebytes[k] - _darkmultiplier * (masterDark[k]));
+
                                 }
-                                //subtract dark
+                                }
+                            //subtract dark
+                            File.WriteAllBytes("testd.raw", rawImage.imagebytes);
+                            //copy back to imageInfo
+                            Marshal.Copy(rawImage.imagebytes, 0, ImageInfo.pImagePtr, imagebufferRGB[currentIdex].dataLegth /3);
+                            string filename = string.Format("{0}-{1:ddMMMyyyy-HHmmss}.raw", "image", DateTime.Now);
+                            // File.WriteAllBytes(filename, rawImage.imagebytes);
+                            //debayer buffer into RGB
+                            // myApi.SVS_UtilBufferBayerToRGB(ImageInfo, ref imagebufferRGB[currentIdex].imagebytes[0], imagebufferRGB[currentIdex].dataLegth);
+                            BGAPI2.Image mTransformImage = null;
+                            BGAPI2.Buffer mBufferFilled = new BGAPI2.Buffer();
+                            
 
-                                //copy back to imageInfo
-                                Marshal.Copy(rawImage.imagebytes, 0, ImageInfo.pImagePtr, imagebufferRGB[currentIdex].dataLegth * 2 / 3);
+                            BGAPI2.Image mImage = imgProcessor.CreateImage((uint)imageSizeX, (uint)imageSizeY, "BayerRG12", ImageInfo.pImagePtr, (ulong)(imageSizeX*imageSizeY*2));
+                            
+                            ulong imageBufferAddress = (ulong)ImageInfo.pImagePtr;
+                            mTransformImage = imgProcessor.CreateTransformedImage(mImage, "RGB8");
 
-                                //debayer buffer into RGB
-                                myApi.SVS_UtilBufferBayerToRGB(ImageInfo, ref imagebufferRGB[currentIdex].imagebytes[0], imagebufferRGB[currentIdex].dataLegth);
-
-
-                                //do image stuff here
-                                if (m_saveLocal)
+                            Marshal.Copy(mTransformImage.Buffer, imagebufferRGB[currentIdex].imagebytes, 0, imageSizeX * imageSizeY * 3);
+                            //  mImage = imgProcessor.CreateImage((uint)imageSizeX, (uint)imageSizeY, "RGB8", mBufferFilled.MemPtr, (ulong)mBufferFilled.MemSize);
+                            File.WriteAllBytes("TESTING.RAW",imagebufferRGB[currentIdex].imagebytes);
+                            //do image stuff here
+                            if (m_saveLocal)
                                 {
-                                    string filename = string.Format("{0}-{1:ddMMMyyyy-HHmmss}.jpg", "image", DateTime.Now);
-                                    try
+                                  
+                                try
                                     {
                                         ImageCodecInfo jpgEncoder = GetEncoder(ImageFormat.Jpeg);
                                         b = new Bitmap(this.imageSizeX, this.imageSizeY, PixelFormat.Format24bppRgb);
+                                   
                                         BitmapData bmpData = b.LockBits(new Rectangle(0, 0, b.Width, b.Height), ImageLockMode.WriteOnly, b.PixelFormat);
 
                                         Console.WriteLine("about to copy buffer into bitmapdata");
-                                        Marshal.Copy(imagebufferRGB[currentIdex].imagebytes, 0, bmpData.Scan0, imagebufferRGB[currentIdex].imagebytes.Length);
+                                        Marshal.Copy(imagebufferRGB[currentIdex].imagebytes, 0, bmpData.Scan0, imagebufferRGB[currentIdex].imagebytes.Length/3);
                                         Console.WriteLine("copied buffer into bitmapdata");
 
 
                                         b.UnlockBits(bmpData);
+                                    
+                                    //raise event to host that we have a bitmap
 
-                                        //raise event to host that we have a bitmap
-
-                                        FrameReceivedHandler frameReceivedHandler = this.m_FrameReceivedHandler;
+                                    FrameReceivedHandler frameReceivedHandler = this.m_FrameReceivedHandler;
                                         Console.WriteLine("setup frameReceiveHandler");
                                         if (null != frameReceivedHandler && null != b)
                                         {
@@ -1694,7 +1736,7 @@ namespace SVCamApi
 
             current_selected_cam = SVSCam.Camlist.ElementAt(i);
             current_selected_cam.openConnection();
-            
+            current_selected_cam.loadMasterDark();
 
         }
 
@@ -1824,6 +1866,37 @@ namespace SVCamApi
                 current_selected_cam.acquisitionStart(1, frh);
 
                 acqThreadIsRuning = true;
+                acqThread = new Thread(new ThreadStart(acqTHread));
+                acqThread.Start();
+            }
+            catch
+            {
+                acqThreadIsRuning = false;
+                Console.WriteLine("problem starting acquisition Thread");
+            }
+        }
+        public void startAcquisitionTriggerWidthThread(FrameReceivedHandler frh)
+        {
+
+            try
+            {
+                SVcamApi.SVSCamApiReturn ret;
+                ret = current_selected_cam.openConnection();
+                if (ret != SVcamApi.SVSCamApiReturn.SV_ERROR_SUCCESS)
+                    return;
+                m_frh = frh;
+                ret = current_selected_cam.StreamingChannelOpen();
+                if (ret != SVcamApi.SVSCamApiReturn.SV_ERROR_SUCCESS)
+
+                {
+                    Console.WriteLine("could not open channel {0}", ret);
+                    current_selected_cam.closeConnection();
+                    return;
+                }
+
+                current_selected_cam.acquisitionStart(1, frh);
+
+                acqThreadIsRuning = true;
                 acqThread = new Thread(new ThreadStart(acqTHreadTriggerWidth));
                 acqThread.Start();
             }
@@ -1864,6 +1937,38 @@ namespace SVCamApi
                 Console.WriteLine("problem starting acquisition Thread");
             }
         }
+        public void startAcquisitionThreadTriggerWidthForDarks(FrameReceivedHandler frh)
+        {
+
+            try
+            {
+                SVcamApi.SVSCamApiReturn ret;
+                ret = current_selected_cam.openConnection();
+                if (ret != SVcamApi.SVSCamApiReturn.SV_ERROR_SUCCESS)
+                    return;
+                m_frh = frh;
+                ret = current_selected_cam.StreamingChannelOpen();
+                if (ret != SVcamApi.SVSCamApiReturn.SV_ERROR_SUCCESS)
+
+                {
+                    Console.WriteLine("could not open channel {0}", ret);
+                    current_selected_cam.closeConnection();
+                    return;
+                }
+
+                current_selected_cam.acquisitionStart(1, frh);
+
+                acqThreadIsRuning = true;
+                acqThread = new Thread(new ThreadStart(acqTHreadTriggerWidthdarks));
+                acqThread.Start();
+            }
+            catch
+            {
+                acqThreadIsRuning = false;
+                Console.WriteLine("problem starting acquisition Thread");
+            }
+        }
+
         public void killCapture()
         {
             //lost control so kill process
@@ -2119,6 +2224,118 @@ namespace SVCamApi
             int numDarks = 10;
 
             int pDestLength = 0;
+            prepareCameraForTimed(cam);
+            for (int d = 0; d < numDarks; d++)
+            {
+                //take pic
+                //expose(cam);
+                //
+                if (!cam.grab())
+                    continue;
+                Console.WriteLine("inside while loop");
+
+                // Check if a RGB image( Bayer buffer format) arrived
+                bool isImgRGB = false;
+                pDestLength = (int)(cam.bufferInfoDest.iImageSize);
+                int sizeX = (int)cam.bufferInfoDest.iSizeX;
+                int sizeY = (int)cam.bufferInfoDest.iSizeY;
+
+                CurrentID = Convert.ToString(cam.bufferInfoDest.iImageId);
+
+                if (((int)cam.bufferInfoDest.iPixelType & SVCamApi.SVcamApi.DefineConstants.SV_GVSP_PIX_ID_MASK) >= 8)
+                {
+                    isImgRGB = true;
+                    // pDestLength = 3 * pDestLength / 2;
+                }
+                if (!isImgRGB)
+                    isImgRGB = false;
+
+                //this.initializeBuffer(isImgRGB, sizeX, sizeY);
+                cam.imageSizeX = sizeX;
+                cam.imageSizeY = sizeY;
+                cam.imagebufferDark[d].imagebytes = new byte[pDestLength];
+                Marshal.Copy(cam.bufferInfoDest.pImagePtr, cam.imagebufferDark[d].imagebytes, 0, pDestLength);
+                //File.WriteAllBytes("dark.raw", cam.imagebufferDark[d].imagebytes);
+
+                cam.isrgb = isImgRGB;
+                //
+
+            } //collected all dark frames into byte arrays
+
+            byte byte1, byte2, byte3;
+            int pixel1, pixel2, avgPixel1, avgPixel2, totalPixel1, totalPixel2;
+            cam.masterDark = new byte[pDestLength];
+
+            for (int k = 0; k < pDestLength; k = k + 3)
+            {
+
+                totalPixel1 = 0;
+                totalPixel2 = 0;
+                for (int d = 0; d < numDarks; d++)
+                {
+
+
+                    //
+
+                    //unpack 2 pixels in 3 bytes
+                    byte1 = cam.imagebufferDark[d].imagebytes[k];
+                    byte2 = cam.imagebufferDark[d].imagebytes[k + 1];
+                    byte3 = cam.imagebufferDark[d].imagebytes[k + 2];
+
+
+
+
+                    pixel1 = (byte1) << 4 | (byte2 & 0b0000_1111);
+                    pixel2 = (byte3) << 4 | (byte2 & 0b1111_0000) >> 4;
+
+
+
+
+
+                  
+
+                    totalPixel1 = totalPixel1 + pixel1;
+                    totalPixel2 = totalPixel2 + pixel2;
+
+                }
+                avgPixel1 = totalPixel1 / numDarks;
+                avgPixel2 = totalPixel2 / numDarks;
+                byte1 = (byte)((avgPixel1 & 0xFF0) >> 4);
+                byte2 = (byte)(avgPixel1 & 0xF);
+                byte2 = (byte)((avgPixel2 >> 8) << 4 + byte2);
+                byte3 = (byte)((avgPixel2 & 0xFF0) >> 4);
+                cam.masterDark[k] = byte1;
+                cam.masterDark[k+1] = byte2;
+                cam.masterDark[k+2] = byte3;
+            }
+            //
+           
+            
+
+            //write byte array to file
+
+
+
+
+
+
+            //string folderName = string.Format("{0:yyyy-MMM-dd}", DateTime.Now);
+            //System.IO.Directory.CreateDirectory(Path.Combine("e:\\image", folderName));
+            //Console.WriteLine("SVS Vistek: saving master darks");
+            //File.WriteAllBytes(Path.Combine("e:\\image", folderName, "masterDark.raw"), cam.masterDark);
+            string filename = string.Format("masterDark{0}.raw", cam.devInfo.model);
+            File.WriteAllBytes(filename, cam.masterDark);
+            Console.WriteLine("done with darks");
+
+        }
+        public void acqTHreadTriggerWidthdarks()
+        {
+
+            //Bitmap[] darks = new Bitmap[10];
+            Camera cam = this.current_selected_cam;
+            int numDarks = 10;
+
+            int pDestLength = 0;
             prepareCameraForTriggerWidth(cam);
             for (int d = 0; d < numDarks; d++)
             {
@@ -2163,9 +2380,11 @@ namespace SVCamApi
                 for (int d = 0; d < numDarks; d++)
                 {
                     totalPixel = totalPixel + cam.imagebufferDark[d].imagebytes[pxl];
-                  
+
                 }
-                cam.masterDark[pxl] = (byte)(totalPixel / numDarks);
+                int avgPixel = totalPixel / numDarks;
+
+                cam.masterDark[pxl]= (byte)(avgPixel);
             }
 
 
@@ -2182,7 +2401,8 @@ namespace SVCamApi
             //System.IO.Directory.CreateDirectory(Path.Combine("e:\\image", folderName));
             //Console.WriteLine("SVS Vistek: saving master darks");
             //File.WriteAllBytes(Path.Combine("e:\\image", folderName, "masterDark.raw"), cam.masterDark);
-            File.WriteAllBytes( "masterSVSDark.raw", cam.masterDark);
+            string filename = string.Format("masterDark{0}.raw", cam.devInfo.model);
+            File.WriteAllBytes(filename, cam.masterDark);
             Console.WriteLine("done with darks");
 
         }
@@ -2363,6 +2583,7 @@ namespace SVCamApi
         private void initializeBuffer(bool rgb, int camWidth, int camHeight)
         {
             newsize = false;
+            int maxbytes = 6;
             int k;
             if (current_selected_cam == null)
                 return;
@@ -2370,7 +2591,7 @@ namespace SVCamApi
             {
 
 
-                if (current_selected_cam.imagebufferRGB[0].dataLegth != 3 * camWidth * camHeight)
+                if (current_selected_cam.imagebufferRGB[0].dataLegth != maxbytes * camWidth * camHeight)
                     newsize = true;
 
                 for (k = 0; k < 4; k++)
@@ -2378,45 +2599,45 @@ namespace SVCamApi
                     unsafe
                     {
                         if (newsize)
-                            current_selected_cam.imagebufferRGB[k].imagebytes = new byte[3 * camWidth * camHeight];
+                            current_selected_cam.imagebufferRGB[k].imagebytes = new byte[maxbytes * camWidth * camHeight];
 
                         fixed (byte* ColorPtr = current_selected_cam.imagebufferRGB[k].imagebytes)
                         {
                             if (newsize)
-                                display_img_rgb[k] = new Bitmap(camWidth, camHeight, (3 * camWidth), System.Drawing.Imaging.PixelFormat.Format24bppRgb, (IntPtr)ColorPtr);
+                            //    display_img_rgb[k] = new Bitmap(camWidth, camHeight, (maxbytes * camWidth), System.Drawing.Imaging.PixelFormat.Format24bppRgb, (IntPtr)ColorPtr);
                             current_selected_cam.imagebufferRGB[k].sizeX = camWidth;
                             current_selected_cam.imagebufferRGB[k].sizeY = camHeight;
-                            current_selected_cam.imagebufferRGB[k].dataLegth = 3 * camWidth * camHeight;
+                            current_selected_cam.imagebufferRGB[k].dataLegth = maxbytes * camWidth * camHeight;
                         }
                     }
                 }
             }
 
-            else
-            {
+        //    else
+        //    {
 
-                if (current_selected_cam.imagebufferMono[0].dataLegth != camWidth * camHeight)
-                    newsize = true;
+        //        if (current_selected_cam.imagebufferMono[0].dataLegth != camWidth * camHeight)
+        //            newsize = true;
 
-                for (k = 0; k < 4; k++)
-                {
-                    unsafe
-                    {
-                        if (newsize)
-                            current_selected_cam.imagebufferMono[k].imagebytes = new byte[camWidth * camHeight];
+        //        for (k = 0; k < 4; k++)
+        //        {
+        //            unsafe
+        //            {
+        //                if (newsize)
+        //                    current_selected_cam.imagebufferMono[k].imagebytes = new byte[camWidth * camHeight];
 
-                        fixed (byte* MonoPtr = current_selected_cam.imagebufferMono[k].imagebytes)
-                        {
-                            if (newsize)
-                                display_img_mono[k] = new Bitmap(camWidth, camHeight, camWidth, System.Drawing.Imaging.PixelFormat.Format8bppIndexed, (IntPtr)MonoPtr);
+        //                fixed (byte* MonoPtr = current_selected_cam.imagebufferMono[k].imagebytes)
+        //                {
+        //                    if (newsize)
+        //                   //     display_img_mono[k] = new Bitmap(camWidth, camHeight, camWidth, System.Drawing.Imaging.PixelFormat.Format8bppIndexed, (IntPtr)MonoPtr);
 
-                            current_selected_cam.imagebufferMono[k].sizeX = camWidth;
-                            current_selected_cam.imagebufferMono[k].sizeY = camHeight;
-                            current_selected_cam.imagebufferMono[k].dataLegth = camWidth * camHeight;
-                        }
-                    }
-                }
-            }
+        //                    current_selected_cam.imagebufferMono[k].sizeX = camWidth;
+        //                    current_selected_cam.imagebufferMono[k].sizeY = camHeight;
+        //                    current_selected_cam.imagebufferMono[k].dataLegth = camWidth * camHeight;
+        //                }
+        //            }
+        //        }
+        //    }
         }
 
         //private void setTodisplay()

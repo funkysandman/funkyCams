@@ -11,6 +11,7 @@ Imports QCamManagedDriver
 Imports System.Threading
 Imports System.Net.Http
 Imports System.Collections.Specialized
+Imports vimbaWinVBnet.vimbaWinVBnet
 
 Public Class frmQ
     Dim myDetectionQueue As New Queue(Of queueEntry)
@@ -642,7 +643,7 @@ Public Class frmQ
             If myDetectionQueue.Count > 0 Then
                 aQE = myDetectionQueue.Dequeue()
 
-                CallAzureMeteorDetection(aQE)
+                Functions.CallAzureMeteorDetection(aQE)
 
 
                 aQE = Nothing

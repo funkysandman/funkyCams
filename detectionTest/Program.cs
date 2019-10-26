@@ -18,9 +18,9 @@ namespace detectionTest
         static void Main(string[] args)
         {
 
-            DateTime from_date = DateTime.Now.AddHours(-1600000);
+            DateTime from_date = DateTime.Now.AddHours(-18);
             DateTime to_date = DateTime.Now;
-            var directory = new DirectoryInfo("E:\\imagesvs\\2019-Oct-03");
+            var directory = new DirectoryInfo("E:\\found_backup");
 
 
             var files = directory.GetFiles("*.jpg"); //.Where(file => file.LastWriteTime >= from_date && file.LastWriteTime <= to_date);
@@ -32,7 +32,7 @@ namespace detectionTest
                     string file = afile.FullName;
                     Bitmap b = new Bitmap(file);
                     MemoryStream ms = new MemoryStream();
-                    b.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
+                    b.Save(ms, System.Drawing.Imaging.ImageFormat.Jpeg);
                     var contents = ms.ToArray();
                     callFunction(contents, Path.GetFileName(file));
 
@@ -116,5 +116,6 @@ namespace detectionTest
             Debug.WriteLine(responseString);
 
         }
+
     }
 }
