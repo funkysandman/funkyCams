@@ -199,7 +199,7 @@ namespace DetectionServer
                 }
                 else
                 {
-                    dateTaken = DateTime.ParseExact(myParams[0],"MM/dd/yyyy hh:mm tt",null);
+                    dateTaken = DateTime.ParseExact(myParams[0],"MM/dd/yyyy hh:mm:ss tt",null);
                 }
                 //
                 ObjectDetection.TFDetector md = new ObjectDetection.TFDetector();
@@ -248,7 +248,7 @@ namespace DetectionServer
                 float[,] scores = null;
                 float[,] classes = null;
                 float[] num = null;
-
+                bool pushToCloud = true;
                 //Console.WriteLine("about to examine " + qe.filename);
                 //Console.WriteLine("items in queue: {0} ", qt.Count);
                 //
@@ -393,7 +393,8 @@ namespace DetectionServer
 
                     }
 
-
+                    if (pushToCloud)
+                    { 
                     //push to cloud for further analysis
                     System.Net.ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12;
                     var httpWebRequest = (HttpWebRequest)WebRequest.Create("http://imageingest.azurewebsites.net/api/SkyImages");
@@ -468,7 +469,7 @@ namespace DetectionServer
 
 
                     c.Dispose();
-
+                    }
                     //send to cloud
 
 

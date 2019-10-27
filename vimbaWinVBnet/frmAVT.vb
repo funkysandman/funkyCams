@@ -312,7 +312,7 @@ Public Class frmAVT
             qe.img = contents
             qe.filename = Path.GetFileName(filename)
             qe.dateTaken = Now
-            qe.cameraID = "AVT-" & myCamID
+            qe.cameraID = "AVT-" & v.MyCamera.Id
             qe.width = b.Width
             qe.height = b.Height
 
