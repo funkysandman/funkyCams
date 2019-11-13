@@ -1,0 +1,6 @@
+﻿meteor
+plane
+satellite
+flare
+flarecurve
+flarespike

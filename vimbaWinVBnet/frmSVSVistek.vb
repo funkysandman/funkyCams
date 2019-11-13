@@ -414,7 +414,7 @@ Public Class frmSVSVistek
 
             Dim contents = ms.ToArray()
             Dim qe As New queueEntry
-            qe.img = contents
+            qe.img = contents 'jpeg sent to detection 
             qe.filename = Path.GetFileName(filename)
             qe.dateTaken = Now
             qe.cameraID = "SVS Vistek Camera"

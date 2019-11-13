@@ -604,134 +604,135 @@ namespace ObjectDetection
             examining = false;
             // }
         }
-        public void examine(Image imageData, string aFile, ref float[,,] _boxes, ref float[,] _scores, ref float[,] _classes, ref float[] _num, ref bool _found)
-        {
+        //public void examine(Image imageData, string aFile, ref float[,,] _boxes, ref float[,] _scores, ref float[,] _classes, ref float[] _num, ref bool _found)
+        //{
 
-            // make bitmap
+        //    // make bitmap
 
-            Console.WriteLine("examining {0}", aFile);
-            Bitmap img;
+        //    Console.WriteLine("examining {0}", aFile);
+        //    Bitmap img;
 
-            img = new Bitmap(imageData);
+        //    img = new Bitmap(imageData);
             
 
-            if (examining) return;
-            examining = true;
-            try
-            {
-                string outfile = "";
-                float detectedClass = 0;
-                int c = 0;
-                if (mySession is null)
-                    mySession = new TFSession(graph);
-                //using (mySession)
-                //{
+        //    if (examining) return;
+        //    examining = true;
+        //    try
+        //    {
+        //        string outfile = "";
+        //        float detectedClass = 0;
+        //        int c = 0;
+        //        if (mySession is null)
+        //            mySession = new TFSession(graph);
+        //        //using (mySession)
+        //        //{
 
 
 
-                // Create an EncoderParameters object.
-                // An EncoderParameters object has an array of EncoderParameter
-                // objects. In this case, there is only one
-                // EncoderParameter object in the array.
+        //        // Create an EncoderParameters object.
+        //        // An EncoderParameters object has an array of EncoderParameter
+        //        // objects. In this case, there is only one
+        //        // EncoderParameter object in the array.
 
-                MemoryStream ms = new MemoryStream();
-                Bitmap cloneImg = new Bitmap(img);
+        //        MemoryStream ms = new MemoryStream();
+        //        Bitmap cloneImg = new Bitmap(img);
 
-                img.Dispose();
+        //        img.Dispose();
 
-                cloneImg.Save(ms, jgpEncoder, myEncoderParameters);
-                var contents = ms.ToArray();
-                ms.Close();
-                cloneImg.Dispose();
-                tensor = ImageUtil.CreateTensorFromImageFile(contents, TFDataType.UInt8);
-                //if (runner is null)
-                runner = mySession.GetRunner();
+        //        cloneImg.Save(ms, jgpEncoder, myEncoderParameters);
+        //        var contents = ms.ToArray();
+        //        ms.Close();
+        //        cloneImg.Dispose();
+        //        tensor = ImageUtil.CreateTensorFromImageFile(imageData, TFDataType.UInt8);
+                
+        //        //if (runner is null)
+        //        runner = mySession.GetRunner();
 
-                runner
-                    .AddInput(graph["image_tensor"][0], tensor)
-                    .Fetch(
-                    graph["detection_boxes"][0],
-                    graph["detection_scores"][0],
-                    graph["detection_classes"][0],
-                    graph["num_detections"][0]);
-                var output = runner.Run();
-                while (drawingBoxes) { };//make sure boxes aren't in use
-                boxes = (float[,,])output[0].GetValue(jagged: false);
-                scores = (float[,])output[1].GetValue(jagged: false);
-                classes = (float[,])output[2].GetValue(jagged: false);
-                num = (float[])output[3].GetValue(jagged: false);
-                found = false;
+        //        runner
+        //            .AddInput(graph["image_tensor"][0], tensor)
+        //            .Fetch(
+        //            graph["detection_boxes"][0],
+        //            graph["detection_scores"][0],
+        //            graph["detection_classes"][0],
+        //            graph["num_detections"][0]);
+        //        var output = runner.Run();
+        //        while (drawingBoxes) { };//make sure boxes aren't in use
+        //        boxes = (float[,,])output[0].GetValue(jagged: false);
+        //        scores = (float[,])output[1].GetValue(jagged: false);
+        //        classes = (float[,])output[2].GetValue(jagged: false);
+        //        num = (float[])output[3].GetValue(jagged: false);
+        //        found = false;
 
-                float maxscore = 0;
-                c = 0;
-                foreach (float score in scores)
-                {
+        //        float maxscore = 0;
+        //        c = 0;
+        //        foreach (float score in scores)
+        //        {
 
-                    if (score > maxscore && classes[0, c] == 1)
-                    {
-                        maxscore = score;
-                        detectedClass = classes[0, c];
-                    }
-                    if (score > MIN_SCORE_FOR_OBJECT_HIGHLIGHTING && classes[0, c] == 1)
-                    {
-                        found = true;
-                        // maxClass = classes[i];
-                    }
-                    c++;
-                }
-                _found = found;
-                _boxes = boxes;
-                _scores = scores;
-                _classes = classes;
-                _num = num;
-                //store in the cloud
+        //            if (score > maxscore && classes[0, c] == 1)
+        //            {
+        //                maxscore = score;
+        //                detectedClass = classes[0, c];
+        //            }
+        //            if (score > MIN_SCORE_FOR_OBJECT_HIGHLIGHTING && classes[0, c] == 1)
+        //            {
+        //                found = true;
+        //                // maxClass = classes[i];
+        //            }
+        //            c++;
+        //        }
+        //        _found = found;
+        //        _boxes = boxes;
+        //        _scores = scores;
+        //        _classes = classes;
+        //        _num = num;
+        //        //store in the cloud
 
 
-                //return boxes, scores, classes
-                //outfile = "e:\\test\\found\\" + Path.GetFileName(aFile);
-                //System.IO.Directory.CreateDirectory(Path.Combine(Path.GetDirectoryName(aFile), "found"));
-                //if (found)
+        //        //return boxes, scores, classes
+        //        //outfile = "e:\\test\\found\\" + Path.GetFileName(aFile);
+        //        //System.IO.Directory.CreateDirectory(Path.Combine(Path.GetDirectoryName(aFile), "found"));
+        //        //if (found)
 
-                //{
-                //    outfile = outfile.Replace("jpg", "png");
-                //    using (MemoryStream memory = new MemoryStream())
-                //    {
-                //        using (FileStream fs = new FileStream(outfile, FileMode.Create, FileAccess.ReadWrite))
-                //        {
-                //            img.Save(memory, ImageFormat.Png);
-                //            byte[] bytes = memory.ToArray();
-                //            fs.Write(bytes, 0, bytes.Length);
-                //        }
-                //    }
-                //    //save original bitmap lossless
-                //    //outfile = outfile.Replace("bmp", "png");
-                //    //img.Save(outfile);
-                //    outfile = outfile.Replace("png", "jpg");
-                //    //outfile = "none";
-                //    DrawBoxes(boxes, scores, classes, img, outfile, MIN_SCORE_FOR_OBJECT_HIGHLIGHTING, false);
-                //    using (MemoryStream memory = new MemoryStream())
-                //    {
-                //        using (FileStream fs = new FileStream(outfile, FileMode.Create, FileAccess.ReadWrite))
-                //        {
-                //            img.Save(memory, ImageFormat.Jpeg);
-                //            byte[] bytes = memory.ToArray();
-                //            fs.Write(bytes, 0, bytes.Length);
-                //        }
-                //    }
-                //}
-                tensor.Dispose();
+        //        //{
+        //        //    outfile = outfile.Replace("jpg", "png");
+        //        //    using (MemoryStream memory = new MemoryStream())
+        //        //    {
+        //        //        using (FileStream fs = new FileStream(outfile, FileMode.Create, FileAccess.ReadWrite))
+        //        //        {
+        //        //            img.Save(memory, ImageFormat.Png);
+        //        //            byte[] bytes = memory.ToArray();
+        //        //            fs.Write(bytes, 0, bytes.Length);
+        //        //        }
+        //        //    }
+        //        //    //save original bitmap lossless
+        //        //    //outfile = outfile.Replace("bmp", "png");
+        //        //    //img.Save(outfile);
+        //        //    outfile = outfile.Replace("png", "jpg");
+        //        //    //outfile = "none";
+        //        //    DrawBoxes(boxes, scores, classes, img, outfile, MIN_SCORE_FOR_OBJECT_HIGHLIGHTING, false);
+        //        //    using (MemoryStream memory = new MemoryStream())
+        //        //    {
+        //        //        using (FileStream fs = new FileStream(outfile, FileMode.Create, FileAccess.ReadWrite))
+        //        //        {
+        //        //            img.Save(memory, ImageFormat.Jpeg);
+        //        //            byte[] bytes = memory.ToArray();
+        //        //            fs.Write(bytes, 0, bytes.Length);
+        //        //        }
+        //        //    }
+        //        //}
+        //        tensor.Dispose();
 
-                ms.Dispose();
-                examining = false;
-            }
+        //        ms.Dispose();
+        //        examining = false;
+        //    }
 
-            catch (Exception e)
-            {
-                Console.Write("error:" + e.Message);
-                examining = false;
-            }
-            // }
-        }
+        //    catch (Exception e)
+        //    {
+        //        Console.Write("error:" + e.Message);
+        //        examining = false;
+        //    }
+        //    // }
+        //}
 
         public void examine(byte[] imageData, string aFile,ref float[,,] _boxes,ref float[,] _scores,ref float[,] _classes,ref float[] _num, ref bool _found)
         {
@@ -739,11 +740,11 @@ namespace ObjectDetection
             // make bitmap
 
             Console.WriteLine("examining {0}", aFile);
-            Bitmap img;
-            using (var imagems = new MemoryStream(imageData))
-            {
-                img = new Bitmap(imagems);
-            }
+            //Bitmap img;
+            //using (var imagems = new MemoryStream(imageData))
+            //{
+            //    img = new Bitmap(imagems);
+            //}
 
             if (examining) return;
             examining = true;
@@ -765,15 +766,15 @@ namespace ObjectDetection
                 // EncoderParameter object in the array.
 
                 MemoryStream ms = new MemoryStream();
-                Bitmap cloneImg = new Bitmap(img);
+                //Bitmap cloneImg = new Bitmap(img);
 
-                img.Dispose();
+            //    img.Dispose();
 
-                cloneImg.Save(ms, jgpEncoder, myEncoderParameters);
-                var contents = ms.ToArray();
-                ms.Close();
-                cloneImg.Dispose();
-                tensor = ImageUtil.CreateTensorFromImageFile(contents, TFDataType.UInt8);
+             //   cloneImg.Save(ms, jgpEncoder, myEncoderParameters);
+             //   var contents = ms.ToArray();
+             //   ms.Close();
+             //   cloneImg.Dispose();
+                tensor = ImageUtil.CreateTensorFromImageFile(imageData, TFDataType.UInt8);
                 //if (runner is null)
                 runner = mySession.GetRunner();
 

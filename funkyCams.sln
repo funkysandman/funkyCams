@@ -25,7 +25,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BaumerAPI", "BaumerAPI\Baum
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AzureMeteorDetect", "AzureMeteorDetect\AzureMeteorDetect.csproj", "{A38F3B5B-FD9B-4D5E-AE23-15668F67F522}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "detectionTest", "detectionTest\detectionTest.csproj", "{6310DF93-E5B6-49E9-B8C5-A122F2E06192}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "pushImagesToDB", "detectionTest\pushImagesToDB.csproj", "{6310DF93-E5B6-49E9-B8C5-A122F2E06192}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "detectionServer", "dectionServer\detectionServer.csproj", "{BE85C62D-E724-42D8-AE1B-2B9F671CDBBA}"
 EndProject

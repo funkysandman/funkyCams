@@ -305,7 +305,7 @@ Public Class frmAVT
             ' md.examine(bm, filename)
             'call azure service
             Dim ms As New MemoryStream()
-            b.Save(ms, System.Drawing.Imaging.ImageFormat.Png)
+            b.Save(ms, myImageCodecInfo, myEncoderParameters)
 
             Dim contents = ms.ToArray()
             Dim qe As New queueEntry
