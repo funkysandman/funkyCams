@@ -1,0 +1,5 @@
+﻿# pb files, cudnn
+libtensorflow.dll
+cudnn64_7.dll
+*.weights
+*.pb

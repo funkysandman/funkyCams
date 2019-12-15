@@ -49,11 +49,11 @@ namespace Models
     public class ImageData
     {
 
+        [Key]
+        public int imageID { get; set; }
         public string imageData { get; set; }
 
-        [Key]
-        [System.ComponentModel.DataAnnotations.Schema.ForeignKey("SkyImage")]
-        public int skyImageRefId { get; set; }
+        public int skyImageId { get; set; }
         // public SkyImage SkyImage { get; set; }
     }
     public class SkyObjectDetection
@@ -63,7 +63,8 @@ namespace Models
         public string skyObjectClass { get; set; }
         public BoundingBox bbox { get; set; }
         public Decimal score { get; set; }
-
+        public int skyImageId { get; set; }
+        // public SkyImage SkyImage { get; set; }
     }
     public class BoundingBox
     {
@@ -73,7 +74,8 @@ namespace Models
         public int ymin { get; set; }
         public int xmax { get; set; }
         public int ymax { get; set; }
-
+        public int skyObjectID { get; set; }
+        // public SkyImage SkyImage { get; set; }
 
     }
 

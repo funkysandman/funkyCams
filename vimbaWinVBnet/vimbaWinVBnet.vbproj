@@ -122,6 +122,12 @@
   <ItemGroup>
     <Compile Include=".vb" />
     <Compile Include="device.vb" />
+    <Compile Include="frmPCO.designer.vb">
+      <DependentUpon>frmPCO.vb</DependentUpon>
+    </Compile>
+    <Compile Include="frmPCO.vb">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="frmPointGrey.Designer.vb">
       <DependentUpon>frmPointGrey.vb</DependentUpon>
     </Compile>
@@ -202,12 +208,18 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <Compile Include="PCO\Declares.vb" />
+    <Compile Include="PCO\modDeclarations.vb" />
+    <Compile Include="PCO\pcoapicall.vb" />
     <Compile Include="program.vb" />
     <Compile Include="queueEntry.vb" />
     <Compile Include="Toupcam.vb" />
     <Compile Include="webserver.vb" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="frmPCO.resx">
+      <DependentUpon>frmPCO.vb</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="frmPointGrey.resx">
       <DependentUpon>frmPointGrey.vb</DependentUpon>
     </EmbeddedResource>
@@ -354,6 +366,12 @@
       <SubType>Designer</SubType>
     </Content>
     <Content Include="night_gt2450.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SC2_Cam.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SC2_DLG.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="settings.xml">

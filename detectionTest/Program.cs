@@ -24,8 +24,8 @@ namespace pushImagesToDB
 
             DateTime from_date = DateTime.Now.AddHours(-189999);
             DateTime to_date = DateTime.Now;
-            var directory = new DirectoryInfo("E:\\meteor_corpus");
-            bool pushToCloud = false;
+            var directory = new DirectoryInfo("c:\\found");
+            bool pushToCloud = true;
             bool createYOLO = true;
             byte[] buffer;
 
@@ -121,7 +121,7 @@ namespace pushImagesToDB
                         ServicePointManager.Expect100Continue = true;
 
                         System.Net.ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12;
-                        var httpWebRequest = (HttpWebRequest)WebRequest.Create("http://imageingest.azurewebsites.net/api/SkyImages");
+                        var httpWebRequest = (HttpWebRequest)WebRequest.Create("http://localhost:58611/api/SkyImages");
 
                         httpWebRequest.ContentType = "application/json";
                         httpWebRequest.Method = "POST";

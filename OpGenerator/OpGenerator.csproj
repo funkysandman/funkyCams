@@ -57,9 +57,9 @@
     <Folder Include="New Folder\" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="libtensorflow.dll">
+    <None Include="libtensorflow.dllcpu">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

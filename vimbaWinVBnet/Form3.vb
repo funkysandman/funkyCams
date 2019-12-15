@@ -75,4 +75,11 @@ Public Class Form3
         f.ShowDialog()
         Me.Close()
     End Sub
+
+    Private Sub btnPCO_Click(sender As Object, e As EventArgs) Handles btnPCO.Click
+        Dim f As New frmPCO
+        Me.Hide()
+        f.ShowDialog()
+        Me.Close()
+    End Sub
 End Class

@@ -6,7 +6,11 @@
 *.user
 *.userosscache
 *.sln.docstates
+# ML models
 
+*.weights
+cudnn64_7.dll
+*.pb
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 

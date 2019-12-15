@@ -16,7 +16,7 @@ Module Module1
         Dim myMS As MemoryStream
         Dim b As Byte()
         'Dim files = directory.GetFiles("*.jpg").Where(f >= f.LastWriteTime >= from_date && f.LastWriteTime <= to_date)
-        Dim filedir As New DirectoryInfo("e:\new_meteors")
+        Dim filedir As New DirectoryInfo("c:\found")
         Dim fileList = filedir.GetFiles("*.jpg")
         Dim queryMatchingFiles = From file In fileList
                                  Where file.LastWriteTime >= from_date And file.LastWriteTime <= to_date

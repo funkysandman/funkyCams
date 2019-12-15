@@ -23,16 +23,37 @@ namespace MeteorIngestAPI.Models
         public ImageData imageData { get; set; }
 
         public int imageSet { get; set; }
+
+        public int rank { get; set; }
+
+        public bool selectedForTraining { get; set; }
+
+        //public decimal highScore()
+        //{
+
+        //    decimal bestscore = 0;
+
+        //    foreach ( SkyObjectDetection so in detectedObjects)
+        //    {
+        //        if (so.skyObjectClass=="meteor")
+        //        {
+        //            if (so.score > bestscore)
+        //                bestscore = so.score;
+        //        }
+        //    }
+        //    return bestscore;
+
+        //}
     }
 
     public class ImageData
     {
 
+        [Key]
+        public int imageID { get; set; }
         public string imageData { get; set; }
 
-        [Key]
-        [System.ComponentModel.DataAnnotations.Schema.ForeignKey("SkyImage")]
-        public int skyImageRefId { get; set; }
+        public int skyImageId { get; set; }
         // public SkyImage SkyImage { get; set; }
     }
     public class SkyObjectDetection
@@ -42,7 +63,8 @@ namespace MeteorIngestAPI.Models
         public string skyObjectClass { get; set; }
         public BoundingBox bbox { get; set; }
         public Decimal score { get; set; }
-
+        public int skyImageId { get; set; }
+        // public SkyImage SkyImage { get; set; }
     }
     public class BoundingBox
     {
@@ -52,7 +74,8 @@ namespace MeteorIngestAPI.Models
         public int ymin { get; set; }
         public int xmax { get; set; }
         public int ymax { get; set; }
-
+        public int skyObjectID { get; set; }
+        // public SkyImage SkyImage { get; set; }
 
     }
 

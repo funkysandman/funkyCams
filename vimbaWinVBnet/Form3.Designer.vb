@@ -31,6 +31,7 @@ Partial Class Form3
         Me.Button7 = New System.Windows.Forms.Button()
         Me.btnToup = New System.Windows.Forms.Button()
         Me.Button8 = New System.Windows.Forms.Button()
+        Me.btnPCO = New System.Windows.Forms.Button()
         Me.SuspendLayout()
         '
         'Button1
@@ -109,18 +110,28 @@ Partial Class Form3
         '
         'Button8
         '
-        Me.Button8.Location = New System.Drawing.Point(635, 71)
+        Me.Button8.Location = New System.Drawing.Point(631, 39)
         Me.Button8.Name = "Button8"
         Me.Button8.Size = New System.Drawing.Size(112, 38)
         Me.Button8.TabIndex = 8
         Me.Button8.Text = "svs Camera"
         Me.Button8.UseVisualStyleBackColor = True
         '
+        'btnPCO
+        '
+        Me.btnPCO.Location = New System.Drawing.Point(631, 115)
+        Me.btnPCO.Name = "btnPCO"
+        Me.btnPCO.Size = New System.Drawing.Size(112, 38)
+        Me.btnPCO.TabIndex = 9
+        Me.btnPCO.Text = "PCO.2000"
+        Me.btnPCO.UseVisualStyleBackColor = True
+        '
         'Form3
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.ClientSize = New System.Drawing.Size(807, 188)
+        Me.Controls.Add(Me.btnPCO)
         Me.Controls.Add(Me.Button8)
         Me.Controls.Add(Me.btnToup)
         Me.Controls.Add(Me.Button7)
@@ -144,4 +155,5 @@ Partial Class Form3
     Friend WithEvents Button7 As Button
     Friend WithEvents btnToup As Button
     Friend WithEvents Button8 As Button
+    Friend WithEvents btnPCO As Button
 End Class

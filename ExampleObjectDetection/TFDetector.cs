@@ -25,7 +25,7 @@ namespace ObjectDetection
         private static string _catalogPath;
         private static string _modelPath;
         private static TFGraph graph;
-        private static double MIN_SCORE_FOR_OBJECT_HIGHLIGHTING = 0.15;
+        private static double MIN_SCORE_FOR_OBJECT_HIGHLIGHTING = 0.55;
         private static TFSession mySession;
         private TFTensor tensor;
         private TFSession.Runner runner;
@@ -802,6 +802,7 @@ namespace ObjectDetection
                     {
                         maxscore = score;
                         detectedClass = classes[0, c];
+
                     }
                     if (score > MIN_SCORE_FOR_OBJECT_HIGHLIGHTING && classes[0, c] == 1)
                     {

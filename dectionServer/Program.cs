@@ -14,12 +14,13 @@ using MeteorIngestAPI.Models;
 using System.Runtime.Serialization.Json;
 using Newtonsoft.Json;
 using Alturos.Yolo;
+using System.Diagnostics;
 
 namespace DetectionServer
 {
     public class DetectionServer
     {
-       
+
         private readonly HttpListener _listener = new HttpListener();
         private readonly Func<HttpListenerRequest, string> _responderMethod;
 
@@ -116,7 +117,7 @@ namespace DetectionServer
         }
     }
 
-    internal  class Program
+    internal class Program
     {
 
         private static Queue qt = new Queue();
@@ -130,11 +131,11 @@ namespace DetectionServer
         private static EncoderParameter myEncoderParameter;
         private static System.Drawing.Imaging.Encoder myEncoder;
         private static double MIN_SCORE_FOR_OBJECT_HIGHLIGHTING = 0.1;
+        //private static Alturos.Yolo.YoloWrapper _yoloWrapper = new YoloWrapper("yolo_meteor.cfg", "yolo_meteor_last.weights", "labels.txt");
         #region Nested classes to support running as service
         public const string ServiceName = "DetectionServer";
-        public static DetectionServer ws = new DetectionServer(SendResponse, "http://192.168.1.192:7071/api/detection/");
-        public static TensorFlowNET.Examples.ObjectDetection detector = new TensorFlowNET.Examples.ObjectDetection();
-
+        public static DetectionServer ws = new DetectionServer(SendResponse, "http://192.168.1.199:7071/api/detection/");
+        //public static TensorFlowNET.Examples.ObjectDetection detector = new TensorFlowNET.Examples.ObjectDetection();
         public class Service : ServiceBase
         {
             public Service()
@@ -162,7 +163,7 @@ namespace DetectionServer
 
         }
 
-          private static ImageCodecInfo GetEncoder(ImageFormat format)
+        private static ImageCodecInfo GetEncoder(ImageFormat format)
         {
             ImageCodecInfo[] codecs = ImageCodecInfo.GetImageDecoders();
             foreach (ImageCodecInfo codec in codecs)
@@ -175,66 +176,85 @@ namespace DetectionServer
             return null;
         }
 
-        private  static byte[] ReadToEnd(System.IO.Stream stream)
+        private static byte[] ReadToEnd(System.IO.Stream stream)
         {
-            long originalPosition = 0;
-
-            if (stream.CanSeek)
-            {
-                originalPosition = stream.Position;
-                stream.Position = 0;
-            }
-
             try
             {
-                byte[] readBuffer = new byte[4096];
 
-                int totalBytesRead = 0;
-                int bytesRead;
 
-                while ((bytesRead = stream.Read(readBuffer, totalBytesRead, readBuffer.Length - totalBytesRead)) > 0)
-                {
-                    totalBytesRead += bytesRead;
-
-                    if (totalBytesRead == readBuffer.Length)
-                    {
-                        int nextByte = stream.ReadByte();
-                        if (nextByte != -1)
-                        {
-                            byte[] temp = new byte[readBuffer.Length * 2];
-                            Buffer.BlockCopy(readBuffer, 0, temp, 0, readBuffer.Length);
-                            Buffer.SetByte(temp, totalBytesRead, (byte)nextByte);
-                            readBuffer = temp;
-                            totalBytesRead++;
-                        }
-                    }
-                }
-
-                byte[] buffer = readBuffer;
-                if (readBuffer.Length != totalBytesRead)
-                {
-                    buffer = new byte[totalBytesRead];
-                    Buffer.BlockCopy(readBuffer, 0, buffer, 0, totalBytesRead);
-                }
-                return buffer;
-            }
-            finally
-            {
+                long originalPosition = 0;
+                MemoryStream ms = new MemoryStream();
                 if (stream.CanSeek)
                 {
-                    stream.Position = originalPosition;
+                    originalPosition = stream.Position;
+                    stream.Position = 0;
                 }
+
+                byte[] buffer = new byte[16383];
+                int bytesRead;
+                while ((bytesRead = stream.Read(buffer, 0, buffer.Length)) > 0)
+                {
+                    ms.Write(buffer, 0, bytesRead);
+                }
+
+                return ms.ToArray();
             }
+            catch
+            {
+                return null;
+            }
+
+
+            //try
+            //{
+            //    byte[] readBuffer = new byte[4096];
+
+            //    int totalBytesRead = 0;
+            //    int bytesRead;
+
+            //    while ((bytesRead = stream.Read(readBuffer, totalBytesRead, readBuffer.Length - totalBytesRead)) > 0)
+            //    {
+            //        totalBytesRead += bytesRead;
+
+            //        if (totalBytesRead == readBuffer.Length)
+            //        {
+            //            int nextByte = stream.ReadByte();
+            //            if (nextByte != -1)
+            //            {
+            //                byte[] temp = new byte[readBuffer.Length * 2];
+            //                Buffer.BlockCopy(readBuffer, 0, temp, 0, readBuffer.Length);
+            //                Buffer.SetByte(temp, totalBytesRead, (byte)nextByte);
+            //                readBuffer = temp;
+            //                totalBytesRead++;
+            //            }
+            //        }
+            //    }
+
+            //    byte[] buffer = readBuffer;
+            //    if (readBuffer.Length != totalBytesRead)
+            //    {
+            //        buffer = new byte[totalBytesRead];
+            //        Buffer.BlockCopy(readBuffer, 0, buffer, 0, totalBytesRead);
+            //    }
+            //    return buffer;
+            //}
+            //finally
+            //{
+            //    if (stream.CanSeek)
+            //    {
+            //        stream.Position = originalPosition;
+            //    }
+            //}
         }
         public static string SendResponse(HttpListenerRequest request)
 
-            {
+        {
             //Console.WriteLine(request.ContentLength64);
 
 
             try
             {
-             
+
                 //    // Get request body
                 string[] myParams = request.QueryString.GetValues("file");
 
@@ -242,7 +262,7 @@ namespace DetectionServer
                 myParams = request.QueryString.GetValues("cameraID");
 
                 string cameraID;
-                if (myParams==null)
+                if (myParams == null)
                 {
                     cameraID = "unknown";
                 }
@@ -258,11 +278,12 @@ namespace DetectionServer
                 }
                 else
                 {
-                    dateTaken = DateTime.ParseExact(myParams[0],"MM/dd/yyyy hh:mm:ss tt",null);
+                    dateTaken = DateTime.ParseExact(myParams[0], "MM/dd/yyyy hh:mm:ss tt", null);
                 }
                 //
                 ObjectDetection.TFDetector md = new ObjectDetection.TFDetector();
-                var yoloWrapper = new YoloWrapper("tiny-yolo_meteor.cfg", "tiny-yolo_meteor_last.weights", "labels.txt");
+
+
                 queueEntry qe = new queueEntry();
                 qe.filename = filename;
                 qe.dateTaken = dateTaken;
@@ -271,9 +292,9 @@ namespace DetectionServer
                 if (qe.dateTaken == null)
                 {
                     qe.dateTaken = DateTime.Now;
-                    
+
                 }
-                        
+
                 if (qe.cameraID == null)
                 {
                     qe.cameraID = "unknown";
@@ -299,10 +320,10 @@ namespace DetectionServer
                 qe.img = buffer;
 
                 //note: buffer should be jpeg format
-             
+
 
                 var imgms = new MemoryStream(buffer);
-                
+
                 Image img = new Bitmap(imgms);
                 var bitmapMS = new MemoryStream();
                 bool found = false;
@@ -330,10 +351,10 @@ namespace DetectionServer
 
                 DateTime start = DateTime.Now;
 
-                
+                lock (syncLock) {
                 md.examine(qe.img, qe.filename, ref boxes, ref scores, ref classes, ref num, ref found);
-
-                //Console.WriteLine("elapsed time: {0}", DateTime.Now - start);
+                }
+                Console.WriteLine("elapsed time: {0}", DateTime.Now - start);
                 //totalImagesProcessed++;
 
                 qe.filename = qe.filename.Replace("bmp", "jpg");
@@ -379,18 +400,23 @@ namespace DetectionServer
                     qe.filename = hs.Substring(1) + qe.filename;
                     //Console.WriteLine("about to save bmp");
                     Bitmap c = new Bitmap(b);
-                    c.Save("e:\\found\\" + qe.filename, jgpEncoder, myEncoderParameters);
+                    try
+                    {
+                        c.Save("\\found\\" + qe.filename, jgpEncoder, myEncoderParameters);
+                    }
+                    catch { }
+
                     string width, height;
                     width = Convert.ToString(c.Width);
                     height = Convert.ToString(c.Height);
-                    
+
                     XElement boxxml = md.GetBoxesXML(boxes, scores, classes, qe.filename, width, height);
 
 
 
                     boxxml.FirstNode.AddAfterSelf(new XElement("camera", qe.cameraID));
                     boxxml.FirstNode.AddAfterSelf(new XElement("dateTaken", qe.dateTaken));
-                    boxxml.Save("e:\\found\\" + qe.filename.Replace("jpg", "xml"));
+                    boxxml.Save("\\found\\" + qe.filename.Replace("jpg", "xml"));
 
 
 
@@ -400,7 +426,7 @@ namespace DetectionServer
                         {
                             var newObject = new SkyObjectDetection();
                             skyObjectId = skyObjectId + 1;
-                            //newObject.skyObjectID = skyObjectId;
+                           
 
                             foreach (XElement xe2 in xe.Elements())
                             {
@@ -414,6 +440,7 @@ namespace DetectionServer
                                         break;
                                     case "bndbox":
                                         var newBBox = new BoundingBox();
+                                        
                                         bbId++;
                                         foreach (XElement xe3 in xe2.Elements())
                                         {
@@ -437,7 +464,7 @@ namespace DetectionServer
                                                     break;
                                             }
                                         }
-                                        //newBBox.boundingBoxId = bbId;
+                                        newBBox.skyObjectID = skyObjectId;
                                         newObject.bbox = newBBox;
                                         break;
                                     default:
@@ -457,50 +484,68 @@ namespace DetectionServer
                     }
                     //check with Yolo model
                 }
-
-                    var items = yoloWrapper.Detect(buffer);
-                    //
+                Stopwatch stopWatch = new Stopwatch();
+                stopWatch.Start();
                 bool yoloFound = false;
-                    foreach (Alturos.Yolo.Model.YoloItem detection in items)
-                    {
+                //lock (syncLock)
+                //{
+                //    var items = _yoloWrapper.Detect(buffer);
 
-                       Rectangle rect = new Rectangle(detection.X, detection.Y, detection.Width, detection.Height);
-                        Graphics gr = Graphics.FromImage(b);
-                        Pen p = new Pen(Brushes.LightGreen);
-                        gr.DrawRectangle(p, rect);
-                        gr.DrawString(detection.Type + " " + detection.Confidence.ToString(), new Font(FontFamily.GenericSansSerif, 18), Brushes.Red, new PointF(detection.X, detection.Y - 15));
-                        var newObject = new SkyObjectDetection();
-                        skyObjectId = skyObjectId + 1;
-                        var newBBox = new BoundingBox();
-                        newObject.score = Convert.ToDecimal(detection.Confidence);
-                        newObject.skyObjectClass = detection.Type;
-                        newBBox.xmin = detection.X;
-                        newBBox.ymin = detection.Y;
-                        newBBox.xmax = detection.X + detection.Width;
-                        newBBox.ymax = detection.Y + detection.Height;
-                        newObject.bbox = newBBox;
-                        yoloFound = true;
-                        si.detectedObjects.Add(newObject);
-                    p.Dispose();
-                    gr.Dispose();
-                    }
-                //
+                //    stopWatch.Stop();
+                //    // Get the elapsed time as a TimeSpan value.
+                //    TimeSpan ts = stopWatch.Elapsed;
+
+                //    // Format and display the TimeSpan value.
+                //    string elapsedTime = String.Format("{0:00}:{1:00}",
+                //        ts.Seconds,
+                //        ts.Milliseconds / 10);
+                //    Console.WriteLine(qe.filename + " " + elapsedTime);
+                //    //
+
+                //    foreach (Alturos.Yolo.Model.YoloItem detection in items)
+                //    {
+
+                //        //Rectangle rect = new Rectangle(detection.X, detection.Y, detection.Width, detection.Height);
+                //        // Graphics gr = Graphics.FromImage(b);
+                //        // Pen p = new Pen(Brushes.LightGreen);
+                //        // gr.DrawRectangle(p, rect);
+                //        // gr.DrawString(detection.Type + " " + detection.Confidence.ToString(), new Font(FontFamily.GenericSansSerif, 18), Brushes.Red, new PointF(detection.X, detection.Y - 15));
+                //        var newObject = new SkyObjectDetection();
+                //        skyObjectId = skyObjectId + 1;
+                //        var newBBox = new BoundingBox();
+                //        newObject.score = Convert.ToDecimal(detection.Confidence);
+                //        newObject.skyObjectClass = "yolo:" + detection.Type;
+                //        newBBox.xmin = detection.X;
+                //        newBBox.ymin = detection.Y;
+                //        newBBox.xmax = detection.X + detection.Width;
+                //        newBBox.ymax = detection.Y + detection.Height;
+                //        newObject.bbox = newBBox;
+                //        if (detection.Type == "meteor")
+                //            yoloFound = true;
+                //        si.detectedObjects.Add(newObject);
+                //        //p.Dispose();
+                //        //gr.Dispose();
+                //    }
+                //}
+                ////
                 if (yoloFound)
                 {
 
-                    b.Save("e:\\found\\" + "yolo-" + qe.filename, jgpEncoder, myEncoderParameters);
+                    // b.Save("\\found\\" + "yolo-" + qe.filename, jgpEncoder, myEncoderParameters);
                 }
                 b.Dispose();
                 //}
                 //else
+
+                //if (!found)
                 //{
                 //    Console.WriteLine("nothing found");
-                //    //Bitmap b;
-                //    //b = new Bitmap(img);
-                //    //Console.WriteLine("about to save bmp");
-                //    //Bitmap c = new Bitmap(b);
-                //    //qe.filename = Path.GetFileName(qe.filename);
-                //    //c.Save("e:\\notfound\\" + qe.filename,ImageFormat.Jpeg);
+                   
+                //    b = new Bitmap(img);
+                //    Console.WriteLine("about to save bmp");
+                //    Bitmap c = new Bitmap(b);
+                //    qe.filename = Path.GetFileName(qe.filename);
+                //    c.Save("d:\\notfound\\" + qe.filename, ImageFormat.Jpeg);
                 //}
 
                 found = found | yoloFound;
@@ -510,7 +555,7 @@ namespace DetectionServer
                     ServicePointManager.Expect100Continue = true;
 
                     System.Net.ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12;
-                    var httpWebRequest = (HttpWebRequest)WebRequest.Create("http://imageingest.azurewebsites.net/api/SkyImages");
+                    var httpWebRequest = (HttpWebRequest)WebRequest.Create("http://localhost:3333/api/SkyImages");
 
                     httpWebRequest.ContentType = "application/json";
                     httpWebRequest.Method = "POST";
@@ -518,7 +563,7 @@ namespace DetectionServer
                     var ims = new MemoryStream();
                     string base64String = Convert.ToBase64String(qe.img);
                     var imgdata = new ImageData();
-
+                    
                     imgdata.imageData = base64String;
                     si.imageData = imgdata;
                     var streamWriter = new StreamWriter(httpWebRequest.GetRequestStream());
@@ -545,7 +590,7 @@ namespace DetectionServer
                     streamWriter.Write(json);
                     streamWriter.Flush();
                     streamWriter.Close();
-                    // File.WriteAllText("c:\\json.txt", json);
+                     File.WriteAllText("c:\\json.txt", json);
                     ms.Close();
                     var result = "";
                     try
@@ -592,7 +637,7 @@ namespace DetectionServer
                 //
                 qe = null;
                 //
-            
+
                 //return string.Format("<HTML><BODY>My web page.<br>{0}</BODY></HTML>", DateTime.Now);
                 //get image and filename
                 return "ok";
@@ -638,12 +683,12 @@ namespace DetectionServer
             if (!Environment.UserInteractive)
                 // running as service
                 using (var service = new Service())
-                { 
+                {
                     ServiceBase.Run(service);
                 }
             else
             {
-                
+
                 ws.Run();
                 //Console.WriteLine("A simple webserver. Press a key to quit.");
                 Console.ReadKey();
