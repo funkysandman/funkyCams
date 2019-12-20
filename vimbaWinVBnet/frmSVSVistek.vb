@@ -375,8 +375,8 @@ Public Class frmSVSVistek
         Dim myFontLabels As New Font("Arial", 16, GraphicsUnit.Pixel)
         Dim myBrushLabels As New SolidBrush(Color.White)
 
-        gr.DrawString(firstText, myFontLabels, Brushes.GreenYellow, firstLocation) '# last 2 number are X and Y coords.
-        gr.Dispose()
+        'gr.DrawString(firstText, myFontLabels, Brushes.GreenYellow, firstLocation) '# last 2 number are X and Y coords.
+        'gr.Dispose()
 
         'object detection section test
         '
@@ -562,6 +562,8 @@ Public Class frmSVSVistek
 
             Timer1.Enabled = False
 
+            mySVCam.upper = Val(tbUpper.Text)
+            mySVCam.lower = Val(tbLower.Text)
 
             Dim currentMode As Boolean
             currentMode = False
@@ -661,6 +663,8 @@ Public Class frmSVSVistek
         gotFrameTime = Now 'reset time
 
         Timer3.Enabled = True
+        mySVCam.upper = Val(tbUpper.Text)
+        mySVCam.lower = Val(tbLower.Text)
 
         If Now.Hour >= cboNight.SelectedItem Or Now.Hour <= cboDay.SelectedItem Then
             night = True
@@ -699,6 +703,13 @@ Public Class frmSVSVistek
         mySVCam._darkmultiplier = Val(Me.tbMultiplier.Text)
         mySVCam.m_saveLocal = True
         If Me.cbUseTrigger.Checked Then
+            mySVCam.prepareCameraForTriggerWidth(mySVCam.current_selected_cam)
+        Else
+
+            mySVCam.prepareCameraForTimed(mySVCam.current_selected_cam)
+        End If
+        If Me.cbUseTrigger.Checked Then
+
             mySVCam.startAcquisitionTriggerWidthThread(AddressOf Me.received_frame)
         Else
             mySVCam.startAcquisitionThread(AddressOf Me.received_frame)
@@ -774,7 +785,10 @@ Public Class frmSVSVistek
         mySVCam.closeCamera()
         mySVCam = Nothing
         'md = Nothing
-        myWebServer.StopWebServer()
+        If Not myWebServer Is Nothing Then
+            myWebServer.StopWebServer()
+        End If
+
         myWebServer = Nothing
         meteorCheckRunning = False
     End Sub
@@ -789,12 +803,7 @@ Public Class frmSVSVistek
 
     Private Sub cmbCam_SelectedIndexChanged(sender As Object, e As EventArgs) Handles cmbCam.SelectedIndexChanged
         mySVCam.openCamera(cmbCam.SelectedIndex)
-        If Me.cbUseTrigger.Checked Then
-            mySVCam.prepareCameraForTriggerWidth(mySVCam.current_selected_cam)
-        Else
 
-            mySVCam.prepareCameraForTimed(mySVCam.current_selected_cam)
-        End If
 
     End Sub
 
