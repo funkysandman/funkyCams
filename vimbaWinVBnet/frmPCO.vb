@@ -571,7 +571,7 @@ Public Class frmPCO
 
 
         '        Dim apiURL As String = "https://azuremeteordetect20181212113628.azurewebsites.net/api/detection?code=zi3Lrr58mJB3GTut0lktSLIzb08E1dLkHXAbX6s07bd46IoZmm1vqQ==&file=" + file
-        Dim apiURL As String = "http://192.168.1.192:7071/api/detection"
+        Dim apiURL As String = "http://192.168.1.199:7071/api/detection"
         Dim myUriBuilder As New UriBuilder(apiURL)
 
 
@@ -1172,6 +1172,8 @@ Public Class frmPCO
         'errorCode = PCO_Set
 
         errorCode = PCO_SetFPSExposureMode(hdriver, 0, 0)
+
+        errorCode = PCO_SetPixelRate(hdriver, 10000000)
         If lblDayNight.Text = "day" Then
             errorCode = PCO_SetDelayExposureTime(hdriver, 5000, tbExposureTime.Text, 2, 2)
 
@@ -1287,10 +1289,10 @@ Public Class frmPCO
 
             stopWatch.[Stop]()
             If errorCode = 0 Then
-                ReDim b(iXres * iYres)
+                ReDim b(iXres * iYres * 2)
 
                 'Looks easy, but this took some time to work...
-                Marshal.Copy(pwbuf, b, 0, iXres * iYres)
+                Marshal.Copy(pwbuf, b, 0, iXres * iYres * 2)
 
                 '  Text1.Text = "0x" & Hex(b(10)) & "   0x" & Hex(b(100)) & "   0x" & Hex(b(1000))
 
@@ -1311,15 +1313,31 @@ Public Class frmPCO
                 isize = Math.Abs(bmpData.Stride) * iYres
                 Dim Image24(isize) As Byte
                 bmBildUsed = 1
-
+                Dim range As Integer
+                range = tbUpper.Text - tbLower.Text
+                Dim multiplier As Single
+                multiplier = 256 / range
+                Dim lower, upper As Integer
+                lower = CInt(tbLower.Text)
+                upper = CInt(tbUpper.Text)
                 j = 0
-                For i = 0 To iXres * iYres - 1 ' This loop converts from 16bit to 8bit using min and max
-                    value = b(i)
+                For i = 0 To iXres * iYres - 1  ' This loop converts from 16bit to 8bit using min and max
+                    value = b(j + 1) * 256 + b(j)
+                    value = value >> 2
+
+                    'Debug.Print(value)
                     If value < 0 Then ' Type cast from short to ushort? Forget it: Not with VB
                         value = value * -1
                         value = value + &H8000
                     End If
-                    value = value * 255 / span
+                    value = value - lower
+                    If value < 0 Then
+                        value = 0
+                    End If
+                    value = CInt(CSng(value) * multiplier)
+
+
+                    'value = value * 255 / span
                     If value > 255 Then
                         value = 255
                     End If
@@ -1327,9 +1345,14 @@ Public Class frmPCO
                         value = 0
                     End If
 
+                    'stretch image
+
+
+
                     Image24(i * 3 + 0) = value ' Set the values to the intermediate buffer
                     Image24(i * 3 + 1) = value
                     Image24(i * 3 + 2) = value
+                    j = j + 2
                 Next
 
                 Marshal.Copy(Image24, 0, bmpData.Scan0, isize) ' Copy intermediate buffer to the bitmap
@@ -1345,7 +1368,7 @@ Public Class frmPCO
                 filename = Path.Combine(Me.tbPath.Text, folderName, filename)
 
 
-
+                m_grabbing = False
                 If Me.cbMeteors.Checked And Me.lblDayNight.Text.ToLower = "night" Then
                     ' md.examine(bm, filename)
                     'call azure service
@@ -1381,7 +1404,7 @@ Public Class frmPCO
                     bmBild.Dispose()
 
                 End If
-                m_grabbing = False
+
 
 
 

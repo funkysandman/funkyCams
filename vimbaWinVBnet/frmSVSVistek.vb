@@ -474,7 +474,7 @@ Public Class frmSVSVistek
             cmbCam.Items.Add(c.devInfo.displayName)
         Next
 
-        myImageCodecInfo = GetEncoderInfo("image/jpeg")
+        'myImageCodecInfo = GetEncoderInfo("image/jpeg")
 
         ' Create an Encoder object based on the GUID
         ' for the Quality parameter category.
