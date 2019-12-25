@@ -1427,6 +1427,7 @@ namespace SVCamApi
                             for (int x =0;x<rawImage.imagebytes.Length; x=x+2)
                             {
                                 value = Convert.ToInt16(rawImage.imagebytes[x +1])*256  + Convert.ToInt16(rawImage.imagebytes[x ]) ;
+                                value = value >> 4;
                                 if (value > maxvalue ) maxvalue = value;
                                 if (value < minvalue) minvalue = value;
                                 total = total + value;
