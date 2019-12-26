@@ -76,9 +76,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\Program Files\NET GmbH\FGControl\Samples\Project\C#\CSharpFGControl\obj\Debug\AxInterop.FGControlLib.dll</HintPath>
     </Reference>
-    <Reference Include="Interop.FGControlLib">
-      <HintPath>..\..\Program Files\NET GmbH\FGControl\Samples\Project\C#\CSharpFGControl\obj\Debug\Interop.FGControlLib.dll</HintPath>
+    <Reference Include="Interop.FGControlLib, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <EmbedInteropTypes>True</EmbedInteropTypes>
+      <HintPath>bin\Debug\Interop.FGControlLib.dll</HintPath>
     </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />

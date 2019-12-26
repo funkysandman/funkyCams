@@ -69,6 +69,7 @@ Partial Class frmQ
         Me.Timer2 = New System.Windows.Forms.Timer(Me.components)
         Me.Timer3 = New System.Windows.Forms.Timer(Me.components)
         Me.TimerAcquistionRate = New System.Windows.Forms.Timer(Me.components)
+        Me.Timer4 = New System.Windows.Forms.Timer(Me.components)
         CType(Me.PictureBox1, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
         '
@@ -380,6 +381,10 @@ Partial Class frmQ
         '
         Me.TimerAcquistionRate.Interval = 1000
         '
+        'Timer4
+        '
+        Me.Timer4.Interval = 10000
+        '
         'frmQ
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
@@ -462,4 +467,5 @@ Partial Class frmQ
     Friend WithEvents Timer2 As Timer
     Friend WithEvents Timer3 As Timer
     Friend WithEvents TimerAcquistionRate As Timer
+    Friend WithEvents Timer4 As Timer
 End Class

@@ -10,11 +10,13 @@ Imports System.Runtime.InteropServices
 Imports QCamManagedDriver
 Imports System.Threading
 Imports System.Net.Http
+Imports System.Media
 
 Public Class frmQ
     Dim myDetectionQueue As New Queue(Of QueueEntry)
     Private mCamList As QCamM_CamListItem()
     Private mhCamera As IntPtr
+    Private mCameraid As UInteger
     Private mDisplayPanel As myPanel
     Private mIsMono As Boolean
     Private mDisplayBitmap As Bitmap
@@ -22,7 +24,7 @@ Public Class frmQ
     Private mFrame1 As QCamM_Frame
     Private mFrame2 As QCamM_Frame
     Private mRgbFrame As QCamM_Frame
-    Private mSettings As QCamM_SettingsEx
+    Private mSettings As QCamM_Settings
     Private myWebServer As WebServer
     Private checkBox1 As CheckBox
     Private tbExposure As TrackBar
@@ -44,6 +46,7 @@ Public Class frmQ
     Private gotFrameTime As DateTime
     Private dark() As Byte
     Private t As Thread
+    Private watchDogT As Thread
     Dim night As Boolean = False
     ' Private md As New ObjectDetection.TFDetector()
     Private myImageCodecInfo As ImageCodecInfo
@@ -57,7 +60,7 @@ Public Class frmQ
     Shared m_pics As RingBitmap
     Private m_grabbedframe As Boolean
     Private m_grabbedframe_err As Integer = 0
-
+    Private m_stopwatch As Stopwatch
     Private Class queueEntry
 
         Public img As Byte()
@@ -88,11 +91,12 @@ Public Class frmQ
         End Property
         Public ReadOnly Property ImageBytes As Byte()
             Get
-                Debug.Print("getting bitmap " & m_BitmapSelector)
+                Debug.Print("getting bitmap array " & m_BitmapSelector)
                 'copy raw data to byte array
 
 
                 Return m_buffers(m_BitmapSelector)
+
             End Get
         End Property
         Public Sub FillNextBitmap(frame As QCamM_Frame)
@@ -120,9 +124,9 @@ Public Class frmQ
 
             Try
                 'copy frame into bitmap
-                Dim rawData(frame.bufferSize) As Byte
+                Dim rawData(frame.bufferSize - 1) As Byte
 
-
+                Debug.Print("about to copy buffer into array")
 
                 Marshal.Copy(frame.pBuffer, rawData, 0, frame.bufferSize)
 
@@ -134,14 +138,17 @@ Public Class frmQ
                 Dim ptr As IntPtr = bmpData.Scan0
 
                 Dim bytes As Integer = frame.bufferSize
-                For i = 1 To 100
-                    Debug.Print(rawData(i))
+                For i = 1 To 5
+                    Debug.Print("imgedata" & rawData(i))
                 Next
-
+                Debug.Print("about to copy array into bitmap")
 
                 Marshal.Copy(rawData, 0, ptr, bytes)
+                Debug.Print("copied array into bitmap")
                 m_Bitmaps(m_BitmapSelector).UnlockBits(bmpData)
+                Debug.Print("unlockedbits")
                 m_Bitmaps(m_BitmapSelector).RotateFlip(RotateFlipType.Rotate180FlipNone)
+                Debug.Print("flipped bitmap")
                 ''Dim b As New Bitmap(m_Bitmaps(m_BitmapSelector))
                 '' myBitmap.Save("Shapes025.jpg", myImageCodecInfo, myEncoderParameters)
                 'Dim firstLocation As PointF = New PointF(10.0F, 10.0F)
@@ -171,29 +178,40 @@ Public Class frmQ
         End Sub
     End Class
     Private Sub StopStream()
-        QCam.QCamM_Abort(mhCamera)
+        Debug.Print("stopping stream")
+        ' 'QCam.QCamM_Abort(mhCamera)
+        watchDogT.Abort()
+        Debug.Print("aborted")
         QCam.QCamM_SetStreaming(mhCamera, 0)
+        'QCam.QCamM_Abort(mhCamera)
+        Debug.Print("stream stopped")
     End Sub
 
     Private Sub StartStream()
-        QCam.QCamM_Abort(mhCamera)
         QCam.QCamM_SetStreaming(mhCamera, 0)
+        'QCam.QCamM_Abort(mhCamera)
+
         QCam.QCamM_SetStreaming(mhCamera, 1)
+
         QueueFrame(1)
-        QueueFrame(2)
+
+        ' QueueFrame(2)
     End Sub
 
     Private Function QueueFrame(ByVal frameNum As UInteger) As Boolean
         Dim err As QCamM_Err
+        watchDogT = New Thread(AddressOf bailout)
+        watchDogT.Start()
+        'allocate memory for image buffer
+        mFrame1.pBuffer = QCam.QCamM_Malloc(mFrame1.bufferSize)
+        Debug.Print("queued frame " & frameNum)
+        ' If frameNum = 1 Then
+        err = QCam.QCamM_QueueFrame(Me.mhCamera, mFrame1, mFrameCallback, CUInt(QCamM_qcCallbackFlags.qcCallbackDone), IntPtr.Zero, frameNum)
+        'ElseIf frameNum = 2 Then
+        '    err = QCam.QCamM_QueueFrame(Me.mhCamera, mFrame2, mFrameCallback, CUInt(QCamM_qcCallbackFlags.qcCallbackDone), IntPtr.Zero, frameNum)
+        'Else
 
-        If frameNum = 1 Then
-            err = QCam.QCamM_QueueFrame(Me.mhCamera, mFrame1, mFrameCallback, CUInt(QCamM_qcCallbackFlags.qcCallbackDone), IntPtr.Zero, frameNum)
-        ElseIf frameNum = 2 Then
-            err = QCam.QCamM_QueueFrame(Me.mhCamera, mFrame2, mFrameCallback, CUInt(QCamM_qcCallbackFlags.qcCallbackDone), IntPtr.Zero, frameNum)
-        Else
 
-            Return False
-        End If
 
         If err = QCamM_Err.qerrSuccess Then
             Return True
@@ -212,7 +230,7 @@ Public Class frmQ
             If QCam.QCamM_OpenCamera(mCamList(0).cameraId, mhCamera) <> QCamM_Err.qerrSuccess Then
                 Return False
             End If
-
+            mCameraid = mCamList(0).cameraId
             Return True
         Else
             If (listLen > 0) And (mCamList(0).isOpen = 1) Then
@@ -230,44 +248,44 @@ Public Class frmQ
         Dim ccdType As UInteger = 0
         Dim err As QCamM_Err = QCamM_Err.qerrSuccess
         'msgbox("initCamera")
-        mSettings = New QCamM_SettingsEx()
+        mSettings = New QCamM_Settings()
         'msgbox("new settings")
         Try
-            QCam.QCamM_CreateCameraSettingsStruct(mSettings)
+            ' err = QCam.QCamM_CreateCameraSettingsStruct(mSettings)
             'msgbox("created settings")
         Catch ex As Exception
             'msgbox(ex.Message)
         End Try
-
+        MsgBox("create settings: " & err)
 
         Try
             'msgbox("init cam settings")
-            ' QCam.QCamM_ReadSettingsFromCam(mhCamera, mSettings)
-            'QCam.QCamM_InitializeCameraSettings(mhCamera, mSettings)
+            err = QCam.QCamM_ReadSettingsFromCam(mhCamera, mSettings)
+            ' QCam.QCamM_InitializeCameraSettings(mhCamera, mSettings)
         Catch ex As Exception
             'msgbox(ex.Message)
         End Try
-
+        MsgBox("read settings: " & err)
         'msgbox("read settings")
         Try
-            QCam.QCamM_ReadDefaultSettings(mhCamera, mSettings)
+            'QCam.QCamM_ReadDefaultSettings(mhCamera, mSettings)
         Catch ex As Exception
             'msgbox(ex.Message)
         End Try
 
         'msgbox("stage1")
-        'err = QCam.QCamM_GetInfo(mhCamera, QCamM_Info.qinfCcdType, ccdType)
-        ''msgbox("stage1a")
-        'If ccdType = Convert.ToUInt32(QCamM_qcCcdType.qcCcdColorBayer) Then
-        '    err = QCam.QCamM_SetParam(mSettings, QCamM_Param.qprmImageFormat, Convert.ToUInt32(QCamM_ImageFormat.qfmtBayer8))
-        '    mIsMono = False
-        'ElseIf ccdType = Convert.ToUInt32(QCamM_qcCcdType.qcCcdMonochrome) Then
-        '    err = QCam.QCamM_SetParam(mSettings, QCamM_Param.qprmImageFormat, Convert.ToUInt32(QCamM_ImageFormat.qfmtMono8))
-        '    'msgbox("stage1b")
-        '    mIsMono = True
-        'Else
-        '    Return False
-        'End If
+        err = QCam.QCamM_GetInfo(mhCamera, QCamM_Info.qinfCcdType, ccdType)
+        'msgbox("stage1a")
+        If ccdType = Convert.ToUInt32(QCamM_qcCcdType.qcCcdColorBayer) Then
+            err = QCam.QCamM_SetParam(mSettings, QCamM_Param.qprmImageFormat, Convert.ToUInt32(QCamM_ImageFormat.qfmtBayer8))
+            mIsMono = False
+        ElseIf ccdType = Convert.ToUInt32(QCamM_qcCcdType.qcCcdMonochrome) Then
+            err = QCam.QCamM_SetParam(mSettings, QCamM_Param.qprmImageFormat, Convert.ToUInt32(QCamM_ImageFormat.qfmtMono8))
+            'msgbox("stage1b")
+            mIsMono = True
+        Else
+            Return False
+        End If
         'msgbox("stage2")
         mIsMono = True
         Dim frameSize As UInteger = 0
@@ -275,11 +293,14 @@ Public Class frmQ
         frameSize = frameSize '* 2
         'msgbox("making mFrame1")
         mFrame1 = New QCamM_Frame()
+        mFrame1.format = CUInt(QCamM_ImageFormat.qfmtMono8)
         mFrame1.bufferSize = frameSize
         mFrame1.pBuffer = QCam.QCamM_Malloc(mFrame1.bufferSize)
-        mFrame2 = New QCamM_Frame()
-        mFrame2.bufferSize = frameSize
-        mFrame2.pBuffer = QCam.QCamM_Malloc(mFrame2.bufferSize)
+
+
+        'mFrame2 = New QCamM_Frame()
+        'mFrame2.bufferSize = frameSize
+        'mFrame2.pBuffer = QCam.QCamM_Malloc(mFrame2.bufferSize)
         QCam.QCamM_SetParam(mSettings, QCamM_Param.qprmReadoutSpeed, 1)
 
         'QCam.QCamM_SetParam(mSettings, QCamM_Param.qprmOffset, 258)
@@ -289,6 +310,7 @@ Public Class frmQ
         'msgbox("stage3")
         'QCam.QCamM_SetParam(mSettings, QCamM_Param., tbExposureTime.Text)
         err = QCam.QCamM_SendSettingsToCam(mhCamera, mSettings)
+        Debug.Print("sendsettingstocam :" & err)
         'If Not mIsMono Then
         '    mRgbFrame = New QCamM_Frame()
         '    mRgbFrame.bufferSize = frameSize * 3
@@ -324,24 +346,40 @@ Public Class frmQ
         ' QCam.QCamM_GetSerialString(mhCamera, serNum)
         '  lblSerNum.Text = "Serial: " & serNum
         mFrameCallback = New QCamM_AsyncCallback(AddressOf frameCallback)
+
         Return True
     End Function
     Private Sub frameCallback(ByVal userPtr As IntPtr, ByVal userData As UInteger, ByVal errcode As QCamM_Err, ByVal flags As UInteger)
+        watchDogT.Abort()
         If errcode <> QCamM_Err.qerrSuccess Then
+            'My.Computer.Audio.PlaySystemSound(SystemSounds.Exclamation)
             Debug.Print("framecallback error:" & errcode)
+            StartStream()
+            ''QCam.QCamM_Abort(mhCamera) 'stop exposing
+            'QCam.QCamM_SetStreaming(mhCamera, 0) 'stop streaming
+            'Debug.Print("stopped stream")
+            ''QCam.QCamM_Abort(mhCamera)
+            ''Debug.Print("aborted")
+            'QCam.QCamM_SetStreaming(mhCamera, 1) 'start streaming
+            'Debug.Print("started stream")
+            'QueueFrame(userData)
+            'Debug.Print("queued a frame")
             Exit Sub
         End If
-        Dim myFrame As QCamM_Frame
-        If running Then Exit Sub
+
+        If running Then
+            MsgBox("what? how'd this happen?")
+            Exit Sub
+        End If
 
         running = True
-        If userData = 1 Then
-            myFrame = mFrame1
-        ElseIf userData = 2 Then
-            myFrame = mFrame2
-        Else
-            Return
-        End If
+        'If userData = 1 Then
+        '    myFrame = mFrame1
+        'ElseIf userData = 2 Then
+        '    myFrame = mFrame2
+        'Else
+        '    Return
+        'End If
         Debug.Print("frame arrived")
         Try
             'Dim width As UInteger = myFrame.width
@@ -369,71 +407,14 @@ Public Class frmQ
                 If m_pics Is Nothing Then
                     m_pics = New RingBitmap(5)
                 End If
-                m_pics.FillNextBitmap(myFrame)
+                m_pics.FillNextBitmap(mFrame1)
 
-                'Marshal.Copy(rawData, 0, ptr, bytes)
-                'bmp.UnlockBits(bmpData)
-
-                ' debug.Print("image")
-                'For i = 1 To 512
-                '    Debug.Print(rawData(i))
-                'Next
-
-
-                ' bmp = New Bitmap(New MemoryStream(rawData))
+                frames = frames + 1
 
             End If
 
-            'Else
-            '    QCamImgfnc.QCamM_BayerToRgb(QCamM_qcBayerInterp.qcBayerInterpFast, myFrame, mRgbFrame)
-            '    bmp = New Bitmap(CInt(width), CInt(height), CInt(width) * 3, PixelFormat.Format24bppRgb, mRgbFrame.pBuffer)
-            'End If
-
-            'Using fs As FileStream = New FileStream("image.raw", FileMode.Create)
-            '    Dim bw As BinaryWriter = New System.IO.BinaryWriter(fs)
-            '    Dim b As Byte
-            '    For i As Integer = 0 To mFrame1.size - 1
-            '        b = Marshal.ReadByte(myFrame.pBuffer, i)
-            '        bw.Write(b)
-
-            '    Next
-            '    bw.Close()
-            'End Using
-            '    mDisplayBitmap = bmp
-
-            '' myBitmap.Save("Shapes025.jpg", myImageCodecInfo, myEncoderParameters)
-            'Dim firstLocation As PointF = New PointF(10.0F, 10.0F)
-            'Dim firstText As String = String.Format("{0:dd-MMM-yyyy HH:mm:ss}", DateTime.Now)
-            ''b = bm.Clone
-
-
-            ''try to draw on bitmap
-            'Dim tempbmp As Bitmap
-            'tempbmp = New Bitmap(m_pics.Image.Width, m_pics.Image.Height)
-
-
-            ''From this bitmap, the graphics can be obtained, because it has the right PixelFormat
-            'Dim gr As Graphics = Graphics.FromImage(tempbmp)
-            'gr.DrawImage(m_pics.Image, 0, 0)
-            'Dim myFontLabels As New Font("Arial", 16, GraphicsUnit.Pixel)
-            ''Dim myBrushLabels As New SolidBrush(Color.White)
-            ''bmp.RotateFlip(RotateFlipType.Rotate180FlipNone)
-
-            ''Dim odata As BitmapData
-            ''Dim odata2 As BitmapData
-
-            ''odata = bmp.LockBits(New Rectangle(0, 0, bmp.Width, bmp.Height), ImageLockMode.ReadWrite, bmp.PixelFormat)
-            ''odata2 = bmp2.LockBits(New Rectangle(0, 0, bmp2.Width, bmp2.Height), ImageLockMode.ReadWrite, bmp2.PixelFormat)
-            ''Marshal.Copy()
-
-            'gr.DrawString(firstText, myFontLabels, Brushes.GreenYellow, firstLocation) '# last 2 number are X and Y coords.
-            'gr.Dispose()
-            ' myFontLabels.Dispose()
-            ' bmp = tempbmp
-
-
-
-            'PictureBox1.Image = bmp
+            'dispose of frame
+            QCam.QCamM_Free(mFrame1.pBuffer)
 
             Dim filename As String
             Dim folderName = String.Format("{0:yyyy-MMM-dd}", DateTime.Now)
@@ -467,8 +448,10 @@ Public Class frmQ
 
 
             End If
+            If m_camRunning Then
+                StartStream()
+            End If
 
-            QueueFrame(userData)
             running = False
         Catch ex As Exception
             Debug.Print(ex.Message)
@@ -641,10 +624,10 @@ Public Class frmQ
                 CallAzureMeteorDetection(aQE.img, aQE.filename)
 
 
-                    aQE = Nothing
+                aQE = Nothing
 
-                End If
-                Console.WriteLine("in the queue:{0}", myDetectionQueue.Count)
+            End If
+            Console.WriteLine("in the queue:{0}", myDetectionQueue.Count)
             Thread.Sleep(100)
         End While
 
@@ -719,17 +702,18 @@ Public Class frmQ
 
         QCam.QCamM_SetParam(mSettings, QCamM_Param.qprmExposure, tbExposureTime.Text)
         err = QCam.QCamM_SendSettingsToCam(mhCamera, mSettings)
-
+        StartStream()
         If lblDayNight.Text = "night" Then
-            StartStream()
+            'StartStream()
         Else
-            TimerAcquistionRate.Enabled = True
+            'TimerAcquistionRate.Enabled = True
         End If
 
         Button7.Enabled = False
         Button8.Enabled = True
 
         startTime = Now
+        Timer3.Enabled = True
         meteorCheckRunning = True
         Timer2.Enabled = True
         t = New Thread(AddressOf processDetection)
@@ -737,6 +721,7 @@ Public Class frmQ
     End Sub
 
     Private Sub Button8_Click(sender As Object, e As EventArgs) Handles Button8.Click
+        Timer3.Enabled = False
         m_camRunning = False
         TimerAcquistionRate.Enabled = False
         StopStream()
@@ -746,6 +731,7 @@ Public Class frmQ
     End Sub
 
     Private Sub frmQ_Load(sender As Object, e As EventArgs) Handles Me.Load
+
         getCameraReady()
         myImageCodecInfo = GetEncoderInfo("image/jpeg")
 
@@ -763,6 +749,8 @@ Public Class frmQ
         myEncoderParameter = New EncoderParameter(myEncoder, CType(85L, Int32))
         myEncoderParameters.Param(0) = myEncoderParameter
         ' md.LoadModel("c:\tmp\frozen_inference_graph_orig.pb", "c:\tmp\mscoco_label_map.pbtxt")
+        cboDay.SelectedIndex = 3
+        cboNight.SelectedIndex = 5
     End Sub
 
     Private Sub getCameraReady()
@@ -836,24 +824,24 @@ Public Class frmQ
         myWebServer.ImageDirectory = "c:\web\images\"
         myWebServer.VirtualRoot = "c:\web\"
     End Sub
-    Public Function getLastImage() As Bitmap
-        Dim stopWatch As Stopwatch = New Stopwatch()
-        stopWatch.Start()
+    'Public Function getLastImage() As Bitmap
+    '    Dim stopWatch As Stopwatch = New Stopwatch()
+    '    stopWatch.Start()
 
-        While running AndAlso stopWatch.ElapsedMilliseconds < 20000
+    '    While running AndAlso stopWatch.ElapsedMilliseconds < 20000
 
-        End While
+    '    End While
 
-        stopWatch.[Stop]()
+    '    stopWatch.[Stop]()
 
-        'Dim x As New Bitmap(b)
-        Debug.Print("get last image")
-        Dim x As New Bitmap(m_pics.Image)
-        Return x
+    '    'Dim x As New Bitmap(b)
+    '    Debug.Print("get last image")
+    '    Dim x As New Bitmap(m_pics.Image)
+    '    Return x
 
 
 
-    End Function
+    'End Function
     Public Function getLastImageArray() As Byte()
         Dim stopWatch As Stopwatch = New Stopwatch()
         stopWatch.Start()
@@ -865,7 +853,7 @@ Public Class frmQ
         stopWatch.[Stop]()
 
         'Dim x As New Bitmap(b)
-        Debug.Print("get last image")
+        Debug.Print("get last image byte array")
         Return m_pics.ImageBytes
 
 
@@ -934,31 +922,33 @@ Public Class frmQ
             Debug.Print("setting gain to " & tbGain.Text)
             Debug.Print("setting exposure to " & tbExposureTime.Text)
             If lblDayNight.Text = "day" Then
-                QCam.QCamM_Abort(mhCamera) 'stop exposing
+                ' 'QCam.QCamM_Abort(mhCamera) 'stop exposing
                 QCam.QCamM_SetStreaming(mhCamera, 0) 'stop streaming
-                If m_camRunning Then
-                    TimerAcquistionRate.Enabled = True
-                End If
+                'If m_camRunning Then
+                '    TimerAcquistionRate.Enabled = True
+                'End If
 
             Else
-                TimerAcquistionRate.Enabled = False
-                If m_camRunning Then
-                    StartStream()
+                ' 'QCam.QCamM_Abort(mhCamera) 'stop exposing
+                QCam.QCamM_SetStreaming(mhCamera, 0) 'stop streaming
 
-                End If
             End If
 
             QCam.QCamM_SetParam(mSettings, QCamM_Param.qprmGain, CUInt((tbGain.Text)))
             QCam.QCamM_SetParam(mSettings, QCamM_Param.qprmExposure, tbExposureTime.Text)
             err = QCam.QCamM_SendSettingsToCam(mhCamera, mSettings)
+            If m_camRunning Then
+                QCam.QCamM_SetStreaming(mhCamera, 1) 'resume streaming
+            End If
         End If
 
     End Sub
 
     Private Sub frmQ_Closing(sender As Object, e As CancelEventArgs) Handles Me.Closing
+        On Error Resume Next
         QCam.QCamM_CloseCamera(mhCamera)
         QCam.QCamM_Free(mFrame1.pBuffer)
-        QCam.QCamM_Free(mFrame2.pBuffer)
+        'QCam.QCamM_Free(mFrame2.pBuffer)
         QCam.QCamM_ReleaseDriver()
 
 
@@ -1000,7 +990,7 @@ Public Class frmQ
                     m_grabbedframe = False
                 End If
                 If Not m_grabbedframe Then
-                    QCam.QCamM_Abort(mhCamera)
+                    'QCam.QCamM_Abort(mhCamera)
                     t_grab.Abort()
 
                     err = QCamM_Err.qerrCancelled
@@ -1023,7 +1013,7 @@ Public Class frmQ
 
 
             Else
-                    TimerAcquistionRate.Enabled = False
+                TimerAcquistionRate.Enabled = False
 
                 'msgbox("mframe1 is noting")
             End If
@@ -1045,7 +1035,9 @@ Public Class frmQ
 
         Dim err As QCamM_Err = QCamM_Err.qerrSuccess
         Try
-            QCam.QCamM_Abort(mhCamera)
+            Debug.Print("about to do safe abort")
+            'QCam.QCamM_Abort(mhCamera)
+            Debug.Print("abort to be safe")
             err = QCam.QCamM_GrabFrame(mhCamera, mFrame1)
             Debug.Print("grabAframe err:" & err)
             m_grabbedframe = True
@@ -1059,7 +1051,48 @@ Public Class frmQ
 
     End Sub
 
-    Private Sub tbExposureTime_AutoSizeChanged(sender As Object, e As EventArgs) Handles tbExposureTime.AutoSizeChanged
+    Private Sub Timer4_Tick(sender As Object, e As EventArgs) Handles Timer4.Tick
+        'call back didn't happen, now what?
+        'call abort
+        Timer4.Enabled = False
+        Debug.Print("calling abort")
+        QCam.QCamM_Abort(mhCamera)
+        Debug.Print("stopping stream")
+        QCam.QCamM_SetStreaming(mhCamera, 0)
+        MsgBox("call back never happenned")
+    End Sub
 
+    Private Sub bailout()
+        Dim stopWatch As Stopwatch = New Stopwatch()
+        stopWatch.Start()
+
+        While stopWatch.ElapsedMilliseconds < 15000
+            Thread.Sleep(500)
+        End While
+        My.Computer.Audio.PlaySystemSound(SystemSounds.Exclamation)
+        stopWatch.[Stop]()
+        Debug.Print("restarting stream")
+        QCam.QCamM_Abort(mhCamera)
+        Debug.Print("startstream")
+        StartStream()
+        Exit Sub
+
+        Debug.Print("stopping stream")
+        QCam.QCamM_SetStreaming(mhCamera, 0)
+        MsgBox("call back never happenned..next close camera")
+        QCam.QCamM_CloseCamera(mhCamera)
+        MsgBox("closed camera...next releasae driver")
+        QCam.QCamM_ReleaseDriver()
+        MsgBox("released driver...next open camera")
+        Dim qerr As QCamM_Err = QCamM_Err.qerrSuccess
+        qerr = QCam.QCamM_OpenCamera(mCameraid, mhCamera)
+        MsgBox("opened camera " & qerr)
+        MsgBox("about to init camera")
+        InitCamera()
+
+    End Sub
+
+    Protected Overrides Sub Finalize()
+        MyBase.Finalize()
     End Sub
 End Class
