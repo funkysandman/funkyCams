@@ -957,7 +957,7 @@ Public Class frmPCO
         End While
 
         stopWatch.[Stop]()
-        Dim x As New Bitmap(iXres, iYres)
+        Dim x As New Bitmap(iXres, iYres, Imaging.PixelFormat.Format24bppRgb)
         Dim BoundsRect = New Rectangle(0, 0, iXres, iYres)
         Dim bmpData As System.Drawing.Imaging.BitmapData = x.LockBits(BoundsRect, System.Drawing.Imaging.ImageLockMode.[WriteOnly], x.PixelFormat)
         Dim ptr As IntPtr = bmpData.Scan0

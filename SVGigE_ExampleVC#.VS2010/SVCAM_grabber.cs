@@ -1590,7 +1590,7 @@ namespace SVCamApi
                 if (SVCLProtocol == null)
                 {
                     Console.WriteLine("GetEnvironmentVariableA SVS_GENICAM_CLPROTOCOL failed! ");
-                    return false;
+                    //return false;
                 }
 
                 SVGenicamCache = Environment.GetEnvironmentVariable("SVS_GENICAM_CACHE");
