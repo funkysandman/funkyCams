@@ -16,7 +16,7 @@ Public Class frmAVTastro
     Dim myTimer As New System.Timers.Timer
     Dim myCamID As String
     Dim nightset As Boolean
-    Dim md As New ObjectDetection.TFDetector()
+    '  Dim md As New ObjectDetection.TFDetector()
     Dim v As AsynchronousGrab.VimbaHelper
 
     Private Shared Function GetEncoderInfo(ByVal mimeType As String) As ImageCodecInfo

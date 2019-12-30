@@ -140,12 +140,13 @@ Public Class VimbaHelper
         'If Me.m_Camera.Features("ExposureMode").EnumValues Then
         '    Me.m_Camera.Features("ExposureMode").StringValue = "TriggerWidth"
         'End If
-        Me.m_Camera.Features("TriggerSource").StringValue = "Line1"
+        Me.m_Camera.Features("TriggerSource").StringValue = "Freerun"
         If m_Camera.Features.ContainsName("SensorDigitizationTaps") Then
             Me.m_Camera.Features("SensorDigitizationTaps").StringValue = "One"
         End If
 
-        Me.m_Camera.Features("PixelFormat").StringValue = "Mono14"
+        'Me.m_Camera.Features("PixelFormat").StringValue = "Mono12"
+        'MsgBox("Mono12")
         If m_Camera.Features.ContainsName("BlackLevel") Then
             Me.m_Camera.Features("BlackLevel").FloatValue = 100
         End If
@@ -202,22 +203,39 @@ Public Class VimbaHelper
         End Try
     End Sub
 
-    Public Sub StartContinuousFrameAcquisition(ByVal frameReceivedHandler As OnFrameReceivedHandler)
+    Public Sub StartContinuousFrameAcquisition(ByVal aFrameReceivedHandler As AVT.VmbAPINET.Camera.OnFrameReceivedHandler)
         Dim bError As Boolean = True
 
         Try
 
-            If frameReceivedHandler IsNot Nothing Then
-                AddHandler Me.m_Camera.OnFrameReceived, AddressOf Me.OnFrameReceived
+            'If frameReceivedHandler IsNot Nothing Then
+            '    AddHandler Me.m_Camera.OnFrameReceived, AddressOf Me.OnFrameReceived
 
-                Me.m_FrameReceivedHandler = frameReceivedHandler
-            End If
-
+            '    Me.m_FrameReceivedHandler = frameReceivedHandler
+            'End If
+            AddHandler Me.m_Camera.OnFrameReceived, aFrameReceivedHandler
             m_RingBitmap = New RingBitmap(m_RingBitmapSize)
             m_ImageInUse = True
             Me.m_Acquiring = True
-            Me.m_Camera.StartCapture()
-            ' Me.m_Camera.StartContinuousImageAcquisition(3)
+            b = New Byte(Me.m_Camera.Features("PayloadSize").IntValue) {}
+            'b = New Byte(8355840) {}
+            camFrame = New Frame(b)
+            'Me.m_Camera.AnnounceFrame(camFrame)
+            'm_Camera.QueueFrame(camFrame)
+            Debug.WriteLine("frame status:" & camFrame.ReceiveStatus)
+            ' m_RingBitmap = New RingBitmap(m_RingBitmapSize)
+            Me.m_Camera.StartContinuousImageAcquisition(1)
+            'Me.m_Camera.StartCapture()
+            ' Me.m_Camera.Features("TriggerSelector").StringValue = "FrameStart"
+            'Me.m_Camera.Features("TriggerActivation").StringValue = "RisingEdge"
+            'Me.m_Camera.Features("TriggerActivation").StringValue = "RisingEdge"
+
+            '' Me.m_Camera.Features("ExposureMode").StringValue = "TriggerWidth"
+            'Me.m_Camera.Features("TriggerMode").StringValue = "On"
+            'Me.m_Camera.QueueFrame(camFrame)
+            ' Me.m_Camera.StartCapture()
+            'Me.m_Camera.Features("AcquisitionStart").RunCommand()
+            'Me.m_Camera.StartContinuousImageAcquisition(1)
             bError = False
         Finally
 
@@ -234,6 +252,7 @@ Public Class VimbaHelper
         Dim bError As Boolean = True
 
         Try
+            MsgBox("StartSingleFrameAcquisition:" & Now)
 
             ''  If FrameReceivedHandler IsNot Nothing Then
             'AddHandler Me.m_Camera.OnFrameReceived, AddressOf Me.OnFrameReceived
@@ -256,13 +275,13 @@ Public Class VimbaHelper
             'Me.m_Camera.Features("TriggerActivation").StringValue = "RisingEdge"
 
             ' Me.m_Camera.Features("ExposureMode").StringValue = "TriggerWidth"
-            Me.m_Camera.Features("TriggerSource").StringValue = "Line1"
-
+            Me.m_Camera.Features("TriggerMode").StringValue = "On"
+            Me.m_Camera.QueueFrame(camFrame)
             Try
                 Me.m_Camera.StartCapture() 'press play
             Catch
             End Try
-            Me.m_Camera.Features("StreamHoldEnable").StringValue = "On"
+            'Me.m_Camera.Features("StreamHoldEnable").StringValue = "On"
 
             'Me.m_Camera.Features("AcquisitionStop").RunCommand()
             'send software trigger
@@ -270,11 +289,11 @@ Public Class VimbaHelper
             'Me.m_Camera.StartContinuousImageAcquisition(3)
 
             Me.m_Camera.Features("AcquisitionStart").RunCommand()
-            While (Not m_Camera.Features("AcquisitionStart").IsCommandDone())
+            'While (Not m_Camera.Features("AcquisitionStart").IsCommandDone())
 
-            End While
-            Me.m_Camera.QueueFrame(camFrame)
-            flipEdge()
+            'End While
+
+            'flipEdge()
 
 
             bError = False
@@ -298,6 +317,7 @@ Public Class VimbaHelper
             Throw New Exception("No camera open.")
         End If
 
+        Me.m_Camera.StopContinuousImageAcquisition()
 
     End Sub
     Public Sub flipEdge()
@@ -433,7 +453,7 @@ Public Class VimbaHelper
     Public Sub OnFrameReceived(ByVal frame As Frame)
 
         m_isWaitingForImage = False
-        Console.WriteLine("got image")
+        Console.WriteLine("got frame")
 
         'If m_timeoutThread IsNot Nothing Then
         '    m_timeoutThread.Abort()

@@ -103,7 +103,7 @@ namespace BaumerAPI
         BGAPI2.DataStreamList datastreamList = null;
         BGAPI2.DataStream mDataStream = null;
         string sDataStreamID = "";
-
+        
         BGAPI2.BufferList bufferList = null;
         BGAPI2.Buffer mBuffer = null;
 
@@ -114,7 +114,10 @@ namespace BaumerAPI
          FrameReceivedHandler m_frh;
         Boolean running = false;
         public byte[] masterDark;
-
+        public bool useDarks = false;
+        public bool makeDarks = false;
+        public int pixelCutOff = 3000;
+        public double darkMultiplier = 1.0;
         //public GIGEGRABBER()
         //{
         //    openCamera();
@@ -171,7 +174,8 @@ namespace BaumerAPI
                     { 
                     while (running) 
                     {
-                        mBufferFilled = mDataStream.GetFilledBuffer(15000); // image polling timeout 1000 msec
+                        mBufferFilled = mDataStream.GetFilledBuffer(25000); // image polling timeout 1000 msec
+                        
                         retryClose = 0;
                         retryOpen = 0;
                         retryStart = 0;
@@ -287,8 +291,9 @@ namespace BaumerAPI
                         else if (mBufferFilled.IsIncomplete == true)
                         {
                             System.Console.Write("Error: Image is incomplete\r\n");
-                            // queue buffer again
-                            mBufferFilled.QueueBuffer();
+                        // queue buffer again
+                       
+                        mBufferFilled.QueueBuffer();
                         }
                         else
                         {
@@ -312,11 +317,11 @@ namespace BaumerAPI
 
             
         }
-        public void setParams(int duration, float aGain)
+        public void setParams(int duration, int aGain)
         {
 
             mDevice.RemoteNodeList["ExposureTime"].Value = duration;
-
+            mDevice.RemoteNodeList["GainRaw"].Value = aGain;
             mDevice.RemoteNodeList["AcquisitionMode"].Value = "Continuous";
 
            
@@ -364,13 +369,16 @@ namespace BaumerAPI
 
 
             //OPEN THE FIRST SYSTEM IN THE LIST WITH A CAMERA CONNECTED
-            try
+            
+           
+            foreach (KeyValuePair<string, BGAPI2.System> sys_pair in BGAPI2.SystemList.Instance)
             {
-                foreach (KeyValuePair<string, BGAPI2.System> sys_pair in BGAPI2.SystemList.Instance)
+                try
+
                 {
                     System.Console.Write("SYSTEM\r\n");
                     System.Console.Write("######\r\n\r\n");
-
+                    
                     try
                     {
                         sys_pair.Value.Open();
@@ -433,8 +441,8 @@ namespace BaumerAPI
                                     {
                                         System.Console.Write("5.1.13   Close interface ({0} cameras found) \r\n\r\n", deviceList.Count);
                                         ifc_pair.Value.Close();//close interface
-                                        sys_pair.Value.Close();//close system too
-                                        throw new ArgumentNullException("no camera found");
+                                       // sys_pair.Value.Close();//close system too
+                                        System.Console.Write("no camera found");
                                        
                                     }
                                     else
@@ -492,7 +500,7 @@ namespace BaumerAPI
                         System.Console.Write(" ResourceInUseException {0} \r\n", ex.GetErrorDescription());
                     }
                 }
-            }
+           
             catch (BGAPI2.Exceptions.IException ex)
             {
                 returnCode = (0 == returnCode) ? 1 : returnCode;
@@ -500,7 +508,7 @@ namespace BaumerAPI
                 System.Console.Write("ErrorDescription: {0} \r\n", ex.GetErrorDescription());
                 System.Console.Write("in function:      {0} \r\n", ex.GetFunctionName());
             }
-
+            }
             if (sSystemID == "")
             {
                 System.Console.Write(" No System found \r\n");
@@ -577,9 +585,10 @@ namespace BaumerAPI
             System.Console.Write("######\r\n\r\n");
 
             //OPEN THE FIRST CAMERA IN THE LIST
-            try
+            foreach (KeyValuePair<string, BGAPI2.Device> dev_pair in deviceList)
+
             {
-                foreach (KeyValuePair<string, BGAPI2.Device> dev_pair in deviceList)
+                try
                 {
                     try
                     {
@@ -591,41 +600,41 @@ namespace BaumerAPI
                         System.Console.Write("          Device TLType:          {0}\r\n", dev_pair.Value.TLType);
                         System.Console.Write("          Device AccessStatus:    {0}\r\n", dev_pair.Value.AccessStatus);
                         System.Console.Write("          Device UserID:          {0}\r\n\r\n", dev_pair.Value.DisplayName);
-                        if (dev_pair.Value.Model==camid)
+                        if (dev_pair.Value.Model == camid)
                         {
-                        dev_pair.Value.Open();
-                        sDeviceID = dev_pair.Key;
-                        System.Console.Write("        Opened device - RemoteNodeList Information \r\n");
-                        System.Console.Write("          Device AccessStatus:    {0}\r\n", dev_pair.Value.AccessStatus);
+                            dev_pair.Value.Open();
+                            sDeviceID = dev_pair.Key;
+                            System.Console.Write("        Opened device - RemoteNodeList Information \r\n");
+                            System.Console.Write("          Device AccessStatus:    {0}\r\n", dev_pair.Value.AccessStatus);
 
-                        //SERIAL NUMBER
-                        if (dev_pair.Value.RemoteNodeList.GetNodePresent("DeviceSerialNumber") == true)
-                            System.Console.Write("          DeviceSerialNumber:     {0}\r\n", (string)dev_pair.Value.RemoteNodeList["DeviceSerialNumber"].Value);
-                        else if (dev_pair.Value.RemoteNodeList.GetNodePresent("DeviceID") == true)
-                            System.Console.Write("          DeviceID (SN):          {0}\r\n", (string)dev_pair.Value.RemoteNodeList["DeviceID"].Value);
-                        else
-                            System.Console.Write("          SerialNumber:           Not Available.\r\n");
+                            //SERIAL NUMBER
+                            if (dev_pair.Value.RemoteNodeList.GetNodePresent("DeviceSerialNumber") == true)
+                                System.Console.Write("          DeviceSerialNumber:     {0}\r\n", (string)dev_pair.Value.RemoteNodeList["DeviceSerialNumber"].Value);
+                            else if (dev_pair.Value.RemoteNodeList.GetNodePresent("DeviceID") == true)
+                                System.Console.Write("          DeviceID (SN):          {0}\r\n", (string)dev_pair.Value.RemoteNodeList["DeviceID"].Value);
+                            else
+                                System.Console.Write("          SerialNumber:           Not Available.\r\n");
 
-                        //DISPLAY DEVICEMANUFACTURERINFO
-                        if (dev_pair.Value.RemoteNodeList.GetNodePresent("DeviceManufacturerInfo") == true)
-                            System.Console.Write("          DeviceManufacturerInfo: {0}\r\n", (string)dev_pair.Value.RemoteNodeList["DeviceManufacturerInfo"].Value);
+                            //DISPLAY DEVICEMANUFACTURERINFO
+                            if (dev_pair.Value.RemoteNodeList.GetNodePresent("DeviceManufacturerInfo") == true)
+                                System.Console.Write("          DeviceManufacturerInfo: {0}\r\n", (string)dev_pair.Value.RemoteNodeList["DeviceManufacturerInfo"].Value);
 
-                        //DISPLAY DEVICEFIRMWAREVERSION OR DEVICEVERSION
-                        if (dev_pair.Value.RemoteNodeList.GetNodePresent("DeviceFirmwareVersion") == true)
-                            System.Console.Write("          DeviceFirmwareVersion:  {0}\r\n", (string)dev_pair.Value.RemoteNodeList["DeviceFirmwareVersion"].Value);
-                        else if (dev_pair.Value.RemoteNodeList.GetNodePresent("DeviceVersion") == true)
-                            System.Console.Write("          DeviceVersion:          {0}\r\n", (string)dev_pair.Value.RemoteNodeList["DeviceVersion"].Value);
-                        else
-                            System.Console.Write("          DeviceVersion:          Not Available.\r\n");
+                            //DISPLAY DEVICEFIRMWAREVERSION OR DEVICEVERSION
+                            if (dev_pair.Value.RemoteNodeList.GetNodePresent("DeviceFirmwareVersion") == true)
+                                System.Console.Write("          DeviceFirmwareVersion:  {0}\r\n", (string)dev_pair.Value.RemoteNodeList["DeviceFirmwareVersion"].Value);
+                            else if (dev_pair.Value.RemoteNodeList.GetNodePresent("DeviceVersion") == true)
+                                System.Console.Write("          DeviceVersion:          {0}\r\n", (string)dev_pair.Value.RemoteNodeList["DeviceVersion"].Value);
+                            else
+                                System.Console.Write("          DeviceVersion:          Not Available.\r\n");
 
-                        if (dev_pair.Value.TLType == "GEV")
-                        {
-                            System.Console.Write("          GevCCP:                 {0}\r\n", (string)dev_pair.Value.RemoteNodeList["GevCCP"].Value);
-                            System.Console.Write("          GevCurrentIPAddress:    {0}.{1}.{2}.{3}\r\n", ((long)dev_pair.Value.RemoteNodeList["GevCurrentIPAddress"].Value & 0xff000000) >> 24, ((long)dev_pair.Value.RemoteNodeList["GevCurrentIPAddress"].Value & 0x00ff0000) >> 16, ((long)dev_pair.Value.RemoteNodeList["GevCurrentIPAddress"].Value & 0x0000ff00) >> 8, ((long)dev_pair.Value.RemoteNodeList["GevCurrentIPAddress"].Value & 0x000000ff));
-                            System.Console.Write("          GevCurrentSubnetMask:   {0}.{1}.{2}.{3}\r\n", ((long)dev_pair.Value.RemoteNodeList["GevCurrentSubnetMask"].Value & 0xff000000) >> 24, ((long)dev_pair.Value.RemoteNodeList["GevCurrentSubnetMask"].Value & 0x00ff0000) >> 16, ((long)dev_pair.Value.RemoteNodeList["GevCurrentSubnetMask"].Value & 0x0000ff00) >> 8, ((long)dev_pair.Value.RemoteNodeList["GevCurrentSubnetMask"].Value & 0x000000ff));
-                        }
-                        System.Console.Write("          \r\n");
-                        break;
+                            if (dev_pair.Value.TLType == "GEV")
+                            {
+                                System.Console.Write("          GevCCP:                 {0}\r\n", (string)dev_pair.Value.RemoteNodeList["GevCCP"].Value);
+                                System.Console.Write("          GevCurrentIPAddress:    {0}.{1}.{2}.{3}\r\n", ((long)dev_pair.Value.RemoteNodeList["GevCurrentIPAddress"].Value & 0xff000000) >> 24, ((long)dev_pair.Value.RemoteNodeList["GevCurrentIPAddress"].Value & 0x00ff0000) >> 16, ((long)dev_pair.Value.RemoteNodeList["GevCurrentIPAddress"].Value & 0x0000ff00) >> 8, ((long)dev_pair.Value.RemoteNodeList["GevCurrentIPAddress"].Value & 0x000000ff));
+                                System.Console.Write("          GevCurrentSubnetMask:   {0}.{1}.{2}.{3}\r\n", ((long)dev_pair.Value.RemoteNodeList["GevCurrentSubnetMask"].Value & 0xff000000) >> 24, ((long)dev_pair.Value.RemoteNodeList["GevCurrentSubnetMask"].Value & 0x00ff0000) >> 16, ((long)dev_pair.Value.RemoteNodeList["GevCurrentSubnetMask"].Value & 0x0000ff00) >> 8, ((long)dev_pair.Value.RemoteNodeList["GevCurrentSubnetMask"].Value & 0x000000ff));
+                            }
+                            System.Console.Write("          \r\n");
+                            break;
                         }
                     }
                     catch (BGAPI2.Exceptions.ResourceInUseException ex)
@@ -641,15 +650,15 @@ namespace BaumerAPI
                         System.Console.Write(" AccessDeniedException {0} \r\n", ex.GetErrorDescription());
                     }
                 }
-            }
-            catch (BGAPI2.Exceptions.IException ex)
-            {
-                returnCode = (0 == returnCode) ? 1 : returnCode;
-                System.Console.Write("ExceptionType:    {0} \r\n", ex.GetType());
-                System.Console.Write("ErrorDescription: {0} \r\n", ex.GetErrorDescription());
-                System.Console.Write("in function:      {0} \r\n", ex.GetFunctionName());
-            }
 
+                catch (BGAPI2.Exceptions.IException ex)
+                {
+                    returnCode = (0 == returnCode) ? 1 : returnCode;
+                    System.Console.Write("ExceptionType:    {0} \r\n", ex.GetType());
+                    System.Console.Write("ErrorDescription: {0} \r\n", ex.GetErrorDescription());
+                    System.Console.Write("in function:      {0} \r\n", ex.GetFunctionName());
+                }
+            }
             if (sDeviceID == "")
             {
                 System.Console.Write(" No Device found \r\n");
@@ -667,6 +676,17 @@ namespace BaumerAPI
 
             System.Console.Write("DEVICE PARAMETER SETUP\r\n");
             System.Console.Write("######################\r\n\r\n");
+        }
+
+        public void closeCamera()
+        {
+            foreach (KeyValuePair<string, BGAPI2.DataStream> dst_pair in mDevice.DataStreams)
+            {
+                dst_pair.Value.Close();
+            }
+                //mDevice.Close();
+                //mInterface.Close();
+                //mSystem.Close();
         }
 
         public void startCapture(FrameReceivedHandler frh)
@@ -892,10 +912,65 @@ namespace BaumerAPI
         private void loadMasterDark()
         {
             masterDark = File.ReadAllBytes("masterdark.raw");
+            ////apply lut
+            //int[] lut = new int[4095];
+            //double arg = 500;
+            //double slope;
+            //slope = 4096 / (4096 - arg);
+            //for (int i =0;i<4096;i++)
+            //{
+            //    lut[i] = Convert.ToInt32(Math.Max(0, Convert.ToDouble(i) * slope - arg * slope));
 
+
+            //}
+          
+            //for (int i =0;i<masterDark.Length;i++)
+            //{
+            //    dpixel1 = (dbyte1 & 0b1111_0000) >> 4;
+            //    dpixel1 = Convert.ToInt32(Convert.ToDouble(dpixel1) * darkMultiplier);
+
+            //}
+
+
+    }
+
+         int reversebits(int aNum,bool lsb)
+        {
+            int newNum = 0;
+            if (lsb)
+            {
+                newNum = Math.Sign(aNum & 0b1000_0000_0000) * (1);
+                newNum = newNum + (Math.Sign(aNum & 0b0100_0000_0000) * (2));
+                newNum = newNum + (Math.Sign(aNum & 0b0010_0000_0000) * (4));
+                newNum = newNum + (Math.Sign(aNum & 0b0001_0000_0000) * (8));
+                newNum = newNum + (Math.Sign(aNum & 0b0000_1000_0000) * (16));
+                newNum = newNum + (Math.Sign(aNum & 0b0000_0100_0000) * (32));
+                newNum = newNum + (Math.Sign(aNum & 0b0000_0010_0000) * (64));
+                newNum = newNum + (Math.Sign(aNum & 0b0000_0001_0000) * (128));
+                newNum = newNum + (Math.Sign(aNum & 0b0000_0000_1000) * (256));
+                newNum = newNum + (Math.Sign(aNum & 0b0000_0000_0100) * (512));
+                newNum = newNum + (Math.Sign(aNum & 0b0000_0000_0010) * (1024));
+                newNum = newNum + (Math.Sign(aNum & 0b0000_0000_0001) * (2048));
+            }
+            else
+            {
+                newNum = Math.Sign(aNum & 0b1000_0000_0000) * (2048);
+                newNum = newNum + (Math.Sign(aNum & 0b0100_0000_0000) * (1024));
+                newNum = newNum + (Math.Sign(aNum & 0b0010_0000_0000) * (512));
+                newNum = newNum + (Math.Sign(aNum & 0b0001_0000_0000) * (256));
+                newNum = newNum + (Math.Sign(aNum & 0b0000_1000_0000) * (128));
+                newNum = newNum + (Math.Sign(aNum & 0b0000_0100_0000) * (64));
+                newNum = newNum + (Math.Sign(aNum & 0b0000_0010_0000) * (32));
+                newNum = newNum + (Math.Sign(aNum & 0b0000_0001_0000) * (16));
+                newNum = newNum + (Math.Sign(aNum & 0b0000_0000_1000) * (8));
+                newNum = newNum + (Math.Sign(aNum & 0b0000_0000_0100) * (4));
+                newNum = newNum + (Math.Sign(aNum & 0b0000_0000_0010) * (2));
+                newNum = newNum + (Math.Sign(aNum & 0b0000_0000_0001) * (1));
+            }
+
+
+            return newNum;
         }
-
-
         void processImage(BGAPI2.Buffer mBufferFilled)
     {
         //load image into Bitmap
@@ -916,10 +991,76 @@ namespace BaumerAPI
             //apply darks:
             //if (useDarks)
             // {
-            for (int k = 0; k < imageBufferCopy.Length; k++)
+            int pixel1, pixel2, pixel3, pixel4;
+            int dpixel1, dpixel2, dpixel3, dpixel4;
+            byte byte1, byte2, byte3, byte4, byte5, byte6;
+            byte dbyte1, dbyte2, dbyte3, dbyte4, dbyte5, dbyte6;
+            string filename;
+
+            filename = String.Format("{0}{1:ddMMMyyyy-HHmmss}.raw", "dark_", DateTime.Now);
+            if (makeDarks)
             {
-                if ((masterDark[k]) > 250)
-                    imageBufferCopy[k] = (byte)Math.Max(0, imageBufferCopy[k] - 0.75 * (masterDark[k]));
+                 File.WriteAllBytes(filename,imageBufferCopy);
+            }
+            for (int k = 0; k < imageBufferCopy.Length - 1; k = k + 3)
+            {
+                //unpack 2 pixels in 3 bytes
+                byte1 = imageBufferCopy[k];
+                byte2 = imageBufferCopy[k + 1];
+                byte3 = imageBufferCopy[k + 2];
+
+
+                dbyte1 = masterDark[k];
+                dbyte2 = masterDark[k + 1];
+                dbyte3 = masterDark[k + 2];
+
+
+                pixel1 = (byte1 << 4) | ((byte2 & 0b1111_0000) >> 4);
+                pixel2 = ((byte2 & 0b0000_1111) << 8) | byte3;
+
+
+                dpixel1 = (dbyte1 << 4) | ((dbyte2 & 0b1111_0000) >> 4);
+                dpixel2 = ((dbyte2 & 0b0000_1111) << 8) | dbyte3;
+
+                //pixel1 = reversebits(pixel1,true);
+                //pixel2 = reversebits(pixel2,true);
+                //dpixel1 = reversebits(dpixel1,true);
+                //dpixel2 = reversebits(dpixel2,true);
+                //pixel1 = (byte1 & 0b1111_0000) >> 4;
+                //dpixel1 = (dbyte1 & 0b1111_0000) >> 4;
+                dpixel1 = Convert.ToInt32(Convert.ToDouble(dpixel1) * darkMultiplier);
+
+                dpixel2 = Convert.ToInt32(Convert.ToDouble(dpixel2) * darkMultiplier);
+
+                if (useDarks)
+                {
+
+                    //pixel1 = Math.Min(pixel1 + 50, 4095);
+                    // if (dpixel1 > pixelCutOff) { 
+                    pixel1 = Math.Max(pixel1 - dpixel1, 0);
+                    //  }
+
+                    //   if (dpixel2 > pixelCutOff)
+                    //   {
+                    pixel2 = Math.Max(pixel2 - dpixel2, 0);
+                    //   }
+                }
+                //pixel1 = reversebits(pixel1,true);
+                //pixel2 = reversebits(pixel2,true);
+
+                byte1 = (byte)(pixel1 >> 4);
+                byte2 = (byte)((pixel1 & 0xFF)<<4);
+                byte2 = (byte)((byte)(pixel2 >> 8) + byte2);
+                byte3 = (byte)(pixel2 & 0xFFFF);
+
+               
+
+                imageBufferCopy[k] = byte1;
+                imageBufferCopy[k+1] = byte2;
+                imageBufferCopy[k+2] = byte3;
+
+                //if ((masterDark[k]) > 250)
+                //    imageBufferCopy[k] = (byte)Math.Max(0, imageBufferCopy[k] - 0.75 * (masterDark[k]));
 
             }
             //copy back to buffer
@@ -963,14 +1104,16 @@ namespace BaumerAPI
         //copy into bitmap
         Rectangle rect = new Rectangle(0, 0, (int)mTransformImage.Width, (int)mTransformImage.Height);
         b = new Bitmap((int)mTransformImage.Width, (int)mTransformImage.Height, PixelFormat.Format24bppRgb);
+          
         System.Drawing.Imaging.BitmapData bmpData = b.LockBits(rect, System.Drawing.Imaging.ImageLockMode.ReadWrite, b.PixelFormat);
         //                            int bytes2 = Math.Abs(bmpData2.Stride) * dark.Height;
         //                            byte[] camRGBValues = new byte[bytes2];
         IntPtr ptr = bmpData.Scan0;
         System.Runtime.InteropServices.Marshal.Copy(transformImageBufferCopy, 0, ptr, transformImageBufferCopy.Length);
-        //
-        //report image to handler
-        //FrameReceivedHandler frameReceivedHandler = this.m_FrameReceivedHandler;
+            //
+            //report image to handler
+            //FrameReceivedHandler frameReceivedHandler = this.m_FrameReceivedHandler;
+        
         Console.WriteLine("setup frameReceiveHandler");
         if (null != m_frh && null != b)
         {

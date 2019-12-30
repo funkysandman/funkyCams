@@ -28,7 +28,6 @@ Partial Class frmGIGE
         Me.FolderBrowserDialog1 = New System.Windows.Forms.FolderBrowserDialog()
         Me.Label5 = New System.Windows.Forms.Label()
         Me.tbPath = New System.Windows.Forms.TextBox()
-        Me.Button1 = New System.Windows.Forms.Button()
         Me.tbPort = New System.Windows.Forms.TextBox()
         Me.Timer1 = New System.Windows.Forms.Timer(Me.components)
         Me.Button6 = New System.Windows.Forms.Button()
@@ -41,51 +40,53 @@ Partial Class frmGIGE
         Me.cmbCam = New System.Windows.Forms.ComboBox()
         Me.tbMultiplier = New System.Windows.Forms.TextBox()
         Me.Button3 = New System.Windows.Forms.Button()
-        Me.Button2 = New System.Windows.Forms.Button()
-        Me.Button4 = New System.Windows.Forms.Button()
+        Me.btnStart = New System.Windows.Forms.Button()
         Me.cbSaveImages = New System.Windows.Forms.CheckBox()
         Me.Label8 = New System.Windows.Forms.Label()
         Me.Label7 = New System.Windows.Forms.Label()
-        Me.tbNightGamma = New System.Windows.Forms.TextBox()
-        Me.tbNightDgain = New System.Windows.Forms.TextBox()
         Me.tbNightAgain = New System.Windows.Forms.TextBox()
-        Me.tbDayGamma = New System.Windows.Forms.TextBox()
-        Me.Label6 = New System.Windows.Forms.Label()
-        Me.tbDayDgain = New System.Windows.Forms.TextBox()
-        Me.Label1 = New System.Windows.Forms.Label()
         Me.lblDayNight = New System.Windows.Forms.Label()
         Me.tbExposureTime = New System.Windows.Forms.TextBox()
         Me.Label4 = New System.Windows.Forms.Label()
         Me.tbDayGain = New System.Windows.Forms.TextBox()
         Me.tbNightExp = New System.Windows.Forms.TextBox()
         Me.tbDayTimeExp = New System.Windows.Forms.TextBox()
-        Me.Label3 = New System.Windows.Forms.Label()
-        Me.Label2 = New System.Windows.Forms.Label()
         Me.cboNight = New System.Windows.Forms.ComboBox()
         Me.cboDay = New System.Windows.Forms.ComboBox()
         Me.Label9 = New System.Windows.Forms.Label()
         Me.cbUseDarks = New System.Windows.Forms.CheckBox()
         Me.TimerAcquistionRate = New System.Windows.Forms.Timer(Me.components)
-        Me.Button7 = New System.Windows.Forms.Button()
         Me.tbGain = New System.Windows.Forms.TextBox()
+        Me.tbCutoff = New System.Windows.Forms.TextBox()
+        Me.Label1 = New System.Windows.Forms.Label()
+        Me.Label2 = New System.Windows.Forms.Label()
+        Me.Label3 = New System.Windows.Forms.Label()
+        Me.Label6 = New System.Windows.Forms.Label()
+        Me.Label11 = New System.Windows.Forms.Label()
+        Me.Label12 = New System.Windows.Forms.Label()
+        Me.Label13 = New System.Windows.Forms.Label()
+        Me.Label14 = New System.Windows.Forms.Label()
+        Me.Label15 = New System.Windows.Forms.Label()
+        Me.cbMakeDarks = New System.Windows.Forms.CheckBox()
         CType(Me.PictureBox1, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
         '
         'tbMessage
         '
-        Me.tbMessage.Location = New System.Drawing.Point(29, 414)
+        Me.tbMessage.Location = New System.Drawing.Point(114, 415)
         Me.tbMessage.Margin = New System.Windows.Forms.Padding(2)
         Me.tbMessage.Multiline = True
         Me.tbMessage.Name = "tbMessage"
         Me.tbMessage.Size = New System.Drawing.Size(336, 76)
         Me.tbMessage.TabIndex = 72
+        Me.tbMessage.Visible = False
         '
         'Button10
         '
         Me.Button10.Location = New System.Drawing.Point(329, 337)
         Me.Button10.Margin = New System.Windows.Forms.Padding(2)
         Me.Button10.Name = "Button10"
-        Me.Button10.Size = New System.Drawing.Size(36, 18)
+        Me.Button10.Size = New System.Drawing.Size(36, 28)
         Me.Button10.TabIndex = 70
         Me.Button10.Text = "..."
         Me.Button10.UseVisualStyleBackColor = True
@@ -109,19 +110,9 @@ Partial Class frmGIGE
         Me.tbPath.TabIndex = 68
         Me.tbPath.Text = "c:\image"
         '
-        'Button1
-        '
-        Me.Button1.Location = New System.Drawing.Point(295, -2)
-        Me.Button1.Margin = New System.Windows.Forms.Padding(2)
-        Me.Button1.Name = "Button1"
-        Me.Button1.Size = New System.Drawing.Size(70, 46)
-        Me.Button1.TabIndex = 66
-        Me.Button1.Text = "start"
-        Me.Button1.UseVisualStyleBackColor = True
-        '
         'tbPort
         '
-        Me.tbPort.Location = New System.Drawing.Point(200, 377)
+        Me.tbPort.Location = New System.Drawing.Point(381, 375)
         Me.tbPort.Name = "tbPort"
         Me.tbPort.Size = New System.Drawing.Size(36, 20)
         Me.tbPort.TabIndex = 60
@@ -135,7 +126,7 @@ Partial Class frmGIGE
         'Button6
         '
         Me.Button6.Enabled = False
-        Me.Button6.Location = New System.Drawing.Point(252, 374)
+        Me.Button6.Location = New System.Drawing.Point(195, 375)
         Me.Button6.Name = "Button6"
         Me.Button6.Size = New System.Drawing.Size(113, 23)
         Me.Button6.TabIndex = 61
@@ -155,7 +146,7 @@ Partial Class frmGIGE
         '
         Me.PictureBox1.Location = New System.Drawing.Point(28, 17)
         Me.PictureBox1.Name = "PictureBox1"
-        Me.PictureBox1.Size = New System.Drawing.Size(337, 307)
+        Me.PictureBox1.Size = New System.Drawing.Size(150, 66)
         Me.PictureBox1.TabIndex = 48
         Me.PictureBox1.TabStop = False
         '
@@ -166,11 +157,11 @@ Partial Class frmGIGE
         'Label10
         '
         Me.Label10.AutoSize = True
-        Me.Label10.Location = New System.Drawing.Point(552, 352)
+        Me.Label10.Location = New System.Drawing.Point(528, 375)
         Me.Label10.Name = "Label10"
-        Me.Label10.Size = New System.Drawing.Size(21, 13)
+        Me.Label10.Size = New System.Drawing.Size(24, 13)
         Me.Label10.TabIndex = 101
-        Me.Label10.Text = "fps"
+        Me.Label10.Text = "fps:"
         '
         'txtFps
         '
@@ -182,11 +173,11 @@ Partial Class frmGIGE
         'cbMeteors
         '
         Me.cbMeteors.AutoSize = True
-        Me.cbMeteors.Location = New System.Drawing.Point(439, 376)
+        Me.cbMeteors.Location = New System.Drawing.Point(28, 286)
         Me.cbMeteors.Name = "cbMeteors"
-        Me.cbMeteors.Size = New System.Drawing.Size(96, 17)
+        Me.cbMeteors.Size = New System.Drawing.Size(134, 17)
         Me.cbMeteors.TabIndex = 99
-        Me.cbMeteors.Text = "detect meteors"
+        Me.cbMeteors.Text = "detect meteors at night"
         Me.cbMeteors.UseVisualStyleBackColor = True
         '
         'cmbCam
@@ -199,44 +190,35 @@ Partial Class frmGIGE
         '
         'tbMultiplier
         '
-        Me.tbMultiplier.Location = New System.Drawing.Point(393, 352)
+        Me.tbMultiplier.Location = New System.Drawing.Point(149, 211)
         Me.tbMultiplier.Margin = New System.Windows.Forms.Padding(2)
         Me.tbMultiplier.Name = "tbMultiplier"
         Me.tbMultiplier.Size = New System.Drawing.Size(35, 20)
         Me.tbMultiplier.TabIndex = 97
-        Me.tbMultiplier.Text = "1.0"
+        Me.tbMultiplier.Text = "1"
         '
         'Button3
         '
-        Me.Button3.Location = New System.Drawing.Point(486, 304)
+        Me.Button3.Location = New System.Drawing.Point(116, 120)
         Me.Button3.Name = "Button3"
         Me.Button3.Size = New System.Drawing.Size(62, 23)
         Me.Button3.TabIndex = 96
         Me.Button3.Text = "Stop"
         Me.Button3.UseVisualStyleBackColor = True
         '
-        'Button2
+        'btnStart
         '
-        Me.Button2.Location = New System.Drawing.Point(555, 304)
-        Me.Button2.Name = "Button2"
-        Me.Button2.Size = New System.Drawing.Size(64, 38)
-        Me.Button2.TabIndex = 95
-        Me.Button2.Text = "take darks"
-        Me.Button2.UseVisualStyleBackColor = True
-        '
-        'Button4
-        '
-        Me.Button4.Location = New System.Drawing.Point(418, 304)
-        Me.Button4.Name = "Button4"
-        Me.Button4.Size = New System.Drawing.Size(62, 23)
-        Me.Button4.TabIndex = 94
-        Me.Button4.Text = "Start snapshots"
-        Me.Button4.UseVisualStyleBackColor = True
+        Me.btnStart.Location = New System.Drawing.Point(28, 120)
+        Me.btnStart.Name = "btnStart"
+        Me.btnStart.Size = New System.Drawing.Size(62, 23)
+        Me.btnStart.TabIndex = 94
+        Me.btnStart.Text = "Start snapshots"
+        Me.btnStart.UseVisualStyleBackColor = True
         '
         'cbSaveImages
         '
         Me.cbSaveImages.AutoSize = True
-        Me.cbSaveImages.Location = New System.Drawing.Point(439, 353)
+        Me.cbSaveImages.Location = New System.Drawing.Point(28, 252)
         Me.cbSaveImages.Name = "cbSaveImages"
         Me.cbSaveImages.Size = New System.Drawing.Size(97, 17)
         Me.cbSaveImages.TabIndex = 93
@@ -246,7 +228,7 @@ Partial Class frmGIGE
         'Label8
         '
         Me.Label8.AutoSize = True
-        Me.Label8.Location = New System.Drawing.Point(567, 36)
+        Me.Label8.Location = New System.Drawing.Point(552, 46)
         Me.Label8.Name = "Label8"
         Me.Label8.Size = New System.Drawing.Size(30, 13)
         Me.Label8.TabIndex = 92
@@ -255,75 +237,25 @@ Partial Class frmGIGE
         'Label7
         '
         Me.Label7.AutoSize = True
-        Me.Label7.Location = New System.Drawing.Point(511, 36)
+        Me.Label7.Location = New System.Drawing.Point(426, 46)
         Me.Label7.Name = "Label7"
         Me.Label7.Size = New System.Drawing.Size(24, 13)
         Me.Label7.TabIndex = 91
         Me.Label7.Text = "day"
         '
-        'tbNightGamma
-        '
-        Me.tbNightGamma.Location = New System.Drawing.Point(570, 115)
-        Me.tbNightGamma.Name = "tbNightGamma"
-        Me.tbNightGamma.Size = New System.Drawing.Size(47, 20)
-        Me.tbNightGamma.TabIndex = 90
-        Me.tbNightGamma.Text = "1.2"
-        '
-        'tbNightDgain
-        '
-        Me.tbNightDgain.Location = New System.Drawing.Point(570, 89)
-        Me.tbNightDgain.Name = "tbNightDgain"
-        Me.tbNightDgain.Size = New System.Drawing.Size(47, 20)
-        Me.tbNightDgain.TabIndex = 89
-        Me.tbNightDgain.Text = "1"
-        '
         'tbNightAgain
         '
-        Me.tbNightAgain.Location = New System.Drawing.Point(570, 63)
+        Me.tbNightAgain.Location = New System.Drawing.Point(535, 67)
         Me.tbNightAgain.Name = "tbNightAgain"
-        Me.tbNightAgain.Size = New System.Drawing.Size(47, 20)
+        Me.tbNightAgain.Size = New System.Drawing.Size(54, 20)
         Me.tbNightAgain.TabIndex = 88
         Me.tbNightAgain.Text = "27"
-        '
-        'tbDayGamma
-        '
-        Me.tbDayGamma.Location = New System.Drawing.Point(514, 115)
-        Me.tbDayGamma.Name = "tbDayGamma"
-        Me.tbDayGamma.Size = New System.Drawing.Size(47, 20)
-        Me.tbDayGamma.TabIndex = 87
-        Me.tbDayGamma.Text = "1"
-        '
-        'Label6
-        '
-        Me.Label6.AutoSize = True
-        Me.Label6.Location = New System.Drawing.Point(415, 122)
-        Me.Label6.Name = "Label6"
-        Me.Label6.Size = New System.Drawing.Size(91, 13)
-        Me.Label6.TabIndex = 86
-        Me.Label6.Text = "gamma correction"
-        '
-        'tbDayDgain
-        '
-        Me.tbDayDgain.Location = New System.Drawing.Point(514, 89)
-        Me.tbDayDgain.Name = "tbDayDgain"
-        Me.tbDayDgain.Size = New System.Drawing.Size(47, 20)
-        Me.tbDayDgain.TabIndex = 85
-        Me.tbDayDgain.Text = "1"
-        '
-        'Label1
-        '
-        Me.Label1.AutoSize = True
-        Me.Label1.Location = New System.Drawing.Point(415, 93)
-        Me.Label1.Name = "Label1"
-        Me.Label1.Size = New System.Drawing.Size(57, 13)
-        Me.Label1.TabIndex = 84
-        Me.Label1.Text = "digital gain"
         '
         'lblDayNight
         '
         Me.lblDayNight.AutoSize = True
         Me.lblDayNight.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.lblDayNight.Location = New System.Drawing.Point(415, 273)
+        Me.lblDayNight.Location = New System.Drawing.Point(452, 182)
         Me.lblDayNight.Name = "lblDayNight"
         Me.lblDayNight.Size = New System.Drawing.Size(35, 13)
         Me.lblDayNight.TabIndex = 83
@@ -332,24 +264,24 @@ Partial Class frmGIGE
         'tbExposureTime
         '
         Me.tbExposureTime.Enabled = False
-        Me.tbExposureTime.Location = New System.Drawing.Point(569, 270)
+        Me.tbExposureTime.Location = New System.Drawing.Point(451, 238)
         Me.tbExposureTime.Name = "tbExposureTime"
-        Me.tbExposureTime.Size = New System.Drawing.Size(45, 20)
+        Me.tbExposureTime.Size = New System.Drawing.Size(55, 20)
         Me.tbExposureTime.TabIndex = 82
         Me.tbExposureTime.Text = "4996100"
         '
         'Label4
         '
         Me.Label4.AutoSize = True
-        Me.Label4.Location = New System.Drawing.Point(415, 66)
+        Me.Label4.Location = New System.Drawing.Point(351, 70)
         Me.Label4.Name = "Label4"
-        Me.Label4.Size = New System.Drawing.Size(62, 13)
+        Me.Label4.Size = New System.Drawing.Size(65, 13)
         Me.Label4.TabIndex = 81
-        Me.Label4.Text = "analog gain"
+        Me.Label4.Text = "analog gain:"
         '
         'tbDayGain
         '
-        Me.tbDayGain.Location = New System.Drawing.Point(514, 63)
+        Me.tbDayGain.Location = New System.Drawing.Point(427, 67)
         Me.tbDayGain.Name = "tbDayGain"
         Me.tbDayGain.Size = New System.Drawing.Size(47, 20)
         Me.tbDayGain.TabIndex = 80
@@ -357,46 +289,28 @@ Partial Class frmGIGE
         '
         'tbNightExp
         '
-        Me.tbNightExp.Location = New System.Drawing.Point(570, 216)
+        Me.tbNightExp.Location = New System.Drawing.Point(537, 120)
         Me.tbNightExp.Name = "tbNightExp"
-        Me.tbNightExp.Size = New System.Drawing.Size(45, 20)
+        Me.tbNightExp.Size = New System.Drawing.Size(52, 20)
         Me.tbNightExp.TabIndex = 79
         Me.tbNightExp.Text = "4996100"
         '
         'tbDayTimeExp
         '
-        Me.tbDayTimeExp.Location = New System.Drawing.Point(570, 181)
+        Me.tbDayTimeExp.Location = New System.Drawing.Point(428, 120)
         Me.tbDayTimeExp.Name = "tbDayTimeExp"
         Me.tbDayTimeExp.Size = New System.Drawing.Size(45, 20)
         Me.tbDayTimeExp.TabIndex = 78
         Me.tbDayTimeExp.Text = "125"
         '
-        'Label3
-        '
-        Me.Label3.AutoSize = True
-        Me.Label3.Location = New System.Drawing.Point(415, 216)
-        Me.Label3.Name = "Label3"
-        Me.Label3.Size = New System.Drawing.Size(30, 13)
-        Me.Label3.TabIndex = 77
-        Me.Label3.Text = "night"
-        '
-        'Label2
-        '
-        Me.Label2.AutoSize = True
-        Me.Label2.Location = New System.Drawing.Point(414, 162)
-        Me.Label2.Name = "Label2"
-        Me.Label2.Size = New System.Drawing.Size(24, 13)
-        Me.Label2.TabIndex = 76
-        Me.Label2.Text = "day"
-        '
         'cboNight
         '
         Me.cboNight.DisplayMember = "6"
         Me.cboNight.FormattingEnabled = True
-        Me.cboNight.Items.AddRange(New Object() {"15", "16", "17", "18", "19", "20", "21"})
-        Me.cboNight.Location = New System.Drawing.Point(417, 232)
+        Me.cboNight.Items.AddRange(New Object() {"15", "16", "17", "18", "19", "20", "21", "22", "23"})
+        Me.cboNight.Location = New System.Drawing.Point(535, 93)
         Me.cboNight.Name = "cboNight"
-        Me.cboNight.Size = New System.Drawing.Size(109, 21)
+        Me.cboNight.Size = New System.Drawing.Size(54, 21)
         Me.cboNight.TabIndex = 75
         Me.cboNight.ValueMember = "6"
         '
@@ -405,9 +319,9 @@ Partial Class frmGIGE
         Me.cboDay.DisplayMember = "displayMember"
         Me.cboDay.FormattingEnabled = True
         Me.cboDay.Items.AddRange(New Object() {"4", "5", "6", "7", "8", "9"})
-        Me.cboDay.Location = New System.Drawing.Point(418, 178)
+        Me.cboDay.Location = New System.Drawing.Point(427, 93)
         Me.cboDay.Name = "cboDay"
-        Me.cboDay.Size = New System.Drawing.Size(109, 21)
+        Me.cboDay.Size = New System.Drawing.Size(47, 21)
         Me.cboDay.TabIndex = 74
         Me.cboDay.ValueMember = "displayMember"
         '
@@ -422,7 +336,7 @@ Partial Class frmGIGE
         'cbUseDarks
         '
         Me.cbUseDarks.AutoSize = True
-        Me.cbUseDarks.Location = New System.Drawing.Point(396, 399)
+        Me.cbUseDarks.Location = New System.Drawing.Point(29, 165)
         Me.cbUseDarks.Name = "cbUseDarks"
         Me.cbUseDarks.Size = New System.Drawing.Size(110, 17)
         Me.cbUseDarks.TabIndex = 102
@@ -433,31 +347,131 @@ Partial Class frmGIGE
         '
         Me.TimerAcquistionRate.Interval = 5000
         '
-        'Button7
-        '
-        Me.Button7.Location = New System.Drawing.Point(211, 403)
-        Me.Button7.Name = "Button7"
-        Me.Button7.Size = New System.Drawing.Size(154, 38)
-        Me.Button7.TabIndex = 103
-        Me.Button7.Text = "Button7"
-        Me.Button7.UseVisualStyleBackColor = True
-        Me.Button7.Visible = False
-        '
         'tbGain
         '
-        Me.tbGain.Location = New System.Drawing.Point(489, 270)
+        Me.tbGain.Location = New System.Drawing.Point(451, 208)
         Me.tbGain.Name = "tbGain"
-        Me.tbGain.Size = New System.Drawing.Size(47, 20)
+        Me.tbGain.Size = New System.Drawing.Size(55, 20)
         Me.tbGain.TabIndex = 104
         Me.tbGain.Text = "27"
+        '
+        'tbCutoff
+        '
+        Me.tbCutoff.Location = New System.Drawing.Point(149, 187)
+        Me.tbCutoff.Margin = New System.Windows.Forms.Padding(2)
+        Me.tbCutoff.Name = "tbCutoff"
+        Me.tbCutoff.Size = New System.Drawing.Size(42, 20)
+        Me.tbCutoff.TabIndex = 105
+        Me.tbCutoff.Text = "500"
+        '
+        'Label1
+        '
+        Me.Label1.AutoSize = True
+        Me.Label1.Location = New System.Drawing.Point(351, 96)
+        Me.Label1.Name = "Label1"
+        Me.Label1.Size = New System.Drawing.Size(29, 13)
+        Me.Label1.TabIndex = 106
+        Me.Label1.Text = "time:"
+        '
+        'Label2
+        '
+        Me.Label2.AutoSize = True
+        Me.Label2.Location = New System.Drawing.Point(351, 127)
+        Me.Label2.Name = "Label2"
+        Me.Label2.Size = New System.Drawing.Size(53, 13)
+        Me.Label2.TabIndex = 107
+        Me.Label2.Text = "exposure:"
+        '
+        'Label3
+        '
+        Me.Label3.AutoSize = True
+        Me.Label3.Location = New System.Drawing.Point(351, 182)
+        Me.Label3.Name = "Label3"
+        Me.Label3.Size = New System.Drawing.Size(72, 13)
+        Me.Label3.TabIndex = 108
+        Me.Label3.Text = "current mode:"
+        '
+        'Label6
+        '
+        Me.Label6.AutoSize = True
+        Me.Label6.Location = New System.Drawing.Point(351, 211)
+        Me.Label6.Name = "Label6"
+        Me.Label6.Size = New System.Drawing.Size(66, 13)
+        Me.Label6.TabIndex = 109
+        Me.Label6.Text = "current gain:"
+        '
+        'Label11
+        '
+        Me.Label11.AutoSize = True
+        Me.Label11.Location = New System.Drawing.Point(351, 241)
+        Me.Label11.Name = "Label11"
+        Me.Label11.Size = New System.Drawing.Size(89, 13)
+        Me.Label11.TabIndex = 110
+        Me.Label11.Text = "current exposure:"
+        '
+        'Label12
+        '
+        Me.Label12.AutoSize = True
+        Me.Label12.Location = New System.Drawing.Point(52, 190)
+        Me.Label12.Name = "Label12"
+        Me.Label12.Size = New System.Drawing.Size(95, 13)
+        Me.Label12.TabIndex = 111
+        Me.Label12.Text = "hot pixel threshold:"
+        '
+        'Label13
+        '
+        Me.Label13.AutoSize = True
+        Me.Label13.Location = New System.Drawing.Point(52, 215)
+        Me.Label13.Name = "Label13"
+        Me.Label13.Size = New System.Drawing.Size(94, 13)
+        Me.Label13.TabIndex = 112
+        Me.Label13.Text = "dark frame divider:"
+        '
+        'Label14
+        '
+        Me.Label14.AutoSize = True
+        Me.Label14.Location = New System.Drawing.Point(326, 379)
+        Me.Label14.Name = "Label14"
+        Me.Label14.Size = New System.Drawing.Size(49, 13)
+        Me.Label14.TabIndex = 113
+        Me.Label14.Text = "http port:"
+        '
+        'Label15
+        '
+        Me.Label15.AutoSize = True
+        Me.Label15.Location = New System.Drawing.Point(351, 15)
+        Me.Label15.Name = "Label15"
+        Me.Label15.Size = New System.Drawing.Size(45, 13)
+        Me.Label15.TabIndex = 114
+        Me.Label15.Text = "camera:"
+        '
+        'cbMakeDarks
+        '
+        Me.cbMakeDarks.AutoSize = True
+        Me.cbMakeDarks.Location = New System.Drawing.Point(455, 308)
+        Me.cbMakeDarks.Name = "cbMakeDarks"
+        Me.cbMakeDarks.Size = New System.Drawing.Size(81, 17)
+        Me.cbMakeDarks.TabIndex = 115
+        Me.cbMakeDarks.Text = "make darks"
+        Me.cbMakeDarks.UseVisualStyleBackColor = True
         '
         'frmGIGE
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(627, 417)
+        Me.ClientSize = New System.Drawing.Size(627, 408)
+        Me.Controls.Add(Me.cbMakeDarks)
+        Me.Controls.Add(Me.Label15)
+        Me.Controls.Add(Me.Label14)
+        Me.Controls.Add(Me.Label13)
+        Me.Controls.Add(Me.Label12)
+        Me.Controls.Add(Me.Label11)
+        Me.Controls.Add(Me.Label6)
+        Me.Controls.Add(Me.Label3)
+        Me.Controls.Add(Me.Label2)
+        Me.Controls.Add(Me.Label1)
+        Me.Controls.Add(Me.tbCutoff)
         Me.Controls.Add(Me.tbGain)
-        Me.Controls.Add(Me.Button7)
         Me.Controls.Add(Me.cbUseDarks)
         Me.Controls.Add(Me.Label10)
         Me.Controls.Add(Me.txtFps)
@@ -465,26 +479,17 @@ Partial Class frmGIGE
         Me.Controls.Add(Me.cmbCam)
         Me.Controls.Add(Me.tbMultiplier)
         Me.Controls.Add(Me.Button3)
-        Me.Controls.Add(Me.Button2)
-        Me.Controls.Add(Me.Button4)
+        Me.Controls.Add(Me.btnStart)
         Me.Controls.Add(Me.cbSaveImages)
         Me.Controls.Add(Me.Label8)
         Me.Controls.Add(Me.Label7)
-        Me.Controls.Add(Me.tbNightGamma)
-        Me.Controls.Add(Me.tbNightDgain)
         Me.Controls.Add(Me.tbNightAgain)
-        Me.Controls.Add(Me.tbDayGamma)
-        Me.Controls.Add(Me.Label6)
-        Me.Controls.Add(Me.tbDayDgain)
-        Me.Controls.Add(Me.Label1)
         Me.Controls.Add(Me.lblDayNight)
         Me.Controls.Add(Me.tbExposureTime)
         Me.Controls.Add(Me.Label4)
         Me.Controls.Add(Me.tbDayGain)
         Me.Controls.Add(Me.tbNightExp)
         Me.Controls.Add(Me.tbDayTimeExp)
-        Me.Controls.Add(Me.Label3)
-        Me.Controls.Add(Me.Label2)
         Me.Controls.Add(Me.cboNight)
         Me.Controls.Add(Me.cboDay)
         Me.Controls.Add(Me.Label9)
@@ -492,7 +497,6 @@ Partial Class frmGIGE
         Me.Controls.Add(Me.Button10)
         Me.Controls.Add(Me.Label5)
         Me.Controls.Add(Me.tbPath)
-        Me.Controls.Add(Me.Button1)
         Me.Controls.Add(Me.tbPort)
         Me.Controls.Add(Me.Button6)
         Me.Controls.Add(Me.Button5)
@@ -509,7 +513,6 @@ Partial Class frmGIGE
     Friend WithEvents FolderBrowserDialog1 As FolderBrowserDialog
     Friend WithEvents Label5 As Label
     Friend WithEvents tbPath As TextBox
-    Friend WithEvents Button1 As Button
     Friend WithEvents Timer3 As Timer
     Friend WithEvents tbPort As TextBox
     Friend WithEvents Timer1 As Timer
@@ -523,31 +526,32 @@ Partial Class frmGIGE
     Friend WithEvents cmbCam As ComboBox
     Friend WithEvents tbMultiplier As TextBox
     Friend WithEvents Button3 As Button
-    Friend WithEvents Button2 As Button
-    Friend WithEvents Button4 As Button
+    Friend WithEvents btnStart As Button
     Friend WithEvents cbSaveImages As CheckBox
     Friend WithEvents Label8 As Label
     Friend WithEvents Label7 As Label
-    Friend WithEvents tbNightGamma As TextBox
-    Friend WithEvents tbNightDgain As TextBox
     Friend WithEvents tbNightAgain As TextBox
-    Friend WithEvents tbDayGamma As TextBox
-    Friend WithEvents Label6 As Label
-    Friend WithEvents tbDayDgain As TextBox
-    Friend WithEvents Label1 As Label
     Friend WithEvents lblDayNight As Label
     Friend WithEvents tbExposureTime As TextBox
     Friend WithEvents Label4 As Label
     Friend WithEvents tbDayGain As TextBox
     Friend WithEvents tbNightExp As TextBox
     Friend WithEvents tbDayTimeExp As TextBox
-    Friend WithEvents Label3 As Label
-    Friend WithEvents Label2 As Label
     Friend WithEvents cboNight As ComboBox
     Friend WithEvents cboDay As ComboBox
     Friend WithEvents Label9 As Label
     Friend WithEvents cbUseDarks As CheckBox
     Friend WithEvents TimerAcquistionRate As Timer
-    Friend WithEvents Button7 As Button
     Friend WithEvents tbGain As TextBox
+    Friend WithEvents tbCutoff As TextBox
+    Friend WithEvents Label1 As Label
+    Friend WithEvents Label2 As Label
+    Friend WithEvents Label3 As Label
+    Friend WithEvents Label6 As Label
+    Friend WithEvents Label11 As Label
+    Friend WithEvents Label12 As Label
+    Friend WithEvents Label13 As Label
+    Friend WithEvents Label14 As Label
+    Friend WithEvents Label15 As Label
+    Friend WithEvents cbMakeDarks As CheckBox
 End Class

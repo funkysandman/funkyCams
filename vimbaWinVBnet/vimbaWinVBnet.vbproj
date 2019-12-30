@@ -72,41 +72,23 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="AxInterop.FGControlLib, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Microsoft.QualityTools.Testing.Fakes, Version=12.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\Program Files\NET GmbH\FGControl\Samples\Project\C#\CSharpFGControl\obj\Debug\AxInterop.FGControlLib.dll</HintPath>
-    </Reference>
-    <Reference Include="Interop.FGControlLib, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <EmbedInteropTypes>True</EmbedInteropTypes>
-      <HintPath>bin\Debug\Interop.FGControlLib.dll</HintPath>
     </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
-    <Reference Include="QCamManagedDriver, Version=2.0.12.5, Culture=neutral, PublicKeyToken=a952e79807cc2f57, processorArchitecture=x86">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\Program Files\QImaging\SDK\libs\AMD64\QCamManagedDriver\NETv4.0\QCamManagedDriver.dll</HintPath>
+    <Reference Include="QCamManagedDriver">
+      <HintPath>..\..\..\..\..\..\Program Files\QImaging\SDK\libs\i386\QCamManagedDriver\NETv4.0\QCamManagedDriver.dll</HintPath>
+    </Reference>
+    <Reference Include="SpinnakerNETd_v140">
+      <HintPath>..\..\..\..\..\..\Program Files\Point Grey Research\Spinnaker\bin64\vs2015\SpinnakerNETd_v140.dll</HintPath>
     </Reference>
     <Reference Include="System" />
-    <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Data" />
     <Reference Include="System.Deployment" />
     <Reference Include="System.Drawing" />
-    <Reference Include="System.IO">
-      <HintPath>..\packages\System.IO.4.3.0\lib\net462\System.IO.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="System.Net.Http, Version=4.1.1.3, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Net.Http.4.3.4\lib\net46\System.Net.Http.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Runtime">
-      <HintPath>..\packages\System.Runtime.4.3.0\lib\net462\System.Runtime.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="System.Security.Cryptography.Algorithms">
-      <HintPath>..\packages\System.Security.Cryptography.Algorithms.4.3.1\lib\net463\System.Security.Cryptography.Algorithms.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Web" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xaml" />
     <Reference Include="System.XML" />
@@ -138,7 +120,32 @@
     <Import Include="System.Threading.Tasks" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include=".vb" />
     <Compile Include="device.vb" />
+    <Compile Include="frmPCO.designer.vb">
+      <DependentUpon>frmPCO.vb</DependentUpon>
+    </Compile>
+    <Compile Include="frmPCO.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmPointGrey.Designer.vb">
+      <DependentUpon>frmPointGrey.vb</DependentUpon>
+    </Compile>
+    <Compile Include="frmPointGrey.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmSVSVistek.Designer.vb">
+      <DependentUpon>frmSVSVistek.vb</DependentUpon>
+    </Compile>
+    <Compile Include="frmSVSVistek.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmToupcam.Designer.vb">
+      <DependentUpon>frmToupcam.vb</DependentUpon>
+    </Compile>
+    <Compile Include="frmToupcam.vb">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="frmAVTastro.Designer.vb">
       <DependentUpon>frmAVTastro.vb</DependentUpon>
     </Compile>
@@ -164,6 +171,12 @@
     <Compile Include="frmGIGE.vb">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="frmCoolsnap.Designer.vb">
+      <DependentUpon>frmCoolsnap.vb</DependentUpon>
+    </Compile>
+    <Compile Include="frmCoolsnap.vb">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="frmQ.Designer.vb">
       <DependentUpon>frmQ.vb</DependentUpon>
     </Compile>
@@ -173,18 +186,13 @@
     <Compile Include="frmQimaging.vb">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="frmSVSVistek.Designer.vb">
-      <DependentUpon>frmSVSVistek.vb</DependentUpon>
-    </Compile>
-    <Compile Include="frmSVSVistek.vb">
-      <SubType>Form</SubType>
-    </Compile>
     <Compile Include="Form3.Designer.vb">
       <DependentUpon>Form3.vb</DependentUpon>
     </Compile>
     <Compile Include="Form3.vb">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="Functions.vb" />
     <Compile Include="My Project\AssemblyInfo.vb" />
     <Compile Include="My Project\Application.Designer.vb">
       <AutoGen>True</AutoGen>
@@ -200,10 +208,28 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <Compile Include="PCO\Declares.vb" />
+    <Compile Include="PCO\modDeclarations.vb" />
+    <Compile Include="PCO\pcoapicall.vb" />
     <Compile Include="program.vb" />
+    <Compile Include="queueEntry.vb" />
+    <Compile Include="Toupcam.vb" />
     <Compile Include="webserver.vb" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="frmPCO.resx">
+      <DependentUpon>frmPCO.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmPointGrey.resx">
+      <DependentUpon>frmPointGrey.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmSVSVistek.resx">
+      <DependentUpon>frmSVSVistek.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmToupcam.resx">
+      <DependentUpon>frmToupcam.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
     <EmbeddedResource Include="frmAVTastro.resx">
       <DependentUpon>frmAVTastro.vb</DependentUpon>
       <SubType>Designer</SubType>
@@ -218,14 +244,14 @@
     <EmbeddedResource Include="frmGIGE.resx">
       <DependentUpon>frmGIGE.vb</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="frmCoolsnap.resx">
+      <DependentUpon>frmCoolsnap.vb</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="frmQ.resx">
       <DependentUpon>frmQ.vb</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="frmQimaging.resx">
       <DependentUpon>frmQimaging.vb</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="frmSVSVistek.resx">
-      <DependentUpon>frmSVSVistek.vb</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Form3.resx">
       <DependentUpon>Form3.vb</DependentUpon>
@@ -245,6 +271,9 @@
     <AdditionalFiles Include="BaumerSDKlibs\bgapi2_usb.cti">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </AdditionalFiles>
+    <None Include="masterDarkSVS4021CSGE_12.raw">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="My Project\Application.myapp">
       <Generator>MyApplicationCodeGenerator</Generator>
       <LastGenOutput>Application.Designer.vb</LastGenOutput>
@@ -306,6 +335,25 @@
     <AdditionalFiles Include="BaumerSDKlibs\XmlParser_MD_VC120_v3_0_baumer.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </AdditionalFiles>
+    <Content Include="BaumerSDKlibs\CLAllSerial_MD_VC120_v3_0.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="BaumerSDKlibs\CLProtocol_MD_VC120_v3_0.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="BaumerSDKlibs\CLSerCOM.dll" />
+    <Content Include="BaumerSDKlibs\GCBase_MD_VC120_v3_0.dll" />
+    <Content Include="BaumerSDKlibs\GenApi_MD_VC120_v3_0.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="BaumerSDKlibs\GenCP_MD_VC120_v3_0.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="BaumerSDKlibs\log4cpp_MD_VC120_v3_0.dll" />
+    <Content Include="BaumerSDKlibs\Log_MD_VC120_v3_0.dll" />
+    <Content Include="BaumerSDKlibs\MathParser_MD_VC120_v3_0.dll" />
+    <Content Include="BaumerSDKlibs\NodeMapData_MD_VC120_v3_0.dll" />
+    <Content Include="BaumerSDKlibs\XmlParser_MD_VC120_v3_0.dll" />
     <Content Include="day.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <SubType>Designer</SubType>
@@ -320,8 +368,12 @@
     <Content Include="img_09Nov2018-021150.bmp">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="libpng16.dll" />
     <Content Include="masterDark.png" />
-    <Content Include="masterDark.raw">
+    <Content Include="masterDarkEXO174CBGEC.raw">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="masterSVSDark.raw">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="night.xml">
@@ -335,7 +387,18 @@
     <Content Include="night_gt2450.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="SC2_Cam.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SC2_DLG.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="settings.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SVGenSDK64.dll" />
+    <Content Include="SVLog64.dll" />
+    <Content Include="toupcam.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
@@ -351,13 +414,9 @@
       <Project>{782f80d9-c751-4664-a6be-f6f499bdd581}</Project>
       <Name>BaumerAPI</Name>
     </ProjectReference>
-    <ProjectReference Include="..\ExampleObjectDetection\ObjectDetection.csproj">
-      <Project>{69471b59-576d-446b-8df3-96ec783c0b6c}</Project>
-      <Name>ObjectDetection</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Pylon.NETSupportLibrary\Pylon.NETSupportLibrary.csproj">
-      <Project>{3eafc9f5-d49f-4f9f-86c8-fbd231b07d2e}</Project>
-      <Name>Pylon.NETSupportLibrary</Name>
+    <ProjectReference Include="..\PVcamHelper\PVcamHelper.csproj">
+      <Project>{cff8e983-451b-4bbf-874a-0af38aba86a6}</Project>
+      <Name>PVcamHelper</Name>
     </ProjectReference>
     <ProjectReference Include="..\SVGigE_ExampleVC#.VS2010\GigeApi_.csproj">
       <Project>{b209e79d-9e9e-475e-9300-076e0062dabb}</Project>

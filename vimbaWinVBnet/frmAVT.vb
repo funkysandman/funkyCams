@@ -6,9 +6,8 @@ Imports System.Timers
 Imports System.ComponentModel
 Imports System.Net.Http
 Imports System.Threading
-
-
-
+Imports System.Collections.Specialized
+Imports vimbaWinVBnet.vimbaWinVBnet
 
 Public Class frmAVT
     'Dim v As New AVT.VmbAPINET.Vimba
@@ -35,12 +34,6 @@ Public Class frmAVT
     Dim t As Thread
     Dim meteorCheckRunning As Boolean = False
 
-    Private Class queueEntry
-
-        Public img As Byte()
-        Public filename As String
-
-    End Class
     Public Sub New()
 
         ' This call is required by the designer.
@@ -76,11 +69,23 @@ Public Class frmAVT
 
 
     End Sub
+    Function darkFunction(pixeld As Long, arg As Long, slope As Long) As Int16
+        Dim subtract
+
+        subtract = Math.Max(0, arg - pixeld * slope)
+        Return Math.Max(0, subtract)
+    End Function
     Private Sub received_frame(sender As Object, args As FrameEventArgs)
 
-        ' b = New Bitmap(CInt(args.Frame.Width), CInt(args.Frame.Height), PixelFormat.Format24bppRgb)
-        b = args.Image
-        b.Tag = "orig"
+        b = New Bitmap(CInt(args.Frame.Width), CInt(args.Frame.Height), PixelFormat.Format24bppRgb)
+
+
+        'receive raw data and convert to color
+        Dim f As Frame
+        f = args.Frame
+
+        ' b = args.Image
+        ' b.Tag = "orig"
         running = True
         'start timeout timer
         writeline("received frame")
@@ -96,82 +101,137 @@ Public Class frmAVT
         writeline("got image " & Now)
 
         'darks
-        Dim d2 As Bitmap
+        ' Dim d2 As Bitmap
 
-        If Me.cbUseDarks.Checked Then
+        If Me.cbUseDarks.Checked And lblDayNight.Text = "night" Then
             'd2 = Bitmap.FromFile(Application.StartupPath & "\dark.png")
+            Dim pixValue As Int16 = 0
+            Dim darkValue As Int16 = 0
+            Dim x
             If dark Is Nothing Then
-                Dim fs As New FileStream(Application.StartupPath & "\dark.drk", FileMode.Open)
+                Dim fs As New FileStream(Application.StartupPath & "\dark_" & v.m_Camera.Id & ".raw", FileMode.Open)
                 'read dark from file
 
-                ReDim dark(b.Width * b.Height * 3)
+                ReDim dark(b.Width * b.Height * 2)
                 fs.Read(dark, 0, dark.Count)
                 fs.Close()
+                Dim slope
+                Dim arg As Int16 = Val(tbMultiplier.Text)
+                slope = 4096 / (4096 - arg)
+                Dim lut(4095) As Int16
+                For i = 0 To 4095
+                    lut(i) = Math.Max(0, CInt(i * slope) - arg * slope)
+                Next
+                For x = 0 To dark.Length - 2 Step 2
+
+
+                    darkValue = (dark(x + 1) * 256) + dark(x)
+
+                    ' If darkValue > 500 Then
+                    darkValue = lut(darkValue)
+
+                    dark(x + 1) = (darkValue And &HFF00) >> 8
+                    dark(x) = darkValue And &HFF
+                    ' End If
+
+                Next
             End If
 
-            Dim raw As System.Drawing.Imaging.BitmapData = Nothing
-            ' 'Freeze the image in memory
-            raw = b.LockBits(New Rectangle(0, 0,
-             b.Width, b.Height),
-             System.Drawing.Imaging.ImageLockMode.ReadOnly,
-            b.PixelFormat)
-            Dim size As Integer = b.Width * b.Height * 3
+            Try
 
-            Dim rawImage() As Byte = New Byte(size - 1) {}
-            ''Copy the image into the byte()
-            System.Runtime.InteropServices.Marshal.Copy(raw.Scan0, rawImage, 0, size)
+                Dim t As TimeSpan
+                Dim t2 As Date
+                t2 = Now
 
 
-            Dim multiplier
-            multiplier = Val(Me.tbMultiplier.Text)
-            '
-            'subtract the dark
-            If cbUseDarks.Checked Then
-                Dim aByte As Integer
-                Try
+                For x = 0 To dark.Length - 2 Step 2
 
-                    Dim aNewValue As Byte
-                    Dim offset As Integer
-                    For aByte = 0 To size - 1
-                        If dark(aByte) > 220 Then
-                            aNewValue = CByte(Math.Max(0, CLng(rawImage(aByte)) - CLng(dark(aByte))))
-                            rawImage(aByte) = aNewValue
-                        End If
+                    pixValue = (f.Buffer(x + 1) * 256) + f.Buffer(x)
+                    darkValue = (dark(x + 1) * 256) + dark(x)
 
-                    Next
-                    writeline("subtracted dark")
-                Catch ex As Exception
-                    MsgBox(ex.Message)
-                End Try
-            End If
+                    ' If darkValue > 500 Then
 
-            Dim raw2 As System.Drawing.Imaging.BitmapData = Nothing
+                    pixValue = Math.Max(0, pixValue - darkValue)
+                    ' pixValue = darkFunction(pixValue, darkValue, 100)
+                    f.Buffer(x + 1) = Int(pixValue / 256)
+                    f.Buffer(x) = pixValue And 255
+
+                    ' End If
+
+                Next
+                t = Now - t2
+                Debug.Print(t.ToString)
+            Catch ex As Exception
+                Debug.Print(x)
+            End Try
 
 
-            ' 'Freeze the image in memory
-
-            'raw2 = d2.LockBits(New Rectangle(0, 0,
-            ' d2.Width, d2.Height),
+            'Dim raw As System.Drawing.Imaging.BitmapData = Nothing
+            '' 'Freeze the image in memory
+            'raw = b.LockBits(New Rectangle(0, 0,
+            ' b.Width, b.Height),
             ' System.Drawing.Imaging.ImageLockMode.ReadOnly,
-            'd2.PixelFormat)
-            'size = raw2.Height * raw2.Stride
+            'b.PixelFormat)
+            'Dim size As Integer = b.Width * b.Height * 3
 
-            ' Dim rawImage2() As Byte = New Byte(size - 1) {}
-            ' 'Copy the image into the byte()
-            System.Runtime.InteropServices.Marshal.Copy(rawImage, 0, raw.Scan0, size)
+            'Dim rawImage() As Byte = New Byte(size - 1) {}
+            '''Copy the image into the byte()
+            'System.Runtime.InteropServices.Marshal.Copy(raw.Scan0, rawImage, 0, size)
 
-            'If Not raw2 Is Nothing Then
-            '    ' Unfreeze the memory for the image
-            '    d2.UnlockBits(raw2)
+
+            'Dim multiplier
+            'multiplier = Val(Me.tbMultiplier.Text)
+            ''
+            ''subtract the dark
+            'If cbUseDarks.Checked Then
+            '    Dim aByte As Integer
+            '    Try
+
+            '        Dim aNewValue As Byte
+            '        Dim offset As Integer
+            '        For aByte = 0 To size - 1
+            '            If dark(aByte) > 220 Then
+            '                aNewValue = CByte(Math.Max(0, CLng(rawImage(aByte)) - CLng(dark(aByte))))
+            '                rawImage(aByte) = aNewValue
+            '            End If
+
+            '        Next
+            '        writeline("subtracted dark")
+            '    Catch ex As Exception
+            '        MsgBox(ex.Message)
+            '    End Try
             'End If
 
+            'Dim raw2 As System.Drawing.Imaging.BitmapData = Nothing
 
 
-            b.UnlockBits(raw)
+            '' 'Freeze the image in memory
+
+            ''raw2 = d2.LockBits(New Rectangle(0, 0,
+            '' d2.Width, d2.Height),
+            '' System.Drawing.Imaging.ImageLockMode.ReadOnly,
+            ''d2.PixelFormat)
+            ''size = raw2.Height * raw2.Stride
+
+            '' Dim rawImage2() As Byte = New Byte(size - 1) {}
+            '' 'Copy the image into the byte()
+            'System.Runtime.InteropServices.Marshal.Copy(rawImage, 0, raw.Scan0, size)
+
+            ''If Not raw2 Is Nothing Then
+            ''    ' Unfreeze the memory for the image
+            ''    d2.UnlockBits(raw2)
+            ''End If
+
+
+
+            'b.UnlockBits(raw)
 
 
 
         Else '
+
+            dark = Nothing
+
             'copy buffer into bitmap
             'b = New Bitmap(CInt(args.Frame.Width), CInt(args.Frame.Height), PixelFormat.Format24bppRgb)
 
@@ -205,12 +265,12 @@ Public Class frmAVT
 
         End If
 
-        'imageInUse = imageInUse + 1
         Dim iTotBytes As Integer = 0
         Dim sResponse As String = ""
-        'Dim fs As New FileStream(sPhysicalFilePath, FileMode.Open, FileAccess.Read, FileShare.Read)
-        '
 
+        'convert frame to bitmap
+
+        f.Fill(b)
 
 
         ' myBitmap.Save("Shapes025.jpg", myImageCodecInfo, myEncoderParameters)
@@ -224,10 +284,7 @@ Public Class frmAVT
         gr.DrawString(firstText, myFontLabels, Brushes.GreenYellow, firstLocation) '# last 2 number are X and Y coords.
         gr.Dispose()
 
-        'object detection section test
-        '
-        'Dim t As New Threading.Thread(AddressOf checkForThings)
-        ''t.Start()
+
 
         Dim filename As String
         Dim folderName = String.Format("{0:yyyy-MMM-dd}", DateTime.Now)
@@ -244,21 +301,26 @@ Public Class frmAVT
 
 
         End If
-        If cbMeteors.Checked Then ' And lblDayNight.Text = "night" Then
+        If cbMeteors.Checked And lblDayNight.Text = "night" Then
             ' md.examine(bm, filename)
             'call azure service
             Dim ms As New MemoryStream()
-            b.Save(ms, System.Drawing.Imaging.ImageFormat.Png)
+            b.Save(ms, myImageCodecInfo, myEncoderParameters)
 
             Dim contents = ms.ToArray()
             Dim qe As New queueEntry
             qe.img = contents
             qe.filename = Path.GetFileName(filename)
+            qe.dateTaken = Now
+            qe.cameraID = "AVT-" & v.MyCamera.Id
+            qe.width = b.Width
+            qe.height = b.Height
+
             If myDetectionQueue.Count < 10 Then
                 myDetectionQueue.Enqueue(qe)
             End If
             'myDetectionQueue.Enqueue(New queueEntry(contents,))
-            'callAzureMeteorDetection(contents, Path.GetFileName(filename))
+            'Functions.CallAzureMeteorDetection(contents, Path.GetFileName(filename))
             ms.Close()
         Else
             ' md.examine(bm)
@@ -272,33 +334,19 @@ Public Class frmAVT
         While (meteorCheckRunning)
             If myDetectionQueue.Count > 0 Then
                 aQE = myDetectionQueue.Dequeue()
-                callAzureMeteorDetection(aQE.img, aQE.filename)
+                Functions.CallAzureMeteorDetection(aQE)
 
                 aQE = Nothing
 
             End If
-            Console.WriteLine(myDetectionQueue.Count)
-
+            ' Console.WriteLine(myDetectionQueue.Count)
+            Application.DoEvents()
         End While
 
     End Sub
 
 
-    Public Async Function callAzureMeteorDetection(contents As Byte(), file As String) As Task
 
-        '        Dim apiURL As String = "https://azuremeteordetect20181212113628.azurewebsites.net/api/detection?code=zi3Lrr58mJB3GTut0lktSLIzb08E1dLkHXAbX6s07bd46IoZmm1vqQ==&file=" + file
-        Dim apiURL As String = "http://192.168.1.192:7071/api/detection?file=" + file
-
-
-
-        Using byteContent = New ByteArrayContent(contents)
-
-            Dim response = client.PostAsync(apiURL, byteContent)
-            Dim responseString = response.Result
-            Console.WriteLine(contents.Length)
-        End Using
-
-    End Function
     Public Function getLastImage() As Bitmap
         Dim s As Stopwatch
         Dim stopWatch As Stopwatch = New Stopwatch()
@@ -313,7 +361,7 @@ Public Class frmAVT
     End Function
 
     Public Sub writeline(s As String)
-        Console.WriteLine("AVT GigE: " & v.m_Camera.Id & ":" & s)
+        'Console.WriteLine("AVT GigE: " & v.m_Camera.Id & ":" & s)
     End Sub
 
     Private Sub startup()
@@ -364,7 +412,7 @@ Public Class frmAVT
                     ''   m_CCamera.setGainExposure(Val(Me.tbNightAgain.Text), Val(Me.tbExposureTime.Text))
 
                 Else
-                    v.m_Camera.LoadCameraSettings(Application.StartupPath & "\day_gc1380ch.xml")
+                    'v.m_Camera.LoadCameraSettings(Application.StartupPath & "\day_gc1380ch.xml")
                     'day mode
 
                     'tbExposureTime.Text = tbDayTimeExp.Text
@@ -420,7 +468,7 @@ Public Class frmAVT
         myEncoderParameters = New EncoderParameters(1)
 
         ' Save the bitmap as a JPEG file with quality level 25.
-        myEncoderParameter = New EncoderParameter(myEncoder, CType(85L, Int32))
+        myEncoderParameter = New EncoderParameter(myEncoder, CType(100L, Int32))
         myEncoderParameters.Param(0) = myEncoderParameter
 
         Dim cams As List(Of CameraInfo)
@@ -477,22 +525,22 @@ Public Class frmAVT
             'reader.Close()
             'b.Save(Application.StartupPath & "\dark.tif", System.Drawing.Imaging.ImageFormat.Tiff)
         Next
-        'average the pictures
+        'average the pictures (for 12 bit images)
         Dim imageValueTotal
         Dim newValue
-        For i = 0 To f.BufferSize - 1
+        For i = 0 To f.BufferSize - 1 Step 2
             imageValueTotal = 0
             For x = 0 To 9
-                imageValueTotal = imageValueTotal + darks(x).Buffer(i)
+                imageValueTotal = imageValueTotal + (darks(x).Buffer(i + 1) * 256) + darks(x).Buffer(i)
 
             Next
             newValue = Int(imageValueTotal / 10)
-            f.Buffer(i) = newValue
-
+            f.Buffer(i + 1) = Int(newValue / 256)
+            f.Buffer(i) = newValue And 255
         Next
 
 
-        Dim fs As New FileStream(Application.StartupPath & "\dark.drk", FileMode.Create)
+        Dim fs As New FileStream(Application.StartupPath & "\dark_" & v.m_Camera.Id & ".raw", FileMode.Create)
 
         Dim ms As New MemoryStream()
         fs.Write(f.Buffer, 0, f.BufferSize)
@@ -580,15 +628,24 @@ Public Class frmAVT
         '    cbCam.Focus()
         '    Exit Sub
 
-        'End If
         Button7.Enabled = False
         Button8.Enabled = True
         startTime = Now
         Timer1.Enabled = True
         Timer3.Enabled = True
         meteorCheckRunning = True
-        t = New Thread(AddressOf processDetection)
-        t.Start()
+        If t Is Nothing Then
+
+            t = New Thread(AddressOf processDetection)
+            t.Start()
+
+        Else
+            If Not t.IsAlive Then
+                t = New Thread(AddressOf processDetection)
+                t.Start()
+            End If
+        End If
+
 
         'If Now.Hour >= ComboBox2.SelectedItem Or Now.Hour <= ComboBox1.SelectedItem Then
         '    night = True 'night
@@ -604,6 +661,7 @@ Public Class frmAVT
     Private Sub Button8_Click(sender As Object, e As EventArgs) Handles Button8.Click
         Button7.Enabled = True
         Button8.Enabled = False
+
         v.StopContinuousImageAcquisition()
         meteorCheckRunning = False
         'myCam.StopContinuousImageAcquisition()
@@ -689,6 +747,7 @@ Public Class frmAVT
     End Sub
 
     Private Sub tbMultiplier_TextChanged(sender As Object, e As EventArgs) Handles tbMultiplier.TextChanged
+        dark = Nothing
 
     End Sub
 

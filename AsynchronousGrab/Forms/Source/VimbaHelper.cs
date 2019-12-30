@@ -431,10 +431,16 @@ namespace AsynchronousGrab
             {
                 throw new Exception("No camera open.");
             }
+            // 
+            //this.MyCamera.StopContinuousImageAcquisition();
 
             // Close camera
+            //this.MyCamera.EndCapture();
+        
             this.m_timeoutThread.Abort();
-            this.ReleaseCamera();
+            this.MyCamera.Close();
+            this.MyCamera.Open(VmbAccessModeType.VmbAccessModeFull);
+            
         }
 
         /// <summary>
@@ -707,14 +713,14 @@ namespace AsynchronousGrab
             {
                 case VmbFrameStatusType.VmbFrameStatusComplete:
                     Console.WriteLine("good image");
-                    myImage = ConvertFrame(frame);
-                    Console.WriteLine("converted frame");
+                   // myImage = ConvertFrame(frame);
+                   // Console.WriteLine("converted frame");
                     FrameReceivedHandler frameReceivedHandler = this.m_FrameReceivedHandler;
                     Console.WriteLine("setup frameReceiveHandler");
-                    if (null != frameReceivedHandler && null != myImage)
+                    if (null != frameReceivedHandler && null != frame)
                     {
                         // Report image to user
-                        frameReceivedHandler(this, new FrameEventArgs(myImage));
+                        frameReceivedHandler(this, new FrameEventArgs(frame));
                         Console.WriteLine("Report image to user");
                     }
                     this.MyCamera.QueueFrame(frame);

@@ -32,7 +32,7 @@ namespace ExampleObjectDetection
         private static string _catalogPath;
         private static string _modelPath;
 
-        private static double MIN_SCORE_FOR_OBJECT_HIGHLIGHTING = 0.3;
+        private static double MIN_SCORE_FOR_OBJECT_HIGHLIGHTING = 0.05;
 
         static OptionSet options = new OptionSet()
         {

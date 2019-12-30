@@ -23,7 +23,9 @@ namespace AzureMeteorDetect
     {
         public byte[] img;
         public string filename;
-      
+        public string cameraID;
+        public DateTime dateTaken;
+
     }
 
 

@@ -6,9 +6,11 @@ Imports System.Drawing
 Imports System.Drawing.Imaging
 Imports System.Threading
 Imports System.Net.Http
+Imports System.Collections.Specialized
+Imports vimbaWinVBnet.vimbaWinVBnet
 
 Public Class frmGIGE
-    Dim myDetectionQueue As New Queue(Of QueueEntry)
+    Dim myDetectionQueue As New Queue(Of queueEntry)
     Dim client As New HttpClient()
     Private gigeGrabber As BaumerAPI.GIGEGrabber
     Private mySVCam As SVCamApi.SVCamGrabber 'just for setting properties
@@ -28,12 +30,7 @@ Public Class frmGIGE
     Private mThread As Thread
     Private meteorCheckRunning As Boolean
     Private t As Thread
-    Private Class queueEntry
 
-        Public img As Byte()
-        Public filename As String
-
-    End Class
     Private Sub received_frame(sender As Object, args As BaumerAPI.FrameEventArgs)
 
         ' b = New Bitmap(CInt(args.Frame.Width), CInt(args.Frame.Height), PixelFormat.Format24bppRgb)
@@ -57,110 +54,126 @@ Public Class frmGIGE
         'darks
         Dim d2 As Bitmap
 
-        If Me.cbUseDarks.Checked And False Then 'darks are processed before they arrive here...
-            'd2 = Bitmap.FromFile(Application.StartupPath & "\dark.png")
-            'If dark Is Nothing Then
-            '    Dim fs As New FileStream(Application.StartupPath & "\dark.drk", FileMode.Open)
-            '    'read dark from file
+        'If Me.cbUseDarks.Checked And True Then 'darks are processed before they arrive here...
+        '    'd2 = Bitmap.FromFile(Application.StartupPath & "\masterDarkSVS.bmp")
+        '    'If dark Is Nothing Then
+        '    '    Dim fs As New FileStream(Application.StartupPath & "\masterDarkSVS.png", FileMode.Open)
+        '    '    'read dark from file
 
-            '    ReDim dark(b.Width * b.Height * 3)
-            '    fs.Read(dark, 0, dark.Count)
-            '    fs.Close()
-            'End If
+        '    '    ReDim dark(b.Width * b.Height * 3)
+        '    '    fs.Read(dark, 0, dark.Count)
+        '    '    fs.Close()
+        '    'End If
+        '    'Dim darkraw As System.Drawing.Imaging.BitmapData = Nothing
+        '    ' 'Freeze the image in memory
 
-            Dim raw As System.Drawing.Imaging.BitmapData = Nothing
-            ' 'Freeze the image in memory
-            raw = bm.LockBits(New Rectangle(0, 0,
-             bm.Width, bm.Height),
-             System.Drawing.Imaging.ImageLockMode.ReadOnly,
-            bm.PixelFormat)
-            Dim size As Integer = bm.Width * b.Height
+        '    '' darkraw = d2.LockBits(New Rectangle(0, 0,
+        '    'd2.Width, d2.Height),
+        '    'System.Drawing.Imaging.ImageLockMode.ReadOnly,
+        '    'd2.PixelFormat)
+        '    Dim raw As System.Drawing.Imaging.BitmapData = Nothing
+        '    ' 'Freeze the image in memory
 
-            Dim rawImage() As Byte = New Byte(size - 1) {}
-            ''Copy the image into the byte()
-            System.Runtime.InteropServices.Marshal.Copy(raw.Scan0, rawImage, 0, size)
+        '    raw = bm.LockBits(New Rectangle(0, 0,
+        '     bm.Width, bm.Height),
+        '     System.Drawing.Imaging.ImageLockMode.ReadOnly,
+        '    bm.PixelFormat)
+        '    Dim size As Integer = bm.Width * b.Height * 3
 
-
-            'Dim multiplier
-            'multiplier = Val(Me.tbMultiplier.Text)
-            ''
-            ''subtract the dark
-            'Dim aByte As Integer
-            'Try
-
-            '    Dim aNewValue As Byte
-            '    Dim offset As Integer
-            '    For aByte = 0 To size - 1
-
-            '        aNewValue = CByte(Math.Max(0, CLng(rawImage(aByte)) - CLng(dark(aByte)) * 0.75))
-            '        rawImage(aByte) = aNewValue
-
-            '    Next
-            '    writeline("subtracted dark")
-            'Catch ex As Exception
-            '    MsgBox(ex.Message)
-            'End Try
-            Dim raw2 As System.Drawing.Imaging.BitmapData = Nothing
+        '    Dim rawImagebytes() As Byte = New Byte(size - 1) {}
+        '    Dim rawDarkbytes() As Byte = New Byte(size - 1) {}
+        '    ''Copy the image into the byte()
+        '    System.Runtime.InteropServices.Marshal.Copy(raw.Scan0, rawImagebytes, 0, size - 1)
+        '    System.Runtime.InteropServices.Marshal.Copy(darkraw.Scan0, rawDarkbytes, 0, size - 1)
 
 
-            ' 'Freeze the image in memory
+        '    Dim multiplier
+        '    multiplier = Val(Me.tbMultiplier.Text)
+        '    '
+        '    'subtract the dark
+        '    Dim aByte As Integer
+        '    Try
 
-            'raw2 = d2.LockBits(New Rectangle(0, 0,
-            ' d2.Width, d2.Height),
-            ' System.Drawing.Imaging.ImageLockMode.ReadOnly,
-            'd2.PixelFormat)
-            'size = raw2.Height * raw2.Stride
+        '        Dim aNewValue As Byte
+        '        Dim offset As Integer
+        '        For aByte = 0 To size - 1 Step 3
 
-            ' Dim rawImage2() As Byte = New Byte(size - 1) {}
-            ' 'Copy the image into the byte()
-            System.Runtime.InteropServices.Marshal.Copy(rawImage, 0, raw.Scan0, size)
+        '            ' aNewValue = rawImagebytes(aByte)
+        '            'rawImagebytes(aByte) = aNewValue
+        '            For j = 0 To 2
+        '                If rawDarkbytes(aByte + j) > 30 Then
+        '                    aNewValue = CByte(Math.Max(0, CLng(rawImagebytes(aByte + j)) - CLng(rawDarkbytes(aByte + j))))
 
-            'If Not raw2 Is Nothing Then
-            '    ' Unfreeze the memory for the image
-            '    d2.UnlockBits(raw2)
-            'End If
+        '                    rawImagebytes(aByte + j) = aNewValue
+        '                End If
+        '            Next
 
-
-            'copy buffer into bitmap
-
-
-            '' Lock the bitmap's bits.  
-            'Dim rect As New Rectangle(0, 0, b.Width, b.Height)
-            'Dim bmpData As System.Drawing.Imaging.BitmapData = b.LockBits(rect, System.Drawing.Imaging.ImageLockMode.ReadWrite, b.PixelFormat)
-
-            '    ' Get the address of the first line.
-            '    Dim ptr As IntPtr = bmpData.Scan0
-
-            '    ' Declare an array to hold the bytes of the bitmap.
-            '    ' This code is specific to a bitmap with 24 bits per pixels.
-            '    Dim bytes As Integer = Math.Abs(bmpData.Stride) * b.Height
-            '    Dim rgbValues(bytes - 1) As Byte
-
-            '    '' Copy the RGB values into the array.
-            '    'System.Runtime.InteropServices.Marshal.Copy(ptr, rgbValues, 0, bytes)
-
-            '    '' Set every third value to 255. A 24bpp image will look red.
-            '    'For counter As Integer = 2 To rgbValues.Length - 1 Step 3
-            '    '    rgbValues(counter) = 255
-            '    'Next
-
-            '    ' Copy the RGB values back to the bitmap
-            '    System.Runtime.InteropServices.Marshal.Copy(dark, 0, ptr, dark.Count)
-
-            ' Unlock the bits.
-            bm.UnlockBits(raw)
+        '        Next
+        '            writeline("subtracted dark")
+        '    Catch ex As Exception
+        '        MsgBox(ex.Message)
+        '    End Try
+        'Dim raw2 As System.Drawing.Imaging.BitmapData = Nothing
 
 
+        ' 'Freeze the image in memory
+        ' Dim size As Integer
+        'raw2 = d2.LockBits(New Rectangle(0, 0,
+        ' d2.Width, d2.Height),
+        ' System.Drawing.Imaging.ImageLockMode.ReadOnly,
+        'd2.PixelFormat)
+        'Size = raw2.Height * raw2.Stride
+
+        'Dim rawImage2() As Byte = New Byte(Size - 1) {}
+        'Copy the image into the byte()
+        'System.Runtime.InteropServices.Marshal.Copy(rawImagebytes, 0, raw.Scan0, size)
+
+        'If Not raw2 Is Nothing Then
+        '    ' Unfreeze the memory for the image
+        '    d2.UnlockBits(raw2)
+        'End If
+
+
+        'copy buffer into bitmap
+
+
+        '' Lock the bitmap's bits.  
+        'Dim rect As New Rectangle(0, 0, b.Width, b.Height)
+        'Dim bmpData As System.Drawing.Imaging.BitmapData = b.LockBits(rect, System.Drawing.Imaging.ImageLockMode.ReadWrite, b.PixelFormat)
+
+        '    ' Get the address of the first line.
+        '    Dim ptr As IntPtr = bmpData.Scan0
+
+        '    ' Declare an array to hold the bytes of the bitmap.
+        '    ' This code is specific to a bitmap with 24 bits per pixels.
+        '    Dim bytes As Integer = Math.Abs(bmpData.Stride) * b.Height
+        '    Dim rgbValues(bytes - 1) As Byte
+
+        '    '' Copy the RGB values into the array.
+        '    'System.Runtime.InteropServices.Marshal.Copy(ptr, rgbValues, 0, bytes)
+
+        '    '' Set every third value to 255. A 24bpp image will look red.
+        '    'For counter As Integer = 2 To rgbValues.Length - 1 Step 3
+        '    '    rgbValues(counter) = 255
+        '    'Next
+
+        '    ' Copy the RGB values back to the bitmap
+        '    System.Runtime.InteropServices.Marshal.Copy(dark, 0, ptr, dark.Count)
+
+        '' Unlock the bits.
+        'bm.UnlockBits(raw)
 
 
 
-        Else '
+
+
+        'Else '
 
 
 
 
 
-        End If
+        'End If
 
         'imageInUse = imageInUse + 1
         Dim iTotBytes As Integer = 0
@@ -203,7 +216,7 @@ Public Class frmGIGE
 
 
 
-        If cbMeteors.Checked Then 'And lblDayNight.Text.ToLower = "night" Then
+        If cbMeteors.Checked And lblDayNight.Text.ToLower = "night" Then
             ' md.examine(bm, filename)
             'call azure service
             Dim ms As New MemoryStream()
@@ -213,6 +226,11 @@ Public Class frmGIGE
             Dim qe As New queueEntry
             qe.img = contents
             qe.filename = Path.GetFileName(filename)
+            qe.dateTaken = Now
+            qe.cameraID = "SVS Vistek Camera"
+            qe.width = bm.Width
+            qe.height = bm.Height
+
             If myDetectionQueue.Count < 10 Then
                 myDetectionQueue.Enqueue(qe)
             End If
@@ -233,26 +251,82 @@ Public Class frmGIGE
         running = False
 
     End Sub
-    Public Async Function callAzureMeteorDetection(contents As Byte(), file As String) As Task
+    Private Sub startCapture()
+        If gigeGrabber Is Nothing Then
+            gigeGrabber = New BaumerAPI.GIGEGrabber()
+            gigeGrabber.openCamera(cmbCam.SelectedItem)
+        End If
+
+        gigeGrabber.useDarks = cbUseDarks.Checked
+        gigeGrabber.pixelCutOff = Val(tbCutoff.Text)
+        gigeGrabber.darkMultiplier = Val(tbMultiplier.Text)
+        'Timer2.Enabled = True
+
+
+        'If LCase(Me.lblDayNight.Text) = "day" Then
+        '    gigeGrabber.setParams(Val(Me.tbExposureTime.Text), Val(Me.tbDayGain.Text))
+        'Else
+        '    gigeGrabber.setParams(Val(Me.tbExposureTime.Text), Val(Me.tbNightAgain.Text))
+
+        'End If
+        ' myVistekImageGrabber.useDarks = cbUseDarks.Checked
+        ' myVistekImageGrabber.stopStreamingFF()
+        ' myVistekImageGrabber.startStreamingFF()
+        'gigeGrabber._darkmultiplier = Val(Me.tbMultiplier.Text)
+
+        gigeGrabber.startCapture(AddressOf received_frame)
+        mThread = New Thread(AddressOf startAcquisitionThread)
+        mThread.Name = "Camera thread"
+        mThread.Start()
+
+        TimerAcquistionRate.Enabled = True
+        startTime = Now
+        Timer2.Enabled = True
+        meteorCheckRunning = True
+
+
+
+    End Sub
+    Public Async Function CallAzureMeteorDetection(qe As queueEntry) As Task
 
 
         '        Dim apiURL As String = "https://azuremeteordetect20181212113628.azurewebsites.net/api/detection?code=zi3Lrr58mJB3GTut0lktSLIzb08E1dLkHXAbX6s07bd46IoZmm1vqQ==&file=" + file
-        Dim apiURL As String = "http://192.168.1.192:7071/api/detection?file=" + file
+        Dim apiURL As String = "http://192.168.1.192:7071/api/detection"
+        Dim myUriBuilder As New UriBuilder(apiURL)
+
+
+        Dim query As NameValueCollection = Web.HttpUtility.ParseQueryString(String.Empty)
+
+        query("file") = qe.filename
+        query("dateTaken") = qe.dateTaken.ToString("MM/dd/yyyy hh:mm tt")
+        query("cameraID") = qe.cameraID
+        query("width") = qe.width
+        query("height") = qe.height
+        myUriBuilder.Query = query.ToString
+
 
         Dim client As New HttpClient()
 
-        Dim byteContent = New ByteArrayContent(contents)
+        Dim byteContent = New ByteArrayContent(qe.img)
+        Try
 
-        Dim response = client.PostAsync(apiURL, byteContent)
-        Dim responseString = response.Result
 
+            Dim response = client.PostAsync(myUriBuilder.ToString, byteContent)
+            Dim responseString = response.Result
+            byteContent = Nothing
+
+        Catch ex As Exception
+            Console.WriteLine("calling meteor detection:" & ex.Message)
+        End Try
     End Function
+
+
     Public Sub processDetection()
         Dim aQE As queueEntry
         While (meteorCheckRunning)
             If myDetectionQueue.Count > 0 Then
                 aQE = myDetectionQueue.Dequeue()
-                callAzureMeteorDetection(aQE.img, aQE.filename)
+                Functions.CallAzureMeteorDetection(aQE)
 
                 aQE = Nothing
 
@@ -314,7 +388,7 @@ Public Class frmGIGE
 
     End Sub
 
-    Private Sub Button1_Click(sender As Object, e As EventArgs) Handles Button1.Click
+    Private Sub Button1_Click(sender As Object, e As EventArgs)
         'open the camera
 
     End Sub
@@ -377,8 +451,8 @@ Public Class frmGIGE
     End Sub
 
     Private Sub Button6_Click(sender As Object, e As EventArgs) Handles Button6.Click
-        Button6.Enabled = True
-        Button4.Enabled = False
+        Button5.Enabled = True
+        Button6.Enabled = False
         myWebServer.StopWebServer()
     End Sub
 
@@ -389,48 +463,46 @@ Public Class frmGIGE
 
 
             Dim currentMode As Boolean
-            currentMode = False
+            currentMode = True 'night
 
             If Now.Hour >= cboNight.SelectedItem Or Now.Hour <= cboDay.SelectedItem Then
                 currentMode = True
             Else
                 currentMode = False
             End If
-            If currentMode <> night Then
-                night = currentMode
-                If night Then
 
-                    tbExposureTime.Text = tbNightExp.Text
+            If currentMode Then
 
-                    'night mode
-                    ' If Not myWebServer Is Nothing Then
-                    If cbUseDarks.Checked Then
-                        ' gigeGrabber.useDarks = True
-                    Else
-                        ' gigeGrabber.useDarks = False
-                    End If
-                    'End If
-                    tbGain.Text = tbNightAgain.Text
-                    lblDayNight.Text = "night"
-                    ' gigeGrabber.setParams(Val(Me.tbExposureTime.Text), Val(Me.tbNightAgain.Text))
+                tbExposureTime.Text = tbNightExp.Text
 
+                'night mode
+                ' If Not myWebServer Is Nothing Then
+                If cbUseDarks.Checked Then
+                    ' gigeGrabber.useDarks = True
                 Else
-                    'day mode
-
-                    tbExposureTime.Text = tbDayTimeExp.Text
-
-
-                    tbGain.Text = tbDayGain.Text
-                    lblDayNight.Text = "day"
-
-
-
+                    ' gigeGrabber.useDarks = False
                 End If
                 'End If
+                tbGain.Text = tbNightAgain.Text
+                lblDayNight.Text = "night"
+                ' gigeGrabber.setParams(Val(Me.tbExposureTime.Text), Val(Me.tbNightAgain.Text))
+                gigeGrabber.useDarks = cbUseDarks.Checked
+            Else
+                'day mode
+
+                tbExposureTime.Text = tbDayTimeExp.Text
 
 
+                tbGain.Text = tbDayGain.Text
+                lblDayNight.Text = "day"
 
+                gigeGrabber.useDarks = False
             End If
+            'End If
+
+
+
+
 
         Catch ex As Exception
 
@@ -440,17 +512,18 @@ Public Class frmGIGE
         Timer1.Enabled = True
     End Sub
 
-    Private Sub Button4_Click(sender As Object, e As EventArgs) Handles Button4.Click
+    Private Sub Button4_Click(sender As Object, e As EventArgs) Handles btnStart.Click
 
-        Button2.Enabled = True
-        Button1.Enabled = False
+
+        btnStart.Enabled = False
+        Button3.Enabled = True
         If Now.Hour >= cboNight.SelectedItem Or Now.Hour <= cboDay.SelectedItem Then
             night = True
         Else
             night = False
         End If
-        If night Then
 
+        If night Then
             tbExposureTime.Text = tbNightExp.Text
             lblDayNight.Text = "night"
             'night mode
@@ -478,7 +551,7 @@ Public Class frmGIGE
         Next
         'cmbCam.SelectedIndex = 0
         mySVCam.openCamera(cmbCam.SelectedIndex)
-
+        mySVCam.prepareCameraForTimed(mySVCam.current_selected_cam)
         If LCase(Me.lblDayNight.Text) = "day" Then
             mySVCam.setParams(Val(Me.tbExposureTime.Text), Val(Me.tbDayGain.Text))
         Else
@@ -486,37 +559,9 @@ Public Class frmGIGE
         End If
 
         mySVCam.closeCamera()
-
-        gigeGrabber = New BaumerAPI.GIGEGrabber()
-        gigeGrabber.openCamera(cmbCam.SelectedItem)
-
-
-        'Timer2.Enabled = True
-
-
-        If LCase(Me.lblDayNight.Text) = "day" Then
-            gigeGrabber.setParams(Val(Me.tbExposureTime.Text), Val(Me.tbDayGain.Text))
-        Else
-            gigeGrabber.setParams(Val(Me.tbExposureTime.Text), Val(Me.tbNightAgain.Text))
-
-        End If
-        ' myVistekImageGrabber.useDarks = cbUseDarks.Checked
-        ' myVistekImageGrabber.stopStreamingFF()
-        ' myVistekImageGrabber.startStreamingFF()
-        'gigeGrabber._darkmultiplier = Val(Me.tbMultiplier.Text)
-
-        gigeGrabber.startCapture(AddressOf received_frame)
-        mThread = New Thread(AddressOf startAcquisitionThread)
-        mThread.Name = "Camera thread"
-        mThread.Start()
-
-        TimerAcquistionRate.Enabled = True
-        startTime = Now
-        Timer2.Enabled = True
-        meteorCheckRunning = True
+        Me.startCapture()
         t = New Thread(AddressOf processDetection)
         t.Start()
-
     End Sub
     Private Sub startAcquisitionThread()
         Console.WriteLine("starting camera thread")
@@ -529,12 +574,14 @@ Public Class frmGIGE
 
     Private Sub Button3_Click(sender As Object, e As EventArgs) Handles Button3.Click
         gigeGrabber.stopAcquisition()
+        gigeGrabber.closeCamera()
         mThread.Abort()
         meteorCheckRunning = False
-
+        Button3.Enabled = False
+        btnStart.Enabled = True
     End Sub
 
-    Private Sub Button7_Click(sender As Object, e As EventArgs) Handles Button7.Click
+    Private Sub Button7_Click(sender As Object, e As EventArgs)
         Dim test As New Bitmap("img_09Nov2018-021150.bmp")
         Dim filename As String
         Dim folderName = String.Format("{0:yyyy-MMM-dd}", DateTime.Now)
@@ -567,10 +614,70 @@ Public Class frmGIGE
         End If
     End Sub
 
-    Private Sub tbGain_TextChanged(sender As Object, e As EventArgs) Handles tbGain.TextChanged
+
+
+    Private Sub Button2_Click(sender As Object, e As EventArgs)
+
+    End Sub
+
+    Private Sub cbUseDarks_CheckedChanged(sender As Object, e As EventArgs) Handles cbUseDarks.CheckedChanged
         If Not gigeGrabber Is Nothing Then
-            gigeGrabber.setParams(Val(Me.tbExposureTime.Text), Val(Me.tbGain.Text))
+            If Me.lblDayNight.Text = "night" Then
+                gigeGrabber.useDarks = cbUseDarks.Checked
+            End If
+
         End If
 
+    End Sub
+
+    Private Sub tbCutoff_TextChanged(sender As Object, e As EventArgs) Handles tbCutoff.TextChanged
+        If Not gigeGrabber Is Nothing Then
+            gigeGrabber.pixelCutOff = Val(tbCutoff.Text)
+        End If
+    End Sub
+
+    Private Sub tbMultiplier_TextChanged(sender As Object, e As EventArgs) Handles tbMultiplier.TextChanged
+        If Not gigeGrabber Is Nothing Then
+            gigeGrabber.darkMultiplier = Val(tbMultiplier.Text)
+        End If
+    End Sub
+
+    Private Sub lblDayNight_TextChanged(sender As Object, e As EventArgs) Handles lblDayNight.TextChanged
+        If Not gigeGrabber Is Nothing Then
+            ' gigeGrabber.setParams(Val(Me.tbExposureTime.Text), Val(Me.tbNightAgain.Text))
+
+            myDetectionQueue.Clear()
+            gigeGrabber.stopAcquisition()
+            mThread.Abort()
+            'wait ten seconds
+            Thread.Sleep(10000)
+            gigeGrabber.closeCamera()
+            mySVCam.openCamera(cmbCam.SelectedIndex)
+
+            If LCase(Me.lblDayNight.Text) = "day" Then
+                gigeGrabber.useDarks = False
+                mySVCam.setParams(Val(Me.tbExposureTime.Text), Val(Me.tbDayGain.Text))
+            Else
+                gigeGrabber.useDarks = cbUseDarks.Checked
+                mySVCam.setParams(Val(Me.tbExposureTime.Text), Val(Me.tbNightAgain.Text))
+            End If
+
+            mySVCam.closeCamera()
+            startCapture()
+        End If
+
+    End Sub
+
+    Private Sub lblDayNight_Click(sender As Object, e As EventArgs) Handles lblDayNight.Click
+
+    End Sub
+
+    Private Sub CheckBox1_CheckedChanged(sender As Object, e As EventArgs) Handles cbMakeDarks.CheckedChanged
+        If Not gigeGrabber Is Nothing Then
+            If Me.lblDayNight.Text = "night" Then
+                gigeGrabber.makeDarks = cbMakeDarks.Checked
+            End If
+
+        End If
     End Sub
 End Class

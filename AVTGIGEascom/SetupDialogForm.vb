@@ -12,6 +12,7 @@ Public Class SetupDialogForm
         Camera.m_exposureTime = Val(tbExposure.Text)
         Camera.m_gain = Val(tbGain.Text)
         Camera.m_chosenPort = ComboBox2.SelectedItem
+        Camera.m_binning = cboBinning.SelectedItem
         Me.DialogResult = System.Windows.Forms.DialogResult.OK
         Me.Close()
     End Sub

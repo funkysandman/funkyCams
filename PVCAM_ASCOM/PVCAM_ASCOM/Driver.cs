@@ -72,15 +72,12 @@ namespace ASCOM.Photometrics
         private static string driverDescription = "ASCOM Camera Driver for Photometrics.";
         private static pvcam_helper.PVCamCamera myCam;
         internal static string comPortProfileName = "COM Port"; // Constants used for Profile persistence
-        internal static string ROIProfileName = "ROI y trim";//how much to trim off bottom
-        internal static string ROIyTrimDefault = "95";
         internal static string comPortDefault = "COM1";
         internal static string traceStateProfileName = "Trace Level";
         internal static string traceStateDefault = "false";
 
         internal static string comPort; // Variables to hold the currrent device configuration
-        public static string ROIytrim;
-        
+
         /// <summary>
         /// Private variable to hold the connected state
         /// </summary>
@@ -125,40 +122,32 @@ namespace ASCOM.Photometrics
             SubscribeToAcquisitionNotifications(myCam);
             pvcam_helper.PVCamCamera.RefreshCameras(myCam);
             // open first camera
-            
+
             //myCam.ReadCameraParams();
-            ccdWidth= myCam.XSize;
+            ccdWidth = myCam.XSize;
             ccdHeight = myCam.YSize;
-
-
-            myCam.Region[0].p2 = (ushort)( myCam.Region[0].p2 - ushort.Parse(ROIytrim));
-            ccdWidth = (myCam.Region[0].s2 - myCam.Region[0].s1 + 1);
-            ccdHeight = (myCam.Region[0].p2 - myCam.Region[0].p1 + 1);
 
             myCam.SetClockingMode("Alternate Normal");
             myCam.SetClearMode("Pre-Exposure");
             myCam.SetClearCycles(2);
             myCam.SetEMGain(1);
-           
-            myCam.SetReadoutSpeed((short)(myCam.SpeedTable.ReadoutSpeeds-1)); //default to slowest readout
-
-
+            myCam.SetReadoutSpeed(1); //10Mhz
             myCam.SetTriggerMode("Timed");
             myCam.SetBinning("1");
             myCam.SetGainState(0);//gain state 2
             myCam.FramesToGet = 1;
             myCam.SetExposureTime(1);
-         //   myCam.StartSeqAcq();
+            //   myCam.StartSeqAcq();
 
             //
-            tl.LogMessage("Camera", "Completed initialisation");
+            tl.LogMessage("Camera", "Completed initialisation,yo");
         }
 
         private void ReportReceived(pvcam_helper.PVCamCamera pvcc, pvcam_helper.ReportMessage rm)
         {
             rm.Type = rm.Type;
             Console.WriteLine(rm.Message);
-            tl.LogMessage("Camera",rm.Message);
+            tl.LogMessage("Camera", rm.Message);
             //if (rm.Type == MsgTypes.MSG_ERROR)
             //{
             //    ReportErr(lblErrMsg, lbxStatusList, rm.Message, this);
@@ -179,15 +168,15 @@ namespace ASCOM.Photometrics
             }
 
 
-                if (evtType.NotifEvent == pvcam_helper.CameraNotifications.ACQ_NEW_FRAME_RECEIVED)
+            if (evtType.NotifEvent == pvcam_helper.CameraNotifications.ACQ_NEW_FRAME_RECEIVED)
             {
 
                 //copy image frame
                 //check if roi in use
 
-                int tempW = (myCam.Region[0].s2 - myCam.Region[0].s1+1) / myCam.Region[0].sbin;
+                int tempW = (myCam.Region[0].s2 - myCam.Region[0].s1 + 1) / myCam.Region[0].sbin;
 
-                int tempH = (myCam.Region[0].p2 - myCam.Region[0].p1 +1) / myCam.Region[0].pbin;
+                int tempH = (myCam.Region[0].p2 - myCam.Region[0].p1 + 1) / myCam.Region[0].pbin;
                 cameraImageArray = new int[tempW, tempH];
                 int n = 0;
                 for (int y = 0; y < tempH; y++)
@@ -207,7 +196,7 @@ namespace ASCOM.Photometrics
                     //open camera
                     if (pvcam_helper.PVCamCamera.OpenCamera(pvcam_helper.PVCamCamera.CameraList[0], myCam))
                         myCam.ReadCameraParams();
-                   
+
                 }
             }
         }
@@ -236,12 +225,12 @@ namespace ASCOM.Photometrics
         {
             // consider only showing the setup dialog if not connected
             // or call a different dialog if connected
-            
-                
+
+
 
             using (pvcam_helper.FrmSettings F = new pvcam_helper.FrmSettings(myCam))
             {
-              
+
                 var result = F.ShowDialog();
                 if (result == System.Windows.Forms.DialogResult.OK)
                 {
@@ -392,9 +381,9 @@ namespace ASCOM.Photometrics
 
         #region ICamera Implementation
 
-        private  int ccdWidth = 1392; // Constants to define the ccd pixel dimenstions
-        private  int ccdHeight = 1040;
-        private  double pixelSize = 6.45; // Constant for the pixel physical dimension
+        private int ccdWidth = 1392; // Constants to define the ccd pixel dimenstions
+        private int ccdHeight = 1040;
+        private double pixelSize = 6.45; // Constant for the pixel physical dimension
 
         private int cameraNumX = 1392; // Initialise variables to hold values required for functionality tested by Conform
         private int cameraNumY = 1040;
@@ -468,7 +457,7 @@ namespace ASCOM.Photometrics
                 if (!myCam.isRunning())
                     myCam.GetCurrentTemprature();
                 //
-                return myCam.CurrentTemperature/100;
+                return myCam.CurrentTemperature / 100;
 
             }
         }
@@ -857,7 +846,7 @@ namespace ASCOM.Photometrics
             get
             {
                 tl.LogMessage("PixelSizeX Get", pixelSize.ToString());
-                return (double)(myCam.PixelSize)/1000;
+                return (double)(myCam.PixelSize) / 1000;
             }
         }
 
@@ -949,7 +938,7 @@ namespace ASCOM.Photometrics
             {
                 return;
             }
-           
+
 
             //Get estimated read out time and update the label
             if (myCam.ReadoutTime != 0)
@@ -973,7 +962,7 @@ namespace ASCOM.Photometrics
 
 
             tl.LogMessage("StartExposure", Duration.ToString() + " " + Light.ToString());
-            
+
         }
 
         public int StartX
@@ -1124,7 +1113,6 @@ namespace ASCOM.Photometrics
                 driverProfile.DeviceType = "Camera";
                 tl.Enabled = Convert.ToBoolean(driverProfile.GetValue(driverID, traceStateProfileName, string.Empty, traceStateDefault));
                 comPort = driverProfile.GetValue(driverID, comPortProfileName, string.Empty, comPortDefault);
-                ROIytrim = driverProfile.GetValue(driverID, ROIProfileName, string.Empty, ROIyTrimDefault);
             }
         }
 
@@ -1138,7 +1126,6 @@ namespace ASCOM.Photometrics
                 driverProfile.DeviceType = "Camera";
                 driverProfile.WriteValue(driverID, traceStateProfileName, tl.Enabled.ToString());
                 driverProfile.WriteValue(driverID, comPortProfileName, comPort.ToString());
-                driverProfile.WriteValue(driverID, ROIProfileName, ROIytrim.ToString());
             }
         }
 

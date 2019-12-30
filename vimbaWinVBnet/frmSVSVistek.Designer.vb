@@ -63,12 +63,17 @@ Partial Class frmSVSVistek
         Me.Timer3 = New System.Windows.Forms.Timer(Me.components)
         Me.Label10 = New System.Windows.Forms.Label()
         Me.txtFps = New System.Windows.Forms.TextBox()
+        Me.cbUseTrigger = New System.Windows.Forms.CheckBox()
+        Me.Label11 = New System.Windows.Forms.Label()
+        Me.Label12 = New System.Windows.Forms.Label()
+        Me.tbUpper = New System.Windows.Forms.TextBox()
+        Me.tbLower = New System.Windows.Forms.TextBox()
         CType(Me.PictureBox1, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
         '
         'Button6
         '
-        Me.Button6.Location = New System.Drawing.Point(20, 382)
+        Me.Button6.Location = New System.Drawing.Point(20, 451)
         Me.Button6.Name = "Button6"
         Me.Button6.Size = New System.Drawing.Size(104, 23)
         Me.Button6.TabIndex = 8
@@ -77,18 +82,16 @@ Partial Class frmSVSVistek
         '
         'tbPort
         '
-        Me.tbPort.Location = New System.Drawing.Point(130, 382)
+        Me.tbPort.Location = New System.Drawing.Point(129, 451)
         Me.tbPort.Name = "tbPort"
         Me.tbPort.Size = New System.Drawing.Size(50, 20)
         Me.tbPort.TabIndex = 9
-        Me.tbPort.Text = "8083"
+        Me.tbPort.Text = "8050"
         '
         'cbUseDarks
         '
         Me.cbUseDarks.AutoSize = True
-        Me.cbUseDarks.Checked = True
-        Me.cbUseDarks.CheckState = System.Windows.Forms.CheckState.Checked
-        Me.cbUseDarks.Location = New System.Drawing.Point(317, 384)
+        Me.cbUseDarks.Location = New System.Drawing.Point(316, 453)
         Me.cbUseDarks.Name = "cbUseDarks"
         Me.cbUseDarks.Size = New System.Drawing.Size(110, 17)
         Me.cbUseDarks.TabIndex = 10
@@ -98,7 +101,7 @@ Partial Class frmSVSVistek
         'Label3
         '
         Me.Label3.AutoSize = True
-        Me.Label3.Location = New System.Drawing.Point(466, 248)
+        Me.Label3.Location = New System.Drawing.Point(182, 236)
         Me.Label3.Name = "Label3"
         Me.Label3.Size = New System.Drawing.Size(30, 13)
         Me.Label3.TabIndex = 16
@@ -107,7 +110,7 @@ Partial Class frmSVSVistek
         'Label2
         '
         Me.Label2.AutoSize = True
-        Me.Label2.Location = New System.Drawing.Point(465, 194)
+        Me.Label2.Location = New System.Drawing.Point(181, 182)
         Me.Label2.Name = "Label2"
         Me.Label2.Size = New System.Drawing.Size(24, 13)
         Me.Label2.TabIndex = 15
@@ -118,7 +121,7 @@ Partial Class frmSVSVistek
         Me.cboNight.DisplayMember = "6"
         Me.cboNight.FormattingEnabled = True
         Me.cboNight.Items.AddRange(New Object() {"15", "16", "17", "18", "19", "20", "21", "22", "23"})
-        Me.cboNight.Location = New System.Drawing.Point(468, 264)
+        Me.cboNight.Location = New System.Drawing.Point(184, 252)
         Me.cboNight.Name = "cboNight"
         Me.cboNight.Size = New System.Drawing.Size(109, 21)
         Me.cboNight.TabIndex = 14
@@ -129,7 +132,7 @@ Partial Class frmSVSVistek
         Me.cboDay.DisplayMember = "displayMember"
         Me.cboDay.FormattingEnabled = True
         Me.cboDay.Items.AddRange(New Object() {"4", "5", "6", "7", "8", "9"})
-        Me.cboDay.Location = New System.Drawing.Point(469, 210)
+        Me.cboDay.Location = New System.Drawing.Point(184, 197)
         Me.cboDay.Name = "cboDay"
         Me.cboDay.Size = New System.Drawing.Size(109, 21)
         Me.cboDay.TabIndex = 13
@@ -138,14 +141,14 @@ Partial Class frmSVSVistek
         'Label1
         '
         Me.Label1.AutoSize = True
-        Me.Label1.Location = New System.Drawing.Point(479, 214)
+        Me.Label1.Location = New System.Drawing.Point(195, 202)
         Me.Label1.Name = "Label1"
         Me.Label1.Size = New System.Drawing.Size(0, 13)
         Me.Label1.TabIndex = 12
         '
         'Button4
         '
-        Me.Button4.Location = New System.Drawing.Point(185, 380)
+        Me.Button4.Location = New System.Drawing.Point(184, 449)
         Me.Button4.Name = "Button4"
         Me.Button4.Size = New System.Drawing.Size(116, 22)
         Me.Button4.TabIndex = 17
@@ -155,11 +158,11 @@ Partial Class frmSVSVistek
         'Timer1
         '
         Me.Timer1.Enabled = True
-        Me.Timer1.Interval = 30000
+        Me.Timer1.Interval = 10000
         '
         'tbDayTimeExp
         '
-        Me.tbDayTimeExp.Location = New System.Drawing.Point(621, 213)
+        Me.tbDayTimeExp.Location = New System.Drawing.Point(337, 201)
         Me.tbDayTimeExp.Name = "tbDayTimeExp"
         Me.tbDayTimeExp.Size = New System.Drawing.Size(45, 20)
         Me.tbDayTimeExp.TabIndex = 18
@@ -167,7 +170,7 @@ Partial Class frmSVSVistek
         '
         'tbNightExp
         '
-        Me.tbNightExp.Location = New System.Drawing.Point(621, 248)
+        Me.tbNightExp.Location = New System.Drawing.Point(337, 236)
         Me.tbNightExp.Name = "tbNightExp"
         Me.tbNightExp.Size = New System.Drawing.Size(45, 20)
         Me.tbNightExp.TabIndex = 19
@@ -175,7 +178,7 @@ Partial Class frmSVSVistek
         '
         'tbDayGain
         '
-        Me.tbDayGain.Location = New System.Drawing.Point(565, 95)
+        Me.tbDayGain.Location = New System.Drawing.Point(280, 83)
         Me.tbDayGain.Name = "tbDayGain"
         Me.tbDayGain.Size = New System.Drawing.Size(47, 20)
         Me.tbDayGain.TabIndex = 22
@@ -184,7 +187,7 @@ Partial Class frmSVSVistek
         'Label4
         '
         Me.Label4.AutoSize = True
-        Me.Label4.Location = New System.Drawing.Point(466, 98)
+        Me.Label4.Location = New System.Drawing.Point(182, 86)
         Me.Label4.Name = "Label4"
         Me.Label4.Size = New System.Drawing.Size(62, 13)
         Me.Label4.TabIndex = 23
@@ -193,7 +196,7 @@ Partial Class frmSVSVistek
         'tbExposureTime
         '
         Me.tbExposureTime.Enabled = False
-        Me.tbExposureTime.Location = New System.Drawing.Point(620, 302)
+        Me.tbExposureTime.Location = New System.Drawing.Point(336, 290)
         Me.tbExposureTime.Name = "tbExposureTime"
         Me.tbExposureTime.Size = New System.Drawing.Size(45, 20)
         Me.tbExposureTime.TabIndex = 24
@@ -203,7 +206,7 @@ Partial Class frmSVSVistek
         '
         Me.lblDayNight.AutoSize = True
         Me.lblDayNight.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.lblDayNight.Location = New System.Drawing.Point(466, 305)
+        Me.lblDayNight.Location = New System.Drawing.Point(182, 292)
         Me.lblDayNight.Name = "lblDayNight"
         Me.lblDayNight.Size = New System.Drawing.Size(35, 13)
         Me.lblDayNight.TabIndex = 25
@@ -213,7 +216,7 @@ Partial Class frmSVSVistek
         '
         Me.PictureBox1.Location = New System.Drawing.Point(22, 23)
         Me.PictureBox1.Name = "PictureBox1"
-        Me.PictureBox1.Size = New System.Drawing.Size(432, 315)
+        Me.PictureBox1.Size = New System.Drawing.Size(142, 116)
         Me.PictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage
         Me.PictureBox1.TabIndex = 26
         Me.PictureBox1.TabStop = False
@@ -221,7 +224,7 @@ Partial Class frmSVSVistek
         'Label5
         '
         Me.Label5.AutoSize = True
-        Me.Label5.Location = New System.Drawing.Point(466, 125)
+        Me.Label5.Location = New System.Drawing.Point(182, 113)
         Me.Label5.Name = "Label5"
         Me.Label5.Size = New System.Drawing.Size(57, 13)
         Me.Label5.TabIndex = 27
@@ -229,7 +232,7 @@ Partial Class frmSVSVistek
         '
         'tbDayDgain
         '
-        Me.tbDayDgain.Location = New System.Drawing.Point(565, 121)
+        Me.tbDayDgain.Location = New System.Drawing.Point(280, 109)
         Me.tbDayDgain.Name = "tbDayDgain"
         Me.tbDayDgain.Size = New System.Drawing.Size(47, 20)
         Me.tbDayDgain.TabIndex = 28
@@ -238,7 +241,7 @@ Partial Class frmSVSVistek
         'Label6
         '
         Me.Label6.AutoSize = True
-        Me.Label6.Location = New System.Drawing.Point(466, 154)
+        Me.Label6.Location = New System.Drawing.Point(182, 142)
         Me.Label6.Name = "Label6"
         Me.Label6.Size = New System.Drawing.Size(91, 13)
         Me.Label6.TabIndex = 29
@@ -246,7 +249,7 @@ Partial Class frmSVSVistek
         '
         'tbDayGamma
         '
-        Me.tbDayGamma.Location = New System.Drawing.Point(565, 147)
+        Me.tbDayGamma.Location = New System.Drawing.Point(280, 135)
         Me.tbDayGamma.Name = "tbDayGamma"
         Me.tbDayGamma.Size = New System.Drawing.Size(47, 20)
         Me.tbDayGamma.TabIndex = 30
@@ -254,7 +257,7 @@ Partial Class frmSVSVistek
         '
         'tbNightGamma
         '
-        Me.tbNightGamma.Location = New System.Drawing.Point(621, 147)
+        Me.tbNightGamma.Location = New System.Drawing.Point(337, 135)
         Me.tbNightGamma.Name = "tbNightGamma"
         Me.tbNightGamma.Size = New System.Drawing.Size(47, 20)
         Me.tbNightGamma.TabIndex = 33
@@ -262,7 +265,7 @@ Partial Class frmSVSVistek
         '
         'tbNightDgain
         '
-        Me.tbNightDgain.Location = New System.Drawing.Point(621, 121)
+        Me.tbNightDgain.Location = New System.Drawing.Point(337, 109)
         Me.tbNightDgain.Name = "tbNightDgain"
         Me.tbNightDgain.Size = New System.Drawing.Size(47, 20)
         Me.tbNightDgain.TabIndex = 32
@@ -270,7 +273,7 @@ Partial Class frmSVSVistek
         '
         'tbNightAgain
         '
-        Me.tbNightAgain.Location = New System.Drawing.Point(621, 95)
+        Me.tbNightAgain.Location = New System.Drawing.Point(337, 83)
         Me.tbNightAgain.Name = "tbNightAgain"
         Me.tbNightAgain.Size = New System.Drawing.Size(47, 20)
         Me.tbNightAgain.TabIndex = 31
@@ -279,7 +282,7 @@ Partial Class frmSVSVistek
         'Label7
         '
         Me.Label7.AutoSize = True
-        Me.Label7.Location = New System.Drawing.Point(562, 68)
+        Me.Label7.Location = New System.Drawing.Point(278, 56)
         Me.Label7.Name = "Label7"
         Me.Label7.Size = New System.Drawing.Size(24, 13)
         Me.Label7.TabIndex = 34
@@ -288,7 +291,7 @@ Partial Class frmSVSVistek
         'Label8
         '
         Me.Label8.AutoSize = True
-        Me.Label8.Location = New System.Drawing.Point(618, 68)
+        Me.Label8.Location = New System.Drawing.Point(334, 56)
         Me.Label8.Name = "Label8"
         Me.Label8.Size = New System.Drawing.Size(30, 13)
         Me.Label8.TabIndex = 35
@@ -297,7 +300,7 @@ Partial Class frmSVSVistek
         'cbSaveImages
         '
         Me.cbSaveImages.AutoSize = True
-        Me.cbSaveImages.Location = New System.Drawing.Point(490, 385)
+        Me.cbSaveImages.Location = New System.Drawing.Point(206, 373)
         Me.cbSaveImages.Name = "cbSaveImages"
         Me.cbSaveImages.Size = New System.Drawing.Size(97, 17)
         Me.cbSaveImages.TabIndex = 36
@@ -306,7 +309,7 @@ Partial Class frmSVSVistek
         '
         'Button1
         '
-        Me.Button1.Location = New System.Drawing.Point(469, 336)
+        Me.Button1.Location = New System.Drawing.Point(184, 324)
         Me.Button1.Name = "Button1"
         Me.Button1.Size = New System.Drawing.Size(62, 23)
         Me.Button1.TabIndex = 37
@@ -315,7 +318,7 @@ Partial Class frmSVSVistek
         '
         'Button2
         '
-        Me.Button2.Location = New System.Drawing.Point(606, 336)
+        Me.Button2.Location = New System.Drawing.Point(322, 324)
         Me.Button2.Name = "Button2"
         Me.Button2.Size = New System.Drawing.Size(64, 38)
         Me.Button2.TabIndex = 38
@@ -328,7 +331,7 @@ Partial Class frmSVSVistek
         '
         'Button3
         '
-        Me.Button3.Location = New System.Drawing.Point(537, 336)
+        Me.Button3.Location = New System.Drawing.Point(253, 324)
         Me.Button3.Name = "Button3"
         Me.Button3.Size = New System.Drawing.Size(62, 23)
         Me.Button3.TabIndex = 39
@@ -337,8 +340,8 @@ Partial Class frmSVSVistek
         '
         'tbMultiplier
         '
-        Me.tbMultiplier.Location = New System.Drawing.Point(444, 384)
-        Me.tbMultiplier.Margin = New System.Windows.Forms.Padding(2)
+        Me.tbMultiplier.Location = New System.Drawing.Point(160, 372)
+        Me.tbMultiplier.Margin = New System.Windows.Forms.Padding(2, 2, 2, 2)
         Me.tbMultiplier.Name = "tbMultiplier"
         Me.tbMultiplier.Size = New System.Drawing.Size(35, 20)
         Me.tbMultiplier.TabIndex = 40
@@ -347,15 +350,15 @@ Partial Class frmSVSVistek
         'cmbCam
         '
         Me.cmbCam.FormattingEnabled = True
-        Me.cmbCam.Location = New System.Drawing.Point(478, 44)
+        Me.cmbCam.Location = New System.Drawing.Point(184, 11)
         Me.cmbCam.Name = "cmbCam"
         Me.cmbCam.Size = New System.Drawing.Size(188, 21)
         Me.cmbCam.TabIndex = 41
         '
         'Button10
         '
-        Me.Button10.Location = New System.Drawing.Point(313, 354)
-        Me.Button10.Margin = New System.Windows.Forms.Padding(2)
+        Me.Button10.Location = New System.Drawing.Point(312, 423)
+        Me.Button10.Margin = New System.Windows.Forms.Padding(2, 2, 2, 2)
         Me.Button10.Name = "Button10"
         Me.Button10.Size = New System.Drawing.Size(36, 18)
         Me.Button10.TabIndex = 44
@@ -365,7 +368,7 @@ Partial Class frmSVSVistek
         'Label9
         '
         Me.Label9.AutoSize = True
-        Me.Label9.Location = New System.Drawing.Point(14, 357)
+        Me.Label9.Location = New System.Drawing.Point(14, 426)
         Me.Label9.Margin = New System.Windows.Forms.Padding(2, 0, 2, 0)
         Me.Label9.Name = "Label9"
         Me.Label9.Size = New System.Drawing.Size(31, 13)
@@ -374,17 +377,17 @@ Partial Class frmSVSVistek
         '
         'tbPath
         '
-        Me.tbPath.Location = New System.Drawing.Point(49, 354)
-        Me.tbPath.Margin = New System.Windows.Forms.Padding(2)
+        Me.tbPath.Location = New System.Drawing.Point(48, 423)
+        Me.tbPath.Margin = New System.Windows.Forms.Padding(2, 2, 2, 2)
         Me.tbPath.Name = "tbPath"
         Me.tbPath.Size = New System.Drawing.Size(252, 20)
         Me.tbPath.TabIndex = 42
-        Me.tbPath.Text = "c:\image"
+        Me.tbPath.Text = "c:\imageSVS"
         '
         'cbMeteors
         '
         Me.cbMeteors.AutoSize = True
-        Me.cbMeteors.Location = New System.Drawing.Point(490, 408)
+        Me.cbMeteors.Location = New System.Drawing.Point(206, 396)
         Me.cbMeteors.Name = "cbMeteors"
         Me.cbMeteors.Size = New System.Drawing.Size(96, 17)
         Me.cbMeteors.TabIndex = 45
@@ -397,7 +400,7 @@ Partial Class frmSVSVistek
         'Label10
         '
         Me.Label10.AutoSize = True
-        Me.Label10.Location = New System.Drawing.Point(603, 384)
+        Me.Label10.Location = New System.Drawing.Point(319, 372)
         Me.Label10.Name = "Label10"
         Me.Label10.Size = New System.Drawing.Size(21, 13)
         Me.Label10.TabIndex = 49
@@ -405,16 +408,65 @@ Partial Class frmSVSVistek
         '
         'txtFps
         '
-        Me.txtFps.Location = New System.Drawing.Point(606, 401)
+        Me.txtFps.Location = New System.Drawing.Point(322, 389)
         Me.txtFps.Name = "txtFps"
         Me.txtFps.Size = New System.Drawing.Size(48, 20)
         Me.txtFps.TabIndex = 48
+        '
+        'cbUseTrigger
+        '
+        Me.cbUseTrigger.AutoSize = True
+        Me.cbUseTrigger.Location = New System.Drawing.Point(185, 36)
+        Me.cbUseTrigger.Name = "cbUseTrigger"
+        Me.cbUseTrigger.Size = New System.Drawing.Size(115, 17)
+        Me.cbUseTrigger.TabIndex = 50
+        Me.cbUseTrigger.Text = "use external trigger"
+        Me.cbUseTrigger.UseVisualStyleBackColor = True
+        '
+        'Label11
+        '
+        Me.Label11.AutoSize = True
+        Me.Label11.Location = New System.Drawing.Point(127, 494)
+        Me.Label11.Name = "Label11"
+        Me.Label11.Size = New System.Drawing.Size(34, 13)
+        Me.Label11.TabIndex = 104
+        Me.Label11.Text = "upper"
+        '
+        'Label12
+        '
+        Me.Label12.AutoSize = True
+        Me.Label12.Location = New System.Drawing.Point(10, 494)
+        Me.Label12.Name = "Label12"
+        Me.Label12.Size = New System.Drawing.Size(32, 13)
+        Me.Label12.TabIndex = 103
+        Me.Label12.Text = "lower"
+        '
+        'tbUpper
+        '
+        Me.tbUpper.Location = New System.Drawing.Point(165, 491)
+        Me.tbUpper.Name = "tbUpper"
+        Me.tbUpper.Size = New System.Drawing.Size(62, 20)
+        Me.tbUpper.TabIndex = 102
+        Me.tbUpper.Text = "16383"
+        '
+        'tbLower
+        '
+        Me.tbLower.Location = New System.Drawing.Point(48, 491)
+        Me.tbLower.Name = "tbLower"
+        Me.tbLower.Size = New System.Drawing.Size(62, 20)
+        Me.tbLower.TabIndex = 101
+        Me.tbLower.Text = "1000"
         '
         'frmSVSVistek
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(685, 433)
+        Me.ClientSize = New System.Drawing.Size(428, 523)
+        Me.Controls.Add(Me.Label11)
+        Me.Controls.Add(Me.Label12)
+        Me.Controls.Add(Me.tbUpper)
+        Me.Controls.Add(Me.tbLower)
+        Me.Controls.Add(Me.cbUseTrigger)
         Me.Controls.Add(Me.Label10)
         Me.Controls.Add(Me.txtFps)
         Me.Controls.Add(Me.cbMeteors)
@@ -499,4 +551,9 @@ Partial Class frmSVSVistek
     Friend WithEvents Timer3 As Timer
     Friend WithEvents Label10 As Label
     Friend WithEvents txtFps As TextBox
+    Friend WithEvents cbUseTrigger As CheckBox
+    Friend WithEvents Label11 As Label
+    Friend WithEvents Label12 As Label
+    Friend WithEvents tbUpper As TextBox
+    Friend WithEvents tbLower As TextBox
 End Class

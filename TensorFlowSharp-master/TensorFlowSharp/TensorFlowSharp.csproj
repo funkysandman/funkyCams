@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFrameworks>net471;netstandard2.0</TargetFrameworks>
@@ -27,7 +27,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="libtensorflow.dll" />
+    <None Remove="libtensorflow.dllcpu" />
     <None Remove="nuget\build\net45\TensorFlowSharp.targets" />
+    <None Remove="TensorFlowSharp.dll" />
     <None Include="nuget\build\net45\TensorFlowSharp.targets" PackagePath="build\net45\TensorFlowSharp.targets" Pack="true" />
     <None Include="..\native\libtensorflow.dll" Link="nuget\runtimes\win7-x64\native\libtensorflow.dll" PackagePath="runtimes\win7-x64\native\libtensorflow.dll" Pack="true" />
     <None Include="..\native\libtensorflow.dylib" Link="nuget\runtimes\osx\native\libtensorflow.dylib" PackagePath="runtimes\osx\native\libtensorflow.dylib" Pack="true" />
@@ -39,7 +42,14 @@
   <ItemGroup>
     <Folder Include="Ops\" />
   </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="System.ValueTuple" Version="4.5.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="System.ValueTuple.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 </Project>

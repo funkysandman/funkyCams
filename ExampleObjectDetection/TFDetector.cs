@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.IO;
-
+using System.Xml.Linq;
 using ExampleCommon;
 using Mono.Options;
 using System.Reflection;
@@ -25,7 +25,7 @@ namespace ObjectDetection
         private static string _catalogPath;
         private static string _modelPath;
         private static TFGraph graph;
-        private static double MIN_SCORE_FOR_OBJECT_HIGHLIGHTING = 0.30;
+        private static double MIN_SCORE_FOR_OBJECT_HIGHLIGHTING = 0.55;
         private static TFSession mySession;
         private TFTensor tensor;
         private TFSession.Runner runner;
@@ -604,6 +604,135 @@ namespace ObjectDetection
             examining = false;
             // }
         }
+        //public void examine(Image imageData, string aFile, ref float[,,] _boxes, ref float[,] _scores, ref float[,] _classes, ref float[] _num, ref bool _found)
+        //{
+
+        //    // make bitmap
+
+        //    Console.WriteLine("examining {0}", aFile);
+        //    Bitmap img;
+
+        //    img = new Bitmap(imageData);
+            
+
+        //    if (examining) return;
+        //    examining = true;
+        //    try
+        //    {
+        //        string outfile = "";
+        //        float detectedClass = 0;
+        //        int c = 0;
+        //        if (mySession is null)
+        //            mySession = new TFSession(graph);
+        //        //using (mySession)
+        //        //{
+
+
+
+        //        // Create an EncoderParameters object.
+        //        // An EncoderParameters object has an array of EncoderParameter
+        //        // objects. In this case, there is only one
+        //        // EncoderParameter object in the array.
+
+        //        MemoryStream ms = new MemoryStream();
+        //        Bitmap cloneImg = new Bitmap(img);
+
+        //        img.Dispose();
+
+        //        cloneImg.Save(ms, jgpEncoder, myEncoderParameters);
+        //        var contents = ms.ToArray();
+        //        ms.Close();
+        //        cloneImg.Dispose();
+        //        tensor = ImageUtil.CreateTensorFromImageFile(imageData, TFDataType.UInt8);
+                
+        //        //if (runner is null)
+        //        runner = mySession.GetRunner();
+
+        //        runner
+        //            .AddInput(graph["image_tensor"][0], tensor)
+        //            .Fetch(
+        //            graph["detection_boxes"][0],
+        //            graph["detection_scores"][0],
+        //            graph["detection_classes"][0],
+        //            graph["num_detections"][0]);
+        //        var output = runner.Run();
+        //        while (drawingBoxes) { };//make sure boxes aren't in use
+        //        boxes = (float[,,])output[0].GetValue(jagged: false);
+        //        scores = (float[,])output[1].GetValue(jagged: false);
+        //        classes = (float[,])output[2].GetValue(jagged: false);
+        //        num = (float[])output[3].GetValue(jagged: false);
+        //        found = false;
+
+        //        float maxscore = 0;
+        //        c = 0;
+        //        foreach (float score in scores)
+        //        {
+
+        //            if (score > maxscore && classes[0, c] == 1)
+        //            {
+        //                maxscore = score;
+        //                detectedClass = classes[0, c];
+        //            }
+        //            if (score > MIN_SCORE_FOR_OBJECT_HIGHLIGHTING && classes[0, c] == 1)
+        //            {
+        //                found = true;
+        //                // maxClass = classes[i];
+        //            }
+        //            c++;
+        //        }
+        //        _found = found;
+        //        _boxes = boxes;
+        //        _scores = scores;
+        //        _classes = classes;
+        //        _num = num;
+        //        //store in the cloud
+
+
+        //        //return boxes, scores, classes
+        //        //outfile = "e:\\test\\found\\" + Path.GetFileName(aFile);
+        //        //System.IO.Directory.CreateDirectory(Path.Combine(Path.GetDirectoryName(aFile), "found"));
+        //        //if (found)
+
+        //        //{
+        //        //    outfile = outfile.Replace("jpg", "png");
+        //        //    using (MemoryStream memory = new MemoryStream())
+        //        //    {
+        //        //        using (FileStream fs = new FileStream(outfile, FileMode.Create, FileAccess.ReadWrite))
+        //        //        {
+        //        //            img.Save(memory, ImageFormat.Png);
+        //        //            byte[] bytes = memory.ToArray();
+        //        //            fs.Write(bytes, 0, bytes.Length);
+        //        //        }
+        //        //    }
+        //        //    //save original bitmap lossless
+        //        //    //outfile = outfile.Replace("bmp", "png");
+        //        //    //img.Save(outfile);
+        //        //    outfile = outfile.Replace("png", "jpg");
+        //        //    //outfile = "none";
+        //        //    DrawBoxes(boxes, scores, classes, img, outfile, MIN_SCORE_FOR_OBJECT_HIGHLIGHTING, false);
+        //        //    using (MemoryStream memory = new MemoryStream())
+        //        //    {
+        //        //        using (FileStream fs = new FileStream(outfile, FileMode.Create, FileAccess.ReadWrite))
+        //        //        {
+        //        //            img.Save(memory, ImageFormat.Jpeg);
+        //        //            byte[] bytes = memory.ToArray();
+        //        //            fs.Write(bytes, 0, bytes.Length);
+        //        //        }
+        //        //    }
+        //        //}
+        //        tensor.Dispose();
+
+        //        ms.Dispose();
+        //        examining = false;
+        //    }
+
+        //    catch (Exception e)
+        //    {
+        //        Console.Write("error:" + e.Message);
+        //        examining = false;
+        //    }
+        //    // }
+        //}
 
         public void examine(byte[] imageData, string aFile,ref float[,,] _boxes,ref float[,] _scores,ref float[,] _classes,ref float[] _num, ref bool _found)
         {
@@ -611,11 +740,11 @@ namespace ObjectDetection
             // make bitmap
 
             Console.WriteLine("examining {0}", aFile);
-            Bitmap img;
-            using (var imagems = new MemoryStream(imageData))
-            {
-                img = new Bitmap(imagems);
-            }
+            //Bitmap img;
+            //using (var imagems = new MemoryStream(imageData))
+            //{
+            //    img = new Bitmap(imagems);
+            //}
 
             if (examining) return;
             examining = true;
@@ -637,15 +766,15 @@ namespace ObjectDetection
                 // EncoderParameter object in the array.
 
                 MemoryStream ms = new MemoryStream();
-                Bitmap cloneImg = new Bitmap(img);
+                //Bitmap cloneImg = new Bitmap(img);
 
-                img.Dispose();
+            //    img.Dispose();
 
-                cloneImg.Save(ms, jgpEncoder, myEncoderParameters);
-                var contents = ms.ToArray();
-                ms.Close();
-                cloneImg.Dispose();
-                tensor = ImageUtil.CreateTensorFromImageFile(contents, TFDataType.UInt8);
+             //   cloneImg.Save(ms, jgpEncoder, myEncoderParameters);
+             //   var contents = ms.ToArray();
+             //   ms.Close();
+             //   cloneImg.Dispose();
+                tensor = ImageUtil.CreateTensorFromImageFile(imageData, TFDataType.UInt8);
                 //if (runner is null)
                 runner = mySession.GetRunner();
 
@@ -673,6 +802,7 @@ namespace ObjectDetection
                     {
                         maxscore = score;
                         detectedClass = classes[0, c];
+
                     }
                     if (score > MIN_SCORE_FOR_OBJECT_HIGHLIGHTING && classes[0, c] == 1)
                     {
@@ -927,20 +1057,101 @@ namespace ObjectDetection
                         }
 
                         int value = Convert.ToInt32(classes[i, j]);
-                        if (value == 1) { 
+                         if (value == 1) { 
                         CatalogItem catalogItem = _catalog.FirstOrDefault(item => item.Id == value);
                         //if (flip)
                         //{ editor.AddBoxFlip(xmin, xmax, ymin, ymax, $"{catalogItem.DisplayName}: {(scores[i, j] * 100).ToString("0")}%"); }
                         //else
                         //{
                             editor.AddBox(xmin, xmax, ymin, ymax, $"{catalogItem.DisplayName} : {(scores[i, j] * 100).ToString("0")}%");
+                        }
                         //}
-                    }
                     }
                 }
             }
             drawingBoxes = false;
         }
+
+        public XElement GetBoxesXML(float[,,] boxes, float[,] scores, float[,] classes, string outputFile,string width, string height)
+
+        {
+
+            var x = boxes.GetLength(0);
+            var y = boxes.GetLength(1);
+            var z = boxes.GetLength(2);
+            XElement xmlTree = new XElement("annotation");
+
+            float ymin = 0, xmin = 0, ymax = 0, xmax = 0;
+            XElement aFilename = new XElement("filename");
+            outputFile.Replace("png", "jpg");
+            aFilename.Value = outputFile;
+            xmlTree.Add(aFilename);
+            XElement aSize = new XElement("size");
+            aSize.Add(new XElement("width",width));
+            aSize.Add(new XElement("height",height));
+            aSize.Add(new XElement("depth","1"));
+            xmlTree.Add(aSize);
+
+            for (int i = 0; i < x; i++)
+            {
+                for (int j = 0; j < y; j++)
+                {
+                    if (scores[i, j] < MIN_SCORE_FOR_OBJECT_HIGHLIGHTING) continue;
+
+                    XElement anObject = new XElement("object");
+                    int value = Convert.ToInt32(classes[i, j]);
+                    CatalogItem catalogItem = _catalog.FirstOrDefault(item => item.Id == value);
+                    anObject.Add(new XElement("score", scores[i, j]));
+                    anObject.Add(new XElement("name",catalogItem.DisplayName));
+                    XElement bndBox = new XElement("bndbox");
+
+
+
+
+                    for (int k = 0; k < z; k++)
+                    {
+                        var box = boxes[i, j, k];
+                        switch (k)
+                        {
+                            case 0:
+                                ymin = box;
+                                break;
+                            case 1:
+                                xmin = box;
+                                break;
+                            case 2:
+                                ymax = box;
+                                break;
+                            case 3:
+                                xmax = box;
+                                break;
+                        }
+
+                    }
+                    bndBox.Add(new XElement("xmin", Convert.ToString(Convert.ToInt16(xmin * Convert.ToInt32(width)))));
+                    bndBox.Add(new XElement("ymin", Convert.ToString(Convert.ToInt16(ymin * Convert.ToInt32(height)))));
+                    bndBox.Add(new XElement("xmax", Convert.ToString(Convert.ToInt16(xmax * Convert.ToInt32(width)))));
+                    bndBox.Add(new XElement("ymax", Convert.ToString(Convert.ToInt16(ymax * Convert.ToInt32(height)))));
+                    anObject.Add(bndBox);
+                    xmlTree.Add(anObject);
+                    //if (value == 1)
+                    //    {
+                    //        ///CatalogItem catalogItem = _catalog.FirstOrDefault(item => item.Id == value);
+                    //        //if (flip)
+                    //        //{ editor.AddBoxFlip(xmin, xmax, ymin, ymax, $"{catalogItem.DisplayName}: {(scores[i, j] * 100).ToString("0")}%"); }
+                    //        //else
+                    //        //{
+                    //      //  editor.AddBox(xmin, xmax, ymin, ymax, $"{catalogItem.DisplayName} : {(scores[i, j] * 100).ToString("0")}%");
+                    //    }
+                    //    //}
+                    //}
+                }
+
+            }
+            return xmlTree;
+
+        }
+
 
         private ImageCodecInfo GetEncoder(ImageFormat format)
         {
