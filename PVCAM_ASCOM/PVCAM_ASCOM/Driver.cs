@@ -134,7 +134,7 @@ namespace ASCOM.Photometrics
             myCam.SetReadoutSpeed(1); //10Mhz
             myCam.SetTriggerMode("Timed");
             myCam.SetBinning("1");
-            myCam.SetGainState(0);//gain state 2
+            myCam.SetGainState(2);//gain state 2
             myCam.FramesToGet = 1;
             myCam.SetExposureTime(1);
             //   myCam.StartSeqAcq();
