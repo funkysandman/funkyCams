@@ -130,7 +130,7 @@ namespace ASCOM.Photometrics
             myCam.SetClockingMode("Alternate Normal");
             myCam.SetClearMode("Pre-Exposure");
             myCam.SetClearCycles(2);
-            myCam.SetEMGain(1);
+            //myCam.SetEMGain(1); - doesn't seem to do much
             myCam.SetReadoutSpeed(1); //10Mhz
             myCam.SetTriggerMode("Timed");
             myCam.SetBinning("1");
@@ -426,12 +426,14 @@ namespace ASCOM.Photometrics
             get
             {
                 tl.LogMessage("BinX Get", "1");
-                return 1;
+                return myCam.Binning;
             }
             set
             {
                 tl.LogMessage("BinX Set", value.ToString());
-                if (value != 1) throw new ASCOM.InvalidValueException("BinX", value.ToString(), "1"); // Only 1 is valid in this simple template
+               // if (value != 1) throw new ASCOM.InvalidValueException("BinX", value.ToString(), "1"); // Only 1 is valid in this simple template
+                myCam.Binning = value;
+                myCam.SetBinning(Convert.ToString(value));
             }
         }
 
@@ -440,12 +442,15 @@ namespace ASCOM.Photometrics
             get
             {
                 tl.LogMessage("BinY Get", "1");
-                return 1;
+                return myCam.Binning;
             }
             set
             {
                 tl.LogMessage("BinY Set", value.ToString());
-                if (value != 1) throw new ASCOM.InvalidValueException("BinY", value.ToString(), "1"); // Only 1 is valid in this simple template
+                //if (value != 1) throw new ASCOM.InvalidValueException("BinY", value.ToString(), "1"); // Only 1 is valid in this simple template
+                myCam.Binning = value;
+                myCam.SetBinning(Convert.ToString(value));
+
             }
         }
 
@@ -790,8 +795,8 @@ namespace ASCOM.Photometrics
         {
             get
             {
-                tl.LogMessage("MaxBinX Get", "1");
-                return 1;
+                tl.LogMessage("MaxBinX Get", "4");
+                return 4;
             }
         }
 
@@ -799,8 +804,8 @@ namespace ASCOM.Photometrics
         {
             get
             {
-                tl.LogMessage("MaxBinY Get", "1");
-                return 1;
+                tl.LogMessage("MaxBinY Get", "4");
+                return 4;
             }
         }
 
@@ -938,7 +943,8 @@ namespace ASCOM.Photometrics
             {
                 return;
             }
-
+            //setup binning
+            
 
             //Get estimated read out time and update the label
             if (myCam.ReadoutTime != 0)
