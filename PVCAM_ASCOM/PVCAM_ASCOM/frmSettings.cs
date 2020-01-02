@@ -581,10 +581,10 @@ namespace pvcam_helper
                     break;
 
                 case CameraNotifications.READOUT_SPEED_CHANGED:
-                    cbxGainStates.Items.Clear();
-                    for (int i = 0; i < ActiveCamera.SpeedTable.ReadoutOption[ActiveCamera.SpeedTableIndex].GainStates; i++)
-                        cbxGainStates.Items.Add(i + 1);
-                    cbxGainStates.SelectedIndex = 0;
+                    //cbxGainStates.Items.Clear();
+                    //for (int i = 0; i < ActiveCamera.SpeedTable.ReadoutOption[ActiveCamera.SpeedTableIndex].GainStates; i++)
+                    //    cbxGainStates.Items.Add(i + 1);
+                    //cbxGainStates.SelectedIndex = 0;
                     break;
             }
         }
@@ -1183,7 +1183,9 @@ namespace pvcam_helper
 
         private void btnOk_Click(object sender, EventArgs e)
         {
-           // ASCOM.Photometrics.Camera.ROIytrim = tbRoiYtrim.Text;
+            // ASCOM.Photometrics.Camera.ROIytrim = tbRoiYtrim.Text;
+            ActiveCamera.SetGainState((Int16)cbxGainStates.SelectedIndex);
+            ActiveCamera.SetReadoutSpeed(Convert.ToInt16(cbxRdOutSpd.SelectedIndex));
             this.DialogResult = DialogResult.OK;
             this.Close();
 
