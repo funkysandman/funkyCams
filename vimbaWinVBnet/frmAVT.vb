@@ -340,7 +340,7 @@ Public Class frmAVT
 
             End If
             ' Console.WriteLine(myDetectionQueue.Count)
-            Application.DoEvents()
+            Thread.Sleep(1000)
         End While
 
     End Sub

@@ -356,6 +356,7 @@ namespace AsynchronousGrab
 
                 // Start synchronous image acquisition (grab)
                 this.MyCamera.StartContinuousImageAcquisition(1);
+                //this.MyCamera.StartCapture();
 
                 bError = false;
             }
