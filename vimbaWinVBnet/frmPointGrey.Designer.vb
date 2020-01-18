@@ -401,9 +401,9 @@ Partial Class frmPointGrey
         Me.Label3.AutoSize = True
         Me.Label3.Location = New System.Drawing.Point(298, 415)
         Me.Label3.Name = "Label3"
-        Me.Label3.Size = New System.Drawing.Size(57, 13)
+        Me.Label3.Size = New System.Drawing.Size(82, 13)
         Me.Label3.TabIndex = 100
-        Me.Label3.Text = "lost frames"
+        Me.Label3.Text = "missing packets"
         '
         'tbLostImage
         '

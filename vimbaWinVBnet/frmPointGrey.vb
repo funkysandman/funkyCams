@@ -231,16 +231,16 @@ Public Class frmPointGrey
                 myForm.startTime = Now
                 myForm.frames = 0
             End If
-            Console.WriteLine("Image event occurred...")
+            Console.WriteLine("Image event occurred...{0}", image.TimeStamp)
 
             If image.IsIncomplete Then
                 myForm.lost_image = myForm.lost_image + 1
 
                 Console.WriteLine("Image incomplete with image status {0}...{1}", image.ImageStatus, NewLine)
-                image.Release()
-                myForm.running = False
+                'image.Release()
+                'myForm.running = False
 
-                Exit Sub
+                'Exit Sub
             End If
 
             'image.Save("pgDark.raw")
