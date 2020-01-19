@@ -1259,6 +1259,10 @@ namespace SVCamApi
                             //File.WriteAllBytes("test.raw", rawImage.imagebytes);
                             //copy back to imageInfo
                             Marshal.Copy(rawImage.imagebytes, 0, ImageInfo.pImagePtr, imageSizeX*imageSizeY*3/2);
+                            //
+                            //
+                            //try baumer api 
+
 
                             ////debayer buffer into RGB
                             ret=myApi.SVS_UtilBufferBayerToRGB(ImageInfo, ref imagebufferRGB[currentIdex].imagebytes[0], imageSizeX*imageSizeY*3);
@@ -1427,6 +1431,12 @@ namespace SVCamApi
                             for (int x =0;x<rawImage.imagebytes.Length; x=x+2)
                             {
                                 value = Convert.ToInt16(rawImage.imagebytes[x +1])*256  + Convert.ToInt16(rawImage.imagebytes[x ]) ;
+
+                               // Console.WriteLine("old value {0}", value);
+
+                                value = value >> 4;
+
+
                                 if (value > maxvalue ) maxvalue = value;
                                 if (value < minvalue) minvalue = value;
                                 total = total + value;
@@ -1440,8 +1450,11 @@ namespace SVCamApi
 
                                 monoImage[i] = Convert.ToByte(newValue);
                                 //back to 
-                                rawImage.imagebytes[x +1] = Convert.ToByte(Math.Truncate(Convert.ToSingle(newValue) /256));
-                                rawImage.imagebytes[x] =  Convert.ToByte(Convert.ToInt16(Convert.ToSingle(newValue))  - Convert.ToInt16(Math.Truncate(Convert.ToSingle(newValue) /256))*256);
+                                rawImage.imagebytes[x+1] = Convert.ToByte(Math.Truncate(Convert.ToSingle(value) /256));
+                                rawImage.imagebytes[x] =  Convert.ToByte(Convert.ToInt16(Convert.ToSingle(value))  - Convert.ToInt16(Math.Truncate(Convert.ToSingle(value) /256))*256);
+                                value = Convert.ToInt16(rawImage.imagebytes[x + 1]) * 256 + Convert.ToInt16(rawImage.imagebytes[x]);
+                             //   Console.WriteLine("new value {0}", value);
+
                                 i++;
                                 //temp = rawImage.imagebytes[x + 1];
                                 //rawImage.imagebytes[x + 1] = rawImage.imagebytes[x];
