@@ -54,6 +54,7 @@ Public Class frmPointGrey
     Private meteorCheckRunning As Boolean = False
     Private m_camRunning As Boolean = False
     Private m_grabbing As Boolean = False
+    Public lost_image As Integer = 0
 
     Shared m_pics As RingBitmap
     Private m_grabbedframe As Boolean
@@ -230,14 +231,16 @@ Public Class frmPointGrey
                 myForm.startTime = Now
                 myForm.frames = 0
             End If
-            Console.WriteLine("Image event occurred...")
+            Console.WriteLine("Image event occurred...{0}", image.TimeStamp)
 
             If image.IsIncomplete Then
-                Console.WriteLine("Image incomplete with image status {0}...{1}", image.ImageStatus, NewLine)
-                image.Release()
-                myForm.running = False
+                myForm.lost_image = myForm.lost_image + 1
 
-                Exit Sub
+                Console.WriteLine("Image incomplete with image status {0}...{1}", image.ImageStatus, NewLine)
+                'image.Release()
+                'myForm.running = False
+
+                'Exit Sub
             End If
 
             'image.Save("pgDark.raw")
@@ -266,9 +269,34 @@ Public Class frmPointGrey
 
             End If
 
+            Dim mTransformImage As BGAPI2.Image = Nothing
+            Dim mImage As BGAPI2.Image = Nothing
+            ' Dim buff As BGAPI2.Buffer = New BGAPI2.Buffer()
+            Dim imgProcessor As New BGAPI2.ImageProcessor()
 
-            Dim convertedImage As IManagedImage = image.Convert(PixelFormatEnums.BGRa8, ColorProcessingAlgorithm.HQ_LINEAR)
 
+            '            //copy back to imageInfo
+            'Marshal.Copy(rawImage.imagebytes, 0, ImageInfo.pImagePtr, imageSizeX * imageSizeY);
+
+            ''//debayer buffer into RGB
+            ''//myApi.SVS_UtilBufferBayerToRGB(ImageInfo, ref imagebufferRGB[currentIdex].imagebytes[0], imageSizeX * imageSizeY );
+            ''BGAPI2.Image mTransformImage = null;
+            ''BGAPI2.Buffer mBufferFilled = New BGAPI2.Buffer();
+            Dim pImagePtr As IntPtr
+            Dim convertedImage As IManagedImage = image.Convert(PixelFormatEnums.RGB8, ColorProcessingAlgorithm.NEAREST_NEIGHBOR_AVG)
+
+            mImage = imgProcessor.CreateImage(image.Width, image.Height, "BayerRG8", image.DataPtr, image.Width * image.Height)
+
+            'ULong imageBufferAddress = (ULong)ImageInfo.pImagePtr;
+            mTransformImage = imgProcessor.CreateTransformedImage(mImage, "BGR8")
+
+            Marshal.Copy(mTransformImage.Buffer, convertedImage.ManagedData, 0, image.Width * image.Height * 3)
+
+            File.WriteAllBytes("pgxxx.raw", image.ManagedData)
+            File.WriteAllBytes("pgxxxyy.raw", convertedImage.ManagedData)
+
+            'Dim convertedImage As IManagedImage = image.Convert(PixelFormatEnums.RGB8, ColorProcessingAlgorithm.NEAREST_NEIGHBOR_AVG)
+            File.WriteAllBytes("pgconvert.raw", image.ManagedData)
             'convertedImage.ConvertToWriteAbleBitmap(PixelFormatEnums.BGR8, convertedImage)
 
 
@@ -425,9 +453,9 @@ Public Class frmPointGrey
             ' Dim bmpData As System.Drawing.Imaging.BitmapData = m_Bitmaps(m_BitmapSelector).LockBits(BoundsRect, System.Drawing.Imaging.ImageLockMode.[WriteOnly], m_Bitmaps(m_BitmapSelector).PixelFormat)
             'Dim ptr As IntPtr = bmpData.Scan0
             'System.Runtime.InteropServices.Marshal.Copy(b.DataPtr, ptr, 0, b.DataSize) 'copy into bitmap
-            System.Runtime.InteropServices.Marshal.Copy(b.DataPtr, rawData, 0, b.DataSize) 'copy into array
+            'System.Runtime.InteropServices.Marshal.Copy(b.ManagedData, 0, rawData, b.DataSize) 'copy into array
 
-            m_buffers(m_BitmapSelector) = rawData
+            m_buffers(m_BitmapSelector) = b.ManagedData
             m_width = b.Width
             m_height = b.Height
             m_dataSize = b.DataSize
@@ -869,7 +897,7 @@ Public Class frmPointGrey
 
 
     Private Sub Button7_Click(sender As Object, e As EventArgs) Handles Button7.Click
-
+        lost_image = 0
         m_camRunning = True
         setExposure(CDbl(tbExposureTime.Text))
         setGain(CDbl(tbGain.Text))
@@ -1008,7 +1036,7 @@ Public Class frmPointGrey
         'Dim x As New Bitmap(b)
         Debug.Print("get last image")
 
-        Dim x As New Bitmap(m_pics.width, m_pics.height)
+        Dim x As New Bitmap(m_pics.width, m_pics.height, PixelFormat.Format24bppRgb)
         Dim BoundsRect = New Rectangle(0, 0, m_pics.width, m_pics.height)
         Dim bmpData As System.Drawing.Imaging.BitmapData = x.LockBits(BoundsRect, System.Drawing.Imaging.ImageLockMode.[WriteOnly], x.PixelFormat)
         Dim ptr As IntPtr = bmpData.Scan0
@@ -1134,6 +1162,8 @@ Public Class frmPointGrey
         seconds = DateDiff(DateInterval.Second, startTime, Now)
         txtFps.Text = frames / seconds
         tbQ.Text = myDetectionQueue.Count
+        tbLostImage.Text = Me.lost_image
+
     End Sub
 
 

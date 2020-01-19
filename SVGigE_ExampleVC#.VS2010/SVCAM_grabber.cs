@@ -232,7 +232,7 @@ namespace SVCamApi
             public byte[] masterDark;
             public int imageSizeX = 0;
             public int imageSizeY = 0;
-
+            public int framesLost = 0;
             public bool isrgb = false;
             public int destdataIndex = 0;
             public string camTemp = "";
@@ -552,6 +552,7 @@ namespace SVCamApi
                             {
                                 Console.Write("ERROR TIMEOUT 1 !!");
                                 myApi.SVS_StreamQueueBuffer(hStream, hBuffer);
+                                framesLost++;
                                 //return false;
                             }
                         }
@@ -560,7 +561,7 @@ namespace SVCamApi
                         {
 
                             Console.WriteLine("ERROR:{0}", ret);
-
+                            framesLost++;
                             //assuming a timeout happened...
                             //send another buffer
                             //myApi.SVS_StreamQueueBuffer(hStream, hBuffer);
@@ -1259,10 +1260,6 @@ namespace SVCamApi
                             //File.WriteAllBytes("test.raw", rawImage.imagebytes);
                             //copy back to imageInfo
                             Marshal.Copy(rawImage.imagebytes, 0, ImageInfo.pImagePtr, imageSizeX*imageSizeY*3/2);
-                            //
-                            //
-                            //try baumer api 
-
 
                             ////debayer buffer into RGB
                             ret=myApi.SVS_UtilBufferBayerToRGB(ImageInfo, ref imagebufferRGB[currentIdex].imagebytes[0], imageSizeX*imageSizeY*3);
@@ -1431,12 +1428,7 @@ namespace SVCamApi
                             for (int x =0;x<rawImage.imagebytes.Length; x=x+2)
                             {
                                 value = Convert.ToInt16(rawImage.imagebytes[x +1])*256  + Convert.ToInt16(rawImage.imagebytes[x ]) ;
-
-                               // Console.WriteLine("old value {0}", value);
-
                                 value = value >> 4;
-
-
                                 if (value > maxvalue ) maxvalue = value;
                                 if (value < minvalue) minvalue = value;
                                 total = total + value;
@@ -1450,11 +1442,8 @@ namespace SVCamApi
 
                                 monoImage[i] = Convert.ToByte(newValue);
                                 //back to 
-                                rawImage.imagebytes[x+1] = Convert.ToByte(Math.Truncate(Convert.ToSingle(value) /256));
-                                rawImage.imagebytes[x] =  Convert.ToByte(Convert.ToInt16(Convert.ToSingle(value))  - Convert.ToInt16(Math.Truncate(Convert.ToSingle(value) /256))*256);
-                                value = Convert.ToInt16(rawImage.imagebytes[x + 1]) * 256 + Convert.ToInt16(rawImage.imagebytes[x]);
-                             //   Console.WriteLine("new value {0}", value);
-
+                                rawImage.imagebytes[x +1] = Convert.ToByte(Math.Truncate(Convert.ToSingle(newValue) /256));
+                                rawImage.imagebytes[x] =  Convert.ToByte(Convert.ToInt16(Convert.ToSingle(newValue))  - Convert.ToInt16(Math.Truncate(Convert.ToSingle(newValue) /256))*256);
                                 i++;
                                 //temp = rawImage.imagebytes[x + 1];
                                 //rawImage.imagebytes[x + 1] = rawImage.imagebytes[x];
@@ -1602,7 +1591,7 @@ namespace SVCamApi
                 if (SVCLProtocol == null)
                 {
                     Console.WriteLine("GetEnvironmentVariableA SVS_GENICAM_CLPROTOCOL failed! ");
-                    return false;
+                    //return false;
                 }
 
                 SVGenicamCache = Environment.GetEnvironmentVariable("SVS_GENICAM_CACHE");
@@ -2286,7 +2275,7 @@ namespace SVCamApi
             {
                 if (cam.featureInfolist.ElementAt(j).SVFeaturInf.displayName == "Pixel Format")
                 {
-                    ret = SVSCam.myApi.SVS_FeatureEnumSubFeatures(cam.hRemoteDevice, cam.featureInfolist.ElementAt(j).hFeature, 3, ref subFeatureName, 512, ref pValue);//bayerRG12packed
+                    ret = SVSCam.myApi.SVS_FeatureEnumSubFeatures(cam.hRemoteDevice, cam.featureInfolist.ElementAt(j).hFeature, 2, ref subFeatureName, 512, ref pValue);//3=bayerRG12packed,r=bayerRG8
                     ret = SVSCam.myApi.SVS_FeatureSetValueInt64Enum(cam.hRemoteDevice, cam.featureInfolist.ElementAt(j).hFeature, pValue);
                     Console.WriteLine("set pixel format");
 
@@ -2541,7 +2530,7 @@ namespace SVCamApi
                 {
                     stopAcquisitionThread();
                     Console.WriteLine("stopped acquisition");
-                   
+                    
                     startAcquisitionThread(m_frh);
                     Console.WriteLine("called start acquisition");
                     return;

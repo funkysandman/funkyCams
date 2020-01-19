@@ -13,8 +13,8 @@ Module modDeclarations
 	
 	Public sX, sY As Object
 	Public hevent As Integer
-  Public b() As Short 'Array is a WORD array and not a byte array!
-  Public nBuf As Short
+    Public b() As Byte 'Array is a WORD array and not a byte array!
+    Public nBuf As Short
   Public bufAddr(10) As Integer
   Public iXres As Integer
   Public iYres As Integer

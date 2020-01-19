@@ -62,6 +62,8 @@ Partial Class frmPointGrey
         Me.Button1 = New System.Windows.Forms.Button()
         Me.tbQ = New System.Windows.Forms.TextBox()
         Me.Label2 = New System.Windows.Forms.Label()
+        Me.Label3 = New System.Windows.Forms.Label()
+        Me.tbLostImage = New System.Windows.Forms.TextBox()
         CType(Me.PictureBox1, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
         '
@@ -394,11 +396,30 @@ Partial Class frmPointGrey
         Me.Label2.TabIndex = 98
         Me.Label2.Text = "queued"
         '
+        'Label3
+        '
+        Me.Label3.AutoSize = True
+        Me.Label3.Location = New System.Drawing.Point(298, 415)
+        Me.Label3.Name = "Label3"
+        Me.Label3.Size = New System.Drawing.Size(82, 13)
+        Me.Label3.TabIndex = 100
+        Me.Label3.Text = "missing packets"
+        '
+        'tbLostImage
+        '
+        Me.tbLostImage.Location = New System.Drawing.Point(361, 415)
+        Me.tbLostImage.Name = "tbLostImage"
+        Me.tbLostImage.Size = New System.Drawing.Size(45, 20)
+        Me.tbLostImage.TabIndex = 99
+        Me.tbLostImage.Text = "0"
+        '
         'frmPointGrey
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.ClientSize = New System.Drawing.Size(580, 447)
+        Me.Controls.Add(Me.Label3)
+        Me.Controls.Add(Me.tbLostImage)
         Me.Controls.Add(Me.Label2)
         Me.Controls.Add(Me.tbQ)
         Me.Controls.Add(Me.Button1)
@@ -480,4 +501,6 @@ Partial Class frmPointGrey
     Friend WithEvents Button1 As Button
     Friend WithEvents tbQ As TextBox
     Friend WithEvents Label2 As Label
+    Friend WithEvents Label3 As Label
+    Friend WithEvents tbLostImage As TextBox
 End Class

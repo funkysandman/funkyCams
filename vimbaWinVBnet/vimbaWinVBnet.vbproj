@@ -72,6 +72,10 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="bgapi2_genicam_dotnet, Version=2.9.18334.18905, Culture=neutral, PublicKeyToken=0551630d1b572f70, processorArchitecture=AMD64">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>BaumerSDKlibs\bgapi2_genicam_dotnet.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.QualityTools.Testing.Fakes, Version=12.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
     </Reference>
@@ -335,6 +339,25 @@
     <AdditionalFiles Include="BaumerSDKlibs\XmlParser_MD_VC120_v3_0_baumer.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </AdditionalFiles>
+    <Content Include="BaumerSDKlibs\CLAllSerial_MD_VC120_v3_0.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="BaumerSDKlibs\CLProtocol_MD_VC120_v3_0.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="BaumerSDKlibs\CLSerCOM.dll" />
+    <Content Include="BaumerSDKlibs\GCBase_MD_VC120_v3_0.dll" />
+    <Content Include="BaumerSDKlibs\GenApi_MD_VC120_v3_0.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="BaumerSDKlibs\GenCP_MD_VC120_v3_0.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="BaumerSDKlibs\log4cpp_MD_VC120_v3_0.dll" />
+    <Content Include="BaumerSDKlibs\Log_MD_VC120_v3_0.dll" />
+    <Content Include="BaumerSDKlibs\MathParser_MD_VC120_v3_0.dll" />
+    <Content Include="BaumerSDKlibs\NodeMapData_MD_VC120_v3_0.dll" />
+    <Content Include="BaumerSDKlibs\XmlParser_MD_VC120_v3_0.dll" />
     <Content Include="day.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <SubType>Designer</SubType>

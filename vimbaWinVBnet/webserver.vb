@@ -1158,7 +1158,7 @@ Public Class WebServer
 
                         bytes = myQIform.getLastImageArray()
 
-
+                        Debug.Print("webserver:got last image array")
                         Dim BoundsRect = New Rectangle(0, 0, 1360 - 1, 1036 - 1)
                         Dim bmpData As System.Drawing.Imaging.BitmapData = b.LockBits(BoundsRect, System.Drawing.Imaging.ImageLockMode.[WriteOnly], b.PixelFormat)
 
@@ -1169,7 +1169,9 @@ Public Class WebServer
 
 
                         Marshal.Copy(bytes, 0, ptr, bytes.Length)
+                        Debug.Print("webserver:copied bytes into bitmap")
                         b.UnlockBits(bmpData)
+                        Debug.Print("webserver:unlocked bits")
                         b.RotateFlip(RotateFlipType.Rotate180FlipNone) 'camera is upside down
                         If Not b Is Nothing Then
                             ' mySVSVistekForm.writeline("acquired last SVS Vistek image")

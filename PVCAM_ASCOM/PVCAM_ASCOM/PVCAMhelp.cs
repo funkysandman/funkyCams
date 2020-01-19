@@ -570,6 +570,9 @@ namespace pvcam_helper
 
         Boolean m_isMultGain;
         UInt16 m_emGainMax;
+        UInt16 m_ADCoffset;
+        UInt16 m_read_noise;
+
         Boolean m_IsSmartStreamingSupported;
         Boolean m_IsExposeOutModeSupported;
         Boolean m_IsSmartStreamingOn;
@@ -2623,6 +2626,24 @@ namespace pvcam_helper
             }
             firmwareVersion = (UInt16)Marshal.ReadInt16(unmngFwVersion);
 
+            
+            IntPtr unmngADCoffset;
+            unmngADCoffset = Marshal.AllocHGlobal(sizeof(UInt16));
+            PVCAM.pl_get_param(m_hCam, PvTypes.PARAM_ADC_OFFSET, (Int16)PvTypes.AttributeIDs.ATTR_CURRENT, unmngADCoffset);
+            m_ADCoffset = (UInt16)Marshal.ReadInt16(unmngADCoffset);
+
+            //IntPtr unmngReadoutNoise;
+            //unmngReadoutNoise = Marshal.AllocHGlobal(sizeof(UInt16));
+            //PVCAM.pl_get_param(m_hCam, PvTypes.PARAM_READ_NOISE, (Int16)PvTypes.AttributeIDs.ATTR_CURRENT, unmngReadoutNoise);
+            //m_read_noise = (UInt16)Marshal.ReadInt16(unmngReadoutNoise);
+
+            IntPtr unmngbitDepth;
+            unmngbitDepth = Marshal.AllocHGlobal(sizeof(UInt16));
+            PVCAM.pl_get_param(m_hCam, PvTypes.PARAM_BIT_DEPTH, (Int16)PvTypes.AttributeIDs.ATTR_MAX, unmngbitDepth);
+            m_ADCoffset = (UInt16)Marshal.ReadInt16(unmngbitDepth);
+
+            //PVCAM.pl_set_param(m_hCam,PvTypes.PARAM_ADC_OFFSET,)
+
             UInt16 fwHighByte = (UInt16)((firmwareVersion & 0xFF00) >> 8);
             UInt16 fwLowByte = (UInt16)(firmwareVersion & 0xFF);
             Marshal.FreeHGlobal(unmngFwVersion);
@@ -2700,6 +2721,16 @@ namespace pvcam_helper
                 Marshal.FreeHGlobal(unmngSsStruct);
                 unmngSsStruct = IntPtr.Zero;
             }
+            //Get Clocking modes supported by camera
+            if (!ReadEnumeration(m_clockModeList, PvTypes.PARAM_PMODE))
+            {
+                ReportMsg(this, new ReportMessage("Failed to Get clocking Mode information", MsgTypes.MSG_ERROR));
+            }
+            else
+            {
+                ReportMsg(this, new ReportMessage("Clocking mode information done", MsgTypes.MSG_STATUS));
+            }
+
 
             //build the speed table
             if (!BuildSpeedTable(m_hCam))
@@ -2714,15 +2745,7 @@ namespace pvcam_helper
             }
 
 
-            //Get Clocking modes supported by camera
-            if (!ReadEnumeration(m_clockModeList, PvTypes.PARAM_PMODE))
-            {
-                ReportMsg(this, new ReportMessage("Failed to Get clocking Mode information", MsgTypes.MSG_ERROR));
-            }
-            else
-            {
-                ReportMsg(this, new ReportMessage("Clocking mode information done", MsgTypes.MSG_STATUS));
-            }
+
 
             //Read Trigger input Modes available on the camera
             if (!ReadEnumeration(m_triggerModeList, PvTypes.PARAM_EXPOSURE_MODE))
@@ -3083,6 +3106,21 @@ namespace pvcam_helper
             unmngClearCycles = IntPtr.Zero;
         }
 
+        public void SetADCoffset(Int16 offset)
+        {
+            IntPtr unmngADCOffset;
+
+            unmngADCOffset = Marshal.AllocHGlobal(sizeof(UInt16));
+            Marshal.WriteInt16(unmngADCOffset, offset);
+
+            if (!PVCAM.pl_set_param(m_hCam, PvTypes.PARAM_ADC_OFFSET, unmngADCOffset))
+                ReportMsg(this, new ReportMessage("Setting adc offset failed", MsgTypes.MSG_ERROR));
+            else
+                ReportMsg(this, new ReportMessage(String.Format("ADC Offset set to {0}", offset), MsgTypes.MSG_STATUS));
+
+            Marshal.FreeHGlobal(unmngADCOffset);
+            unmngADCOffset = IntPtr.Zero;
+        }
         //set the camera readout speed
         public bool SetReadoutSpeed(Int16 spdTblIndex)
         {
@@ -3351,9 +3389,10 @@ namespace pvcam_helper
                     return false;
                 }
 
-                //get port description
-                //NOTE: for Interline and sCMOS cameras this often returns "Mutliplication gain" even though the port does
-                //not have any multiplication gain capability
+                    //get port description
+                    //NOTE: for Interline and sCMOS cameras this often returns "Mutliplication gain" even though the port does
+                    //not have any multiplication gain capability
+                  
                 PVCAM.pl_get_enum_param(hCam, PvTypes.PARAM_READOUT_PORT, (UInt32)i, out enumValue, desc, 100);
 
                 //get number of readout speeds on each readout port
@@ -3375,7 +3414,7 @@ namespace pvcam_helper
                     gainMax = (UInt16)Marshal.ReadInt16(unmngGainMax);
 
                     //get bit depth of the speed
-                    PVCAM.pl_get_param(hCam, PvTypes.PARAM_BIT_DEPTH, (Int16)PvTypes.AttributeIDs.ATTR_CURRENT, unmngBitDepth);
+                    PVCAM.pl_get_param(hCam, PvTypes.PARAM_BIT_DEPTH, (Int16)PvTypes.AttributeIDs.ATTR_MAX, unmngBitDepth);
                     m_bitDepth = Marshal.ReadInt16(unmngBitDepth);
 
                     //get readout frequency (pixel time) of the speed

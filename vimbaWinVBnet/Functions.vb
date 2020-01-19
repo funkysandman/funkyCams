@@ -6,7 +6,7 @@ Namespace vimbaWinVBnet
     Public Module Functions
         Public Async Function CallAzureMeteorDetection(qe As queueEntry) As Task
             '        Dim apiURL As String = "https://azuremeteordetect20181212113628.azurewebsites.net/api/detection?code=zi3Lrr58mJB3GTut0lktSLIzb08E1dLkHXAbX6s07bd46IoZmm1vqQ==&file=" + file
-            Dim apiURL As String = "http://192.168.1.192:7071/api/detection"
+            Dim apiURL As String = "http://192.168.1.199:7071/api/detection"
             Dim myUriBuilder As New UriBuilder(apiURL)
 
 
