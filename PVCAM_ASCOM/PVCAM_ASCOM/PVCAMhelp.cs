@@ -1449,6 +1449,7 @@ namespace pvcam_helper
         //called when user pressed Stop Acquisition button
         public void StopAcquisition()
         {
+           
             if (!m_acqRunning)
             {
                 return;
