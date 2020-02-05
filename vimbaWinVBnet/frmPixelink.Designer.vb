@@ -116,7 +116,7 @@ Partial Class frmPixelink
         'Button10
         '
         Me.Button10.Location = New System.Drawing.Point(320, 338)
-        Me.Button10.Margin = New System.Windows.Forms.Padding(2, 2, 2, 2)
+        Me.Button10.Margin = New System.Windows.Forms.Padding(2)
         Me.Button10.Name = "Button10"
         Me.Button10.Size = New System.Drawing.Size(36, 18)
         Me.Button10.TabIndex = 70
@@ -136,7 +136,7 @@ Partial Class frmPixelink
         'tbPath
         '
         Me.tbPath.Location = New System.Drawing.Point(56, 338)
-        Me.tbPath.Margin = New System.Windows.Forms.Padding(2, 2, 2, 2)
+        Me.tbPath.Margin = New System.Windows.Forms.Padding(2)
         Me.tbPath.Name = "tbPath"
         Me.tbPath.Size = New System.Drawing.Size(252, 20)
         Me.tbPath.TabIndex = 68
@@ -146,7 +146,7 @@ Partial Class frmPixelink
         '
         Me.Button8.Enabled = False
         Me.Button8.Location = New System.Drawing.Point(479, 273)
-        Me.Button8.Margin = New System.Windows.Forms.Padding(2, 2, 2, 2)
+        Me.Button8.Margin = New System.Windows.Forms.Padding(2)
         Me.Button8.Name = "Button8"
         Me.Button8.Size = New System.Drawing.Size(77, 25)
         Me.Button8.TabIndex = 63
@@ -157,7 +157,7 @@ Partial Class frmPixelink
         'Button7
         '
         Me.Button7.Location = New System.Drawing.Point(386, 273)
-        Me.Button7.Margin = New System.Windows.Forms.Padding(2, 2, 2, 2)
+        Me.Button7.Margin = New System.Windows.Forms.Padding(2)
         Me.Button7.Name = "Button7"
         Me.Button7.Size = New System.Drawing.Size(77, 25)
         Me.Button7.TabIndex = 62
@@ -180,7 +180,7 @@ Partial Class frmPixelink
         Me.tbPort.Name = "tbPort"
         Me.tbPort.Size = New System.Drawing.Size(36, 20)
         Me.tbPort.TabIndex = 60
-        Me.tbPort.Text = "8090"
+        Me.tbPort.Text = "8070"
         '
         'tbMultiplier
         '
@@ -259,7 +259,7 @@ Partial Class frmPixelink
         Me.tbNightAgain.Name = "tbNightAgain"
         Me.tbNightAgain.Size = New System.Drawing.Size(47, 20)
         Me.tbNightAgain.TabIndex = 90
-        Me.tbNightAgain.Text = "4000"
+        Me.tbNightAgain.Text = "18"
         '
         'lblDayNight
         '
@@ -307,11 +307,11 @@ Partial Class frmPixelink
         '
         'tbDayTimeExp
         '
-        Me.tbDayTimeExp.Location = New System.Drawing.Point(524, 154)
+        Me.tbDayTimeExp.Location = New System.Drawing.Point(523, 150)
         Me.tbDayTimeExp.Name = "tbDayTimeExp"
         Me.tbDayTimeExp.Size = New System.Drawing.Size(45, 20)
         Me.tbDayTimeExp.TabIndex = 80
-        Me.tbDayTimeExp.Text = "1"
+        Me.tbDayTimeExp.Text = "45"
         '
         'Label9
         '
@@ -468,7 +468,7 @@ Partial Class frmPixelink
         Me.Controls.Add(Me.Label1)
         Me.Controls.Add(Me.Button2)
         Me.Controls.Add(Me.PictureBox1)
-        Me.Margin = New System.Windows.Forms.Padding(2, 2, 2, 2)
+        Me.Margin = New System.Windows.Forms.Padding(2)
         Me.Name = "frmPixelink"
         Me.Text = "frmPixelink"
         CType(Me.PictureBox1, System.ComponentModel.ISupportInitialize).EndInit()

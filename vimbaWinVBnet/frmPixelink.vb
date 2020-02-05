@@ -67,8 +67,8 @@ Public Class frmPixelink
     Private m_grabbedframe_err As Integer = 0
 
     Private m_syncLock As Object = New Object   '// Sync object protecting the following member data
-    Private iWidth As Integer
-    Private iHeight As Integer
+    Public Shared iWidth As Integer
+    Public Shared iHeight As Integer
 
 
     '//
@@ -743,10 +743,31 @@ Public Class frmPixelink
         Dim flags As FeatureFlags = 0
         Dim numParms As Integer = 1
         Dim parms As Single() = New Single(numParms - 1) {}
-        rc = Api.SetFeature(hCamera, Feature.FrameRate, 0, 1, {0.2})
+
+        rc = Api.GetFeature(hCamera, Feature.FrameRate, flags, 1, parms)
+        If (expTime > 1000) Then 'slow frame rate
+
+            rc = Api.SetFeature(hCamera, Feature.FrameRate, flags.Off, 0, parms)
+        Else
+            ' rc = Api.SetFeature(hCamera, Feature.FrameRate, flags.Manual, 0, parms)
+            parms(0) = 0.2 'slow during the daytime
+            rc = Api.SetFeature(hCamera, Feature.FrameRate, flags.Manual, 1, parms)
+        End If
+
         rc = Api.GetFeature(hCamera, Feature.Exposure, flags, numParms, parms)
         parms(0) = CSng(expTime / 1000)
         rc = Api.SetFeature(hCamera, Feature.Exposure, flags, numParms, parms)
+    End Sub
+    Private Sub SetGain(ByVal hCamera As Integer, ByVal gain As Integer)
+        Dim flags As FeatureFlags = 0
+        Dim numParms As Integer = 1
+        Dim parms As Single() = New Single(numParms - 1) {}
+
+        rc = Api.GetFeature(hCamera, Feature.Gain, flags, 1, parms)
+
+        parms(0) = gain
+        rc = Api.SetFeature(hCamera, Feature.FrameRate, flags.Manual, 1, parms)
+
     End Sub
     Private Sub getCameraReady()
         'try to open camera
@@ -803,7 +824,7 @@ Public Class frmPixelink
         Button6.Enabled = True
         myWebServer = WebServer.getWebServer
 
-        ' myWebServer.StartWebServer(Me, Val(Me.tbPort.Text))
+        myWebServer.StartWebServer(Me, Val(Me.tbPort.Text))
         myWebServer.ImageDirectory = "c:\web\images\"
         myWebServer.VirtualRoot = "c:\web\"
     End Sub
@@ -1125,7 +1146,7 @@ Public Class frmPixelink
             'File.WriteAllBytes("imageout.raw", outImage)
             Marshal.Copy(outImage, 0, iPtr, isize - 1)
             bmBild.UnlockBits(bmpData)
-            bmBild.Save("test.jpg")
+
             bmBild.Dispose()
 
             If m_pics Is Nothing Then
