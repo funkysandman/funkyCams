@@ -95,75 +95,75 @@ Module modDeclarations
 		Dim RecState As Short ' 1 = running / 0 = idle
 		Dim AcquireMode As Short
 	End Structure
-	
-	Public Structure CameraType
-		Dim Health As HealthType
-		Dim Temperature As TemperatureType
-		Dim Sensor As SensorType
-		Dim Time As TimingType
-		Dim Storage As StorageType
-	End Structure
-	
-	
-	Public Camera As CameraType
-	
-	
-	
-	
-	' my camera subroutines
-	Public Sub TranslateHealth()
-		
-		Select Case Camera.Health.Warning
-			Case Is = 0
-				Camera.Health.WarningTxt = "No warnings"
-			Case Is = 1
-				Camera.Health.WarningTxt = "Power supply voltage range"
-			Case Is = 2
-				Camera.Health.WarningTxt = "Power supply temperature"
-			Case Is = 4
-				Camera.Health.WarningTxt = "Camera temperature "
-			Case Is = 8
-				Camera.Health.WarningTxt = "Image sensor temperature"
-		End Select
-		
-		
-		Select Case Camera.Health.Error_Renamed
-			Case Is = 0
-				Camera.Health.ErrorTxt = "No error"
-			Case Is = 1
-				Camera.Health.ErrorTxt = "Power supply voltage range"
-			Case Is = 2
-				Camera.Health.ErrorTxt = "Power supply temperature"
-			Case Is = 4
-				Camera.Health.ErrorTxt = "Camera temperature"
-			Case Is = 8
-				Camera.Health.ErrorTxt = "Image Sensor temperature"
-			Case Is = 10000
-				Camera.Health.ErrorTxt = "Camera interface failure"
-			Case Is = 20000
-				Camera.Health.ErrorTxt = "Camera ram module failure"
-			Case Is = 40000
-				Camera.Health.ErrorTxt = "Camera main board failure"
-			Case Is = 80000
-				Camera.Health.ErrorTxt = "Camera head boards failure"
-		End Select
-		
-		Select Case Camera.Health.Status
-			Case Is = 1
-				Camera.Health.ErrorTxt = "Default"
-			Case Is = 2
-				Camera.Health.ErrorTxt = "Settings Valid"
-			Case Is = 4
-				Camera.Health.ErrorTxt = "Recording state"
-		End Select
-		
-		
-	End Sub
+
+    Public Structure PCOCameraType
+        Dim Health As HealthType
+        Dim Temperature As TemperatureType
+        Dim Sensor As SensorType
+        Dim Time As TimingType
+        Dim Storage As StorageType
+    End Structure
+
+
+    Public PCOCamera As PCOCameraType
+
+
+
+
+    ' my camera subroutines
+    Public Sub TranslateHealth()
+
+        Select Case PCOCamera.Health.Warning
+            Case Is = 0
+                PCOCamera.Health.WarningTxt = "No warnings"
+            Case Is = 1
+                PCOCamera.Health.WarningTxt = "Power supply voltage range"
+            Case Is = 2
+                PCOCamera.Health.WarningTxt = "Power supply temperature"
+            Case Is = 4
+                PCOCamera.Health.WarningTxt = "Camera temperature "
+            Case Is = 8
+                PCOCamera.Health.WarningTxt = "Image sensor temperature"
+        End Select
+
+
+        Select Case PCOCamera.Health.Error_Renamed
+            Case Is = 0
+                PCOCamera.Health.ErrorTxt = "No error"
+            Case Is = 1
+                PCOCamera.Health.ErrorTxt = "Power supply voltage range"
+            Case Is = 2
+                PCOCamera.Health.ErrorTxt = "Power supply temperature"
+            Case Is = 4
+                PCOCamera.Health.ErrorTxt = "Camera temperature"
+            Case Is = 8
+                PCOCamera.Health.ErrorTxt = "Image Sensor temperature"
+            Case Is = 10000
+                PCOCamera.Health.ErrorTxt = "Camera interface failure"
+            Case Is = 20000
+                PCOCamera.Health.ErrorTxt = "Camera ram module failure"
+            Case Is = 40000
+                PCOCamera.Health.ErrorTxt = "Camera main board failure"
+            Case Is = 80000
+                PCOCamera.Health.ErrorTxt = "Camera head boards failure"
+        End Select
+
+        Select Case PCOCamera.Health.Status
+            Case Is = 1
+                PCOCamera.Health.ErrorTxt = "Default"
+            Case Is = 2
+                PCOCamera.Health.ErrorTxt = "Settings Valid"
+            Case Is = 4
+                PCOCamera.Health.ErrorTxt = "Recording state"
+        End Select
+
+
+    End Sub
 	
 	
 	Public Sub TranslateTemps()
-		Camera.Temperature.CameraReal = CDbl(Camera.Temperature.cameraindex) / 10
-		Camera.Temperature.CCDReal = CDbl(Camera.Temperature.CCDindex) / 10
-		Camera.Temperature.PowerReal = CDbl(Camera.Temperature.powerindex) / 10
-	End Sub
+        PCOCamera.Temperature.CameraReal = CDbl(PCOCamera.Temperature.cameraindex) / 10
+        PCOCamera.Temperature.CCDReal = CDbl(PCOCamera.Temperature.CCDindex) / 10
+        PCOCamera.Temperature.PowerReal = CDbl(PCOCamera.Temperature.powerindex) / 10
+    End Sub
 End Module
