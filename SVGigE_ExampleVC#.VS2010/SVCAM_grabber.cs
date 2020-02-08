@@ -1352,6 +1352,10 @@ namespace SVCamApi
                             // File.WriteAllBytes(filename, rawImage.imagebytes);
                             //debayer buffer into RGB
                             // myApi.SVS_UtilBufferBayerToRGB(ImageInfo, ref imagebufferRGB[currentIdex].imagebytes[0], imagebufferRGB[currentIdex].dataLegth);
+
+
+
+
                             BGAPI2.Image mTransformImage = null;
                             BGAPI2.Buffer mBufferFilled = new BGAPI2.Buffer();
                             
@@ -1362,6 +1366,9 @@ namespace SVCamApi
                             mTransformImage = imgProcessor.CreateTransformedImage(mImage, "RGB8");
 
                             Marshal.Copy(mTransformImage.Buffer, imagebufferRGB[currentIdex].imagebytes, 0, imageSizeX * imageSizeY * 3);
+                          
+                            
+                            
                             //  mImage = imgProcessor.CreateImage((uint)imageSizeX, (uint)imageSizeY, "RGB8", mBufferFilled.MemPtr, (ulong)mBufferFilled.MemSize);
                             File.WriteAllBytes("TESTING.RAW",imagebufferRGB[currentIdex].imagebytes);
                             //do image stuff here

@@ -12,8 +12,9 @@ Imports System.Net.Http
 Imports Photometrics.Pvcam
 Imports System.Collections.Specialized
 Imports vimbaWinVBnet.vimbaWinVBnet
+Imports PixeLINK
 
-Public Class frmPCO
+Public Class frmPixelink
     Dim myDetectionQueue As New Queue(Of queueEntry)
 
     Private mhCamera As IntPtr
@@ -47,8 +48,10 @@ Public Class frmPCO
     Private dark() As Byte
     Private t As Thread
     Private t_imaging As Thread
-
-    Dim night As Boolean = False
+    Private h_camera As Integer
+    Private rc As ReturnCode
+    Private helper As SnapshotHelper
+    Private night As Boolean = False
     ' Private md As New ObjectDetection.TFDetector()
     Private myImageCodecInfo As ImageCodecInfo
     Private myEncoder As System.Drawing.Imaging.Encoder
@@ -57,11 +60,21 @@ Public Class frmPCO
     Private meteorCheckRunning As Boolean = False
     Private m_camRunning As Boolean = False
     Private m_grabbing As Boolean = False
-
+    Private rawImage As Byte()
+    Private frameDesc As FrameDescriptor
     Shared m_pics As RingBitmap
     Private m_grabbedframe As Boolean
     Private m_grabbedframe_err As Integer = 0
 
+    Private m_syncLock As Object = New Object   '// Sync object protecting the following member data
+    Public Shared iWidth As Integer
+    Public Shared iHeight As Integer
+
+
+    '//
+    '// Callback function for Api.GetClip
+    '// Called by a thread other than that which called Api.GetClip, therefore we syncronize access to the member data modified
+    '//
 
 
     Public Class RingBitmap
@@ -650,7 +663,7 @@ Public Class frmPCO
     '    myCam.ExposureTime = Val(tbExposureTime.Text) / 1000 ' expecting ms
     '    ' myCam.ReadCameraParams()
 
-    '    If Not myCam.AcqSetup(pvcam_helper.PVCamPCO.Camera.AcqTypes.ACQ_TYPE_CONTINUOUS) Then
+    '    If Not myCam.AcqSetup(pvcam_helper.PVCamCamera.AcqTypes.ACQ_TYPE_CONTINUOUS) Then
     '        Return
     '    End If
 
@@ -690,27 +703,16 @@ Public Class frmPCO
 
     Private Sub Button8_Click(sender As Object, e As EventArgs) Handles Button8.Click
         m_camRunning = False
-
+        rc = Api.SetStreamState(h_camera, StreamState.Stop)
         TimerAcquistionRate.Enabled = False
         t.Abort()
 
-        errorCode = PCO_SetRecordingState(hdriver, 0)
-        If errorCode = 0 Then
-            tbStatus.Text = " Recording stopped"
-        Else
-            tbStatus.Text = " Error recording 0x" & Hex(Str(errorCode))
-        End If
-
-        errorCode = PCO_CancelImages(hdriver)
-        If hdialog <> 0 Then
-            PCO_EnableDialogCam(hdialog, True)
-        End If
         meteorCheckRunning = False
         Button7.Enabled = True
         Button8.Enabled = False
     End Sub
 
-    Private Sub frmPCO_Load(sender As Object, e As EventArgs) Handles Me.Load
+    Private Sub frmPixelink_Load(sender As Object, e As EventArgs) Handles Me.Load
         getCameraReady()
         myImageCodecInfo = GetEncoderInfo("image/jpeg")
 
@@ -729,181 +731,67 @@ Public Class frmPCO
         myEncoderParameters.Param(0) = myEncoderParameter
         ' md.LoadModel("c:\tmp\frozen_inference_graph_orig.pb", "c:\tmp\mscoco_label_map.pbtxt")
     End Sub
+    Private Sub SetPixelFormat(ByVal hCamera As Integer, ByVal pixelFormat As PixeLINK.PixelFormat)
+        Dim flags As FeatureFlags = 0
+        Dim numParms As Integer = 1
+        Dim parms As Single() = New Single(numParms - 1) {}
+        Api.GetFeature(hCamera, Feature.PixelFormat, flags, numParms, parms)
+        parms(0) = CSng(pixelFormat)
+        Api.SetFeature(hCamera, Feature.PixelFormat, flags, numParms, parms)
+    End Sub
+    Private Sub SetExposure(ByVal hCamera As Integer, ByVal expTime As Integer)
+        Dim flags As FeatureFlags = 0
+        Dim numParms As Integer = 1
+        Dim parms As Single() = New Single(numParms - 1) {}
 
+        rc = Api.GetFeature(hCamera, Feature.FrameRate, flags, 1, parms)
+        If (expTime > 1000) Then 'slow frame rate
+
+            rc = Api.SetFeature(hCamera, Feature.FrameRate, flags.Off, 0, parms)
+        Else
+            ' rc = Api.SetFeature(hCamera, Feature.FrameRate, flags.Manual, 0, parms)
+            parms(0) = 0.2 'slow during the daytime
+            rc = Api.SetFeature(hCamera, Feature.FrameRate, flags.Manual, 1, parms)
+        End If
+
+        rc = Api.GetFeature(hCamera, Feature.Exposure, flags, numParms, parms)
+        parms(0) = CSng(expTime / 1000)
+        rc = Api.SetFeature(hCamera, Feature.Exposure, flags, numParms, parms)
+    End Sub
+    Private Sub SetGain(ByVal hCamera As Integer, ByVal gain As Integer)
+        Dim flags As FeatureFlags = 0
+        Dim numParms As Integer = 1
+        Dim parms As Single() = New Single(numParms - 1) {}
+
+        rc = Api.GetFeature(hCamera, Feature.Gain, flags, 1, parms)
+
+        parms(0) = gain
+        rc = Api.SetFeature(hCamera, Feature.FrameRate, flags.Manual, 1, parms)
+
+    End Sub
     Private Sub getCameraReady()
         'try to open camera
-        Dim sizeL As Integer
-        Dim dwWarn As Integer
-        Dim dwErr As Integer
-        Dim dwStatus As Integer
-
-        hdriver = 0
-        hdialog = 0
-        errorCode = PCO_OpenCamera(hdriver, 0)
-        If errorCode <> 0 Then
-            MsgBox("Error detected: code: 0x" & Hex(Str(errorCode)))
-            Return
-        End If
-
-        bmBildUsed = 0
-
-        camDesc.wSize = Marshal.SizeOf(camDesc)
-
-        errorCode = PCO_GetCameraDescription(hdriver, camDesc)
-
-        If errorCode >= 0 Then
-            'Text1.Text = " Camera openened, " + hdriver.ToString
-        Else
-            MsgBox(" Error opening camera0x" & Hex(Str(errorCode)), MsgBoxStyle.Critical)
-            End
-        End If
-
-        'minval.Value = 0
-        'maxval.Value = 1 << (camDesc.wDynResDESC) - 1
-        divide = 1 << (16 - camDesc.wDynResDESC)
-
-        'errorCode = PCO_ResetSettingsToDefault(hdriver)
-
-        errorCode = PCO_ArmCamera(hdriver)
-        If errorCode >= 0 Then
-            tbStatus.Text = "Camera armed"
-        Else
-            tbStatus.Text = "Camera not armed"
-        End If
-
-        dwWarn = 0
-        dwErr = 0
-        dwStatus = 0
-        errorCode = PCO_GetCameraHealthStatus(hdriver, dwWarn, dwErr, dwStatus)
-        If dwErr <> 0 Then
-            tbStatus.Text = "Camera status error 0x" & Hex(Str(dwErr)) & " please switch off camera"
-        End If
-
-        'sensor
-        errorCode = PCO_GetSensorFormat(hdriver, PCO.Camera.Sensor.format_Renamed)
-        If errorCode < 0 Then
-            tbStatus.Text = " Error while retrieving sensor format 0x" & Hex(Str(errorCode))
-        End If
-
-        errorCode = PCO_GetSizes(hdriver, PCO.Camera.Sensor.Resolution.xAct, PCO.Camera.Sensor.Resolution.yAct, PCO.Camera.Sensor.Resolution.xMax, PCO.Camera.Sensor.Resolution.yMax)
-
-        If errorCode < 0 Then
-            tbStatus.Text = " Error while retrieving sensor sizes 0x" & Hex(Str(errorCode))
-        End If
 
 
-        errorCode = PCO_GetROI(hdriver, PCO.Camera.Sensor.ROI.x0, PCO.Camera.Sensor.ROI.y0, PCO.Camera.Sensor.ROI.X1, PCO.Camera.Sensor.ROI.Y1)
+        Dim rc As ReturnCode
 
-        If errorCode < 0 Then
-            tbStatus.Text = " Error while retrieving roi 0x" & Hex(Str(errorCode))
-        End If
 
-        iXres = PCO.Camera.Sensor.Resolution.xAct
-        iYres = PCO.Camera.Sensor.Resolution.yAct
+        rc = Api.Initialize(0, h_camera)
+        If Not Api.IsSuccess(rc) Then
+                MessageBox.Show("ERROR: Unable to initialize a camera (Error " + rc.ToString() + ")")
+                Return
+            End If
 
-        errorCode = PCO_CamLinkSetImageParameters(hdriver, iXres, iYres) 'Mandatory for Cameralink and GigE
+        helper = New SnapshotHelper(h_camera)
 
-        ' Don't care for all other interfaces, so leave it intact here.
-        If errorCode < 0 Then
-            tbStatus.Text = " Error while setting CamLinkImageParameters" & Hex(Str(errorCode))
-        End If
-
-        sizeL = CDbl(iXres) * CDbl(iYres) * 2
-        nBuf = -1
-        errorCode = PCO_AllocateBuffer(hdriver, nBuf, sizeL, pwbuf, hevent)
-        'pwbuf already holds the address of the buffer
-
-        If errorCode = 0 Then
-            tbStatus.Text = " Opened; buffer address: 0x" & Hex(pwbuf)
-        Else
-            tbStatus.Text = " Buffer allocation error 0x" & Hex(Str(errorCode))
-        End If
-
-        'Dim ret As Integer = PCO_OpenDialogCam(hdialog, hdriver, Me.Handle, 0, 0, 0, Me.Right, Me.Top, "Camera Settings")
-
+        'set pixeltype
+        SetPixelFormat(h_camera, PixeLINK.PixelFormat.Bayer8)
 
 
 
     End Sub
-    Private Sub ReportReceived(ByVal pvcc As pvcam_helper.PVCamCamera, ByVal rm As pvcam_helper.ReportMessage)
-        rm.Type = rm.Type
-        Console.WriteLine(rm.Message)
-        Debug.Print(rm.Message)
-        ' tl.LogMessage("Camera", rm.Message)
-    End Sub
-
-    'Private Sub CameraNotificationReceived(ByVal pvcc As pvcam_helper.PVCamCamera, ByVal evtType As pvcam_helper.ReportEvent)
-    '    If evtType.NotifEvent = pvcam_helper.CameraNotifications.ACQ_SINGLE_FINISHED Then
-    '        ' cameraImageReady = True
-    '    End If
-    '    Debug.Print("notificationReceived")
-    '    If evtType.NotifEvent = pvcam_helper.CameraNotifications.ACQ_NEW_FRAME_RECEIVED Then
-    '        'Dim tempW As Integer = (myCam.Region(0).s2 - myCam.Region(0).s1 + 1) / myCam.Region(0).sbin
-    '        'Dim tempH As Integer = (myCam.Region(0).p2 - myCam.Region(0).p1 + 1) / myCam.Region(0).pbin
-    '        'cameraImageArray = New Integer(tempW - 1, tempH - 1) {}
-    '        'Dim n As Integer = 0
-
-    '        'For y As Integer = 0 To tempH - 1
-
-    '        '    For x As Integer = 0 To tempW - 1
-    '        '        cameraImageArray(x, y) = CType(myCam.FrameDataShorts(n), UInt16)
-    '        '        n += 1
-    '        '    Next
-    '        'Next
-    '        Debug.Print("new image received")
-    '        If m_pics Is Nothing Then
-    '            m_pics = New RingBitmap(5)
-    '        End If
-    '        ' myCam.FrameToBMP(myCam.FrameDataShorts, myCam.XSize / myCam.Region(0).sbin, myCam.YSize / myCam.Region(0).pbin, True)
-    '        myCam.FrameToBMP(myCam.FrameDataShorts, (myCam.Region(0).s2 - myCam.Region(0).s1 + 1) / myCam.Region(0).sbin, (myCam.Region(0).p2 - myCam.Region(0).p1 + 1) / myCam.Region(0).pbin, False)
-
-    '        m_pics.FillNextBitmap(myCam.LastBMP)
-    '        Dim filename As String
-    '        Dim folderName = String.Format("{0:yyyy-MMM-dd}", DateTime.Now)
-    '        filename = String.Format("{0}{1:ddMMMyyyy-HHmmss}.jpg", "imgq_", DateTime.Now)
-    '        filename = Path.Combine(Me.tbPath.Text, folderName, filename)
 
 
-
-    '        If cbMeteors.Checked And lblDayNight.Text.ToLower = "night" Then
-    '            ' md.examine(bm, filename)
-    '            'call azure service
-    '            Dim ms As New MemoryStream()
-    '            m_pics.Image.Save(ms, ImageFormat.Bmp)
-
-    '            Dim contents = ms.ToArray()
-    '            Dim qe As New queueEntry
-    '            qe.img = contents
-    '            qe.filename = Path.GetFileName(filename)
-    '            qe.dateTaken = Now
-    '            qe.cameraID = "Coolsnap Camera"
-    '            qe.width = myCam.LastBMP.Width
-    '            qe.height = myCam.LastBMP.Height
-
-    '            If myDetectionQueue.Count < 10 Then
-    '                myDetectionQueue.Enqueue(qe)
-    '            End If
-
-    '            ms.Close()
-
-    '        End If
-    '        If Me.cbSaveImages.Checked = True Then
-    '            System.IO.Directory.CreateDirectory(Path.Combine(Me.tbPath.Text, folderName))
-
-
-    '            m_pics.Image.Save(filename, myImageCodecInfo, myEncoderParameters)
-
-
-    '        End If
-    '    End If
-
-    '    'If evtType.NotifEvent = pvcam_helper.CameraNotifications.CAMERA_REFRESH_DONE Then
-
-    '    '    If pvcam_helper.PVCamPCO.Camera.NrOfCameras > 0 Then
-    '    '        If pvcam_helper.PVCamPCO.Camera.OpenCamera(pvcam_helper.PVCamPCO.Camera.CameraList(0), myCam) Then myCam.ReadCameraParams()
-    '    '    End If
-    '    'End If
-    'End Sub
 
 
 
@@ -929,14 +817,7 @@ Public Class frmPCO
 
     End Function 'GetEncoderInfo
 
-    Private Sub cbMeteors_CheckedChanged(sender As Object, e As EventArgs) Handles cbMeteors.CheckedChanged
-        'If Not cbMeteors.Checked Then
-        '    md.LoadModel("c:\tmp\frozen_inference_graph_orig.pb", "c:\tmp\mscoco_label_map.pbtxt")
 
-        'Else
-        '    md.LoadModel("c:\tmp\frozen_inference_graph.pb", "c:\tmp\object-detection.pbtxt")
-        'End If
-    End Sub
 
     Private Sub Button5_Click(sender As Object, e As EventArgs) Handles Button5.Click
         Button5.Enabled = False
@@ -957,11 +838,11 @@ Public Class frmPCO
         End While
 
         stopWatch.[Stop]()
-        Dim x As New Bitmap(iXres, iYres, Imaging.PixelFormat.Format24bppRgb)
-        Dim BoundsRect = New Rectangle(0, 0, iXres, iYres)
+        Dim x As New Bitmap(iWidth, iHeight, Imaging.PixelFormat.Format24bppRgb)
+        Dim BoundsRect = New Rectangle(0, 0, iWidth, iHeight)
         Dim bmpData As System.Drawing.Imaging.BitmapData = x.LockBits(BoundsRect, System.Drawing.Imaging.ImageLockMode.[WriteOnly], x.PixelFormat)
         Dim ptr As IntPtr = bmpData.Scan0
-        System.Runtime.InteropServices.Marshal.Copy(m_pics.ImageBytes, 0, ptr, iXres * iYres) 'copy into bitmap
+        System.Runtime.InteropServices.Marshal.Copy(m_pics.ImageBytes, 0, ptr, iWidth * iHeight * 3 - 1) 'copy into bitmap
 
 
         x.UnlockBits(bmpData)
@@ -1066,7 +947,7 @@ Public Class frmPCO
 
     End Sub
 
-    Private Sub frmPCO_Closing(sender As Object, e As CancelEventArgs) Handles Me.Closing
+    Private Sub frmPixelink_Closing(sender As Object, e As CancelEventArgs) Handles Me.Closing
         Dim i As Object
 
         If hdialog <> 0 Then
@@ -1161,65 +1042,34 @@ Public Class frmPCO
     End Sub
 
 
-    Private Sub tbExposureTime_AutoSizeChanged(sender As Object, e As EventArgs) Handles tbExposureTime.AutoSizeChanged
+    Private Function GetSimpleFeature(ByVal hCamera As Integer, ByVal featureId As Feature) As Single
+        Dim flags As FeatureFlags = 0
+        Dim numParams As Integer = 1
+        Dim params(numParams - 1) As Single
+        rc = Api.GetFeature(hCamera, featureId, flags, numParams, params)
+        Return params(0)
 
-    End Sub
+    End Function
 
     Private Sub Button7_Click(sender As Object, e As EventArgs) Handles Button7.Click
         'use settings
 
         m_camRunning = True
-        'errorCode = PCO_Set
 
-        errorCode = PCO_SetFPSExposureMode(hdriver, 0, 0)
-
-        errorCode = PCO_SetPixelRate(hdriver, 10000000)
-        If lblDayNight.Text = "day" Then
-            errorCode = PCO_SetDelayExposureTime(hdriver, 5000, tbExposureTime.Text, 2, 2)
-
-        Else
-            errorCode = PCO_SetDelayExposureTime(hdriver, 0, tbExposureTime.Text, 0, 2)
-
-        End If
-        Dim sizeL As Integer
-        If hdialog <> 0 Then
-            PCO_EnableDialogCam(hdialog, False)
-        End If
-
-        errorCode = PCO_ArmCamera(hdriver)
-
-        errorCode = PCO_GetSizes(hdriver, PCO.Camera.Sensor.Resolution.xAct, PCO.Camera.Sensor.Resolution.yAct, PCO.Camera.Sensor.Resolution.xMax, PCO.Camera.Sensor.Resolution.yMax)
-        If errorCode < 0 Then
-            tbStatus.Text = " Error while retrieving sensor sizes 0x" & Hex(Str(errorCode))
-        End If
-
-        If (iXres <> PCO.Camera.Sensor.Resolution.xAct) Or (iYres <> PCO.Camera.Sensor.Resolution.yAct) Then
-            iXres = PCO.Camera.Sensor.Resolution.xAct
-            iYres = PCO.Camera.Sensor.Resolution.yAct
-
-            errorCode = PCO_CamLinkSetImageParameters(hdriver, iXres, iYres) 'Mandatory for Cameralink and GigE
-            ' Don't care for all other interfaces, so leave it intact here.
-            If errorCode < 0 Then
-                tbStatus.Text = " Error while setting CamLinkImageParameters" & Hex(Str(errorCode))
-            End If
-
-            If nBuf >= 0 Then
-                errorCode = PCO_FreeBuffer(hdriver, nBuf)
-            End If
-
-            sizeL = CDbl(iXres) * CDbl(iYres) * 2
-            nBuf = -1
-            errorCode = PCO_AllocateBuffer(hdriver, nBuf, sizeL, pwbuf, hevent)
-            'pwbuf already holds the address of the buffer
-        End If
+        'start camera
+        'txtExposure.Text = System.Convert.ToString(GetSimpleFeature(h_camera, Feature.Shutter) * 1000)
+        'txtGain.Text = System.Convert.ToString(GetSimpleFeature(h_camera, Feature.Gain))
 
 
-        errorCode = PCO_SetRecordingState(hdriver, 1)
-        If errorCode = 0 Then
-            tbStatus.Text = " Recording started"
-        Else
-            tbStatus.Text = " Error recording 0x" & Hex(Str(errorCode))
-        End If
+
+
+        SetExposure(h_camera, tbExposureTime.Text)
+
+
+
+
+
+
 
 
         Button7.Enabled = False
@@ -1230,9 +1080,139 @@ Public Class frmPCO
         Timer2.Enabled = True
         t = New Thread(AddressOf processDetection)
         t.Start()
-        t_imaging = New Thread(AddressOf grabImages)
+        t_imaging = New Thread(AddressOf pullImages)
         t_imaging.Start()
     End Sub
+
+    Sub pullImages()
+        Dim s_callbackDelegate
+        m_camRunning = True
+        s_callbackDelegate = New Api.Callback(AddressOf getFrame)
+        Api.SetCallback(h_camera, Overlays.Frame, 0, s_callbackDelegate)
+        rc = Api.SetStreamState(h_camera, StreamState.Start)
+
+        If Not Api.IsSuccess(rc) Then
+            System.Console.WriteLine("ERROR: Unable to start streaming (Error " + rc.ToString() + ")")
+            Return
+        End If
+        'rc = Api.GetClip(h_camera, 1, "test.bmp", callbackDelegate)
+        Do While (m_camRunning)
+
+            '  rc = Api.GetNextFrame(h_camera, bufferSize, rawImage, frameDesc)
+
+            ' If (Not Api.IsSuccess(rc)) Then
+            '     System.Console.WriteLine("ERROR: Unable to setup clip")
+            '     '       Exit Sub
+            ' End If
+
+            '// Poll here until we can see that the callback function has been called
+
+            System.Threading.Thread.Sleep(500)
+
+        Loop
+
+    End Sub
+    Function getFrame(hc As Integer, pBuf As IntPtr, pf As PixeLINK.PixelFormat, ByRef frameDesc As FrameDescriptor, userData As Integer)
+
+        'put image into rin               
+        SyncLock m_syncLock
+            Dim rect As New Rectangle(0, 0, frameDesc.RoiWidth, frameDesc.RoiHeight)
+            bmBild = New Bitmap(frameDesc.RoiWidth, frameDesc.RoiHeight, Imaging.PixelFormat.Format24bppRgb)
+            Dim bmpData As System.Drawing.Imaging.BitmapData = bmBild.LockBits(rect,
+                        Drawing.Imaging.ImageLockMode.ReadWrite, bmBild.PixelFormat)
+            iWidth = frameDesc.RoiWidth
+            iHeight = frameDesc.RoiHeight
+
+            Dim isize As Integer
+            Dim iPtr As IntPtr
+            iPtr = bmpData.Scan0
+            isize = iWidth * iHeight * 3
+            Dim Image24(iWidth * iHeight) As Byte
+
+            Dim newsize As Integer
+            Marshal.Copy(pBuf, Image24, 0, iWidth * iHeight - 1)
+            'convert from bayer8 to 24rgb
+            File.WriteAllBytes("image.raw", Image24)
+
+            rc = Api.FormatImage(Image24, frameDesc, PixeLINK.ImageFormat.Bmp, Nothing, newsize)
+            Dim outImage(newsize) As Byte
+
+            rc = Api.FormatImage(Image24, frameDesc, PixeLINK.ImageFormat.Bmp, outImage, newsize)
+
+
+
+
+
+            'File.WriteAllBytes("imageout.raw", outImage)
+            Marshal.Copy(outImage, 0, iPtr, isize - 1)
+            bmBild.UnlockBits(bmpData)
+
+            bmBild.Dispose()
+
+            If m_pics Is Nothing Then
+                m_pics = New RingBitmap(5)
+            End If
+
+            m_pics.FillNextBitmap(outImage)
+
+
+            ' imageCnt += 1
+
+
+
+
+            ' Must manually release the image to prevent buffers on the camera stream from filling up
+            '  image.Release()
+            Dim filename As String
+
+            Dim folderName = String.Format("{0:yyyy-MMM-dd}", DateTime.Now)
+            filename = String.Format("{0}{1:ddMMMyyyy-HHmmss}.jpg", "imgpl_", DateTime.Now)
+            filename = Path.Combine(tbPath.Text, folderName, filename)
+
+
+
+            If cbMeteors.Checked And lblDayNight.Text.ToLower = "night" Then
+                ' md.examine(bm, filename)
+                'call azure service
+                Dim ms As New MemoryStream()
+                ' convertedImage.ConvertToWriteAbleBitmap()
+                Dim b As Bitmap
+                b = getLastImage()
+
+                b.Save(ms, myImageCodecInfo, myEncoderParameters)
+                b.Dispose()
+
+                Dim contents = ms.ToArray()
+                Dim qe As New queueEntry
+                qe.img = contents
+                qe.filename = Path.GetFileName(filename)
+                qe.dateTaken = Now
+                qe.cameraID = "PixeLINK"
+                qe.width = frameDesc.RoiWidth
+                qe.height = frameDesc.RoiHeight
+                If myDetectionQueue.Count < 10 Then
+                    myDetectionQueue.Enqueue(qe)
+
+                End If
+
+                ms.Close()
+
+            End If
+            If cbSaveImages.Checked = True Then
+                System.IO.Directory.CreateDirectory(Path.Combine(tbPath.Text, folderName))
+                Dim x As Bitmap
+                x = getLastImage()
+
+                x.Save(filename, myImageCodecInfo, myEncoderParameters)
+                x.Dispose()
+
+            End If
+
+
+        End SyncLock
+
+        Debug.WriteLine("got frame")
+    End Function
     Sub grabImages()
 
         Dim BpP As Object
@@ -1251,8 +1231,8 @@ Public Class frmPCO
         Dim j As Integer
         Dim span As Integer
         Dim value As Integer
-        iXres = PCO.Camera.Sensor.Resolution.xAct
-        iYres = PCO.Camera.Sensor.Resolution.yAct
+        iXres = Camera.Sensor.Resolution.xAct
+        iYres = Camera.Sensor.Resolution.yAct
         m_camRunning = True
         span = (Val(tbUpper.Text) - Val(tbLower.Text)) * divide
         Do While (m_camRunning)
@@ -1265,7 +1245,7 @@ Public Class frmPCO
             BpP = 16
             sbuf = 0
 
-            errorCode = PCO_AddBufferEx(hdriver, dwFrst, dwlast, sbuf, PCO.Camera.Sensor.Resolution.xAct, PCO.Camera.Sensor.Resolution.yAct, BpP)
+            errorCode = PCO_AddBufferEx(hdriver, dwFrst, dwlast, sbuf, Camera.Sensor.Resolution.xAct, Camera.Sensor.Resolution.yAct, BpP)
             m_grabbing = True
             'loopcount = 0
             'Do While Not (check) ' status of the dll must be checked or you use waitforsingleobject instead
