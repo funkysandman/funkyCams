@@ -130,14 +130,15 @@ namespace ASCOM.Photometrics
             myCam.SetClockingMode("Alternate Normal");
             myCam.SetClearMode("Pre-Exposure");
             myCam.SetClearCycles(4);
-            //myCam.SetEMGain(1); - doesn't seem to do much
-            myCam.SetReadoutSpeed(0); //20Mhz - seems to have lowest readout noise with current power supply
+           // myCam.SetEMGain(4);// - doesn't seem to do much
+            myCam.SetReadoutSpeed(0); //20Mhz -
             myCam.SetTriggerMode("Timed");
             myCam.SetBinning("1");
-            myCam.SetGainState(2);//gain state 3
+            myCam.SetGainState(0);//gain state 1
             myCam.FramesToGet = 1;
             myCam.SetExposureTime(1);
             myCam.SetADCoffset(40); //this value was found to best for zeroing the bias frame
+
             //   myCam.StartSeqAcq();
 
             //

@@ -97,7 +97,7 @@ Public Class Camera
         Dim cams As String()
         'cams = FG.GetCameraList()
         FG.Camera = 0
-        FG.PixelFormat = 11 '
+        FG.PixelFormat = 11 ' bin 2
         FG.Flip = 1
         FG.BytePerPacket = 1000
         ' FG.bin
@@ -115,6 +115,9 @@ Public Class Camera
         FG.AcquisitionMode = "Continuous"
         ccdHeight = FG.SizeY
         ccdWidth = FG.SizeX
+        FG.SnowNoiseRemove = 1
+        '  FG.SnowNoiseRemoveThreshold = 100
+
 
         TL.LogMessage("Camera", "Completed initialisation")
     End Sub
@@ -262,7 +265,7 @@ Public Class Camera
 
 #Region "ICamera Implementation"
 
-    Private ccdWidth As Integer = 1394 ' Constants to define the ccd pixel dimenstions
+    Private ccdWidth As Integer = 1388 ' Constants to define the ccd pixel dimenstions
     Private ccdHeight As Integer = 1040
     Private pixelSize As Double = 6.45 ' Constant for the pixel physical dimension
 
@@ -298,10 +301,25 @@ Public Class Camera
     Public Property BinX() As Short Implements ICameraV2.BinX
         Get
             TL.LogMessage("BinX Get", "2")
-            Return 2
+            If FG.PixelFormat = 11 Then
+                Return 2
+            End If
+            If FG.PixelFormat = 9 Then
+                Return 1
+
+            End If
         End Get
         Set(value As Short)
             TL.LogMessage("BinX Set", value.ToString())
+            If value = 2 Then
+                FG.PixelFormat = 11
+                FG.BytePerPacket = 1000
+            End If
+            If value = 1 Then
+                FG.PixelFormat = 9
+                FG.BytePerPacket = 1000
+
+            End If
             'If (Not (value = 1)) Then
             '    TL.LogMessage("BinX Set", "Value out of range, throwing InvalidValueException")
             '    Throw New ASCOM.InvalidValueException("BinX", value.ToString(), "2") ' Only 1 is valid in this simple template
@@ -311,8 +329,7 @@ Public Class Camera
 
     Public Property BinY() As Short Implements ICameraV2.BinY
         Get
-            TL.LogMessage("BinY Get", "2")
-            Return 2
+            Return BinX()
         End Get
         Set(value As Short)
             TL.LogMessage("BinY Set", value.ToString())
@@ -326,7 +343,7 @@ Public Class Camera
     Public ReadOnly Property CCDTemperature() As Double Implements ICameraV2.CCDTemperature
         Get
             TL.LogMessage("CCDTemperature Get", "Not implemented")
-            Throw New ASCOM.PropertyNotImplementedException("CCDTemperature", False)
+            Return 0
         End Get
     End Property
 
@@ -340,14 +357,26 @@ Public Class Camera
     Public ReadOnly Property CameraXSize() As Integer Implements ICameraV2.CameraXSize
         Get
             TL.LogMessage("CameraXSize Get", ccdWidth.ToString())
-            Return ccdWidth
+            If FG.PixelFormat = 11 Then '2x2
+                ' Return FG.SizeX * 2
+                Return 688 * 2
+            End If
+            If FG.PixelFormat = 9 Then '1xbinned
+                ' Return FG.SizeX - 1
+                Return 1388
+            End If
         End Get
     End Property
 
     Public ReadOnly Property CameraYSize() As Integer Implements ICameraV2.CameraYSize
         Get
             TL.LogMessage("CameraYSize Get", ccdHeight.ToString())
-            Return ccdHeight
+            If FG.PixelFormat = 11 Then 'binned
+                Return 516 * 2
+            End If
+            If FG.PixelFormat = 9 Then 'binned
+                Return 1040
+            End If
         End Get
     End Property
 
@@ -403,11 +432,13 @@ Public Class Camera
     Public Property CoolerOn() As Boolean Implements ICameraV2.CoolerOn
         Get
             TL.LogMessage("CoolerOn Get", "Not implemented")
-            Throw New ASCOM.PropertyNotImplementedException("CoolerOn", False)
+            'Throw New ASCOM.PropertyNotImplementedException("CoolerOn", False)
+            Return False
         End Get
         Set(value As Boolean)
             TL.LogMessage("CoolerOn Set", "Not implemented")
-            Throw New ASCOM.PropertyNotImplementedException("CoolerOn", True)
+            'Throw New ASCOM.PropertyNotImplementedException("CoolerOn", True)
+            value = value
         End Set
     End Property
 
@@ -613,6 +644,7 @@ Public Class Camera
     End Property
 
     Public Property NumX() As Integer Implements ICameraV2.NumX
+        'what is numx?
         Get
             TL.LogMessage("NumX Get", cameraNumX.ToString())
             Return cameraNumX
@@ -688,18 +720,21 @@ Public Class Camera
     Public ReadOnly Property SensorType() As SensorType Implements ICameraV2.SensorType
         Get
             TL.LogMessage("SensorType Get", "Not implemented")
-            Throw New ASCOM.PropertyNotImplementedException("SensorType", False)
+            ' Throw New ASCOM.PropertyNotImplementedException("SensorType", False)
+            Return SensorType.Monochrome
         End Get
     End Property
 
     Public Property SetCCDTemperature() As Double Implements ICameraV2.SetCCDTemperature
         Get
             TL.LogMessage("SetCCDTemperature Get", "Not implemented")
-            Throw New ASCOM.PropertyNotImplementedException("SetCCDTemperature", False)
+            'Throw New ASCOM.PropertyNotImplementedException("SetCCDTemperature", False)
+            Return 0
         End Get
         Set(value As Double)
             TL.LogMessage("SetCCDTemperature Set", "Not implemented")
-            Throw New ASCOM.PropertyNotImplementedException("SetCCDTemperature", True)
+            'Throw New ASCOM.PropertyNotImplementedException("SetCCDTemperature", True)
+            value = value
         End Set
     End Property
     Public Sub ImageReceived(ts As Integer) Handles FG.ImageReceivedExt
@@ -734,7 +769,7 @@ Public Class Camera
             byteArr = FG.GetRawData(0)
         End If
 
-        ReDim cameraImageArray(Me.ccdWidth, Me.ccdHeight)
+        ReDim cameraImageArray(w - 1, h - 1)
         cameraImageArray = ConvertFrameToImageAray(byteArr, w, h, d)
         cameraImageReady = True
         capturing = False
@@ -818,10 +853,10 @@ Public Class Camera
     Public Sub StartExposure(Duration As Double, Light As Boolean) Implements ICameraV2.StartExposure
         If capturing Then Exit Sub
         If (Duration < 0.0) Then Throw New InvalidValueException("StartExposure", Duration.ToString(), "0.0 upwards")
-        If (cameraNumX > ccdWidth) Then Throw New InvalidValueException("StartExposure", cameraNumX.ToString(), ccdWidth.ToString())
-        If (cameraNumY > ccdHeight) Then Throw New InvalidValueException("StartExposure", cameraNumY.ToString(), ccdHeight.ToString())
-        If (cameraStartX > ccdWidth) Then Throw New InvalidValueException("StartExposure", cameraStartX.ToString(), ccdWidth.ToString())
-        If (cameraStartY > ccdHeight) Then Throw New InvalidValueException("StartExposure", cameraStartY.ToString(), ccdHeight.ToString())
+        'If (cameraNumX > ccdWidth) Then Throw New InvalidValueException("StartExposure", cameraNumX.ToString(), ccdWidth.ToString())
+        'If (cameraNumY > ccdHeight) Then Throw New InvalidValueException("StartExposure", cameraNumY.ToString(), ccdHeight.ToString())
+        'If (cameraStartX > ccdWidth) Then Throw New InvalidValueException("StartExposure", cameraStartX.ToString(), ccdWidth.ToString())
+        'If (cameraStartY > ccdHeight) Then Throw New InvalidValueException("StartExposure", cameraStartY.ToString(), ccdHeight.ToString())
 
         cameraLastExposureDuration = Duration
         exposureStart = DateTime.Now
