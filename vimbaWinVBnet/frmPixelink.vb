@@ -1114,7 +1114,7 @@ Public Class frmPixelink
     End Sub
     Function getFrame(hc As Integer, pBuf As IntPtr, pf As PixeLINK.PixelFormat, ByRef frameDesc As FrameDescriptor, userData As Integer)
 
-        'put image into rin                bmBild = New Bitmap(iXres, iYres, Imaging.PixelFormat.Format24bppRgb)
+        'put image into rin               
         SyncLock m_syncLock
             Dim rect As New Rectangle(0, 0, frameDesc.RoiWidth, frameDesc.RoiHeight)
             bmBild = New Bitmap(frameDesc.RoiWidth, frameDesc.RoiHeight, Imaging.PixelFormat.Format24bppRgb)
@@ -1132,7 +1132,7 @@ Public Class frmPixelink
             Dim newsize As Integer
             Marshal.Copy(pBuf, Image24, 0, iWidth * iHeight - 1)
             'convert from bayer8 to 24rgb
-            'File.WriteAllBytes("image.raw", Image24)
+            File.WriteAllBytes("image.raw", Image24)
 
             rc = Api.FormatImage(Image24, frameDesc, PixeLINK.ImageFormat.Bmp, Nothing, newsize)
             Dim outImage(newsize) As Byte

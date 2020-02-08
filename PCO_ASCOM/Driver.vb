@@ -599,7 +599,7 @@ Public Class Camera
         Get
             If (Not cameraImageReady) Then
                 TL.LogMessage("ImageArray Get", "Throwing InvalidOperationException because of a call to ImageArray before the first image has been taken!")
-                'Throw New ASCOM.InvalidOperationException("Call to ImageArray before the first image has been taken!")
+                Throw New ASCOM.InvalidOperationException("Call to ImageArray before the first image has been taken!")
             Else
 
 
@@ -808,7 +808,22 @@ Public Class Camera
             'pwbuf already holds the address of the buffer
         End If
 
-        errorCode = PCO_SetDelayExposureTime(hdriver, 0, Duration * 1000, 0, 2)
+
+        '0 = microseconds
+        '1 = nanoseconds
+        '2 = milliseconds
+
+        Dim units As Integer = 2
+
+
+        If Duration = 0 Then
+            Duration = 0.5 'fastest this camera can do (pco.2000)
+
+            units = 0 'nano secconds
+
+        End If
+
+        errorCode = PCO_SetDelayExposureTime(hdriver, 0, Duration * 1000, 0, units)
 
 
         'If (Duration < 0.0) Then Throw New InvalidValueException("StartExposure", Duration.ToString(), "0.0 upwards")
