@@ -1064,7 +1064,7 @@ Public Class frmPixelink
 
 
         SetExposure(h_camera, tbExposureTime.Text)
-
+        SetGain(h_camera, tbGain.Text)
 
 
 
@@ -1243,7 +1243,7 @@ Public Class frmPixelink
             'File.WriteAllBytes("imageout.raw", outImage)
             Marshal.Copy(outImage, 0, iPtr, isize - 1)
             bmBild.UnlockBits(bmpData)
-
+            Marshal.FreeHGlobal(pImagePtr)
             bmBild.Dispose()
 
             If m_pics Is Nothing Then
