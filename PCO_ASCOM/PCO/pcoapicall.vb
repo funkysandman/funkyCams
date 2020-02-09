@@ -856,26 +856,30 @@ Module sc2_cam
 	'
 	'SC2_SDK_FUNC int WINAPI PCO_SetPowerDownMode(HANDLE ph, WORD wPowerDownMode);
   Public Declare Function PCO_SetPowerDownMode Lib "sc2_cam.dll" (ByVal hdriver As IntPtr, ByVal wPowerDownMode As Short) As Integer
-	'// Sets the power down mode of the camera, if available.
-	'// In: HANDLE ph -> Handle to a previously opened camera.
-	'//     WORD wPowerDownMode -> WORD variable to hold the power down mode.
-	'// Out: int -> Error message.
-	'
-	'SC2_SDK_FUNC int WINAPI PCO_GetUserPowerDownTime(HANDLE ph, DWORD* dwPowerDownTime);
-	
-	'// Gets the power down time of the camera.
-	'// In: HANDLE ph -> Handle to a previously opened camera.
-	'//     WORD* wPowerDownTime -> Pointer to a WORD variable to receive the power down time.
-	'// Out: int -> Error message.
-	'
-	'SC2_SDK_FUNC int WINAPI PCO_SetUserPowerDownTime(HANDLE ph, DWORD dwPowerDownTime);
-	'// Sets the power down time of the camera, if available.
-	'// In: HANDLE ph -> Handle to a previously opened camera.
-	'//     WORD* wPowerDownTime -> Pointer to a WORD variable to receive the power down time.
-	'// Out: int -> Error message.
-	'
-	'SC2_SDK_FUNC int WINAPI PCO_GetExpTrigSignalStatus(HANDLE ph, WORD* wExpTrgSignal);
-  Public Declare Function PCO_GetExpTrigSignalStatus Lib "sc2_cam.dll" (ByVal hdriver As IntPtr, ByRef wExpTrgSignal As Short) As Integer
+    '// Sets the power down mode of the camera, if available.
+    '// In: HANDLE ph -> Handle to a previously opened camera.
+    '//     WORD wPowerDownMode -> WORD variable to hold the power down mode.
+    '// Out: int -> Error message.
+    '
+    'SC2_SDK_FUNC int WINAPI PCO_GetUserPowerDownTime(HANDLE ph, DWORD* dwPowerDownTime);
+    Public Declare Function PCO_GetUserPowerDownTime Lib "sc2_cam.dll" (ByVal hdriver As IntPtr, ByRef dwTime_us As Integer) As Integer
+
+
+    '// Gets the power down time of the camera.
+    '// In: HANDLE ph -> Handle to a previously opened camera.
+    '//     WORD* wPowerDownTime -> Pointer to a WORD variable to receive the power down time.
+    '// Out: int -> Error message.
+    Public Declare Function PCO_SetUserPowerDownTime Lib "sc2_cam.dll" (ByVal hdriver As IntPtr, ByVal dwTime_us As Integer) As Integer
+
+    '
+    'SC2_SDK_FUNC int WINAPI PCO_SetUserPowerDownTime(HANDLE ph, DWORD dwPowerDownTime);
+    '// Sets the power down time of the camera, if available.
+    '// In: HANDLE ph -> Handle to a previously opened camera.
+    '//     WORD* wPowerDownTime -> Pointer to a WORD variable to receive the power down time.
+    '// Out: int -> Error message.
+    '
+    'SC2_SDK_FUNC int WINAPI PCO_GetExpTrigSignalStatus(HANDLE ph, WORD* wExpTrgSignal);
+    Public Declare Function PCO_GetExpTrigSignalStatus Lib "sc2_cam.dll" (ByVal hdriver As IntPtr, ByRef wExpTrgSignal As Short) As Integer
 	'// Gets the exposure trigger signal state of the camera.
 	'// In: HANDLE ph -> Handle to a previously opened camera.
 	'//     WORD* wExpTrgSignal -> Pointer to a WORD variable to receive the
@@ -1389,7 +1393,7 @@ Module sc2_cam
     '  ...
     '*/
     'SC2_SDK_FUNC int WINAPI PCO_WaitforBuffer(HANDLE ph, int nr_of_buffer, PCO_Buflist *bl, int timeout);
-    '// Public Declare Function PCO_WaitforBuffer Lib "sc2_cam.dll" (ByVal hdriver As IntPtr, ByVal nr_of_buffer As Integer, PCO_Buflist As Long, timeout As Integer) As Integer
+    Public Declare Function PCO_WaitforBuffer Lib "sc2_cam.dll" (ByVal hdriver As IntPtr, ByVal nr_of_buffer As Integer, PCO_Buflist As Long, timeout As Integer) As Integer
     '// Waits for one image buffer in bl and returns if one of the buffers is ready. This function is mainly
     '// used in Linux. In Windows it is implemented for platform independence.
     '// In: HANDLE ph -> Handle to a previously opened camera.
