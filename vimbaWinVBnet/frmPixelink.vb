@@ -785,7 +785,7 @@ Public Class frmPixelink
         helper = New SnapshotHelper(h_camera)
 
         'set pixeltype
-        SetPixelFormat(h_camera, PixeLINK.PixelFormat.Bayer8)
+        SetPixelFormat(h_camera, PixeLINK.PixelFormat.Bayer16)
 
 
 
@@ -1064,7 +1064,7 @@ Public Class frmPixelink
 
 
         SetExposure(h_camera, tbExposureTime.Text)
-
+        SetGain(h_camera, tbGain.Text)
 
 
 
@@ -1114,7 +1114,7 @@ Public Class frmPixelink
     End Sub
     Function getFrame(hc As Integer, pBuf As IntPtr, pf As PixeLINK.PixelFormat, ByRef frameDesc As FrameDescriptor, userData As Integer)
 
-        'put image into rin               
+        'put image into rin                bmBild = New Bitmap(iXres, iYres, Imaging.PixelFormat.Format24bppRgb)
         SyncLock m_syncLock
             Dim rect As New Rectangle(0, 0, frameDesc.RoiWidth, frameDesc.RoiHeight)
             bmBild = New Bitmap(frameDesc.RoiWidth, frameDesc.RoiHeight, Imaging.PixelFormat.Format24bppRgb)
@@ -1122,22 +1122,121 @@ Public Class frmPixelink
                         Drawing.Imaging.ImageLockMode.ReadWrite, bmBild.PixelFormat)
             iWidth = frameDesc.RoiWidth
             iHeight = frameDesc.RoiHeight
-
+            Dim value As Integer
             Dim isize As Integer
             Dim iPtr As IntPtr
             iPtr = bmpData.Scan0
-            isize = iWidth * iHeight * 3
-            Dim Image24(iWidth * iHeight) As Byte
+            isize = iWidth * iHeight * 2
+            Dim bayer16(isize) As Byte
 
             Dim newsize As Integer
-            Marshal.Copy(pBuf, Image24, 0, iWidth * iHeight - 1)
+            Marshal.Copy(pBuf, bayer16, 0, isize - 1)
+            Dim j As Integer
+            ReDim b(iWidth * iHeight)
+
+            'Looks easy, but this took some time to work...
+
+            File.WriteAllBytes("raw16.raw", bayer16)
+            '  Text1.Text = "0x" & Hex(b(10)) & "   0x" & Hex(b(100)) & "   0x" & Hex(b(1000))
+
+            ' span = (maxval.Value - minval.Value) * divide
+
+            If bmBildUsed <> 0 Then
+                bmBild.Dispose()
+            End If
+
+            ' Create bitmap
+            'bmBild = New Bitmap(iWidth, iHeight, Imaging.PixelFormat.Format24bppRgb)
+
+            Dim range As Integer
+            range = tbUpper.Text - tbLower.Text
+            Dim multiplier As Single
+            multiplier = 256 / range
+            Dim lower, upper As Integer
+            lower = CInt(tbLower.Text)
+            upper = CInt(tbUpper.Text)
+            j = 0
+            For i = 0 To iWidth * iHeight - 1  ' This loop converts from 16bit to 8bit using min and max
+                value = (bayer16(j) >> 4) * 256 + ((bayer16(j) And &HF) << 4) + (bayer16(j + 1) >> 4)
+                ' Debug.WriteLine(value)
+
+
+
+                ''Debug.Print(value)
+                If value < 0 Then ' Type cast from short to ushort? Forget it: Not with VB
+                    value = value * -1
+                    value = value + &H8000
+                End If
+                value = value - lower
+                If value < 0 Then
+                    value = 0
+                End If
+                value = CInt(CSng(value) * multiplier)
+
+
+                'value = value * 255 / span
+                If value > 255 Then
+                    value = 255
+                End If
+                If value < 0 Then
+                    value = 0
+                End If
+
+                b(i) = value
+
+
+
+
+                j = j + 2
+            Next
+
+            ' Marshal.Copy(Image24, 0, bmpData.Scan0, isize) ' Copy intermediate buffer to the bitmap
+
+            'b contains bayer8
+            Dim pImagePtr As IntPtr
+            pImagePtr = Marshal.AllocHGlobal(iWidth * iHeight)
+            Marshal.Copy(b, 0, pImagePtr, iWidth * iHeight - 1)
+
+
+
+
+
+
+
+
             'convert from bayer8 to 24rgb
-            File.WriteAllBytes("image.raw", Image24)
+            File.WriteAllBytes("image.raw", b)
 
-            rc = Api.FormatImage(Image24, frameDesc, PixeLINK.ImageFormat.Bmp, Nothing, newsize)
-            Dim outImage(newsize) As Byte
+            Dim mTransformImage As BGAPI2.Image = Nothing
+            Dim mImage As BGAPI2.Image = Nothing
+            ' Dim buff As BGAPI2.Buffer = New BGAPI2.Buffer()
+            Dim imgProcessor As New BGAPI2.ImageProcessor()
 
-            rc = Api.FormatImage(Image24, frameDesc, PixeLINK.ImageFormat.Bmp, outImage, newsize)
+
+
+            Dim outImage(iWidth * iHeight * 3) As Byte
+            mImage = imgProcessor.CreateImage(iWidth, iHeight, "BayerRG8", pImagePtr, iWidth * iHeight)
+
+            'ULong imageBufferAddress = (ULong)ImageInfo.pImagePtr;
+            mTransformImage = imgProcessor.CreateTransformedImage(mImage, "BGR8")
+
+
+
+            Marshal.Copy(mTransformImage.Buffer, outImage, 0, iWidth * iHeight * 3 - 1)
+
+            'File.WriteAllBytes("pgxxx.raw", Image.ManagedData)
+            'File.WriteAllBytes("pgxxxyy.raw", convertedImage.ManagedData)
+
+            ''Dim convertedImage As IManagedImage = image.Convert(PixelFormatEnums.RGB8, ColorProcessingAlgorithm.NEAREST_NEIGHBOR_AVG)
+            'File.WriteAllBytes("pgconvert.raw", Image.ManagedData)
+            'convertedImage.ConvertToWriteAbleBitmap(PixelFormatEnums.BGR8, convertedImage)
+
+
+
+            ' rc = Api.FormatImage(Image24, frameDesc, PixeLINK.ImageFormat.Bmp, Nothing, newsize)
+
+
+            ' rc = Api.FormatImage(Image24, frameDesc, PixeLINK.ImageFormat.Bmp, outImage, newsize)
 
 
 
@@ -1146,7 +1245,7 @@ Public Class frmPixelink
             'File.WriteAllBytes("imageout.raw", outImage)
             Marshal.Copy(outImage, 0, iPtr, isize - 1)
             bmBild.UnlockBits(bmpData)
-
+            Marshal.FreeHGlobal(pImagePtr)
             bmBild.Dispose()
 
             If m_pics Is Nothing Then
