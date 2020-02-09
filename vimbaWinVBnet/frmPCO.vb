@@ -650,7 +650,7 @@ Public Class frmPCO
     '    myCam.ExposureTime = Val(tbExposureTime.Text) / 1000 ' expecting ms
     '    ' myCam.ReadCameraParams()
 
-    '    If Not myCam.AcqSetup(pvcam_helper.PVCamCamera.AcqTypes.ACQ_TYPE_CONTINUOUS) Then
+    '    If Not myCam.AcqSetup(pvcam_helper.PVCamPCO.Camera.AcqTypes.ACQ_TYPE_CONTINUOUS) Then
     '        Return
     '    End If
 
@@ -780,26 +780,26 @@ Public Class frmPCO
         End If
 
         'sensor
-        errorCode = PCO_GetSensorFormat(hdriver, Camera.Sensor.format_Renamed)
+        errorCode = PCO_GetSensorFormat(hdriver, PCO.Camera.Sensor.format_Renamed)
         If errorCode < 0 Then
             tbStatus.Text = " Error while retrieving sensor format 0x" & Hex(Str(errorCode))
         End If
 
-        errorCode = PCO_GetSizes(hdriver, Camera.Sensor.Resolution.xAct, Camera.Sensor.Resolution.yAct, Camera.Sensor.Resolution.xMax, Camera.Sensor.Resolution.yMax)
+        errorCode = PCO_GetSizes(hdriver, PCO.Camera.Sensor.Resolution.xAct, PCO.Camera.Sensor.Resolution.yAct, PCO.Camera.Sensor.Resolution.xMax, PCO.Camera.Sensor.Resolution.yMax)
 
         If errorCode < 0 Then
             tbStatus.Text = " Error while retrieving sensor sizes 0x" & Hex(Str(errorCode))
         End If
 
 
-        errorCode = PCO_GetROI(hdriver, Camera.Sensor.ROI.x0, Camera.Sensor.ROI.y0, Camera.Sensor.ROI.X1, Camera.Sensor.ROI.Y1)
+        errorCode = PCO_GetROI(hdriver, PCO.Camera.Sensor.ROI.x0, PCO.Camera.Sensor.ROI.y0, PCO.Camera.Sensor.ROI.X1, PCO.Camera.Sensor.ROI.Y1)
 
         If errorCode < 0 Then
             tbStatus.Text = " Error while retrieving roi 0x" & Hex(Str(errorCode))
         End If
 
-        iXres = Camera.Sensor.Resolution.xAct
-        iYres = Camera.Sensor.Resolution.yAct
+        iXres = PCO.Camera.Sensor.Resolution.xAct
+        iYres = PCO.Camera.Sensor.Resolution.yAct
 
         errorCode = PCO_CamLinkSetImageParameters(hdriver, iXres, iYres) 'Mandatory for Cameralink and GigE
 
@@ -899,8 +899,8 @@ Public Class frmPCO
 
     '    'If evtType.NotifEvent = pvcam_helper.CameraNotifications.CAMERA_REFRESH_DONE Then
 
-    '    '    If pvcam_helper.PVCamCamera.NrOfCameras > 0 Then
-    '    '        If pvcam_helper.PVCamCamera.OpenCamera(pvcam_helper.PVCamCamera.CameraList(0), myCam) Then myCam.ReadCameraParams()
+    '    '    If pvcam_helper.PVCamPCO.Camera.NrOfCameras > 0 Then
+    '    '        If pvcam_helper.PVCamPCO.Camera.OpenCamera(pvcam_helper.PVCamPCO.Camera.CameraList(0), myCam) Then myCam.ReadCameraParams()
     '    '    End If
     '    'End If
     'End Sub
@@ -1188,14 +1188,14 @@ Public Class frmPCO
 
         errorCode = PCO_ArmCamera(hdriver)
 
-        errorCode = PCO_GetSizes(hdriver, Camera.Sensor.Resolution.xAct, Camera.Sensor.Resolution.yAct, Camera.Sensor.Resolution.xMax, Camera.Sensor.Resolution.yMax)
+        errorCode = PCO_GetSizes(hdriver, PCO.Camera.Sensor.Resolution.xAct, PCO.Camera.Sensor.Resolution.yAct, PCO.Camera.Sensor.Resolution.xMax, PCO.Camera.Sensor.Resolution.yMax)
         If errorCode < 0 Then
             tbStatus.Text = " Error while retrieving sensor sizes 0x" & Hex(Str(errorCode))
         End If
 
-        If (iXres <> Camera.Sensor.Resolution.xAct) Or (iYres <> Camera.Sensor.Resolution.yAct) Then
-            iXres = Camera.Sensor.Resolution.xAct
-            iYres = Camera.Sensor.Resolution.yAct
+        If (iXres <> PCO.Camera.Sensor.Resolution.xAct) Or (iYres <> PCO.Camera.Sensor.Resolution.yAct) Then
+            iXres = PCO.Camera.Sensor.Resolution.xAct
+            iYres = PCO.Camera.Sensor.Resolution.yAct
 
             errorCode = PCO_CamLinkSetImageParameters(hdriver, iXres, iYres) 'Mandatory for Cameralink and GigE
             ' Don't care for all other interfaces, so leave it intact here.
@@ -1251,8 +1251,8 @@ Public Class frmPCO
         Dim j As Integer
         Dim span As Integer
         Dim value As Integer
-        iXres = Camera.Sensor.Resolution.xAct
-        iYres = Camera.Sensor.Resolution.yAct
+        iXres = PCO.Camera.Sensor.Resolution.xAct
+        iYres = PCO.Camera.Sensor.Resolution.yAct
         m_camRunning = True
         span = (Val(tbUpper.Text) - Val(tbLower.Text)) * divide
         Do While (m_camRunning)
@@ -1265,7 +1265,7 @@ Public Class frmPCO
             BpP = 16
             sbuf = 0
 
-            errorCode = PCO_AddBufferEx(hdriver, dwFrst, dwlast, sbuf, Camera.Sensor.Resolution.xAct, Camera.Sensor.Resolution.yAct, BpP)
+            errorCode = PCO_AddBufferEx(hdriver, dwFrst, dwlast, sbuf, PCO.Camera.Sensor.Resolution.xAct, PCO.Camera.Sensor.Resolution.yAct, BpP)
             m_grabbing = True
             'loopcount = 0
             'Do While Not (check) ' status of the dll must be checked or you use waitforsingleobject instead

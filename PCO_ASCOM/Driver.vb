@@ -2,7 +2,7 @@
 ' --------------------------------------------------------------------------------
 ' TODO fill in this information for your driver, then remove this line!
 '
-' ASCOM Camera driver for Foculus
+' ASCOM Camera driver for PCO
 '
 ' Description:	Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam 
 '				nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam 
@@ -21,7 +21,7 @@
 ' ---------------------------------------------------------------------------------
 '
 '
-' Your driver's ID is ASCOM.Foculus.Camera
+' Your driver's ID is ASCOM.PCO.Camera
 '
 ' The Guid attribute sets the CLSID for ASCOM.DeviceName.Camera
 ' The ClassInterface/None addribute prevents an empty interface called
@@ -43,14 +43,15 @@ Imports System.Collections.Generic
 Imports System.Globalization
 Imports System.Runtime.InteropServices
 Imports System.Text
+Imports System.Threading
 
-<Guid("e82b244f-6c67-4c58-bdde-6e45c16046d2")>
+<Guid("f9cacceb-5a6c-469d-9b35-acd31b107ce9")>
 <ClassInterface(ClassInterfaceType.None)>
 Public Class Camera
 
-    ' The Guid attribute sets the CLSID for ASCOM.Foculus.Camera
+    ' The Guid attribute sets the CLSID for ASCOM.PCO.Camera
     ' The ClassInterface/None addribute prevents an empty interface called
-    ' _Foculus from being created and used as the [default] interface
+    ' _PCO from being created and used as the [default] interface
 
     ' TODO Replace the not implemented exceptions with code to implement the function or
     ' throw the appropriate ASCOM exception.
@@ -60,8 +61,8 @@ Public Class Camera
     '
     ' Driver ID and descriptive string that shows in the Chooser
     '
-    Friend Shared driverID As String = "ASCOM.Foculus.Camera"
-    Private Shared driverDescription As String = "Foculus Camera"
+    Friend Shared driverID As String = "ASCOM.PCO.Camera"
+    Private Shared driverDescription As String = "PCO Camera"
 
     Friend Shared comPortProfileName As String = "COM Port" 'Constants used for Profile persistence
     Friend Shared traceStateProfileName As String = "Trace Level"
@@ -70,21 +71,26 @@ Public Class Camera
 
     Friend Shared comPort As String ' Variables to hold the currrent device configuration
     Friend Shared traceState As Boolean
-    Private m_exposureTime As Long
+
     Private connectedState As Boolean ' Private variable to hold the connected state
     Private utilities As Util ' Private variable to hold an ASCOM Utilities object
     Private astroUtilities As AstroUtils ' Private variable to hold an AstroUtils object to provide the Range method
     Private TL As TraceLogger ' Private variable to hold the trace logger object (creates a diagnostic log file with information that you specify)
-    Private capturing As Boolean = False
-    Public myCam As Object
-    Public WithEvents FG As FGControlLib.FGControlCtrl
-    '
+    Private m_fastreadout As Boolean = False
+    Private m_ccdTemp As Double = 0
+    Private m_ccdTargetTemp As Double = 0
+    Private m_camTemp As Double = 0
+    Private m_pwrTemp As Double = 0
+    Private m_xbin As Integer
+    Private m_ybin As Integer
+    Private m_coolerOn As Boolean = True
+    'm_ccdTemp, m_camTemp, m_pwrTemp
     ' Constructor - Must be public for COM registration!
     '
     Public Sub New()
 
         ReadProfile() ' Read device configuration from the ASCOM Profile store
-        TL = New TraceLogger("", "Foculus")
+        TL = New TraceLogger("", "PCO")
         TL.Enabled = traceState
         TL.LogMessage("Camera", "Starting initialisation")
 
@@ -93,35 +99,101 @@ Public Class Camera
         astroUtilities = New AstroUtils 'Initialise new astro utiliites object
 
         'TODO: Implement your additional construction here
-        FG = New FGControlLib.FGControlCtrl
-        Dim cams As String()
-        'cams = FG.GetCameraList()
-        FG.Camera = 0
-        FG.PixelFormat = 11 ' bin 2
-        FG.Flip = 1
-        FG.BytePerPacket = 1000
-        ' FG.bin
-        'FG.AcquisitionMode = ""
-        'FG.SetExposureTimeString("75ms")
-        Me.FG.SetGain("", 500)
-        ' Me.FG.SetExposureTimeString("50ms")
-        ' FG.Binning = 1
-        FG.KneeLUTEnable = True
-        FG.SetLUTKneePoint(0, 525, 1290)
-        FG.SetLUTKneePoint(1, 1290, 1980)
-        FG.SetLUTKneePoint(2, 1860, 2265)
-        FG.SetLUTKneePoint(3, 2475, 2715)
-        FG.ExposureTimeAuto = "Off"
-        FG.AcquisitionMode = "Continuous"
-        ccdHeight = FG.SizeY
-        ccdWidth = FG.SizeX
-        FG.SnowNoiseRemove = 1
-        '  FG.SnowNoiseRemoveThreshold = 100
-
-
+        getCameraReady()
         TL.LogMessage("Camera", "Completed initialisation")
     End Sub
+    Private Sub getCameraReady()
+        'try to open camera
+        Dim sizeL As Integer
+        Dim dwWarn As Integer
+        Dim dwErr As Integer
+        Dim dwStatus As Integer
 
+        hdriver = 0
+        hdialog = 0
+        errorCode = PCO_OpenCamera(hdriver, 0)
+        If errorCode <> 0 Then
+            MsgBox("Error detected: code: 0x" & Hex(Str(errorCode)))
+            Return
+        End If
+
+        bmBildUsed = 0
+
+        camDesc.wSize = Marshal.SizeOf(camDesc)
+
+        errorCode = PCO_GetCameraDescription(hdriver, camDesc)
+
+        If errorCode >= 0 Then
+            'Text1.Text = " Camera openened, " + hdriver.ToString
+        Else
+            MsgBox(" Error opening camera0x" & Hex(Str(errorCode)), MsgBoxStyle.Critical)
+            Exit Sub
+        End If
+
+        'minval.Value = 0
+        'maxval.Value = 1 << (camDesc.wDynResDESC) - 1
+        divide = 1 << (16 - camDesc.wDynResDESC)
+
+        'errorCode = PCO_ResetSettingsToDefault(hdriver)
+
+        '  errorCode = PCO_ArmCamera(hdriver)
+
+
+        dwWarn = 0
+        dwErr = 0
+        dwStatus = 0
+        errorCode = PCO_GetCameraHealthStatus(hdriver, dwWarn, dwErr, dwStatus)
+        If dwErr <> 0 Then
+            ' tbStatus.Text = "Camera status error 0x" & Hex(Str(dwErr)) & " please switch off camera"
+        End If
+
+        'sensor
+        errorCode = PCO_GetSensorFormat(hdriver, PCO.Camera.Sensor.format_Renamed)
+        If errorCode < 0 Then
+            ' tbStatus.Text = " Error while retrieving sensor format 0x" & Hex(Str(errorCode))
+        End If
+
+        errorCode = PCO_GetSizes(hdriver, PCO.Camera.Sensor.Resolution.xAct, PCO.Camera.Sensor.Resolution.yAct, PCO.Camera.Sensor.Resolution.xMax, PCO.Camera.Sensor.Resolution.yMax)
+
+        If errorCode < 0 Then
+            ' tbStatus.Text = " Error while retrieving sensor sizes 0x" & Hex(Str(errorCode))
+        End If
+
+
+        errorCode = PCO_GetROI(hdriver, PCO.Camera.Sensor.ROI.x0, PCO.Camera.Sensor.ROI.y0, PCO.Camera.Sensor.ROI.X1, PCO.Camera.Sensor.ROI.Y1)
+
+        If errorCode < 0 Then
+            ' tbStatus.Text = " Error while retrieving roi 0x" & Hex(Str(errorCode))
+        End If
+
+        iXres = PCO.Camera.Sensor.Resolution.xAct
+        iYres = PCO.Camera.Sensor.Resolution.yAct
+
+        errorCode = PCO_CamLinkSetImageParameters(hdriver, iXres, iYres) 'Mandatory for Cameralink and GigE
+
+        ' Don't care for all other interfaces, so leave it intact here.
+        If errorCode < 0 Then
+            ' tbStatus.Text = " Error while setting CamLinkImageParameters" & Hex(Str(errorCode))
+        End If
+
+        sizeL = CDbl(iXres) * CDbl(iYres) * 2
+        nBuf = -1
+        errorCode = PCO_AllocateBuffer(hdriver, nBuf, sizeL, pwbuf, hevent)
+        'pwbuf already holds the address of the buffer
+
+        If errorCode = 0 Then
+            '  tbStatus.Text = " Opened; buffer address: 0x" & Hex(pwbuf)
+        Else
+            'tbStatus.Text = " Buffer allocation error 0x" & Hex(Str(errorCode))
+        End If
+
+        'Dim ret As Integer = PCO_OpenDialogCam(hdialog, hdriver, Me.Handle, 0, 0, 0, Me.Right, Me.Top, "Camera Settings")
+        errorCode = PCO_SetPixelRate(hdriver, 10000000)
+        errorCode = PCO_SetFPSExposureMode(hdriver, 0, 0)
+        'slowest clock speed
+
+
+    End Sub
     '
     ' PUBLIC COM INTERFACE ICameraV2 IMPLEMENTATION
     '
@@ -244,7 +316,7 @@ Public Class Camera
 
     Public ReadOnly Property Name As String Implements ICameraV2.Name
         Get
-            Dim s_name As String = "Short driver name - please customise"
+            Dim s_name As String = "PCO cam driver"
             TL.LogMessage("Name Get", s_name)
             Return s_name
         End Get
@@ -265,9 +337,9 @@ Public Class Camera
 
 #Region "ICamera Implementation"
 
-    Private ccdWidth As Integer = 1388 ' Constants to define the ccd pixel dimenstions
-    Private ccdHeight As Integer = 1040
-    Private pixelSize As Double = 6.45 ' Constant for the pixel physical dimension
+    Private Const ccdWidth As Integer = 2048 ' Constants to define the ccd pixel dimenstions
+    Private Const ccdHeight As Integer = 2048
+    Private Const pixelSize As Double = 7.4 ' Constant for the pixel physical dimension
 
     Private cameraNumX As Integer = ccdWidth ' Initialise variables to hold values required for functionality tested by Conform
     Private cameraNumY As Integer = ccdHeight
@@ -278,10 +350,11 @@ Public Class Camera
     Private cameraImageReady As Boolean = False
     Private cameraImageArray As Integer(,)
     Private cameraImageArrayVariant As Object(,)
+    Private exposing As Boolean
 
     Public Sub AbortExposure() Implements ICameraV2.AbortExposure
         TL.LogMessage("AbortExposure", "Not implemented")
-        Throw New MethodNotImplementedException("AbortExposure")
+        exposing = False
     End Sub
 
     Public ReadOnly Property BayerOffsetX() As Short Implements ICameraV2.BayerOffsetX
@@ -300,50 +373,44 @@ Public Class Camera
 
     Public Property BinX() As Short Implements ICameraV2.BinX
         Get
-            TL.LogMessage("BinX Get", "2")
-            If FG.PixelFormat = 11 Then
-                Return 2
-            End If
-            If FG.PixelFormat = 9 Then
-                Return 1
-
-            End If
+            TL.LogMessage("BinX Get", "1")
+            Return m_xbin
         End Get
         Set(value As Short)
-            TL.LogMessage("BinX Set", value.ToString())
-            If value = 2 Then
-                FG.PixelFormat = 11
-                FG.BytePerPacket = 1000
-            End If
-            If value = 1 Then
-                FG.PixelFormat = 9
-                FG.BytePerPacket = 1000
+            m_xbin = value
+            'errorCode = PCO_GetBinning(hdriver, m_xbin, m_ybin)
+            errorCode = PCO_SetBinning(hdriver, value, value)
+            errorCode = PCO_SetROI(hdriver, 1, 1, ccdWidth / value, ccdHeight / value)
 
-            End If
-            'If (Not (value = 1)) Then
-            '    TL.LogMessage("BinX Set", "Value out of range, throwing InvalidValueException")
-            '    Throw New ASCOM.InvalidValueException("BinX", value.ToString(), "2") ' Only 1 is valid in this simple template
-            'End If
+            PCO.Camera.Sensor.Resolution.xAct = ccdWidth / value
+            PCO.Camera.Sensor.Resolution.yAct = ccdHeight / value
+
+
         End Set
     End Property
 
     Public Property BinY() As Short Implements ICameraV2.BinY
         Get
-            Return BinX()
+            TL.LogMessage("BinX Get", "1")
+            Return m_ybin
         End Get
         Set(value As Short)
-            TL.LogMessage("BinY Set", value.ToString())
-            'If (Not (value = 1)) Then
-            '    TL.LogMessage("BinX Set", "Value out of range, throwing InvalidValueException")
-            '    Throw New ASCOM.InvalidValueException("BinY", value.ToString(), "2") ' Only 1 is valid in this simple template
-            'End If
+            m_ybin = value
+            'errorCode = PCO_GetBinning(hdriver, m_xbin, m_ybin)
+            errorCode = PCO_SetBinning(hdriver, value, value)
+            errorCode = PCO_SetROI(hdriver, 1, 1, ccdWidth / value, ccdHeight / value)
+
+            PCO.Camera.Sensor.Resolution.xAct = ccdWidth / value
+            PCO.Camera.Sensor.Resolution.yAct = ccdHeight / value
+
         End Set
     End Property
 
     Public ReadOnly Property CCDTemperature() As Double Implements ICameraV2.CCDTemperature
         Get
-            TL.LogMessage("CCDTemperature Get", "Not implemented")
-            Return 0
+
+            errorCode = PCO_GetTemperature(hdriver, m_ccdTemp, m_camTemp, m_pwrTemp)
+            Return m_ccdTemp / 10
         End Get
     End Property
 
@@ -356,48 +423,34 @@ Public Class Camera
 
     Public ReadOnly Property CameraXSize() As Integer Implements ICameraV2.CameraXSize
         Get
-            TL.LogMessage("CameraXSize Get", ccdWidth.ToString())
-            If FG.PixelFormat = 11 Then '2x2
-                ' Return FG.SizeX * 2
-                Return 688 * 2
-            End If
-            If FG.PixelFormat = 9 Then '1xbinned
-                ' Return FG.SizeX - 1
-                Return 1388
-            End If
+            Return iXres
         End Get
     End Property
 
     Public ReadOnly Property CameraYSize() As Integer Implements ICameraV2.CameraYSize
         Get
-            TL.LogMessage("CameraYSize Get", ccdHeight.ToString())
-            If FG.PixelFormat = 11 Then 'binned
-                Return 516 * 2
-            End If
-            If FG.PixelFormat = 9 Then 'binned
-                Return 1040
-            End If
+            Return iYres
         End Get
     End Property
 
     Public ReadOnly Property CanAbortExposure() As Boolean Implements ICameraV2.CanAbortExposure
         Get
             TL.LogMessage("CanAbortExposure Get", False.ToString())
-            Return False
+            Return True
         End Get
     End Property
 
     Public ReadOnly Property CanAsymmetricBin() As Boolean Implements ICameraV2.CanAsymmetricBin
         Get
             TL.LogMessage("CanAsymmetricBin Get", False.ToString())
-            Return True
+            Return False
         End Get
     End Property
 
     Public ReadOnly Property CanFastReadout() As Boolean Implements ICameraV2.CanFastReadout
         Get
             TL.LogMessage("CanFastReadout Get", False.ToString())
-            Return False
+            Return True
         End Get
     End Property
 
@@ -418,27 +471,23 @@ Public Class Camera
     Public ReadOnly Property CanSetCCDTemperature() As Boolean Implements ICameraV2.CanSetCCDTemperature
         Get
             TL.LogMessage("CanSetCCDTemperature Get", False.ToString())
-            Return False
+            Return True
         End Get
     End Property
 
     Public ReadOnly Property CanStopExposure() As Boolean Implements ICameraV2.CanStopExposure
         Get
             TL.LogMessage("CanStopExposure Get", False.ToString())
-            Return False
+            Return True
         End Get
     End Property
 
     Public Property CoolerOn() As Boolean Implements ICameraV2.CoolerOn
         Get
-            TL.LogMessage("CoolerOn Get", "Not implemented")
-            'Throw New ASCOM.PropertyNotImplementedException("CoolerOn", False)
-            Return False
+            Return m_coolerOn
         End Get
         Set(value As Boolean)
-            TL.LogMessage("CoolerOn Set", "Not implemented")
-            'Throw New ASCOM.PropertyNotImplementedException("CoolerOn", True)
-            value = value
+            m_coolerOn = value
         End Set
     End Property
 
@@ -476,29 +525,20 @@ Public Class Camera
             Throw New ASCOM.PropertyNotImplementedException("ExposureResolution", False)
         End Get
     End Property
-    Public Property ExposureTime() As Long
-        Get
-            Return m_exposureTime
-        End Get
-        Set(value As Long)
-            Try
-                m_exposureTime = value 'stored as seconds
-                FG.SetExposureTimeString(CStr(value) & "s")
-                'v.m_Camera.Features("ExposureTimeAbs").FloatValue = Convert.ToDouble(m_exposureTime * 1000000) 'uses microseconds
-            Catch ex As Exception
-                MsgBox(ex.Message)
-            End Try
 
-        End Set
-    End Property
     Public Property FastReadout() As Boolean Implements ICameraV2.FastReadout
         Get
-            TL.LogMessage("FastReadout Get", "Not implemented")
-            Throw New ASCOM.PropertyNotImplementedException("FastReadout", False)
+
+            Return m_fastreadout
         End Get
         Set(value As Boolean)
-            TL.LogMessage("FastReadout Set", "Not implemented")
-            Throw New ASCOM.PropertyNotImplementedException("FastReadout", True)
+            m_fastreadout = value
+            If m_fastreadout Then
+                errorCode = PCO_SetPixelRate(hdriver, 40000000)
+            Else
+                errorCode = PCO_SetPixelRate(hdriver, 10000000)
+            End If
+
         End Set
     End Property
 
@@ -560,10 +600,12 @@ Public Class Camera
             If (Not cameraImageReady) Then
                 TL.LogMessage("ImageArray Get", "Throwing InvalidOperationException because of a call to ImageArray before the first image has been taken!")
                 Throw New ASCOM.InvalidOperationException("Call to ImageArray before the first image has been taken!")
+            Else
+
+
+                Return cameraImageArray
             End If
-            Debug.Print("pulling imageArray")
-            '  ReDim cameraImageArray(cameraNumX - 1, cameraNumY - 1)
-            Return cameraImageArray
+
         End Get
     End Property
 
@@ -574,7 +616,7 @@ Public Class Camera
                 Throw New ASCOM.InvalidOperationException("Call to ImageArrayVariant before the first image has been taken!")
             End If
 
-            ReDim cameraImageArrayVariant(cameraNumX - 1, cameraNumY - 1)
+
             For i As Integer = 0 To cameraImageArray.GetLength(1) - 1
                 For j As Integer = 0 To cameraImageArray.GetLength(0) - 1
                     cameraImageArrayVariant(j, i) = cameraImageArray(j, i)
@@ -644,7 +686,6 @@ Public Class Camera
     End Property
 
     Public Property NumX() As Integer Implements ICameraV2.NumX
-        'what is numx?
         Get
             TL.LogMessage("NumX Get", cameraNumX.ToString())
             Return cameraNumX
@@ -720,139 +761,72 @@ Public Class Camera
     Public ReadOnly Property SensorType() As SensorType Implements ICameraV2.SensorType
         Get
             TL.LogMessage("SensorType Get", "Not implemented")
-            ' Throw New ASCOM.PropertyNotImplementedException("SensorType", False)
-            Return SensorType.Monochrome
+            Throw New ASCOM.PropertyNotImplementedException("SensorType", False)
+
         End Get
     End Property
 
     Public Property SetCCDTemperature() As Double Implements ICameraV2.SetCCDTemperature
         Get
-            TL.LogMessage("SetCCDTemperature Get", "Not implemented")
-            'Throw New ASCOM.PropertyNotImplementedException("SetCCDTemperature", False)
-            Return 0
+            errorCode = PCO_GetCoolingSetpointTemperature(hdriver, m_ccdTargetTemp)
+            Return m_ccdTargetTemp
+
         End Get
         Set(value As Double)
-            TL.LogMessage("SetCCDTemperature Set", "Not implemented")
-            'Throw New ASCOM.PropertyNotImplementedException("SetCCDTemperature", True)
-            value = value
+            errorCode = PCO_SetCoolingSetpointTemperature(hdriver, value)
+            m_ccdTargetTemp = value
+
         End Set
     End Property
-    Public Sub ImageReceived(ts As Integer) Handles FG.ImageReceivedExt
-        If Not capturing Then
-            FG.Acquisition = 0
-            Exit Sub
-        End If
-        'ts
-        'FG.Acquisition = 0
-        Debug.Print("got image " & CStr(ts))
-        'get frame from camera
-        Dim w, h As Integer
-        Dim byteArr() As Byte
-        Dim d As Integer
 
-        d = FG.GetBitPerPixel()
-        w = FG.SizeX
-        h = FG.SizeY
-
-        ' FileNumber = FreeFile()
-
-        If (d = 8) Then
-            ReDim byteArr(w * h)
-            byteArr = FG.GetRawData(0)
-
-        ElseIf (d = 12) Then
-            ReDim byteArr(w * h * 2)
-            byteArr = FG.GetRawData(0)
-
-        ElseIf (d = 16) Then
-            ReDim byteArr(w * h * 2)
-            byteArr = FG.GetRawData(0)
-        End If
-
-        ReDim cameraImageArray(w - 1, h - 1)
-        cameraImageArray = ConvertFrameToImageAray(byteArr, w, h, d)
-        cameraImageReady = True
-        capturing = False
-    End Sub
-    Private Shared Function ConvertFrameToImageAray(ByVal frame As Byte(), w As Integer, h As Integer, d As Integer) As Object
-        Dim imgArr As Integer(,)
-        Dim pixelX As Integer = 0
-        Dim pixelY As Integer = 0
-        ReDim imgArr(w - 1, h - 1)
-        If frame Is Nothing Then
-            Debug.WriteLine("frame is nothing")
-            Throw New ArgumentNullException("frame")
-        End If
-
-        Select Case d
-            Case 12, 16
-                Try
-
-                    For y As Integer = 0 To CInt(h) - 1
-                        pixelX = 0
-                        For x As Integer = 0 To CInt(w * 2) - 1 Step 2
-                            'imgArr(pixelX, y) = frame.Buffer(x + y * frame.Width)
-
-                            imgArr(pixelX, y) = (frame(x + y * w * 2) + frame(x + y * w * 2) * 256)  ' stretch to 16bits
-
-                            pixelX = pixelX + 1
-
-                        Next
-
-                    Next
-                    Return imgArr
-                Catch ex As Exception
-
-                    MsgBox(ex.Message)
-                End Try
-            Case 8
-                Try
-                    Dim t As Integer
-                    For y As Integer = 0 To CInt(h) - 1
-                        pixelY = 0
-                        For x As Integer = 0 To CInt(w) - 1
-                            imgArr(x, y) = frame(x + y * (w))
-
-                            'If (x + y * h) < 1443520 / 2 Then
-                            '    imgArr(pixelX, y) = 0
-                            'Else
-                            '    imgArr(pixelX, y) = 255
-                            'End If
-
-                            ' imgArr(pixelX, y) = (frame.Buffer(x + y * frame.Width * 2) + frame.Buffer(x + 1 + y * frame.Width * 2) * 256)  ' stretch to 16bits
-
-                            pixelX = pixelX + 1
-                            t = t + 1
-                        Next
-
-                    Next
-                    'For x As Integer = 0 To CInt(w) - 1
-                    '    pixelY = 0
-                    '    For y As Integer = 0 To CInt(h) - 1
-                    '        imgArr(x, pixelY) = frame(x + y * h)
-
-                    '        ' imgArr(pixelX, y) = (frame.Buffer(x + y * frame.Width * 2) + frame.Buffer(x + 1 + y * frame.Width * 2) * 256)  ' stretch to 16bits
-
-                    '        pixelY = pixelY + 1
-
-                    '    Next
-
-                    'Next
-                    Return imgArr
-                Catch ex As Exception
-
-                    MsgBox(ex.Message)
-                End Try
-
-            Case Else
-                Throw New Exception("Current pixel format is not supported by this example (only Mono8 and BRG8Packed are supported).")
-        End Select
-
-
-    End Function
     Public Sub StartExposure(Duration As Double, Light As Boolean) Implements ICameraV2.StartExposure
-        If capturing Then Exit Sub
-        If (Duration < 0.0) Then Throw New InvalidValueException("StartExposure", Duration.ToString(), "0.0 upwards")
+        Dim sizeL As Integer
+
+
+        errorCode = PCO_GetSizes(hdriver, PCO.Camera.Sensor.Resolution.xAct, PCO.Camera.Sensor.Resolution.yAct, PCO.Camera.Sensor.Resolution.xMax, PCO.Camera.Sensor.Resolution.yMax)
+        If errorCode < 0 Then
+            ' tbStatus.Text = " Error while retrieving sensor sizes 0x" & Hex(Str(errorCode))
+        End If
+
+        If (iXres <> PCO.Camera.Sensor.Resolution.xAct) Or (iYres <> PCO.Camera.Sensor.Resolution.yAct) Then
+            iXres = PCO.Camera.Sensor.Resolution.xAct
+            iYres = PCO.Camera.Sensor.Resolution.yAct
+
+            errorCode = PCO_CamLinkSetImageParameters(hdriver, iXres, iYres) 'Mandatory for Cameralink and GigE
+            ' Don't care for all other interfaces, so leave it intact here.
+            If errorCode < 0 Then
+                'tbStatus.Text = " Error while setting CamLinkImageParameters" & Hex(Str(errorCode))
+            End If
+
+            If nBuf >= 0 Then
+                errorCode = PCO_FreeBuffer(hdriver, nBuf)
+            End If
+
+            sizeL = CDbl(iXres) * CDbl(iYres) * 2
+            nBuf = -1
+            errorCode = PCO_AllocateBuffer(hdriver, nBuf, sizeL, pwbuf, hevent)
+            'pwbuf already holds the address of the buffer
+        End If
+
+
+        '0 = microseconds
+        '1 = nanoseconds
+        '2 = milliseconds
+
+        Dim units As Integer = 2
+
+
+        If Duration = 0 Then
+            Duration = 0.5 'fastest this camera can do (pco.2000)
+
+            units = 0 'nano secconds
+
+        End If
+
+        errorCode = PCO_SetDelayExposureTime(hdriver, 0, Duration * 1000, 0, units)
+
+
+        'If (Duration < 0.0) Then Throw New InvalidValueException("StartExposure", Duration.ToString(), "0.0 upwards")
         'If (cameraNumX > ccdWidth) Then Throw New InvalidValueException("StartExposure", cameraNumX.ToString(), ccdWidth.ToString())
         'If (cameraNumY > ccdHeight) Then Throw New InvalidValueException("StartExposure", cameraNumY.ToString(), ccdHeight.ToString())
         'If (cameraStartX > ccdWidth) Then Throw New InvalidValueException("StartExposure", cameraStartX.ToString(), ccdWidth.ToString())
@@ -860,17 +834,121 @@ Public Class Camera
 
         cameraLastExposureDuration = Duration
         exposureStart = DateTime.Now
-        'get single frame
+        'System.Threading.Thread.Sleep(Duration * 1000) ' Sleep for the duration to simulate exposure 
+        'TL.LogMessage("StartExposure", Duration.ToString() + " " + Light.ToString())
+        'cameraImageReady = True
+        exposing = True
+        Dim t As Thread
+        t = New Thread(AddressOf grabImage)
+        t.Start()
 
-        ExposureTime = Duration
+    End Sub
 
-        FG.Acquisition = 1
-        ' FG.OneShot()
-        capturing = True
-        Debug.Print("start exposure")
-        '
+    Sub grabImage()
 
-        TL.LogMessage("StartExposure", Duration.ToString() + " " + Light.ToString())
+        Dim BpP As Object
+        Dim seg As Short
+        Dim dwFrst, dwlast As Object
+        Dim sbuf As Short
+        Dim dwStatusDll As Integer
+        Dim dwStatusDrv As Integer
+        Dim check As Integer
+        Dim sizeL As Integer
+        Const mask As Integer = &H8000 'assign 0x00008000 to mask
+        '^-& is essential!! Otherwise VB converts this to an int.
+        '  This will give 0xFFFF8000 to mask, which is not intended.
+
+
+        Dim j As Integer
+
+        Dim value As Integer
+        errorCode = PCO_ArmCamera(hdriver)
+
+
+        cameraImageReady = False
+
+        check = 0
+        seg = 1
+        dwFrst = 0
+        dwlast = 0
+        BpP = 16
+        sbuf = 0
+
+        '  errorCode = PCO_ArmCamera(hdriver)
+
+        errorCode = PCO_GetSizes(hdriver, PCO.Camera.Sensor.Resolution.xAct, PCO.Camera.Sensor.Resolution.yAct, PCO.Camera.Sensor.Resolution.xMax, PCO.Camera.Sensor.Resolution.yMax)
+        iXres = PCO.Camera.Sensor.Resolution.xAct
+        iYres = PCO.Camera.Sensor.Resolution.yAct
+
+        If (iXres <> PCO.Camera.Sensor.Resolution.xAct) Or (iYres <> PCO.Camera.Sensor.Resolution.yAct) Then
+            iXres = PCO.Camera.Sensor.Resolution.xAct
+            iYres = PCO.Camera.Sensor.Resolution.yAct
+
+            errorCode = PCO_CamLinkSetImageParameters(hdriver, iXres, iYres) 'Mandatory for Cameralink and GigE
+            ' Don't care for all other interfaces, so leave it intact here.
+
+
+            If nBuf >= 0 Then
+                errorCode = PCO_FreeBuffer(hdriver, nBuf)
+            End If
+
+            sizeL = CDbl(iXres) * CDbl(iYres) * 2
+            nBuf = -1
+            errorCode = PCO_AllocateBuffer(hdriver, nBuf, sizeL, pwbuf, hevent)
+            'pwbuf already holds the address of the buffer
+        End If
+        Dim camstate As Integer
+
+        errorCode = PCO_GetRecordingState(hdriver, camstate)
+        If camstate = 1 Then
+            errorCode = PCO_SetRecordingState(hdriver, 0)
+        End If
+        errorCode = PCO_SetRecordingState(hdriver, 1)
+        errorCode = PCO_AddBufferEx(hdriver, dwFrst, dwlast, sbuf, PCO.Camera.Sensor.Resolution.xAct, PCO.Camera.Sensor.Resolution.yAct, BpP)
+
+        Debug.Print("recording status: {0}", Hex(Str(errorCode)))
+        'loopcount = 0
+        'Do While Not (check) ' status of the dll must be checked or you use waitforsingleobject instead
+        '    errorCode = PCO_GetBufferStatus(hdriver, sbuf, dwStatusDll, dwStatusDrv)
+        '    check = Not ((dwStatusDll And mask) <> mask) ' event flag set?
+        '    loopcount = loopcount + 1
+        '    If loopcount > 600000 Then
+        '        errorCode = -1
+        '        Debug.Print("timeout")
+        '        Exit Do
+        '    End If
+        'Loop
+
+        'Dim stopWatch As Stopwatch = New Stopwatch()
+        '    stopWatch.Start()
+        'wait for image
+        While exposing And Not (check)
+            errorCode = PCO_GetBufferStatus(hdriver, sbuf, dwStatusDll, dwStatusDrv)
+            check = Not ((dwStatusDll And mask) <> mask) ' event flag set?
+            Thread.Sleep(50)
+        End While
+        errorCode = PCO_SetRecordingState(hdriver, 0)
+        exposing = False
+        ' stopWatch.[Stop]()
+        If errorCode = 0 Then
+            ReDim b(iXres * iYres * 2)
+
+            'Looks easy, but this took some time to work...
+            Marshal.Copy(pwbuf, b, 0, iXres * iYres * 2)
+            ReDim cameraImageArray(iXres - 1, iYres - 1)
+            j = 0
+            For x = 0 To iXres - 1
+                For y = 0 To iYres - 1
+                    value = b(j + 1) * 256 + b(j)
+                    value = value >> 2
+
+                    cameraImageArray(y, x) = value
+                    j = j + 2
+                Next
+            Next
+        End If
+        cameraImageReady = True
+
 
     End Sub
 
@@ -897,9 +975,6 @@ Public Class Camera
     End Property
 
     Public Sub StopExposure() Implements ICameraV2.StopExposure
-        FG.Acquisition = 0
-
-        Debug.Print("stop exposure")
         TL.LogMessage("StopExposure", "Not implemented")
         Throw New MethodNotImplementedException("StopExposure")
     End Sub

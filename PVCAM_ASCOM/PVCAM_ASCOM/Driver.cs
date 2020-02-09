@@ -129,14 +129,16 @@ namespace ASCOM.Photometrics
 
             myCam.SetClockingMode("Alternate Normal");
             myCam.SetClearMode("Pre-Exposure");
-            myCam.SetClearCycles(2);
-            myCam.SetEMGain(1);
-            myCam.SetReadoutSpeed(1); //10Mhz
+            myCam.SetClearCycles(4);
+           // myCam.SetEMGain(4);// - doesn't seem to do much
+            myCam.SetReadoutSpeed(0); //20Mhz -
             myCam.SetTriggerMode("Timed");
             myCam.SetBinning("1");
-            myCam.SetGainState(0);//gain state 2
+            myCam.SetGainState(0);//gain state 1
             myCam.FramesToGet = 1;
             myCam.SetExposureTime(1);
+            myCam.SetADCoffset(40); //this value was found to best for zeroing the bias frame
+
             //   myCam.StartSeqAcq();
 
             //
@@ -160,20 +162,24 @@ namespace ASCOM.Photometrics
         private void CameraNotificationReceived(pvcam_helper.PVCamCamera pvcc, pvcam_helper.ReportEvent evtType)
         {
             //
-
+            Debug.WriteLine("event type={0}", evtType.NotifEvent);
             if (evtType.NotifEvent == pvcam_helper.CameraNotifications.ACQ_SINGLE_FINISHED)
             {
                 cameraImageReady = true;
-
+                Debug.WriteLine("image ready");
             }
-
+            if (evtType.NotifEvent == pvcam_helper.CameraNotifications.ACQ_SINGLE_CANCELLED)
+            {
+                cameraImageReady = true;
+                Debug.WriteLine("image cancelled");
+            }
 
             if (evtType.NotifEvent == pvcam_helper.CameraNotifications.ACQ_NEW_FRAME_RECEIVED)
             {
 
                 //copy image frame
                 //check if roi in use
-
+                
                 int tempW = (myCam.Region[0].s2 - myCam.Region[0].s1 + 1) / myCam.Region[0].sbin;
 
                 int tempH = (myCam.Region[0].p2 - myCam.Region[0].p1 + 1) / myCam.Region[0].pbin;
@@ -183,7 +189,17 @@ namespace ASCOM.Photometrics
                 {
                     for (int x = 0; x < tempW; x++)
                     {
+                        if (n<myCam.FrameDataShorts.Length)
+                        { 
                         cameraImageArray[x, y] = (UInt16)myCam.FrameDataShorts[n];
+                        }
+                       else
+                        {
+                            //data interupted
+                            x = tempW;
+                            y = tempH;
+                            Debug.WriteLine("incomplete image");
+                        }
                         n++;
                     }
                 }
@@ -260,7 +276,7 @@ namespace ASCOM.Photometrics
             // Call CommandString and return as soon as it finishes
             this.CommandString(command, raw);
             // or
-            throw new ASCOM.MethodNotImplementedException("CommandBlind");
+            Debug.WriteLine("CommandBlind");
             // DO NOT have both these sections!  One or the other
         }
 
@@ -270,7 +286,8 @@ namespace ASCOM.Photometrics
             string ret = CommandString(command, raw);
             // TODO decode the return string and return true or false
             // or
-            throw new ASCOM.MethodNotImplementedException("CommandBool");
+            Debug.WriteLine("CommandBool");
+            return false;
             // DO NOT have both these sections!  One or the other
         }
 
@@ -281,7 +298,9 @@ namespace ASCOM.Photometrics
             // then all communication calls this function
             // you need something to ensure that only one command is in progress at a time
 
-            throw new ASCOM.MethodNotImplementedException("CommandString");
+            Debug.WriteLine("CommandString");
+            return "";
+
         }
 
         public void Dispose()
@@ -394,9 +413,8 @@ namespace ASCOM.Photometrics
         private bool cameraImageReady = false;
         private int[,] cameraImageArray;
         private object[,] cameraImageArrayVariant;
-        private double temperature;
-        private double setTemperature;
-        private bool isExposing = false;
+
+
         public void AbortExposure()
         {
             tl.LogMessage("AbortExposure", "Not implemented");
@@ -408,7 +426,8 @@ namespace ASCOM.Photometrics
             get
             {
                 tl.LogMessage("BayerOffsetX Get Get", "Not implemented");
-                throw new ASCOM.PropertyNotImplementedException("BayerOffsetX", false);
+                Debug.WriteLine("BayerOffsetX", false);
+                return 0;
             }
         }
 
@@ -417,7 +436,8 @@ namespace ASCOM.Photometrics
             get
             {
                 tl.LogMessage("BayerOffsetY Get Get", "Not implemented");
-                throw new ASCOM.PropertyNotImplementedException("BayerOffsetX", true);
+                Debug.WriteLine("BayerOffsetX", true);
+                return 0;
             }
         }
 
@@ -426,12 +446,14 @@ namespace ASCOM.Photometrics
             get
             {
                 tl.LogMessage("BinX Get", "1");
-                return 1;
+                return myCam.Binning;
             }
             set
             {
                 tl.LogMessage("BinX Set", value.ToString());
-                if (value != 1) throw new ASCOM.InvalidValueException("BinX", value.ToString(), "1"); // Only 1 is valid in this simple template
+               // if (value != 1) throw new ASCOM.InvalidValueException("BinX", value.ToString(), "1"); // Only 1 is valid in this simple template
+                myCam.Binning = value;
+                myCam.SetBinning(Convert.ToString(value));
             }
         }
 
@@ -440,12 +462,15 @@ namespace ASCOM.Photometrics
             get
             {
                 tl.LogMessage("BinY Get", "1");
-                return 1;
+                return myCam.Binning;
             }
             set
             {
                 tl.LogMessage("BinY Set", value.ToString());
-                if (value != 1) throw new ASCOM.InvalidValueException("BinY", value.ToString(), "1"); // Only 1 is valid in this simple template
+                //if (value != 1) throw new ASCOM.InvalidValueException("BinY", value.ToString(), "1"); // Only 1 is valid in this simple template
+                myCam.Binning = value;
+                myCam.SetBinning(Convert.ToString(value));
+
             }
         }
 
@@ -548,7 +573,7 @@ namespace ASCOM.Photometrics
             get
             {
                 tl.LogMessage("CanStopExposure Get", false.ToString());
-                return false;
+                return true;
             }
         }
 
@@ -561,7 +586,7 @@ namespace ASCOM.Photometrics
             set
             {
                 tl.LogMessage("CoolerOn Set Get", "Not implemented");
-                throw new ASCOM.PropertyNotImplementedException("CoolerOn", true);
+                Debug.WriteLine("CoolerOn", true);
             }
         }
 
@@ -570,7 +595,8 @@ namespace ASCOM.Photometrics
             get
             {
                 tl.LogMessage("CoolerPower Get Get", "Not implemented");
-                throw new ASCOM.PropertyNotImplementedException("CoolerPower", false);
+                Debug.WriteLine("CoolerPower", false);
+                return 0;
             }
         }
 
@@ -579,7 +605,8 @@ namespace ASCOM.Photometrics
             get
             {
                 tl.LogMessage("ElectronsPerADU Get Get", "Not implemented");
-                throw new ASCOM.PropertyNotImplementedException("ElectronsPerADU", false);
+                Debug.WriteLine("ElectronsPerADU", false);
+                return 0;
             }
         }
 
@@ -588,7 +615,8 @@ namespace ASCOM.Photometrics
             get
             {
                 tl.LogMessage("ExposureMax Get Get", "Not implemented");
-                throw new ASCOM.PropertyNotImplementedException("ExposureMax", false);
+                Debug.WriteLine("ExposureMax", false);
+                return 0;
             }
         }
 
@@ -597,7 +625,8 @@ namespace ASCOM.Photometrics
             get
             {
                 tl.LogMessage("ExposureMin Get", "Not implemented");
-                throw new ASCOM.PropertyNotImplementedException("ExposureMin", false);
+                Debug.WriteLine("ExposureMin", false);
+                return 0;
             }
         }
 
@@ -606,7 +635,8 @@ namespace ASCOM.Photometrics
             get
             {
                 tl.LogMessage("ExposureResolution Get", "Not implemented");
-                throw new ASCOM.PropertyNotImplementedException("ExposureResolution", false);
+                Debug.WriteLine("ExposureResolution", false);
+                return 0;
             }
         }
 
@@ -615,12 +645,13 @@ namespace ASCOM.Photometrics
             get
             {
                 tl.LogMessage("FastReadout Get", "Not implemented");
-                throw new ASCOM.PropertyNotImplementedException("FastReadout", false);
+                Debug.WriteLine("FastReadout", false);
+                return false;
             }
             set
             {
                 tl.LogMessage("FastReadout Set", "Not implemented");
-                throw new ASCOM.PropertyNotImplementedException("FastReadout", true);
+                Debug.WriteLine("FastReadout", true);
             }
         }
 
@@ -629,7 +660,8 @@ namespace ASCOM.Photometrics
             get
             {
                 tl.LogMessage("FullWellCapacity Get", "Not implemented");
-                throw new ASCOM.PropertyNotImplementedException("FullWellCapacity", false);
+                Debug.WriteLine("FullWellCapacity", false);
+                return 0;
             }
         }
 
@@ -638,12 +670,14 @@ namespace ASCOM.Photometrics
             get
             {
                 tl.LogMessage("Gain Get", "Not implemented");
-                throw new ASCOM.PropertyNotImplementedException("Gain", false);
+                Debug.WriteLine("Gain", false);
+                return 0;
             }
             set
             {
                 tl.LogMessage("Gain Set", "Not implemented");
-                throw new ASCOM.PropertyNotImplementedException("Gain", true);
+                Debug.WriteLine("Gain", true);
+               
             }
         }
 
@@ -652,7 +686,8 @@ namespace ASCOM.Photometrics
             get
             {
                 tl.LogMessage("GainMax Get", "Not implemented");
-                throw new ASCOM.PropertyNotImplementedException("GainMax", false);
+                Debug.WriteLine("GainMax", false);
+                return 0;
             }
         }
 
@@ -661,7 +696,8 @@ namespace ASCOM.Photometrics
             get
             {
                 tl.LogMessage("GainMin Get", "Not implemented");
-                throw new ASCOM.PropertyNotImplementedException("GainMin", true);
+                Debug.WriteLine("GainMin", true);
+                return 0;
             }
         }
 
@@ -670,7 +706,8 @@ namespace ASCOM.Photometrics
             get
             {
                 tl.LogMessage("Gains Get", "Not implemented");
-                throw new ASCOM.PropertyNotImplementedException("Gains", true);
+                Debug.WriteLine("Gains", true);
+                return null;
             }
         }
 
@@ -688,7 +725,8 @@ namespace ASCOM.Photometrics
             get
             {
                 tl.LogMessage("HeatSinkTemperature Get", "Not implemented");
-                throw new ASCOM.PropertyNotImplementedException("HeatSinkTemperature", false);
+                Debug.WriteLine("HeatSinkTemperature", false);
+                return 0;
             }
         }
 
@@ -696,6 +734,7 @@ namespace ASCOM.Photometrics
         {
             get
             {
+                Debug.WriteLine("get ImageArray");
                 if (!cameraImageReady)
                 {
                     tl.LogMessage("ImageArray Get", "Throwing InvalidOperationException because of a call to ImageArray before the first image has been taken!");
@@ -711,6 +750,7 @@ namespace ASCOM.Photometrics
         {
             get
             {
+                Debug.WriteLine("get ImageArrayVariant");
                 if (!cameraImageReady)
                 {
                     tl.LogMessage("ImageArrayVariant Get", "Throwing InvalidOperationException because of a call to ImageArrayVariant before the first image has been taken!");
@@ -744,7 +784,8 @@ namespace ASCOM.Photometrics
             get
             {
                 tl.LogMessage("IsPulseGuiding Get", "Not implemented");
-                throw new ASCOM.PropertyNotImplementedException("IsPulseGuiding", false);
+                Debug.WriteLine("IsPulseGuiding", false);
+                return false;
             }
         }
 
@@ -790,8 +831,8 @@ namespace ASCOM.Photometrics
         {
             get
             {
-                tl.LogMessage("MaxBinX Get", "1");
-                return 1;
+                tl.LogMessage("MaxBinX Get", "4");
+                return 4;
             }
         }
 
@@ -799,8 +840,8 @@ namespace ASCOM.Photometrics
         {
             get
             {
-                tl.LogMessage("MaxBinY Get", "1");
-                return 1;
+                tl.LogMessage("MaxBinY Get", "4");
+                return 4;
             }
         }
 
@@ -837,7 +878,8 @@ namespace ASCOM.Photometrics
             get
             {
                 tl.LogMessage("PercentCompleted Get", "Not implemented");
-                throw new ASCOM.PropertyNotImplementedException("PercentCompleted", false);
+                Debug.WriteLine("PercentCompleted", false);
+                return 0;
             }
         }
 
@@ -862,7 +904,7 @@ namespace ASCOM.Photometrics
         public void PulseGuide(GuideDirections Direction, int Duration)
         {
             tl.LogMessage("PulseGuide", "Not implemented");
-            throw new ASCOM.MethodNotImplementedException("PulseGuide");
+            Debug.WriteLine("PulseGuide");
         }
 
         public short ReadoutMode
@@ -870,12 +912,13 @@ namespace ASCOM.Photometrics
             get
             {
                 tl.LogMessage("ReadoutMode Get", "Not implemented");
-                throw new ASCOM.PropertyNotImplementedException("ReadoutMode", false);
+                Debug.WriteLine("ReadoutMode", false);
+                return 0;
             }
             set
             {
                 tl.LogMessage("ReadoutMode Set", "Not implemented");
-                throw new ASCOM.PropertyNotImplementedException("ReadoutMode", true);
+                Debug.WriteLine("ReadoutMode", true);
             }
         }
 
@@ -884,7 +927,8 @@ namespace ASCOM.Photometrics
             get
             {
                 tl.LogMessage("ReadoutModes Get", "Not implemented");
-                throw new ASCOM.PropertyNotImplementedException("ReadoutModes", false);
+                Debug.WriteLine("ReadoutModes", false);
+                return null;
             }
         }
 
@@ -893,7 +937,8 @@ namespace ASCOM.Photometrics
             get
             {
                 tl.LogMessage("SensorName Get", "Not implemented");
-                throw new ASCOM.PropertyNotImplementedException("SensorName", false);
+                Debug.WriteLine("SensorName", false);
+                return "ICX694";
             }
         }
 
@@ -902,7 +947,8 @@ namespace ASCOM.Photometrics
             get
             {
                 tl.LogMessage("SensorType Get", "Not implemented");
-                throw new ASCOM.PropertyNotImplementedException("SensorType", false);
+                Debug.WriteLine("SensorType", false);
+                return SensorType.Monochrome;
             }
         }
 
@@ -911,12 +957,13 @@ namespace ASCOM.Photometrics
             get
             {
                 tl.LogMessage("SetCCDTemperature Get", "Not implemented");
-                throw new ASCOM.PropertyNotImplementedException("SetCCDTemperature", false);
+                Debug.WriteLine("SetCCDTemperature", false);
+                return myCam.CurrentTemperature;
             }
             set
             {
                 tl.LogMessage("SetCCDTemperature Set", "Not implemented");
-                throw new ASCOM.PropertyNotImplementedException("SetCCDTemperature", true);
+                Debug.WriteLine("SetCCDTemperature", true);
             }
         }
 
@@ -924,6 +971,7 @@ namespace ASCOM.Photometrics
 
         {
             cameraImageReady = false;
+            Debug.WriteLine("startExposure");
             myCam.SetExposureTime(Convert.ToUInt32(Duration * 1000));
             if (Duration < 0.0) throw new InvalidValueException("StartExposure", Duration.ToString(), "0.0 upwards");
             if (cameraNumX > ccdWidth) throw new InvalidValueException("StartExposure", cameraNumX.ToString(), ccdWidth.ToString());
@@ -938,7 +986,8 @@ namespace ASCOM.Photometrics
             {
                 return;
             }
-
+            //setup binning
+            
 
             //Get estimated read out time and update the label
             if (myCam.ReadoutTime != 0)
@@ -995,8 +1044,8 @@ namespace ASCOM.Photometrics
 
         public void StopExposure()
         {
-            tl.LogMessage("StopExposure", "Not implemented");
-            throw new MethodNotImplementedException("StopExposure");
+            Debug.WriteLine("StopExposure");
+            myCam.StopAcquisition();
         }
 
         #endregion

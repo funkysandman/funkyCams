@@ -570,6 +570,11 @@ namespace pvcam_helper
 
         Boolean m_isMultGain;
         UInt16 m_emGainMax;
+        UInt16 m_ADCoffset;
+        UInt16 m_read_noise;
+        UInt16 m_actual_gain;
+
+
         Boolean m_IsSmartStreamingSupported;
         Boolean m_IsExposeOutModeSupported;
         Boolean m_IsSmartStreamingOn;
@@ -1446,6 +1451,7 @@ namespace pvcam_helper
         //called when user pressed Stop Acquisition button
         public void StopAcquisition()
         {
+           
             if (!m_acqRunning)
             {
                 return;
@@ -2595,8 +2601,6 @@ namespace pvcam_helper
             PVCAM.pl_get_param(m_hCam, PvTypes.PARAM_SER_SIZE, (Int16)PvTypes.AttributeIDs.ATTR_CURRENT, unmngCcdSize);
             m_xSize = Marshal.ReadInt16(unmngCcdSize);
 
-            PVCAM.pl_get_param(m_hCam, PvTypes.PARAM_PIX_PAR_SIZE, (Int16)PvTypes.AttributeIDs.ATTR_CURRENT, unmngCcdSize);
-            m_pixelSize = Marshal.ReadInt16(unmngCcdSize);
             Marshal.FreeHGlobal(unmngCcdSize);
             unmngCcdSize = IntPtr.Zero;
 
@@ -2656,8 +2660,8 @@ namespace pvcam_helper
                 PVCAM.pl_get_param(m_hCam, PvTypes.PARAM_GAIN_MULT_FACTOR, (Int16)PvTypes.AttributeIDs.ATTR_MAX, unmngMultGainMax);
                 m_emGainMax = (UInt16)Marshal.ReadInt16(unmngMultGainMax);
 
-                ////reset the EM gain to 1 upon camera opening
-                //SetEMGain(1);
+                //reset the EM gain to 1 upon camera opening
+                SetEMGain(1);
                 ReportMsg(this, new ReportMessage("Multiplication gain is available", MsgTypes.MSG_STATUS));
             }
 
@@ -2750,22 +2754,20 @@ namespace pvcam_helper
             }
 
             //Read Clear Modes available
-            if (m_clearModeList.Count == 0)
+            if (!ReadEnumeration(m_clearModeList, PvTypes.PARAM_CLEAR_MODE))
             {
-                if (!ReadEnumeration(m_clearModeList, PvTypes.PARAM_CLEAR_MODE))
-                {
-                    ReportMsg(this, new ReportMessage("Failed to get Clearing mode information", MsgTypes.MSG_ERROR));
-                }
-                else
-                {
-                    ReportMsg(this, new ReportMessage("Reading clearing modes information done", MsgTypes.MSG_STATUS));
-                }
+                ReportMsg(this, new ReportMessage("Failed to get Clearing mode information", MsgTypes.MSG_ERROR));
             }
+            else
+            {
+                ReportMsg(this, new ReportMessage("Reading clearing modes information done", MsgTypes.MSG_STATUS));
+            }
+
             //Read cooling parameter
             ReadCoolingParameters();
 
             //Check if Fan speed control is available on the camera 
-            //ReadFanSpeedParameters();
+            ReadFanSpeedParameters();
 
             //Read if Extended binning factors are available then read them
             ReadExtBinningParameters();
@@ -2774,7 +2776,7 @@ namespace pvcam_helper
             ReadExpTimeRange();
 
             //Read Post processing features on the camera
-           // ReadPostProcessingFeatures();
+            ReadPostProcessingFeatures();
 
             //read ROI/MultiRoi/Metadata information
             ReadRegionParameters();
@@ -3083,6 +3085,21 @@ namespace pvcam_helper
             unmngClearCycles = IntPtr.Zero;
         }
 
+        public void SetADCoffset(Int16 offset)
+        {
+            IntPtr unmngADCOffset;
+
+            unmngADCOffset = Marshal.AllocHGlobal(sizeof(UInt16));
+            Marshal.WriteInt16(unmngADCOffset, offset);
+
+            if (!PVCAM.pl_set_param(m_hCam, PvTypes.PARAM_ADC_OFFSET, unmngADCOffset))
+                ReportMsg(this, new ReportMessage("Setting adc offset failed", MsgTypes.MSG_ERROR));
+            else
+                ReportMsg(this, new ReportMessage(String.Format("ADC Offset set to {0}", offset), MsgTypes.MSG_STATUS));
+
+            Marshal.FreeHGlobal(unmngADCOffset);
+            unmngADCOffset = IntPtr.Zero;
+        }
         //set the camera readout speed
         public bool SetReadoutSpeed(Int16 spdTblIndex)
         {
@@ -3324,8 +3341,6 @@ namespace pvcam_helper
             IntPtr unmngGainMax = Marshal.AllocHGlobal(sizeof(UInt16));
             UInt16 gainMax;
 
-            if (m_spdTable.ReadoutPorts==0)
-            { 
             m_spdTable.ReadoutOption.Clear();
 
             //read number of available ports
@@ -3387,9 +3402,8 @@ namespace pvcam_helper
                     m_spdTable.ReadoutOption.Add(new ReadoutOption(i, j, m_bitDepth, gainMax, String.Format("{0}MHz, Port {1}, Speed index {2}, Bit Depth {3}-bit, Gain states: {4}, Description: {5}", 1000 / pixTime, i, j, m_bitDepth, gainMax, desc)));
                 }
             }
-            
-                }
             CamNotif(this, new ReportEvent(CameraNotifications.SPEED_TABLE_BUILD_DONE));
+
             Marshal.FreeHGlobal(unmngRdPortSet);
             unmngRdPortSet = IntPtr.Zero;
 
