@@ -1157,8 +1157,10 @@ Public Class frmPixelink
             upper = CInt(tbUpper.Text)
             j = 0
             For i = 0 To iWidth * iHeight - 1  ' This loop converts from 16bit to 8bit using min and max
-                value = bayer16(j) * 256 + bayer16(j + 1)
-                value = value >> 4
+                value = (bayer16(j) >> 4) * 256 + ((bayer16(j) And &HF) << 4) + (bayer16(j + 1) >> 4)
+                ' Debug.WriteLine(value)
+
+
 
                 ''Debug.Print(value)
                 If value < 0 Then ' Type cast from short to ushort? Forget it: Not with VB
