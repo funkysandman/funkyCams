@@ -28,6 +28,7 @@ Public Class frmSVSVistek
     Private myEncoderParameters As EncoderParameters
     Private camThread As Thread
     Private t As Thread
+    Private lost As Integer = 0
 
     Shared m_pics As RingBitmap
 
@@ -564,6 +565,9 @@ Public Class frmSVSVistek
 
             mySVCam.upper = Val(tbUpper.Text)
             mySVCam.lower = Val(tbLower.Text)
+
+            Me.tbLost.Text = mySVCam.current_selected_cam.framesLost
+
 
             Dim currentMode As Boolean
             currentMode = False

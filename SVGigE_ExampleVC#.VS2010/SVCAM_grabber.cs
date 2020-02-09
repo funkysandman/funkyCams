@@ -232,7 +232,7 @@ namespace SVCamApi
             public byte[] masterDark;
             public int imageSizeX = 0;
             public int imageSizeY = 0;
-
+            public int framesLost = 0;
             public bool isrgb = false;
             public int destdataIndex = 0;
             public string camTemp = "";
@@ -552,6 +552,7 @@ namespace SVCamApi
                             {
                                 Console.Write("ERROR TIMEOUT 1 !!");
                                 myApi.SVS_StreamQueueBuffer(hStream, hBuffer);
+                                framesLost++;
                                 //return false;
                             }
                         }
@@ -560,7 +561,7 @@ namespace SVCamApi
                         {
 
                             Console.WriteLine("ERROR:{0}", ret);
-
+                            framesLost++;
                             //assuming a timeout happened...
                             //send another buffer
                             //myApi.SVS_StreamQueueBuffer(hStream, hBuffer);
@@ -1351,6 +1352,10 @@ namespace SVCamApi
                             // File.WriteAllBytes(filename, rawImage.imagebytes);
                             //debayer buffer into RGB
                             // myApi.SVS_UtilBufferBayerToRGB(ImageInfo, ref imagebufferRGB[currentIdex].imagebytes[0], imagebufferRGB[currentIdex].dataLegth);
+
+
+
+
                             BGAPI2.Image mTransformImage = null;
                             BGAPI2.Buffer mBufferFilled = new BGAPI2.Buffer();
                             
@@ -1361,6 +1366,9 @@ namespace SVCamApi
                             mTransformImage = imgProcessor.CreateTransformedImage(mImage, "RGB8");
 
                             Marshal.Copy(mTransformImage.Buffer, imagebufferRGB[currentIdex].imagebytes, 0, imageSizeX * imageSizeY * 3);
+                          
+                            
+                            
                             //  mImage = imgProcessor.CreateImage((uint)imageSizeX, (uint)imageSizeY, "RGB8", mBufferFilled.MemPtr, (ulong)mBufferFilled.MemSize);
                             File.WriteAllBytes("TESTING.RAW",imagebufferRGB[currentIdex].imagebytes);
                             //do image stuff here
@@ -2274,7 +2282,7 @@ namespace SVCamApi
             {
                 if (cam.featureInfolist.ElementAt(j).SVFeaturInf.displayName == "Pixel Format")
                 {
-                    ret = SVSCam.myApi.SVS_FeatureEnumSubFeatures(cam.hRemoteDevice, cam.featureInfolist.ElementAt(j).hFeature, 3, ref subFeatureName, 512, ref pValue);//bayerRG12packed
+                    ret = SVSCam.myApi.SVS_FeatureEnumSubFeatures(cam.hRemoteDevice, cam.featureInfolist.ElementAt(j).hFeature, 2, ref subFeatureName, 512, ref pValue);//3=bayerRG12packed,r=bayerRG8
                     ret = SVSCam.myApi.SVS_FeatureSetValueInt64Enum(cam.hRemoteDevice, cam.featureInfolist.ElementAt(j).hFeature, pValue);
                     Console.WriteLine("set pixel format");
 
@@ -2529,7 +2537,7 @@ namespace SVCamApi
                 {
                     stopAcquisitionThread();
                     Console.WriteLine("stopped acquisition");
-                   
+                    
                     startAcquisitionThread(m_frh);
                     Console.WriteLine("called start acquisition");
                     return;

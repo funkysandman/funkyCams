@@ -82,4 +82,11 @@ Public Class Form3
         f.ShowDialog()
         Me.Close()
     End Sub
+
+    Private Sub Button9_Click(sender As Object, e As EventArgs) Handles Button9.Click
+        Dim f As New frmPixelink
+        Me.Hide()
+        f.ShowDialog()
+        Me.Close()
+    End Sub
 End Class

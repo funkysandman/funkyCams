@@ -1,13 +1,21 @@
-﻿
+﻿Imports QCamManagedDriver
 <Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()>
-Partial Class frmPointGrey
+Partial Class frmPixelink
     Inherits System.Windows.Forms.Form
 
     'Form overrides dispose to clean up the component list.
     <System.Diagnostics.DebuggerNonUserCode()>
     Protected Overrides Sub Dispose(ByVal disposing As Boolean)
         Try
+            'mCamList = New QCamM_CamListItem(9) {}
+            'Dim listLen As UInteger = 10
+            'QCam.QCamM_ListCameras(mCamList, listLen)
 
+            'If (listLen > 0) AndAlso (mCamList(0).isOpen = 1) Then
+            '    Debug.Print("closing camera")
+            '    QCam.QCamM_CloseCamera(mhCamera)
+            '    Debug.Print("camera closed")
+            'End If
             If disposing AndAlso components IsNot Nothing Then
                 components.Dispose()
             End If
@@ -58,12 +66,14 @@ Partial Class frmPointGrey
         Me.Label11 = New System.Windows.Forms.Label()
         Me.tbGain = New System.Windows.Forms.TextBox()
         Me.Timer1 = New System.Windows.Forms.Timer(Me.components)
+        Me.Timer2 = New System.Windows.Forms.Timer(Me.components)
+        Me.Timer3 = New System.Windows.Forms.Timer(Me.components)
         Me.TimerAcquistionRate = New System.Windows.Forms.Timer(Me.components)
-        Me.Button1 = New System.Windows.Forms.Button()
-        Me.tbQ = New System.Windows.Forms.TextBox()
+        Me.tbStatus = New System.Windows.Forms.TextBox()
+        Me.tbLower = New System.Windows.Forms.TextBox()
+        Me.tbUpper = New System.Windows.Forms.TextBox()
         Me.Label2 = New System.Windows.Forms.Label()
         Me.Label3 = New System.Windows.Forms.Label()
-        Me.tbLostImage = New System.Windows.Forms.TextBox()
         CType(Me.PictureBox1, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
         '
@@ -130,7 +140,7 @@ Partial Class frmPointGrey
         Me.tbPath.Name = "tbPath"
         Me.tbPath.Size = New System.Drawing.Size(252, 20)
         Me.tbPath.TabIndex = 68
-        Me.tbPath.Text = "c:\image_pg"
+        Me.tbPath.Text = "c:\image_pixelink"
         '
         'Button8
         '
@@ -170,7 +180,7 @@ Partial Class frmPointGrey
         Me.tbPort.Name = "tbPort"
         Me.tbPort.Size = New System.Drawing.Size(36, 20)
         Me.tbPort.TabIndex = 60
-        Me.tbPort.Text = "8060"
+        Me.tbPort.Text = "8070"
         '
         'tbMultiplier
         '
@@ -249,7 +259,7 @@ Partial Class frmPointGrey
         Me.tbNightAgain.Name = "tbNightAgain"
         Me.tbNightAgain.Size = New System.Drawing.Size(47, 20)
         Me.tbNightAgain.TabIndex = 90
-        Me.tbNightAgain.Text = "27"
+        Me.tbNightAgain.Text = "18"
         '
         'lblDayNight
         '
@@ -268,7 +278,7 @@ Partial Class frmPointGrey
         Me.tbExposureTime.Name = "tbExposureTime"
         Me.tbExposureTime.Size = New System.Drawing.Size(45, 20)
         Me.tbExposureTime.TabIndex = 84
-        Me.tbExposureTime.Text = "2000000"
+        Me.tbExposureTime.Text = "5000"
         '
         'Label4
         '
@@ -285,7 +295,7 @@ Partial Class frmPointGrey
         Me.tbDayGain.Name = "tbDayGain"
         Me.tbDayGain.Size = New System.Drawing.Size(47, 20)
         Me.tbDayGain.TabIndex = 82
-        Me.tbDayGain.Text = "0"
+        Me.tbDayGain.Text = "1"
         '
         'tbNightExp
         '
@@ -293,15 +303,15 @@ Partial Class frmPointGrey
         Me.tbNightExp.Name = "tbNightExp"
         Me.tbNightExp.Size = New System.Drawing.Size(45, 20)
         Me.tbNightExp.TabIndex = 81
-        Me.tbNightExp.Text = "7500000"
+        Me.tbNightExp.Text = "5000"
         '
         'tbDayTimeExp
         '
-        Me.tbDayTimeExp.Location = New System.Drawing.Point(524, 154)
+        Me.tbDayTimeExp.Location = New System.Drawing.Point(523, 150)
         Me.tbDayTimeExp.Name = "tbDayTimeExp"
         Me.tbDayTimeExp.Size = New System.Drawing.Size(45, 20)
         Me.tbDayTimeExp.TabIndex = 80
-        Me.tbDayTimeExp.Text = "2500"
+        Me.tbDayTimeExp.Text = "45"
         '
         'Label9
         '
@@ -357,72 +367,75 @@ Partial Class frmPointGrey
         Me.tbGain.Name = "tbGain"
         Me.tbGain.Size = New System.Drawing.Size(47, 20)
         Me.tbGain.TabIndex = 95
-        Me.tbGain.Text = "27"
+        Me.tbGain.Text = "4000"
         '
         'Timer1
         '
         Me.Timer1.Enabled = True
         Me.Timer1.Interval = 1000
         '
+        'Timer2
+        '
+        Me.Timer2.Interval = 1000
+        '
+        'Timer3
+        '
+        '
         'TimerAcquistionRate
         '
         Me.TimerAcquistionRate.Interval = 1000
         '
-        'Button1
+        'tbStatus
         '
-        Me.Button1.Location = New System.Drawing.Point(442, 84)
-        Me.Button1.Margin = New System.Windows.Forms.Padding(2)
-        Me.Button1.Name = "Button1"
-        Me.Button1.RightToLeft = System.Windows.Forms.RightToLeft.Yes
-        Me.Button1.Size = New System.Drawing.Size(77, 25)
-        Me.Button1.TabIndex = 96
-        Me.Button1.Text = "garbage collect"
-        Me.Button1.UseVisualStyleBackColor = True
+        Me.tbStatus.Location = New System.Drawing.Point(370, 101)
+        Me.tbStatus.Name = "tbStatus"
+        Me.tbStatus.Size = New System.Drawing.Size(198, 20)
+        Me.tbStatus.TabIndex = 96
         '
-        'tbQ
+        'tbLower
         '
-        Me.tbQ.Location = New System.Drawing.Point(501, 415)
-        Me.tbQ.Name = "tbQ"
-        Me.tbQ.Size = New System.Drawing.Size(45, 20)
-        Me.tbQ.TabIndex = 97
-        Me.tbQ.Text = "0"
+        Me.tbLower.Location = New System.Drawing.Point(101, 416)
+        Me.tbLower.Name = "tbLower"
+        Me.tbLower.Size = New System.Drawing.Size(62, 20)
+        Me.tbLower.TabIndex = 97
+        Me.tbLower.Text = "280"
+        '
+        'tbUpper
+        '
+        Me.tbUpper.Location = New System.Drawing.Point(218, 416)
+        Me.tbUpper.Name = "tbUpper"
+        Me.tbUpper.Size = New System.Drawing.Size(62, 20)
+        Me.tbUpper.TabIndex = 98
+        Me.tbUpper.Text = "1300"
         '
         'Label2
         '
         Me.Label2.AutoSize = True
-        Me.Label2.Location = New System.Drawing.Point(446, 415)
+        Me.Label2.Location = New System.Drawing.Point(63, 419)
         Me.Label2.Name = "Label2"
-        Me.Label2.Size = New System.Drawing.Size(43, 13)
-        Me.Label2.TabIndex = 98
-        Me.Label2.Text = "queued"
+        Me.Label2.Size = New System.Drawing.Size(32, 13)
+        Me.Label2.TabIndex = 99
+        Me.Label2.Text = "lower"
         '
         'Label3
         '
         Me.Label3.AutoSize = True
-        Me.Label3.Location = New System.Drawing.Point(298, 415)
+        Me.Label3.Location = New System.Drawing.Point(180, 419)
         Me.Label3.Name = "Label3"
-        Me.Label3.Size = New System.Drawing.Size(82, 13)
+        Me.Label3.Size = New System.Drawing.Size(34, 13)
         Me.Label3.TabIndex = 100
-        Me.Label3.Text = "missing packets"
+        Me.Label3.Text = "upper"
         '
-        'tbLostImage
-        '
-        Me.tbLostImage.Location = New System.Drawing.Point(361, 415)
-        Me.tbLostImage.Name = "tbLostImage"
-        Me.tbLostImage.Size = New System.Drawing.Size(45, 20)
-        Me.tbLostImage.TabIndex = 99
-        Me.tbLostImage.Text = "0"
-        '
-        'frmPointGrey
+        'frmPixelink
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.ClientSize = New System.Drawing.Size(580, 447)
         Me.Controls.Add(Me.Label3)
-        Me.Controls.Add(Me.tbLostImage)
         Me.Controls.Add(Me.Label2)
-        Me.Controls.Add(Me.tbQ)
-        Me.Controls.Add(Me.Button1)
+        Me.Controls.Add(Me.tbUpper)
+        Me.Controls.Add(Me.tbLower)
+        Me.Controls.Add(Me.tbStatus)
         Me.Controls.Add(Me.tbGain)
         Me.Controls.Add(Me.Label8)
         Me.Controls.Add(Me.Label7)
@@ -456,8 +469,8 @@ Partial Class frmPointGrey
         Me.Controls.Add(Me.Button2)
         Me.Controls.Add(Me.PictureBox1)
         Me.Margin = New System.Windows.Forms.Padding(2)
-        Me.Name = "frmPointGrey"
-        Me.Text = "frmPointGrey"
+        Me.Name = "frmPixelink"
+        Me.Text = "frmPixelink"
         CType(Me.PictureBox1, System.ComponentModel.ISupportInitialize).EndInit()
         Me.ResumeLayout(False)
         Me.PerformLayout()
@@ -476,6 +489,7 @@ Partial Class frmPointGrey
     Friend WithEvents Button6 As Button
     Friend WithEvents tbPort As TextBox
     Friend WithEvents tbMultiplier As TextBox
+    Friend WithEvents cbUseDarks As CheckBox
     Friend WithEvents Button5 As Button
     Friend WithEvents Label1 As Label
     Friend WithEvents Button2 As Button
@@ -496,11 +510,12 @@ Partial Class frmPointGrey
     Friend WithEvents Label11 As Label
     Friend WithEvents tbGain As TextBox
     Friend WithEvents Timer1 As Timer
+    Friend WithEvents Timer2 As Timer
+    Friend WithEvents Timer3 As Timer
     Friend WithEvents TimerAcquistionRate As Timer
-    Public WithEvents cbUseDarks As CheckBox
-    Friend WithEvents Button1 As Button
-    Friend WithEvents tbQ As TextBox
+    Friend WithEvents tbStatus As TextBox
+    Friend WithEvents tbLower As TextBox
+    Friend WithEvents tbUpper As TextBox
     Friend WithEvents Label2 As Label
     Friend WithEvents Label3 As Label
-    Friend WithEvents tbLostImage As TextBox
 End Class
