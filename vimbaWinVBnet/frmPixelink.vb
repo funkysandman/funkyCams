@@ -1157,8 +1157,8 @@ Public Class frmPixelink
             upper = CInt(tbUpper.Text)
             j = 0
             For i = 0 To iWidth * iHeight - 1  ' This loop converts from 16bit to 8bit using min and max
-                value = bayer16(j + 1) * 256 + bayer16(j)
-                value = value << 2
+                value = bayer16(j) * 256 + bayer16(j + 1)
+                value = value >> 4
 
                 ''Debug.Print(value)
                 If value < 0 Then ' Type cast from short to ushort? Forget it: Not with VB
@@ -1212,7 +1212,7 @@ Public Class frmPixelink
 
 
 
-            Dim outImage(isize) As Byte
+            Dim outImage(iWidth * iHeight * 3) As Byte
             mImage = imgProcessor.CreateImage(iWidth, iHeight, "BayerRG8", pImagePtr, iWidth * iHeight)
 
             'ULong imageBufferAddress = (ULong)ImageInfo.pImagePtr;
@@ -1220,7 +1220,7 @@ Public Class frmPixelink
 
 
 
-            Marshal.Copy(mTransformImage.Buffer, outImage, 0, isize - 1)
+            Marshal.Copy(mTransformImage.Buffer, outImage, 0, iWidth * iHeight * 3 - 1)
 
             'File.WriteAllBytes("pgxxx.raw", Image.ManagedData)
             'File.WriteAllBytes("pgxxxyy.raw", convertedImage.ManagedData)
