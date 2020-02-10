@@ -750,7 +750,7 @@ Public Class frmPixelink
             rc = Api.SetFeature(hCamera, Feature.FrameRate, flags.Off, 0, parms)
         Else
             ' rc = Api.SetFeature(hCamera, Feature.FrameRate, flags.Manual, 0, parms)
-            parms(0) = 0.2 'slow during the daytime
+            parms(0) = 1 / expTime 'slow during the daytime
             rc = Api.SetFeature(hCamera, Feature.FrameRate, flags.Manual, 1, parms)
         End If
 
