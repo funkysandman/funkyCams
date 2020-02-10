@@ -788,6 +788,7 @@ Public Class Camera
         Dim sizeL As Integer
 
 
+
         errorCode = PCO_GetSizes(hdriver, PCO.Camera.Sensor.Resolution.xAct, PCO.Camera.Sensor.Resolution.yAct, PCO.Camera.Sensor.Resolution.xMax, PCO.Camera.Sensor.Resolution.yMax)
         If errorCode < 0 Then
             ' tbStatus.Text = " Error while retrieving sensor sizes 0x" & Hex(Str(errorCode))
@@ -909,6 +910,36 @@ Public Class Camera
         If camstate = 1 Then
             errorCode = PCO_SetRecordingState(hdriver, 0)
         End If
+        'set timeout
+        'Dim buf_in(3) As UInt32
+        'buf_in(0) = cameraLastExposureDuration * 1000 + 2000
+        'buf_in(1) = cameraLastExposureDuration * 1000 + 2000
+        'buf_in(2) = cameraLastExposureDuration * 1000 + 2000
+
+        'Dim buf_bytes(12) As Byte
+        'Dim result1 As Byte() = BitConverter.GetBytes(buf_in(0))
+        'Dim result2 As Byte() = BitConverter.GetBytes(buf_in(1))
+        'Dim result3 As Byte() = BitConverter.GetBytes(buf_in(2))
+        'buf_bytes(0) = result1(0)
+        'buf_bytes(1) = result1(1)
+        'buf_bytes(2) = result1(2)
+        'buf_bytes(3) = result1(3)
+        'buf_bytes(4) = result2(0)
+        'buf_bytes(5) = result2(1)
+        'buf_bytes(6) = result2(2)
+        'buf_bytes(7) = result2(3)
+        'buf_bytes(8) = result3(0)
+        'buf_bytes(9) = result3(1)
+        'buf_bytes(10) = result3(2)
+        'buf_bytes(11) = result3(3)
+
+
+
+
+        'Dim buf_ptr As IntPtr = Marshal.AllocHGlobal(12)
+        'Marshal.Copy(buf_bytes, 0, buf_ptr, 12)
+
+        'errorCode = PCO_SetTimeouts(hdriver, buf_ptr, buf_in.Length)
 
         errorCode = PCO_SetRecordingState(hdriver, 1)
         Debug.Print("setrecordingstate: {0}", Hex(Str(errorCode)))
@@ -916,10 +947,10 @@ Public Class Camera
         Debug.Print("addbuffer: {0}", Hex(Str(errorCode)))
         errorCode = PCO_GetActiveRamSegment(hdriver, seg)
         Debug.Print("segment is {0}", seg)
-        errorCode = PCO_GetImageEx(hdriver, seg, dwFrst, dwlast, sbuf, PCO.Camera.Sensor.Resolution.xAct, PCO.Camera.Sensor.Resolution.yAct, BpP)
+        ' errorCode = PCO_GetImageEx(hdriver, seg, dwFrst, dwlast, sbuf, PCO.Camera.Sensor.Resolution.xAct, PCO.Camera.Sensor.Resolution.yAct, BpP)
 
 
-        Debug.Print("get image: {0}", Hex(Str(errorCode)))
+        'Debug.Print("get image: {0}", Hex(Str(errorCode)))
         'loopcount = 0
         'Do While Not (check) ' status of the dll must be checked or you use waitforsingleobject instead
         '    errorCode = PCO_GetBufferStatus(hdriver, sbuf, dwStatusDll, dwStatusDrv)
@@ -939,14 +970,16 @@ Public Class Camera
 
 
 
-        'errorCode = PCO_WaitforBuffer(hdriver, 1, 0, BpL)
-        'While exposing And Not (check)
-        '    errorCode = PCO_GetBufferStatus(hdriver, sbuf, dwStatusDll, dwStatusDrv)
-        '    check = Not ((dwStatusDll And mask) <> mask) ' event flag set?
-        '    Thread.Sleep(500)
-        '    Debug.Print("sleeping")
-        'End While
+
+        While exposing And Not (check)
+            errorCode = PCO_GetBufferStatus(hdriver, sbuf, dwStatusDll, dwStatusDrv)
+            check = Not ((dwStatusDll And mask) <> mask) ' event flag set?
+            Thread.Sleep(500)
+            Debug.Print("sleeping")
+        End While
+
         errorCode = PCO_SetRecordingState(hdriver, 0)
+
         exposing = False
         ' stopWatch.[Stop]()
         If errorCode = 0 Then

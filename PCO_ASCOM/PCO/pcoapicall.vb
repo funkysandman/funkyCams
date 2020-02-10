@@ -1530,27 +1530,28 @@ Module sc2_cam
 	'
 
   Public Declare Function PCO_CamLinkSetImageParameters Lib "sc2_cam.dll" (ByVal hdriver As IntPtr, ByVal wxres As Int16, ByVal wyres As Int16) As Integer
-  '// Neccessary while using a CamLink interface
-  '// If there is a change in buffer size (ROI, binning) this function has to be called
-  '// with the new x and y resolution. Additionally this function has to be called, if you
-  '// switch to another camRAM segment and like to get images.
-  '// In: HANDLE ph -> Handle to a previously opened camera.
-  '//     WORD wxres -> X Resolution of the images to be transferred
-  '//     WORD wyres -> Y Resolution of the images to be transferred
-  '// Out: int -> Error message.
-  '
-  'SC2_SDK_FUNC int WINAPI PCO_SetTimeouts(HANDLE ph, void *buf_in,unsigned int size_in);
-  '// Here you can set the timeouts for the driver.
-  '// In: HANDLE ph -> Handle to a previously opened camera.
-  '//     void *buffer -> Pointer to an array to set the timeout parameters.
-  '//     int ilen -> Total length of the buffer in bytes.
-  '// [0]: command-timeout,   200ms default, Time to wait while a command is sent.
-  '// [1]: image-timeout,    3000ms default, Time to wait while an image is transferred.
-  '// [2]: transfer-timeout, 1000ms default, Time to wait till the transfer channel expires.
-  '// Out: int -> Error message.
-  '
-  'SC2_SDK_FUNC int WINAPI PCO_GetBuffer(HANDLE ph, SHORT sBufNr, WORD** wBuf, HANDLE *hEvent);
-  Public Declare Function PCO_GetBuffer Lib "sc2_cam.dll" (ByVal hdriver As IntPtr, ByVal sbuf As Short, ByRef wbuf As Integer, ByRef hevent As Integer) As Integer
+    '// Neccessary while using a CamLink interface
+    '// If there is a change in buffer size (ROI, binning) this function has to be called
+    '// with the new x and y resolution. Additionally this function has to be called, if you
+    '// switch to another camRAM segment and like to get images.
+    '// In: HANDLE ph -> Handle to a previously opened camera.
+    '//     WORD wxres -> X Resolution of the images to be transferred
+    '//     WORD wyres -> Y Resolution of the images to be transferred
+    '// Out: int -> Error message.
+    '
+    'SC2_SDK_FUNC int WINAPI PCO_SetTimeouts(HANDLE ph, void *buf_in,unsigned int size_in);
+    Public Declare Function PCO_SetTimeouts Lib "sc2_cam.dll" (ByVal hdriver As IntPtr, ByRef buf_in As IntPtr, ByVal size_in As Int16) As Integer
+    '// Here you can set the timeouts for the driver.
+    '// In: HANDLE ph -> Handle to a previously opened camera.
+    '//     void *buffer -> Pointer to an array to set the timeout parameters.
+    '//     int ilen -> Total length of the buffer in bytes.
+    '// [0]: command-timeout,   200ms default, Time to wait while a command is sent.
+    '// [1]: image-timeout,    3000ms default, Time to wait while an image is transferred.
+    '// [2]: transfer-timeout, 1000ms default, Time to wait till the transfer channel expires.
+    '// Out: int -> Error message.
+    '
+    'SC2_SDK_FUNC int WINAPI PCO_GetBuffer(HANDLE ph, SHORT sBufNr, WORD** wBuf, HANDLE *hEvent);
+    Public Declare Function PCO_GetBuffer Lib "sc2_cam.dll" (ByVal hdriver As IntPtr, ByVal sbuf As Short, ByRef wbuf As Integer, ByRef hevent As Integer) As Integer
 	'// Gets the data pointer and the event of a buffer.
 	'// In: HANDLE ph -> Handle to a previously opened camera.
 	'//     SHORT sBufNr -> SHORT variable to hold the buffer number.
