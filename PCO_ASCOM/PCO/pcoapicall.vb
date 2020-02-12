@@ -856,26 +856,30 @@ Module sc2_cam
 	'
 	'SC2_SDK_FUNC int WINAPI PCO_SetPowerDownMode(HANDLE ph, WORD wPowerDownMode);
   Public Declare Function PCO_SetPowerDownMode Lib "sc2_cam.dll" (ByVal hdriver As IntPtr, ByVal wPowerDownMode As Short) As Integer
-	'// Sets the power down mode of the camera, if available.
-	'// In: HANDLE ph -> Handle to a previously opened camera.
-	'//     WORD wPowerDownMode -> WORD variable to hold the power down mode.
-	'// Out: int -> Error message.
-	'
-	'SC2_SDK_FUNC int WINAPI PCO_GetUserPowerDownTime(HANDLE ph, DWORD* dwPowerDownTime);
-	
-	'// Gets the power down time of the camera.
-	'// In: HANDLE ph -> Handle to a previously opened camera.
-	'//     WORD* wPowerDownTime -> Pointer to a WORD variable to receive the power down time.
-	'// Out: int -> Error message.
-	'
-	'SC2_SDK_FUNC int WINAPI PCO_SetUserPowerDownTime(HANDLE ph, DWORD dwPowerDownTime);
-	'// Sets the power down time of the camera, if available.
-	'// In: HANDLE ph -> Handle to a previously opened camera.
-	'//     WORD* wPowerDownTime -> Pointer to a WORD variable to receive the power down time.
-	'// Out: int -> Error message.
-	'
-	'SC2_SDK_FUNC int WINAPI PCO_GetExpTrigSignalStatus(HANDLE ph, WORD* wExpTrgSignal);
-  Public Declare Function PCO_GetExpTrigSignalStatus Lib "sc2_cam.dll" (ByVal hdriver As IntPtr, ByRef wExpTrgSignal As Short) As Integer
+    '// Sets the power down mode of the camera, if available.
+    '// In: HANDLE ph -> Handle to a previously opened camera.
+    '//     WORD wPowerDownMode -> WORD variable to hold the power down mode.
+    '// Out: int -> Error message.
+    '
+    'SC2_SDK_FUNC int WINAPI PCO_GetUserPowerDownTime(HANDLE ph, DWORD* dwPowerDownTime);
+    Public Declare Function PCO_GetUserPowerDownTime Lib "sc2_cam.dll" (ByVal hdriver As IntPtr, ByRef dwTime_us As Integer) As Integer
+
+
+    '// Gets the power down time of the camera.
+    '// In: HANDLE ph -> Handle to a previously opened camera.
+    '//     WORD* wPowerDownTime -> Pointer to a WORD variable to receive the power down time.
+    '// Out: int -> Error message.
+    Public Declare Function PCO_SetUserPowerDownTime Lib "sc2_cam.dll" (ByVal hdriver As IntPtr, ByVal dwTime_us As Integer) As Integer
+
+    '
+    'SC2_SDK_FUNC int WINAPI PCO_SetUserPowerDownTime(HANDLE ph, DWORD dwPowerDownTime);
+    '// Sets the power down time of the camera, if available.
+    '// In: HANDLE ph -> Handle to a previously opened camera.
+    '//     WORD* wPowerDownTime -> Pointer to a WORD variable to receive the power down time.
+    '// Out: int -> Error message.
+    '
+    'SC2_SDK_FUNC int WINAPI PCO_GetExpTrigSignalStatus(HANDLE ph, WORD* wExpTrgSignal);
+    Public Declare Function PCO_GetExpTrigSignalStatus Lib "sc2_cam.dll" (ByVal hdriver As IntPtr, ByRef wExpTrgSignal As Short) As Integer
 	'// Gets the exposure trigger signal state of the camera.
 	'// In: HANDLE ph -> Handle to a previously opened camera.
 	'//     WORD* wExpTrgSignal -> Pointer to a WORD variable to receive the
@@ -1389,7 +1393,7 @@ Module sc2_cam
     '  ...
     '*/
     'SC2_SDK_FUNC int WINAPI PCO_WaitforBuffer(HANDLE ph, int nr_of_buffer, PCO_Buflist *bl, int timeout);
-    '// Public Declare Function PCO_WaitforBuffer Lib "sc2_cam.dll" (ByVal hdriver As IntPtr, ByVal nr_of_buffer As Integer, PCO_Buflist As Long, timeout As Integer) As Integer
+    Public Declare Function PCO_WaitforBuffer Lib "sc2_cam.dll" (ByVal hdriver As IntPtr, ByVal nr_of_buffer As Integer, PCO_Buflist As Long, timeout As Integer) As Integer
     '// Waits for one image buffer in bl and returns if one of the buffers is ready. This function is mainly
     '// used in Linux. In Windows it is implemented for platform independence.
     '// In: HANDLE ph -> Handle to a previously opened camera.
@@ -1526,27 +1530,28 @@ Module sc2_cam
 	'
 
   Public Declare Function PCO_CamLinkSetImageParameters Lib "sc2_cam.dll" (ByVal hdriver As IntPtr, ByVal wxres As Int16, ByVal wyres As Int16) As Integer
-  '// Neccessary while using a CamLink interface
-  '// If there is a change in buffer size (ROI, binning) this function has to be called
-  '// with the new x and y resolution. Additionally this function has to be called, if you
-  '// switch to another camRAM segment and like to get images.
-  '// In: HANDLE ph -> Handle to a previously opened camera.
-  '//     WORD wxres -> X Resolution of the images to be transferred
-  '//     WORD wyres -> Y Resolution of the images to be transferred
-  '// Out: int -> Error message.
-  '
-  'SC2_SDK_FUNC int WINAPI PCO_SetTimeouts(HANDLE ph, void *buf_in,unsigned int size_in);
-  '// Here you can set the timeouts for the driver.
-  '// In: HANDLE ph -> Handle to a previously opened camera.
-  '//     void *buffer -> Pointer to an array to set the timeout parameters.
-  '//     int ilen -> Total length of the buffer in bytes.
-  '// [0]: command-timeout,   200ms default, Time to wait while a command is sent.
-  '// [1]: image-timeout,    3000ms default, Time to wait while an image is transferred.
-  '// [2]: transfer-timeout, 1000ms default, Time to wait till the transfer channel expires.
-  '// Out: int -> Error message.
-  '
-  'SC2_SDK_FUNC int WINAPI PCO_GetBuffer(HANDLE ph, SHORT sBufNr, WORD** wBuf, HANDLE *hEvent);
-  Public Declare Function PCO_GetBuffer Lib "sc2_cam.dll" (ByVal hdriver As IntPtr, ByVal sbuf As Short, ByRef wbuf As Integer, ByRef hevent As Integer) As Integer
+    '// Neccessary while using a CamLink interface
+    '// If there is a change in buffer size (ROI, binning) this function has to be called
+    '// with the new x and y resolution. Additionally this function has to be called, if you
+    '// switch to another camRAM segment and like to get images.
+    '// In: HANDLE ph -> Handle to a previously opened camera.
+    '//     WORD wxres -> X Resolution of the images to be transferred
+    '//     WORD wyres -> Y Resolution of the images to be transferred
+    '// Out: int -> Error message.
+    '
+    'SC2_SDK_FUNC int WINAPI PCO_SetTimeouts(HANDLE ph, void *buf_in,unsigned int size_in);
+    Public Declare Function PCO_SetTimeouts Lib "sc2_cam.dll" (ByVal hdriver As IntPtr, ByRef buf_in As IntPtr, ByVal size_in As Int16) As Integer
+    '// Here you can set the timeouts for the driver.
+    '// In: HANDLE ph -> Handle to a previously opened camera.
+    '//     void *buffer -> Pointer to an array to set the timeout parameters.
+    '//     int ilen -> Total length of the buffer in bytes.
+    '// [0]: command-timeout,   200ms default, Time to wait while a command is sent.
+    '// [1]: image-timeout,    3000ms default, Time to wait while an image is transferred.
+    '// [2]: transfer-timeout, 1000ms default, Time to wait till the transfer channel expires.
+    '// Out: int -> Error message.
+    '
+    'SC2_SDK_FUNC int WINAPI PCO_GetBuffer(HANDLE ph, SHORT sBufNr, WORD** wBuf, HANDLE *hEvent);
+    Public Declare Function PCO_GetBuffer Lib "sc2_cam.dll" (ByVal hdriver As IntPtr, ByVal sbuf As Short, ByRef wbuf As Integer, ByRef hevent As Integer) As Integer
 	'// Gets the data pointer and the event of a buffer.
 	'// In: HANDLE ph -> Handle to a previously opened camera.
 	'//     SHORT sBufNr -> SHORT variable to hold the buffer number.
