@@ -131,10 +131,10 @@ namespace ASCOM.Photometrics
             myCam.SetClearMode("Pre-Exposure");
             myCam.SetClearCycles(4);
            // myCam.SetEMGain(4);// - doesn't seem to do much
-            myCam.SetReadoutSpeed(0); //20Mhz -
+            myCam.SetReadoutSpeed(2); //1.25Mhz biggest dynamic range
             myCam.SetTriggerMode("Timed");
             myCam.SetBinning("1");
-            myCam.SetGainState(2);//gain state 3
+            myCam.SetGainState(2);//gain state 3 - highest gain
             myCam.FramesToGet = 1;
             myCam.SetExposureTime(1);
             myCam.SetADCoffset(40); //this value was found to best for zeroing the bias frame
