@@ -750,7 +750,7 @@ Public Class frmPixelink
             rc = Api.SetFeature(hCamera, Feature.FrameRate, flags.Off, 0, parms)
         Else
             ' rc = Api.SetFeature(hCamera, Feature.FrameRate, flags.Manual, 0, parms)
-            parms(0) = 0.2 'slow during the daytime
+            parms(0) = 1 / expTime 'slow during the daytime
             rc = Api.SetFeature(hCamera, Feature.FrameRate, flags.Manual, 1, parms)
         End If
 
@@ -766,9 +766,23 @@ Public Class frmPixelink
         rc = Api.GetFeature(hCamera, Feature.Gain, flags, 1, parms)
 
         parms(0) = gain
-        rc = Api.SetFeature(hCamera, Feature.FrameRate, flags.Manual, 1, parms)
+        rc = Api.SetFeature(hCamera, Feature.Gain, flags.Manual, 1, parms)
 
     End Sub
+    Private Sub GetTemp(ByVal hCamera As Integer, ByRef temp As Integer)
+        Dim flags As FeatureFlags = 0
+        Dim numParms As Integer = 1
+        Dim parms As Single() = New Single(numParms - 1) {}
+
+        rc = Api.GetFeature(hCamera, Feature.SensorTemperature, flags, 1, parms)
+        temp = parms(0)
+
+        ' rc = Api.GetFeature(hCamera, Feature.s, flags, 1, parms)
+        'parms(0) = 1
+        'rc = Api.SetFeature(hCamera, Feature.ImagerClockDivisor, flags.Manual, 1, parms)
+
+    End Sub
+
     Private Sub getCameraReady()
         'try to open camera
 
@@ -1133,7 +1147,7 @@ Public Class frmPixelink
             Marshal.Copy(pBuf, bayer16, 0, isize - 1)
             Dim j As Integer
             ReDim b(iWidth * iHeight)
-
+            Dim b16(iWidth * iHeight * 2) As Byte
             'Looks easy, but this took some time to work...
 
             File.WriteAllBytes("raw16.raw", bayer16)
@@ -1145,6 +1159,11 @@ Public Class frmPixelink
                 bmBild.Dispose()
             End If
 
+
+            Dim temp As Integer
+            GetTemp(h_camera, temp)
+
+            Debug.Print("temp: {0}", temp)
             ' Create bitmap
             'bmBild = New Bitmap(iWidth, iHeight, Imaging.PixelFormat.Format24bppRgb)
 
@@ -1160,7 +1179,8 @@ Public Class frmPixelink
                 value = (bayer16(j) >> 4) * 256 + ((bayer16(j) And &HF) << 4) + (bayer16(j + 1) >> 4)
                 ' Debug.WriteLine(value)
 
-
+                b16(j) = value >> 8
+                b16(j + 1) = value And &HFF
 
                 ''Debug.Print(value)
                 If value < 0 Then ' Type cast from short to ushort? Forget it: Not with VB
@@ -1200,7 +1220,7 @@ Public Class frmPixelink
 
 
 
-
+            File.WriteAllBytes("raw16.raw", b16)
 
 
 
