@@ -174,12 +174,12 @@ Public Class Camera
         iXres = PCO.Camera.Sensor.Resolution.xAct
         iYres = PCO.Camera.Sensor.Resolution.yAct
 
-        errorCode = PCO_CamLinkSetImageParameters(hdriver, iXres, iYres) 'Mandatory for Cameralink and GigE
+        'errorCode = PCO_CamLinkSetImageParameters(hdriver, iXres, iYres) 'Mandatory for Cameralink and GigE
 
-        ' Don't care for all other interfaces, so leave it intact here.
-        If errorCode < 0 Then
-            ' tbStatus.Text = " Error while setting CamLinkImageParameters" & Hex(Str(errorCode))
-        End If
+        '' Don't care for all other interfaces, so leave it intact here.
+        'If errorCode < 0 Then
+        '    ' tbStatus.Text = " Error while setting CamLinkImageParameters" & Hex(Str(errorCode))
+        'End If
 
         sizeL = CDbl(iXres) * CDbl(iYres) * 2
         nBuf = -1
@@ -387,10 +387,11 @@ Public Class Camera
             errorCode = PCO_SetBinning(hdriver, value, value)
             errorCode = PCO_SetROI(hdriver, 1, 1, ccdWidth / value, ccdHeight / value)
 
-            PCO.Camera.Sensor.Resolution.xAct = ccdWidth / value
-            PCO.Camera.Sensor.Resolution.yAct = ccdHeight / value
+            'iXres = ccdWidth / value
+            ' iYres = ccdHeight / value
 
-
+            Debug.WriteLine("xAct is now {0}", PCO.Camera.Sensor.Resolution.xAct)
+            Debug.WriteLine("yAct is now {0}", PCO.Camera.Sensor.Resolution.yAct)
         End Set
     End Property
 
@@ -415,6 +416,9 @@ Public Class Camera
         Get
 
             errorCode = PCO_GetTemperature(hdriver, m_ccdTemp, m_camTemp, m_pwrTemp)
+            Debug.WriteLine("ccd temp is {0}", m_ccdTemp / 10)
+            Debug.WriteLine("cam temp is {0}", m_camTemp / 10)
+            Debug.WriteLine("pwr temp is {0}", m_pwrTemp / 10)
             Return m_ccdTemp / 10
         End Get
     End Property
@@ -786,36 +790,14 @@ Public Class Camera
 
     Public Sub StartExposure(Duration As Double, Light As Boolean) Implements ICameraV2.StartExposure
         Dim sizeL As Integer
-
-
-
-        errorCode = PCO_GetSizes(hdriver, PCO.Camera.Sensor.Resolution.xAct, PCO.Camera.Sensor.Resolution.yAct, PCO.Camera.Sensor.Resolution.xMax, PCO.Camera.Sensor.Resolution.yMax)
-        If errorCode < 0 Then
-            ' tbStatus.Text = " Error while retrieving sensor sizes 0x" & Hex(Str(errorCode))
+        If exposing Then
+            Debug.WriteLine("already exposing-exit sub")
+            Exit Sub
         End If
-
-        If (iXres <> PCO.Camera.Sensor.Resolution.xAct) Or (iYres <> PCO.Camera.Sensor.Resolution.yAct) Then
-            iXres = PCO.Camera.Sensor.Resolution.xAct
-            iYres = PCO.Camera.Sensor.Resolution.yAct
-
-            errorCode = PCO_CamLinkSetImageParameters(hdriver, iXres, iYres) 'Mandatory for Cameralink and GigE
-            ' Don't care for all other interfaces, so leave it intact here.
-            If errorCode < 0 Then
-                'tbStatus.Text = " Error while setting CamLinkImageParameters" & Hex(Str(errorCode))
-            End If
-
-            If nBuf >= 0 Then
-                errorCode = PCO_FreeBuffer(hdriver, nBuf)
-            End If
-
-            sizeL = CDbl(iXres) * CDbl(iYres) * 2
-            nBuf = -1
-            errorCode = PCO_AllocateBuffer(hdriver, nBuf, sizeL, pwbuf, hevent)
-            'pwbuf already holds the address of the buffer
-        End If
+        Debug.WriteLine("start exposure for {0}", Duration)
+        errorCode = PCO_ArmCamera(hdriver)
 
 
-        '0 = microseconds
         '1 = nanoseconds
         '2 = milliseconds
 
@@ -831,19 +813,20 @@ Public Class Camera
 
         errorCode = PCO_SetDelayExposureTime(hdriver, 0, Duration * 1000, 0, units)
 
+        Debug.WriteLine("exposure set to {0} ms", Duration * 1000)
 
         'If (Duration < 0.0) Then Throw New InvalidValueException("StartExposure", Duration.ToString(), "0.0 upwards")
         'If (cameraNumX > ccdWidth) Then Throw New InvalidValueException("StartExposure", cameraNumX.ToString(), ccdWidth.ToString())
         'If (cameraNumY > ccdHeight) Then Throw New InvalidValueException("StartExposure", cameraNumY.ToString(), ccdHeight.ToString())
         'If (cameraStartX > ccdWidth) Then Throw New InvalidValueException("StartExposure", cameraStartX.ToString(), ccdWidth.ToString())
         'If (cameraStartY > ccdHeight) Then Throw New InvalidValueException("StartExposure", cameraStartY.ToString(), ccdHeight.ToString())
-
+        exposing = True
         cameraLastExposureDuration = Duration
         exposureStart = DateTime.Now
         'System.Threading.Thread.Sleep(Duration * 1000) ' Sleep for the duration to simulate exposure 
         'TL.LogMessage("StartExposure", Duration.ToString() + " " + Light.ToString())
         'cameraImageReady = True
-        exposing = True
+
         Dim t As Thread
         t = New Thread(AddressOf grabImage)
         t.Start()
@@ -853,6 +836,7 @@ Public Class Camera
     Sub grabImage()
 
         Dim BpP As Object
+
 
         Dim seg As Short
         Dim dwFrst, dwlast As Object
@@ -866,10 +850,10 @@ Public Class Camera
         '  This will give 0xFFFF8000 to mask, which is not intended.
 
 
+
         Dim j As Integer
 
         Dim value As Integer
-        errorCode = PCO_ArmCamera(hdriver)
 
 
         cameraImageReady = False
@@ -881,11 +865,10 @@ Public Class Camera
         BpP = 16
         sbuf = 0
 
-        '  errorCode = PCO_ArmCamera(hdriver)
+        errorCode = PCO_ArmCamera(hdriver)
 
         errorCode = PCO_GetSizes(hdriver, PCO.Camera.Sensor.Resolution.xAct, PCO.Camera.Sensor.Resolution.yAct, PCO.Camera.Sensor.Resolution.xMax, PCO.Camera.Sensor.Resolution.yMax)
-        'iXres = PCO.Camera.Sensor.Resolution.xAct
-        'iYres = PCO.Camera.Sensor.Resolution.yAct
+
 
         If (iXres <> PCO.Camera.Sensor.Resolution.xAct) Or (iYres <> PCO.Camera.Sensor.Resolution.yAct) Then
             iXres = PCO.Camera.Sensor.Resolution.xAct
@@ -905,7 +888,8 @@ Public Class Camera
             'pwbuf already holds the address of the buffer
         End If
         Dim camstate As Integer
-
+        errorCode = PCO_ArmCamera(hdriver)
+        Debug.WriteLine("arm camera code is {0}", errorCode)
         errorCode = PCO_GetRecordingState(hdriver, camstate)
         If camstate = 1 Then
             errorCode = PCO_SetRecordingState(hdriver, 0)
@@ -976,6 +960,8 @@ Public Class Camera
             check = Not ((dwStatusDll And mask) <> mask) ' event flag set?
             Thread.Sleep(500)
             Debug.Print("sleeping")
+            Debug.Print("dwStatusDll {0}", dwStatusDll)
+            Debug.Print("dwStatusDrv {0}", dwStatusDrv)
         End While
 
         errorCode = PCO_SetRecordingState(hdriver, 0)
