@@ -671,7 +671,7 @@ namespace ASCOM.Photometrics
             {
                 tl.LogMessage("Gain Get", "Not implemented");
                 Debug.WriteLine("Gain", false);
-                return 0;
+                return myCam.GainStateIndex;
             }
             set
             {
