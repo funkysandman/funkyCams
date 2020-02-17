@@ -124,7 +124,10 @@ Public Class Camera
         errorCode = PCO_GetCameraDescription(hdriver, camDesc)
         Dim wPowerDownMode As Integer
         Dim dwTime As Integer
-
+        Dim cFactor As Integer
+        errorCode = PCO_GetConversionFactor(hdriver, cFactor)
+        errorCode = PCO_SetConversionFactor(hdriver, 110)
+        errorCode = PCO_GetConversionFactor(hdriver, cFactor)
         errorCode = PCO_SetPowerDownMode(hdriver, 0) 'auto
         'errorCode = PCO_GetUserPowerDownTime(hdriver, dwTime)
         'errorCode = PCO_SetUserPowerDownTime(hdriver, 10)
