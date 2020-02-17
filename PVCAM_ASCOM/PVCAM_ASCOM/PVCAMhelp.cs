@@ -3139,6 +3139,8 @@ namespace pvcam_helper
             return true;
         }
 
+
+
         //set camera gain state (analog gain), write directly to the camera
         public bool SetGainState(Int16 gainState)
         {
@@ -3156,6 +3158,33 @@ namespace pvcam_helper
             Marshal.FreeHGlobal(unmngGainState);
             return true;
         }
+
+
+        //set camera gain state (analog gain), write directly to the camera
+        public Boolean GetCurrentGainState()
+        {
+
+            Boolean retValue = false;
+            IntPtr unmngCurGain;
+            unmngCurGain = Marshal.AllocHGlobal(sizeof(Int16));
+
+            if (!PVCAM.pl_get_param(m_hCam, PvTypes.PARAM_GAIN_INDEX, (Int16)PvTypes.AttributeIDs.ATTR_CURRENT, unmngCurGain))
+            {
+                ReportMsg(this, new ReportMessage("Getting current gain state failed", MsgTypes.MSG_ERROR));
+                retValue = false;
+            }
+            else
+            {
+                m_GainStateIndex = Marshal.ReadInt16(unmngCurGain);
+                retValue = true;
+            }
+
+            Marshal.FreeHGlobal(unmngCurGain);
+            unmngCurGain = IntPtr.Zero;
+
+            return retValue;
+        }
+
 
         //set EM (Multiplication) gain, write directly to the camera
         public bool SetEMGain(UInt16 emGain)

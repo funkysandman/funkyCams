@@ -132,6 +132,7 @@
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
     <Content Include="ASCOM.ico" />
+    <Content Include="Photometrics Setup.iss" />
     <Content Include="ReadMe.htm">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
