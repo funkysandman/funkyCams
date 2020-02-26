@@ -457,7 +457,7 @@ namespace pvcam_helper
         Int16 m_imageSizeX;       //Final Image size depends on multiROI/Centoiding etc., Used for display window and 
         Int16 m_imageSizeY;       //recomposing frame
 
-
+        Boolean m_fastReadout;
 
         IntPtr m_latestFrameAddress;
         Int16 m_hCam;
@@ -3132,7 +3132,7 @@ namespace pvcam_helper
             }
 
             ReportMsg(this, new ReportMessage(String.Format("Readout set to {0}", m_spdTable.ReadoutOption[spdTblIndex].PortDesc), MsgTypes.MSG_STATUS));
-            CamNotif(this, new ReportEvent(CameraNotifications.READOUT_SPEED_CHANGED));
+           // CamNotif(this, new ReportEvent(CameraNotifications.READOUT_SPEED_CHANGED));
             Marshal.FreeHGlobal(unmngValue);
             unmngValue = IntPtr.Zero;
 
