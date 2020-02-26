@@ -9,12 +9,10 @@ Imports System.Data
 Imports System.Runtime.InteropServices
 Imports System.Threading
 Imports System.Net.Http
-Imports Photometrics.Pvcam
 Imports System.Collections.Specialized
 Imports vimbaWinVBnet.vimbaWinVBnet
-Imports PixeLINK
 
-Public Class frmPixelink
+Public Class frmIS
     Dim myDetectionQueue As New Queue(Of queueEntry)
 
     Private mhCamera As IntPtr
@@ -49,7 +47,7 @@ Public Class frmPixelink
     Private t As Thread
     Private t_imaging As Thread
     Private h_camera As Integer
-    Private rc As ReturnCode
+
     Private helper As SnapshotHelper
     Private night As Boolean = False
     ' Private md As New ObjectDetection.TFDetector()
@@ -61,7 +59,7 @@ Public Class frmPixelink
     Private m_camRunning As Boolean = False
     Private m_grabbing As Boolean = False
     Private rawImage As Byte()
-    Private frameDesc As FrameDescriptor
+
     Shared m_pics As RingBitmap
     Private m_grabbedframe As Boolean
     Private m_grabbedframe_err As Integer = 0
@@ -703,16 +701,16 @@ Public Class frmPixelink
 
     Private Sub Button8_Click(sender As Object, e As EventArgs) Handles Button8.Click
         m_camRunning = False
-        rc = Api.SetStreamState(h_camera, StreamState.Stop)
+        ' rc = Api.SetStreamState(h_camera, StreamState.Stop)
         TimerAcquistionRate.Enabled = False
-        t.Abort()
-
+        't.Abort()
+        IcImagingControl1.LiveStop()
         meteorCheckRunning = False
         Button7.Enabled = True
         Button8.Enabled = False
     End Sub
 
-    Private Sub frmPixelink_Load(sender As Object, e As EventArgs) Handles Me.Load
+    Private Sub frmIS_Load(sender As Object, e As EventArgs) Handles Me.Load
         getCameraReady()
         myImageCodecInfo = GetEncoderInfo("image/jpeg")
 
@@ -731,78 +729,22 @@ Public Class frmPixelink
         myEncoderParameters.Param(0) = myEncoderParameter
         ' md.LoadModel("c:\tmp\frozen_inference_graph_orig.pb", "c:\tmp\mscoco_label_map.pbtxt")
     End Sub
-    Private Sub SetPixelFormat(ByVal hCamera As Integer, ByVal pixelFormat As PixeLINK.PixelFormat)
-        Dim flags As FeatureFlags = 0
-        Dim numParms As Integer = 1
-        Dim parms As Single() = New Single(numParms - 1) {}
-        Api.GetFeature(hCamera, Feature.PixelFormat, flags, numParms, parms)
-        parms(0) = CSng(pixelFormat)
-        Api.SetFeature(hCamera, Feature.PixelFormat, flags, numParms, parms)
-    End Sub
-    Private Sub SetExposure(ByVal hCamera As Integer, ByVal expTime As Integer)
-        Dim flags As FeatureFlags = 0
-        Dim numParms As Integer = 1
-        Dim parms As Single() = New Single(numParms - 1) {}
 
-        rc = Api.GetFeature(hCamera, Feature.FrameRate, flags, 1, parms)
-        If (expTime > 1000) Then 'slow frame rate
-
-            rc = Api.SetFeature(hCamera, Feature.FrameRate, flags.Off, 0, parms)
-        Else
-            ' rc = Api.SetFeature(hCamera, Feature.FrameRate, flags.Manual, 0, parms)
-            parms(0) = 1 / expTime 'slow during the daytime
-            rc = Api.SetFeature(hCamera, Feature.FrameRate, flags.Manual, 1, parms)
-        End If
-
-        rc = Api.GetFeature(hCamera, Feature.Exposure, flags, numParms, parms)
-        parms(0) = CSng(expTime / 1000)
-        rc = Api.SetFeature(hCamera, Feature.Exposure, flags, numParms, parms)
-    End Sub
-    Private Sub SetGain(ByVal hCamera As Integer, ByVal gain As Integer)
-        Dim flags As FeatureFlags = 0
-        Dim numParms As Integer = 1
-        Dim parms As Single() = New Single(numParms - 1) {}
-
-        rc = Api.GetFeature(hCamera, Feature.Gain, flags, 1, parms)
-
-        parms(0) = gain
-        rc = Api.SetFeature(hCamera, Feature.Gain, flags.Manual, 1, parms)
-
-    End Sub
-    Private Sub GetTemp(ByVal hCamera As Integer, ByRef temp As Integer)
-        Dim flags As FeatureFlags = 0
-        Dim numParms As Integer = 1
-        Dim parms As Single() = New Single(numParms - 1) {}
-
-        rc = Api.GetFeature(hCamera, Feature.SensorTemperature, flags, 1, parms)
-        temp = parms(0)
-
-        ' rc = Api.GetFeature(hCamera, Feature.s, flags, 1, parms)
-        'parms(0) = 1
-        'rc = Api.SetFeature(hCamera, Feature.ImagerClockDivisor, flags.Manual, 1, parms)
-
-    End Sub
 
     Private Sub getCameraReady()
         'try to open camera
 
+        If Not IcImagingControl1.DeviceValid() Then
+            IcImagingControl1.ShowDeviceSettingsDialog()
 
-        Dim rc As ReturnCode
+            If Not IcImagingControl1.DeviceValid Then
+                MsgBox("No device was selected.", MsgBoxStyle.Information, "Grabbing an Image")
 
-
-        rc = Api.Initialize(0, h_camera)
-        If Not Api.IsSuccess(rc) Then
-                MessageBox.Show("ERROR: Unable to initialize a camera (Error " + rc.ToString() + ")")
-                Return
+                Me.Close()
             End If
-
-        helper = New SnapshotHelper(h_camera)
-
-        'set pixeltype
-        SetPixelFormat(h_camera, PixeLINK.PixelFormat.Bayer16)
-
-
-
+        End If
+        IcImagingControl1.DeviceFrameRate = 0.2
+        IcImagingControl1.DeviceFrameFilters.Clear()
     End Sub
 
 
@@ -838,7 +780,7 @@ Public Class frmPixelink
         Button6.Enabled = True
         myWebServer = WebServer.getWebServer
 
-        myWebServer.StartWebServer(Me, Val(Me.tbPort.Text))
+        '   myWebServer.StartWebServer(Me, Val(Me.tbPort.Text))
         myWebServer.ImageDirectory = "c:\web\images\"
         myWebServer.VirtualRoot = "c:\web\"
     End Sub
@@ -961,7 +903,7 @@ Public Class frmPixelink
 
     End Sub
 
-    Private Sub frmPixelink_Closing(sender As Object, e As CancelEventArgs) Handles Me.Closing
+    Private Sub frmIS_Closing(sender As Object, e As CancelEventArgs) Handles Me.Closing
         Dim i As Object
 
         If hdialog <> 0 Then
@@ -978,110 +920,18 @@ Public Class frmPixelink
 
     End Sub
 
-    Private Sub TimerAcquistionRate_Tick(sender As Object, e As EventArgs) Handles TimerAcquistionRate.Tick
-        'take a picture
-        If m_grabbing Then
-            Exit Sub
-        End If
-        'm_grabbing = True
-        'Dim err As QCamM_Err = QCamM_Err.qerrSuccess
-        'Dim sizeInBytes As UInteger = 0
-        'Dim flags As Integer = 0
-        ''QCam.QCamM_GetInfo(mhCamera, QCamM_Info.qinfImageSize, sizeInBytes)
-        'Try
-        '    If Not mFrame1 Is Nothing Then
-        '        'msgbox("grabbing frame")
-        '        Dim frameSize As UInteger = 0
-        '        QCam.QCamM_GetInfo(mhCamera, QCamM_Info.qinfImageSize, frameSize)
-        '        QCam.QCamM_Free(mFrame1.pBuffer)
-        '        mFrame1.pBuffer = QCam.QCamM_Malloc(mFrame1.bufferSize)
-        '        Debug.Print("grab frame")
-        '        Dim t_grab As Thread
-        '        m_grabbedframe = False
-        '        t_grab = New Thread(AddressOf grabAframe)
-        '        t_grab.Start()
-        '        Dim stopWatch As Stopwatch = New Stopwatch()
-        '        stopWatch.Start()
 
-        '        While Not m_grabbedframe AndAlso stopWatch.ElapsedMilliseconds < 20000
-        '            Threading.Thread.Sleep(1000)
-        '            Application.DoEvents()
-        '        End While
-
-        '        stopWatch.[Stop]()
-        '        If m_grabbedframe_err = QCamM_Err.qerrDriverFault Then
-        '            m_grabbedframe = False
-        '        End If
-        '        If Not m_grabbedframe Then
-        '            QCam.QCamM_Abort(mhCamera)
-        '            t_grab.Abort()
-
-        '            err = QCamM_Err.qerrCancelled
-        '            Debug.Print("programmatically aborted grabframe thread")
-        '            'what to do?  close camera?
-        '            QCam.QCamM_CloseCamera(mhCamera)
-        '            Debug.Print("closed camera")
-        '            QCam.QCamM_Free(mFrame1.pBuffer)
-        '            Debug.Print("released mframe1 buffer")
-        '            QCam.QCamM_Free(mFrame2.pBuffer)
-        '            Debug.Print("released mframe2 buffer")
-        '            'QCam.QCamM_ReleaseDriver()
-        '            'Debug.Print("released driver")
-        '            'now reopen
-        '            getCameraReady()
-        '            Debug.Print("recovering....")
-        '            m_grabbing = False
-        '            Exit Sub
-        '        End If
-
-
-        '    Else
-        '            TimerAcquistionRate.Enabled = False
-
-        '        'msgbox("mframe1 is noting")
-        '    End If
-
-        'Catch ex As Exception
-        '    'msgbox(ex.Message)
-        '    'msgbox("QCam error:" & err)
-        '    TimerAcquistionRate.Enabled = False
-
-        'End Try
-
-        'If err = QCamM_Err.qerrSuccess And m_grabbedframe_err = 0 Then
-        '    Call Me.singleframeCallback(mFrame1.pBuffer, 1, err, flags)
-        'End If
-        m_grabbing = False
-
-    End Sub
-
-
-    Private Function GetSimpleFeature(ByVal hCamera As Integer, ByVal featureId As Feature) As Single
-        Dim flags As FeatureFlags = 0
-        Dim numParams As Integer = 1
-        Dim params(numParams - 1) As Single
-        rc = Api.GetFeature(hCamera, featureId, flags, numParams, params)
-        Return params(0)
-
-    End Function
 
     Private Sub Button7_Click(sender As Object, e As EventArgs) Handles Button7.Click
         'use settings
 
         m_camRunning = True
 
-        'start camera
-        'txtExposure.Text = System.Convert.ToString(GetSimpleFeature(h_camera, Feature.Shutter) * 1000)
-        'txtGain.Text = System.Convert.ToString(GetSimpleFeature(h_camera, Feature.Gain))
 
 
 
 
-        SetExposure(h_camera, tbExposureTime.Text)
-        SetGain(h_camera, tbGain.Text)
-
-
-
+        IcImagingControl1.LiveStart()
 
 
 
@@ -1092,432 +942,12 @@ Public Class frmPixelink
         startTime = Now
         meteorCheckRunning = True
         Timer2.Enabled = True
-        t = New Thread(AddressOf processDetection)
-        t.Start()
-        t_imaging = New Thread(AddressOf pullImages)
-        t_imaging.Start()
-    End Sub
-
-    Sub pullImages()
-        Dim s_callbackDelegate
-        m_camRunning = True
-        s_callbackDelegate = New Api.Callback(AddressOf getFrame)
-        Api.SetCallback(h_camera, Overlays.Frame, 0, s_callbackDelegate)
-        rc = Api.SetStreamState(h_camera, StreamState.Start)
-
-        If Not Api.IsSuccess(rc) Then
-            System.Console.WriteLine("ERROR: Unable to start streaming (Error " + rc.ToString() + ")")
-            Return
-        End If
-        'rc = Api.GetClip(h_camera, 1, "test.bmp", callbackDelegate)
-        Do While (m_camRunning)
-
-            '  rc = Api.GetNextFrame(h_camera, bufferSize, rawImage, frameDesc)
-
-            ' If (Not Api.IsSuccess(rc)) Then
-            '     System.Console.WriteLine("ERROR: Unable to setup clip")
-            '     '       Exit Sub
-            ' End If
-
-            '// Poll here until we can see that the callback function has been called
-
-            System.Threading.Thread.Sleep(500)
-
-        Loop
 
     End Sub
-    Function getFrame(hc As Integer, pBuf As IntPtr, pf As PixeLINK.PixelFormat, ByRef frameDesc As FrameDescriptor, userData As Integer)
 
-        'put image into rin                bmBild = New Bitmap(iXres, iYres, Imaging.PixelFormat.Format24bppRgb)
-        SyncLock m_syncLock
-            Dim rect As New Rectangle(0, 0, frameDesc.RoiWidth, frameDesc.RoiHeight)
-            bmBild = New Bitmap(frameDesc.RoiWidth, frameDesc.RoiHeight, Imaging.PixelFormat.Format24bppRgb)
-            Dim bmpData As System.Drawing.Imaging.BitmapData = bmBild.LockBits(rect,
-                        Drawing.Imaging.ImageLockMode.ReadWrite, bmBild.PixelFormat)
-            iWidth = frameDesc.RoiWidth
-            iHeight = frameDesc.RoiHeight
-            Dim value As Integer
-            Dim isize As Integer
-            Dim iPtr As IntPtr
-            iPtr = bmpData.Scan0
-            isize = iWidth * iHeight
-            Dim bayer16(isize * 2) As Byte
-            Dim bayer8(iWidth * iHeight) As Byte
-            Marshal.Copy(pBuf, bayer16, 0, isize * 2)
 
-            Dim newsize As Integer
 
-            Dim j As Integer
-            ReDim b(iWidth * iHeight)
-            Dim b16(iWidth * iHeight * 2) As Byte
-            'Looks easy, but this took some time to work...
-
-            File.WriteAllBytes("raw16.raw", bayer16)
-            '  Text1.Text = "0x" & Hex(b(10)) & "   0x" & Hex(b(100)) & "   0x" & Hex(b(1000))
-
-            ' span = (maxval.Value - minval.Value) * divide
-
-            If bmBildUsed <> 0 Then
-                bmBild.Dispose()
-            End If
-
-
-            Dim temp As Integer
-            GetTemp(h_camera, temp)
-
-            Debug.Print("temp: {0}", temp)
-            ' Create bitmap
-            'bmBild = New Bitmap(iWidth, iHeight, Imaging.PixelFormat.Format24bppRgb)
-
-            Dim range As Integer
-            range = tbUpper.Text - tbLower.Text
-            Dim multiplier As Single
-            multiplier = 256 / range
-            Dim lower, upper As Integer
-            lower = CInt(tbLower.Text)
-            upper = CInt(tbUpper.Text)
-            j = 0
-            For i = 0 To iWidth * iHeight - 1  ' This loop converts from 16bit to 8bit using min and max
-                value = (bayer16(j) >> 4) * 256 + ((bayer16(j) And &HF) << 4) + (bayer16(j + 1) >> 4)
-                ' Debug.WriteLine(value)
-
-                b16(j) = value >> 8
-                b16(j + 1) = value And &HFF
-
-                ''Debug.Print(value)
-                If value < 0 Then ' Type cast from short to ushort? Forget it: Not with VB
-                    value = value * -1
-                    value = value + &H8000
-                End If
-                value = value - lower
-                If value < 0 Then
-                    value = 0
-                End If
-                value = CInt(CSng(value) * multiplier)
-
-
-                'value = value * 255 / span
-                If value > 255 Then
-                    value = 255
-                End If
-                If value < 0 Then
-                    value = 0
-                End If
-
-                b(i) = value
-
-
-
-
-                j = j + 2
-            Next
-
-            ' Marshal.Copy(Image24, 0, bmpData.Scan0, isize) ' Copy intermediate buffer to the bitmap
-
-            'b contains bayer8
-            Dim pImagePtr As IntPtr
-            pImagePtr = Marshal.AllocHGlobal(iWidth * iHeight)
-            Marshal.Copy(b, 0, pImagePtr, iWidth * iHeight - 1)
-
-
-
-
-            File.WriteAllBytes("raw16.raw", b16)
-
-
-
-            'convert from bayer8 to 24rgb
-            File.WriteAllBytes("image.raw", b)
-
-            Dim mTransformImage As BGAPI2.Image = Nothing
-            Dim mImage As BGAPI2.Image = Nothing
-            ' Dim buff As BGAPI2.Buffer = New BGAPI2.Buffer()
-            Dim imgProcessor As New BGAPI2.ImageProcessor()
-
-
-
-            Dim outImage(iWidth * iHeight * 3) As Byte
-            mImage = imgProcessor.CreateImage(iWidth, iHeight, "BayerRG8", pImagePtr, iWidth * iHeight)
-
-            'ULong imageBufferAddress = (ULong)ImageInfo.pImagePtr;
-            mTransformImage = imgProcessor.CreateTransformedImage(mImage, "BGR8")
-
-
-
-            Marshal.Copy(mTransformImage.Buffer, outImage, 0, iWidth * iHeight * 3 - 1)
-
-            'File.WriteAllBytes("pgxxx.raw", Image.ManagedData)
-            'File.WriteAllBytes("pgxxxyy.raw", convertedImage.ManagedData)
-
-            ''Dim convertedImage As IManagedImage = image.Convert(PixelFormatEnums.RGB8, ColorProcessingAlgorithm.NEAREST_NEIGHBOR_AVG)
-            'File.WriteAllBytes("pgconvert.raw", Image.ManagedData)
-            'convertedImage.ConvertToWriteAbleBitmap(PixelFormatEnums.BGR8, convertedImage)
-
-
-
-            ' rc = Api.FormatImage(Image24, frameDesc, PixeLINK.ImageFormat.Bmp, Nothing, newsize)
-
-
-            ' rc = Api.FormatImage(Image24, frameDesc, PixeLINK.ImageFormat.Bmp, outImage, newsize)
-
-
-
-
-
-            'File.WriteAllBytes("imageout.raw", outImage)
-            Marshal.Copy(outImage, 0, iPtr, isize - 1)
-            bmBild.UnlockBits(bmpData)
-            Marshal.FreeHGlobal(pImagePtr)
-            bmBild.Dispose()
-
-            If m_pics Is Nothing Then
-                m_pics = New RingBitmap(5)
-            End If
-
-            m_pics.FillNextBitmap(outImage)
-
-
-            ' imageCnt += 1
-
-
-
-
-            ' Must manually release the image to prevent buffers on the camera stream from filling up
-            '  image.Release()
-            Dim filename As String
-
-            Dim folderName = String.Format("{0:yyyy-MMM-dd}", DateTime.Now)
-            filename = String.Format("{0}{1:ddMMMyyyy-HHmmss}.jpg", "imgpl_", DateTime.Now)
-            filename = Path.Combine(tbPath.Text, folderName, filename)
-
-
-
-            If cbMeteors.Checked And lblDayNight.Text.ToLower = "night" Then
-                ' md.examine(bm, filename)
-                'call azure service
-                Dim ms As New MemoryStream()
-                ' convertedImage.ConvertToWriteAbleBitmap()
-                Dim b As Bitmap
-                b = getLastImage()
-
-                b.Save(ms, myImageCodecInfo, myEncoderParameters)
-                b.Dispose()
-
-                Dim contents = ms.ToArray()
-                Dim qe As New queueEntry
-                qe.img = contents
-                qe.filename = Path.GetFileName(filename)
-                qe.dateTaken = Now
-                qe.cameraID = "PixeLINK"
-                qe.width = frameDesc.RoiWidth
-                qe.height = frameDesc.RoiHeight
-                If myDetectionQueue.Count < 10 Then
-                    myDetectionQueue.Enqueue(qe)
-
-                End If
-
-                ms.Close()
-
-            End If
-            If cbSaveImages.Checked = True Then
-                System.IO.Directory.CreateDirectory(Path.Combine(tbPath.Text, folderName))
-                Dim x As Bitmap
-                x = getLastImage()
-
-                x.Save(filename, myImageCodecInfo, myEncoderParameters)
-                x.Dispose()
-
-            End If
-
-
-        End SyncLock
-
-        Debug.WriteLine("got frame")
-    End Function
-    Sub grabImages()
-
-        Dim BpP As Object
-        Dim seg As Short
-        Dim dwFrst, dwlast As Object
-        Dim sbuf As Short
-        Dim dwStatusDll As Integer
-        Dim dwStatusDrv As Integer
-        Dim loopcount As Integer
-        Dim check As Integer
-        Const mask As Integer = &H8000 'assign 0x00008000 to mask
-        '^-& is essential!! Otherwise VB converts this to an int.
-        '  This will give 0xFFFF8000 to mask, which is not intended.
-        Dim filename As String
-        Dim i As Integer
-        Dim j As Integer
-        Dim span As Integer
-        Dim value As Integer
-        iXres = Camera.Sensor.Resolution.xAct
-        iYres = Camera.Sensor.Resolution.yAct
-        m_camRunning = True
-        span = (Val(tbUpper.Text) - Val(tbLower.Text)) * divide
-        Do While (m_camRunning)
-
-
-            check = 0
-            seg = 1
-            dwFrst = 0
-            dwlast = 0
-            BpP = 16
-            sbuf = 0
-
-            errorCode = PCO_AddBufferEx(hdriver, dwFrst, dwlast, sbuf, Camera.Sensor.Resolution.xAct, Camera.Sensor.Resolution.yAct, BpP)
-            m_grabbing = True
-            'loopcount = 0
-            'Do While Not (check) ' status of the dll must be checked or you use waitforsingleobject instead
-            '    errorCode = PCO_GetBufferStatus(hdriver, sbuf, dwStatusDll, dwStatusDrv)
-            '    check = Not ((dwStatusDll And mask) <> mask) ' event flag set?
-            '    loopcount = loopcount + 1
-            '    If loopcount > 600000 Then
-            '        errorCode = -1
-            '        Debug.Print("timeout")
-            '        Exit Do
-            '    End If
-            'Loop
-
-            Dim stopWatch As Stopwatch = New Stopwatch()
-            stopWatch.Start()
-
-            While m_grabbing AndAlso stopWatch.ElapsedMilliseconds < 60000 And Not (check)
-                errorCode = PCO_GetBufferStatus(hdriver, sbuf, dwStatusDll, dwStatusDrv)
-                check = Not ((dwStatusDll And mask) <> mask) ' event flag set?
-            End While
-
-            stopWatch.[Stop]()
-            If errorCode = 0 Then
-                ReDim b(iXres * iYres * 2)
-
-                'Looks easy, but this took some time to work...
-                Marshal.Copy(pwbuf, b, 0, iXres * iYres * 2)
-
-                '  Text1.Text = "0x" & Hex(b(10)) & "   0x" & Hex(b(100)) & "   0x" & Hex(b(1000))
-
-                ' span = (maxval.Value - minval.Value) * divide
-
-                If bmBildUsed <> 0 Then
-                    bmBild.Dispose()
-                End If
-
-                ' Create bitmap
-                bmBild = New Bitmap(iXres, iYres, Imaging.PixelFormat.Format24bppRgb)
-                Dim rect As New Rectangle(0, 0, bmBild.Width, bmBild.Height)
-                Dim bmpData As System.Drawing.Imaging.BitmapData = bmBild.LockBits(rect,
-                    Drawing.Imaging.ImageLockMode.ReadWrite, bmBild.PixelFormat)
-
-                ' Create intermediate buffer for direct copying to the bitmap.
-                Dim isize As Integer
-                isize = Math.Abs(bmpData.Stride) * iYres
-                Dim Image24(isize) As Byte
-                bmBildUsed = 1
-                Dim range As Integer
-                range = tbUpper.Text - tbLower.Text
-                Dim multiplier As Single
-                multiplier = 256 / range
-                Dim lower, upper As Integer
-                lower = CInt(tbLower.Text)
-                upper = CInt(tbUpper.Text)
-                j = 0
-                For i = 0 To iXres * iYres - 1  ' This loop converts from 16bit to 8bit using min and max
-                    value = b(j + 1) * 256 + b(j)
-                    value = value >> 2
-
-                    'Debug.Print(value)
-                    If value < 0 Then ' Type cast from short to ushort? Forget it: Not with VB
-                        value = value * -1
-                        value = value + &H8000
-                    End If
-                    value = value - lower
-                    If value < 0 Then
-                        value = 0
-                    End If
-                    value = CInt(CSng(value) * multiplier)
-
-
-                    'value = value * 255 / span
-                    If value > 255 Then
-                        value = 255
-                    End If
-                    If value < 0 Then
-                        value = 0
-                    End If
-
-                    'stretch image
-
-
-
-                    Image24(i * 3 + 0) = value ' Set the values to the intermediate buffer
-                    Image24(i * 3 + 1) = value
-                    Image24(i * 3 + 2) = value
-                    j = j + 2
-                Next
-
-                Marshal.Copy(Image24, 0, bmpData.Scan0, isize) ' Copy intermediate buffer to the bitmap
-
-                bmBild.UnlockBits(bmpData)
-                If m_pics Is Nothing Then
-                    m_pics = New RingBitmap(5)
-                End If
-                m_pics.FillNextBitmap(Image24)
-                Debug.Print("got pco image")
-                Dim folderName = String.Format("{0:yyyy-MMM-dd}", DateTime.Now)
-                filename = String.Format("{0}{1:ddMMMyyyy-HHmmss}.jpg", "imgpco_", DateTime.Now)
-                filename = Path.Combine(Me.tbPath.Text, folderName, filename)
-
-
-                m_grabbing = False
-                If Me.cbMeteors.Checked And Me.lblDayNight.Text.ToLower = "night" Then
-                    ' md.examine(bm, filename)
-                    'call azure service
-                    Dim ms As New MemoryStream()
-                    ' convertedImage.ConvertToWriteAbleBitmap()
-                    Dim b As Bitmap
-                    b = Me.getLastImage
-
-                    b.Save(ms, Me.myImageCodecInfo, Me.myEncoderParameters)
-                    b.Dispose()
-
-                    Dim contents = ms.ToArray()
-                    Dim qe As New queueEntry
-                    qe.img = contents
-                    qe.filename = Path.GetFileName(filename)
-                    qe.dateTaken = Now
-                    qe.cameraID = "PCO.2000"
-                    qe.width = iXres
-                    qe.height = iYres
-                    If Me.myDetectionQueue.Count < 10 Then
-                        Me.myDetectionQueue.Enqueue(qe)
-
-                    End If
-
-                    ms.Close()
-
-                End If
-                If Me.cbSaveImages.Checked = True Then
-                    System.IO.Directory.CreateDirectory(Path.Combine(Me.tbPath.Text, folderName))
-
-
-                    bmBild.Save(filename, Me.myImageCodecInfo, Me.myEncoderParameters)
-                    bmBild.Dispose()
-
-                End If
-
-
-
-
-                'Picture.SizeMode = PictureBoxSizeMode.StretchImage ' Stretch it!
-                'Picture.Image = bmBild ' Set bitmap to PictureBox
-                'Picture.Refresh()  ' Show da image
-                'bmBild.Dispose() Don't do this here, since it will be still in use by the PictureBox
-                ' and guess what might happen...
-            End If
-        Loop
-    End Sub
-
+    Friend WithEvents IcImagingControl1 As TIS.Imaging.ICImagingControl
 
 
 End Class

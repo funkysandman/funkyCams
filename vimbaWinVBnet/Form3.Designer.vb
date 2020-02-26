@@ -33,6 +33,7 @@ Partial Class Form3
         Me.Button8 = New System.Windows.Forms.Button()
         Me.btnPCO = New System.Windows.Forms.Button()
         Me.Button9 = New System.Windows.Forms.Button()
+        Me.btnIS = New System.Windows.Forms.Button()
         Me.SuspendLayout()
         '
         'Button1
@@ -129,18 +130,28 @@ Partial Class Form3
         '
         'Button9
         '
-        Me.Button9.Location = New System.Drawing.Point(320, 196)
+        Me.Button9.Location = New System.Drawing.Point(168, 196)
         Me.Button9.Name = "Button9"
         Me.Button9.Size = New System.Drawing.Size(112, 38)
         Me.Button9.TabIndex = 10
         Me.Button9.Text = "PixeLink"
         Me.Button9.UseVisualStyleBackColor = True
         '
+        'btnIS
+        '
+        Me.btnIS.Location = New System.Drawing.Point(320, 196)
+        Me.btnIS.Name = "btnIS"
+        Me.btnIS.Size = New System.Drawing.Size(112, 38)
+        Me.btnIS.TabIndex = 11
+        Me.btnIS.Text = "Imaging Source"
+        Me.btnIS.UseVisualStyleBackColor = True
+        '
         'Form3
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.ClientSize = New System.Drawing.Size(807, 246)
+        Me.Controls.Add(Me.btnIS)
         Me.Controls.Add(Me.Button9)
         Me.Controls.Add(Me.btnPCO)
         Me.Controls.Add(Me.Button8)
@@ -168,4 +179,5 @@ Partial Class Form3
     Friend WithEvents Button8 As Button
     Friend WithEvents btnPCO As Button
     Friend WithEvents Button9 As Button
+    Friend WithEvents btnIS As Button
 End Class
