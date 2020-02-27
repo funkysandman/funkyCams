@@ -255,7 +255,7 @@ Partial Class frmIS
         Me.tbNightAgain.Name = "tbNightAgain"
         Me.tbNightAgain.Size = New System.Drawing.Size(47, 20)
         Me.tbNightAgain.TabIndex = 90
-        Me.tbNightAgain.Text = "18"
+        Me.tbNightAgain.Text = "32"
         '
         'lblDayNight
         '
@@ -299,7 +299,7 @@ Partial Class frmIS
         Me.tbNightExp.Name = "tbNightExp"
         Me.tbNightExp.Size = New System.Drawing.Size(45, 20)
         Me.tbNightExp.TabIndex = 81
-        Me.tbNightExp.Text = "10000"
+        Me.tbNightExp.Text = "5000"
         '
         'tbDayTimeExp
         '
@@ -538,8 +538,12 @@ Partial Class frmIS
         End If
         Dim img() As Byte
         Dim iBuffer As ImageBuffer
-        iBuffer = IcImagingControl1.ImageActiveBuffer
+        Dim pixelValue As UShort
+        Dim darkBuffer() As UShort
 
+        iBuffer = IcImagingControl1.ImageActiveBuffer
+        iWidth = e.ImageBuffer.Size.Width
+        iHeight = e.ImageBuffer.Size.Height
 
         ReDim img(e.ImageBuffer.ActualDataSize)
         ' IcImagingControl1.VideoFormat = "Y16 (3072x2048)"
@@ -551,25 +555,40 @@ Partial Class frmIS
 
         'IcImagingControl1.LiveSuspend()
         'IcImagingControl1.VideoFormat = "RGB24 (3072x2048)"
+        Dim newPixelValue As UInt16
+        Dim dPixelValue As UInt16
 
         'subtract dark here while in 16bit gray mode
+        If cbUseDarks.Checked Then
+            If dark Is Nothing Then
+                loadMasterDark()
+            End If
+            'go through image buffer
+            For x = 0 To iWidth - 1
+                For y = 0 To iHeight - 1
+                    pixelValue = ReadY16(iBuffer, y, x)
+                    dPixelValue = dark(y * iBuffer.PixelPerLine + x)
+                    newPixelValue = Math.Max(0, CInt(pixelValue) - CInt(dPixelValue))
+                    WriteY16(iBuffer, y, x, newPixelValue)
+                Next
+            Next
 
+        End If
 
         'debayer to rgb24
         Dim mTransformImage As BGAPI2.Image = Nothing
         Dim mImage As BGAPI2.Image = Nothing
         ' Dim buff As BGAPI2.Buffer = New BGAPI2.Buffer()
         Dim imgProcessor As New BGAPI2.ImageProcessor()
-        iWidth = e.ImageBuffer.Size.Width
-        iHeight = e.ImageBuffer.Size.Height
+
 
 
         Dim outImage(iWidth * iHeight * 3) As Byte
-        mImage = imgProcessor.CreateImage(iWidth, iHeight, "BayerRG16", e.ImageBuffer.GetImageDataPtr, iWidth * iHeight * 2)
+        mImage = imgProcessor.CreateImage(iWidth, iHeight, "BayerBG16", e.ImageBuffer.GetImageDataPtr, e.ImageBuffer.ActualDataSize)
 
-        mTransformImage = imgProcessor.CreateTransformedImage(mImage, "BayerRG12")
-        'ULong imageBufferAddress = (ULong)ImageInfo.pImagePtr;
-        mTransformImage = imgProcessor.CreateTransformedImage(mTransformImage, "BGR8")
+        mTransformImage = imgProcessor.CreateTransformedImage(mImage, "BayerBG12")
+
+        mTransformImage = imgProcessor.CreateTransformedImage(mTransformImage, "RGB8")
 
 
 
@@ -577,7 +596,7 @@ Partial Class frmIS
 
 
 
-        Marshal.Copy(e.ImageBuffer.GetImageDataPtr, img, 0, e.ImageBuffer.ActualDataSize)
+        ' Marshal.Copy(e.ImageBuffer.GetImageDataPtr, img, 0, e.ImageBuffer.ActualDataSize)
 
 
 
@@ -635,5 +654,76 @@ Partial Class frmIS
 
     Private Sub IcImagingControl1_Load(sender As Object, e As EventArgs) Handles IcImagingControl1.Load
 
+    End Sub
+
+    Private Sub Button2_Click(sender As Object, e As EventArgs) Handles Button2.Click
+        'make 10 darks and average them
+
+        'setup camera for darks
+        Dim AbsValItf As TIS.Imaging.VCDAbsoluteValueProperty
+
+        Dim buffers() As ImageBuffer
+        ' Retrieve an absolute value interface for exposure
+        AbsValItf = IcImagingControl1.VCDPropertyItems.FindInterface(TIS.Imaging.VCDIDs.VCDID_Exposure + ":" +
+                                                                    TIS.Imaging.VCDIDs.VCDElement_Value + ":" +
+                                                                 TIS.Imaging.VCDIDs.VCDInterface_AbsoluteValue)
+        AbsValItf.Value = tbExposureTime.Text / 1000
+
+        ' Retrieve an absolute value interface for exposure
+        AbsValItf = IcImagingControl1.VCDPropertyItems.FindInterface(TIS.Imaging.VCDIDs.VCDID_Gain + ":" +
+                                                                    TIS.Imaging.VCDIDs.VCDElement_Value + ":" +
+                                                                 TIS.Imaging.VCDIDs.VCDInterface_AbsoluteValue)
+        AbsValItf.Value = tbGain.Text
+
+
+        AbsValItf = IcImagingControl1.VCDPropertyItems.FindInterface(TIS.Imaging.VCDIDs.VCDID_Saturation + ":" +
+                                                                    TIS.Imaging.VCDIDs.VCDElement_Value + ":" +
+                                                                 TIS.Imaging.VCDIDs.VCDInterface_AbsoluteValue)
+        AbsValItf.Value = 125
+        Dim fh As FrameHandlerSink
+
+        fh = IcImagingControl1.Sink
+
+        fh.SnapMode = True
+        Dim numDarks As Integer = 10
+        ReDim buffers(numDarks)
+        Dim b As Integer
+        Dim dBuffer() As UInt16
+        Dim pixelValue As UInt32
+
+        For x = 0 To numDarks - 1
+            'snap image
+            IcImagingControl1.MemorySnapImage()
+            buffers(x) = IcImagingControl1.ImageActiveBuffer
+        Next
+        ReDim dBuffer(IcImagingControl1.ImageActiveBuffer.ActualDataSize)
+        fh.SnapMode = False
+        For x = 0 To buffers(0).Size.Width - 1
+            For y = 0 To buffers(0).Size.Height - 1
+                pixelValue = 0
+                For b = 0 To numDarks - 1
+                    pixelValue = pixelValue + ReadY16(buffers(0), y, x)
+                Next
+                pixelValue = pixelValue / numDarks
+                dBuffer(y * buffers(0).PixelPerLine + x) = pixelValue
+            Next
+        Next
+        Dim filename As String
+
+
+
+        filename = String.Format("masterDark{0}.raw", IcImagingControl1.Device)
+        Dim fStream As New FileStream(filename, FileMode.Create)
+        Dim bWriter As New BinaryWriter(fStream)
+        For i = 0 To dBuffer.Length - 1
+            bWriter.Write(dBuffer(i))
+        Next
+        fStream.Close()
+        bWriter.Close()
+
+    End Sub
+
+    Private Sub tbMultiplier_TextChanged(sender As Object, e As EventArgs) Handles tbMultiplier.TextChanged
+        loadMasterDark()
     End Sub
 End Class
