@@ -472,8 +472,10 @@ Public Class frmIS
                 Me.Close()
             End If
         End If
-        IcImagingControl1.DeviceFrameRate = 0.2
+
         IcImagingControl1.DeviceFrameFilters.Clear()
+        IcImagingControl1.LoadDeviceStateFromFile("device.dat", False)
+        IcImagingControl1.DeviceFrameRate = 0.2
         VCDProp = TIS.Imaging.VCDHelpers.VCDSimpleModule.GetSimplePropertyContainer(IcImagingControl1.VCDPropertyItems)
     End Sub
 
