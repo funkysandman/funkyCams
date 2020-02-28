@@ -114,6 +114,10 @@
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xaml" />
     <Reference Include="System.XML" />
+    <Reference Include="TIS.Imaging.ICImagingControl34, Version=3.4.4.2744, Culture=neutral, PublicKeyToken=257805929e8b7928, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\Common Files\IC Imaging Control 3.4\bin\v4.0.30319\x86\TIS.Imaging.ICImagingControl34.dll</HintPath>
+    </Reference>
     <Reference Include="VimbaNET, Version=1.7.0.24184, Culture=neutral, PublicKeyToken=96b729f24f119b9a, processorArchitecture=x86">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\Program Files\Allied Vision\Vimba_2.1\VimbaNET\Bin\Win64\VimbaNET.dll</HintPath>
@@ -144,6 +148,12 @@
   <ItemGroup>
     <Compile Include=".vb" />
     <Compile Include="device.vb" />
+    <Compile Include="frmIS.designer.vb">
+      <DependentUpon>frmIS.vb</DependentUpon>
+    </Compile>
+    <Compile Include="frmIS.vb">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="frmPCO.designer.vb">
       <DependentUpon>frmPCO.vb</DependentUpon>
     </Compile>
@@ -246,6 +256,9 @@
     <Compile Include="webserver.vb" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="frmIS.resx">
+      <DependentUpon>frmIS.vb</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="frmPCO.resx">
       <DependentUpon>frmPCO.vb</DependentUpon>
     </EmbeddedResource>

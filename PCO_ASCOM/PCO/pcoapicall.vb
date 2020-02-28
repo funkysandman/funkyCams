@@ -144,179 +144,179 @@ Module sc2_cam
     Dim wActSeg As Short '                 // no. (0 .. 3) of active segment
     <MarshalAs(UnmanagedType.ByValArray, SizeConst:=39)> Dim ZZwDummy() As Short '
   End Structure
-	
-	
-	'//-----------------------------------------------------------------//
-	'// Name        | SC2_CamExport.h             | Type: ( ) source    //
-	'//-------------------------------------------|       (*) header    //
-	'// Project     | PCO                         |       ( ) others    //
-	'//-----------------------------------------------------------------//
-	'// Platform    | PC                                                //
-	'//-----------------------------------------------------------------//
-	'// Environment | Visual 'C++'                                      //
-	'//-----------------------------------------------------------------//
-	'// Purpose     | PCO - SC2 Camera DLL Functions                    //
-	'//-----------------------------------------------------------------//
-	'// Author      | FRE, PCO AG                                       //
-	'//-----------------------------------------------------------------//
-	'// Revision    |  rev. 1.06 rel. 1.06                              //
-	'//-----------------------------------------------------------------//
-	'// Notes       | Some functions are illustrated with an example    //
-	'//             | source code. If the function you need doesn't     //
-	'//             | have some source code sample, please take a look  //
-	'//             | on other functions supplied with source code. You //
-	'//             | will find some usefull code there and you will be //
-	'//             | able to adapt the code to the function you need.  //
-	'//             |                                                   //
-	'//             | To get informations about the ranges of the       //
-	'//             | data values please take a look at the SDK docu.   //
-	'//-----------------------------------------------------------------//
-	'// (c) 2002 PCO AG * Donaupark 11 *                                //
-	'// D-93309      Kelheim / Germany * Phone: +49 (0)9441 / 2005-0 *  //
-	'// Fax: +49 (0)9441 / 2005-20 * Email: info@pco.de                 //
-	'//-----------------------------------------------------------------//
-	'
-	'
-	'//-----------------------------------------------------------------//
-	'// Revision History:                                               //
-	'//-----------------------------------------------------------------//
-	'// Rev.:     | Date:      | Changed:                               //
-	'// --------- | ---------- | ---------------------------------------//
-	'//  0.10     | 03.07.2003 |  new file, FRE                         //
-	'//-----------------------------------------------------------------//
-	'//  0.13     | 08.12.2003 |  Added GetSizes, FRE                   //
-	'//-----------------------------------------------------------------//
-	'//  0.14     | 14.01.2004 |  Added GetCOCRuntime,                  //
-	'//           |            |  Added GetBufferStatus, FRE            //
-	'//-----------------------------------------------------------------//
-	'//  0.15     | 06.02.2004 |  Added SetImagestruct                  //
-	'//           |            |  Added SetStoragestruct                //
-	'//           | 18.02.2004 |  Added Self calibration and correction //
-	'//-----------------------------------------------------------------//
-	'//  0.16     | 23.03.2004 |  Removed single entries for dwDelay    //
-	'//           |            |  and dwExposure, now they are part of  //
-	'//           |            |  the delay/exposure table, FRE         //
-	'//-----------------------------------------------------------------//
-	'//  1.0      | 04.05.2004 |  Released to market                    //
-	'//           |            |                                        //
-	'//-----------------------------------------------------------------//
-	'//  1.01     | 04.05.2004 |  Added FPSExposureMode, FRE            //
-	'//           |            |  Set-Get-1394Transferparameter         //
-	'//-----------------------------------------------------------------//
-	'//  1.02     | 29.07.2004 |  Changed to explicit linking           //
-	'//           |            |  Added CamLink interface capability    //
-	'//           | 23.07.2004 |  Added OpenCameraEx                    //
-	'//           | 06.10.2004 |  Added SetTimeouts                     //
-	'//           | 10.11.2004 |  Added GetBuffer                       //
-	'//-----------------------------------------------------------------//
-	'//  1.03     | 22.02.2005 |  Added AddBufferEx and GetImageEx, FRE //
-	'//           |            |  Allocate sizes adapted due to possible//
-	'//           |            |  crash in case of changing the transfer//
-	'//           |            |  parameters.                           //
-	'//-----------------------------------------------------------------//
-	'//  1.04     | 19.04.2005 |  Added PCO_Get(Set)NoiseFilterMode, FRE//
-	'//           |            |  Added try catch blocks where pointer  //
-	'//           |            |  are passed in. Changed the init. where//
-	'//           |            |  an error occured while retrieving data//
-	'//           |            |  Bugfix: GetImage(Ex) is able to trans.//
-	'//           |            |  more than one image, now...           //
-	'//           | 20.07.2005 |  Added record stop event stuff, FRE    //
-	'//-----------------------------------------------------------------//
-	'//  1.05     | 27.02.2006 |  Added PCO_GetCameraName, FRE          //
-	'//           |            |  Added PCO_xxxHotPixelxxx, FRE         //
-	'//-----------------------------------------------------------------//
-	'//  1.06     | 02.06.2006 |  Added PCO_GetCameraDescriptionEx, FRE //
-	'//           |            |  Added PCO_xxxModulationMode, FRE      //
-	'//           |            |  Added PCO_GetInfoString, FRE          //
-	'//-----------------------------------------------------------------//
-	'
-	'#ifdef SC2_CAM_EXPORTS
-	'#define SC2_SDK_FUNC __declspec(dllexport)
-	'#Else
-	'#define SC2_SDK_FUNC __declspec(dllimport)
-	'#End If
-	'
-	'#ifdef __cplusplus
-	'extern "C" {            //  Assume C declarations for C++
-	'#endif  //C++
-	'
-	'// VERY IMPORTANT INFORMATION:
-	'/*******************************************************************/
-	'/* PLEASE: Do not forget to fill in all wSize Parameters while     */
-	'/* using the structure funtions. Some structures even have embedded*/
-	'/* wSize parameters.                                               */
-	'/*******************************************************************/
-	'/* All indexes, but segment and image parameters are zero based.   */
-	'/* If you access the camera with segment and image parameters the  */
-	'/* base is 1! E.g.
-	'  PCO_Image strImage;
-	'  int err;
-	'  strImage.wSize = sizeof(PCO_Image);
-	'  err = PCO_GetImageStruct(ph, &strImage);
-	'
-	'  // Info about segment 1:
-	'  dwValidImageCnt = strImage.strSegment[0].dwValidImageCnt;
-	'
-	'  // Info about segment 2:
-	'  dwValidImageCnt = strImage.strSegment[1].dwValidImageCnt;
-	'
-	'  // Info about segment 3:
-	'  dwValidImageCnt = strImage.strSegment[2].dwValidImageCnt;
-	'
-	'  // Info about segment 4:
-	'  dwValidImageCnt = strImage.strSegment[3].dwValidImageCnt;
-	'
-	'but:----Access-To-Segment-1-is----
-	'                                ||
-	'                                \/
-	'  err = PCO_GetSegmentStruct(ph, 1, &strImage.strSegment[0].wSize);
-	'
-	'and:
-	'  DWORD dw1stImage = 1; // 1 based !!!!! This accesses the first image.
-	'  DWORD dwLastImage = 2;
-	'
-	'again:-Access-To-Segment-1--
-	'                          ||
-	'                          \/
-	'  err = PCO_GetImageEx(ph, 1, dw1stImage, dwLastImage, sBufNr,
-	'                       wXRes, wYRes, wBitPerPixel);
-	'
-	'/*******************************************************************/
-	'
-	'/////////////////////////////////////////////////////////////////////
-	'/////// General commands ////////////////////////////////////////////
-	'/////////////////////////////////////////////////////////////////////
-	'SC2_SDK_FUNC int WINAPI PCO_GetGeneral(HANDLE ph, PCO_General *strGeneral);
-	' Public Declare Function PCO_GetGeneral Lib "sc2_cam.dll" (ByVal hdriver As Long, strGeneral As String) As Long
-	
-	'// Gets all data of the general settings in one structure.
-	'// In: HANDLE ph -> Handle to a previously opened camera.
-	'//     PCO_General *strGeneral -> Pointer to a PCO_General structure.
-	'// Out: int -> Error message.
-	'/* Example:
-	'  HANDLE hCamera;
-	'  ...
-	'  PCO_General strGeneral;
-	'  strGeneral.wSize = sizeof(PCO_General);
-	'  int err = PCO_GetGeneral(hCamera, &strGeneral);
-	'  ...
-	'*/
-	'
-	'SC2_SDK_FUNC int WINAPI PCO_GetCameraType(HANDLE ph, PCO_CameraType *strCamType);
-	'// Gets the camera type in one structure.
-	'// In: HANDLE ph -> Handle to a previously opened camera.
-	'//     PCO_CameraType *strCamType -> Pointer to a PCO_CameraType structure.
-	'// Out: int -> Error message.
-	'/* Example:
-	'  HANDLE hCamera;
-	'  ...
-	'  PCO_CameraType strCamType;
-	'  int err = PCO_GetCameraType(hCamera, &strCamType);
-	'  ...
-	'*/
-	'
-	'SC2_SDK_FUNC int WINAPI PCO_GetCameraHealthStatus(HANDLE ph, DWORD* dwWarn, DWORD* dwErr, DWORD* dwStatus);
-  Public Declare Function PCO_GetCameraHealthStatus Lib "sc2_cam.dll" (ByVal hdriver As IntPtr, ByRef lWarning As Integer, ByRef lError As Integer, ByRef lStatus As Integer) As Integer
+
+
+    '//-----------------------------------------------------------------//
+    '// Name        | SC2_CamExport.h             | Type: ( ) source    //
+    '//-------------------------------------------|       (*) header    //
+    '// Project     | PCO                         |       ( ) others    //
+    '//-----------------------------------------------------------------//
+    '// Platform    | PC                                                //
+    '//-----------------------------------------------------------------//
+    '// Environment | Visual 'C++'                                      //
+    '//-----------------------------------------------------------------//
+    '// Purpose     | PCO - SC2 Camera DLL Functions                    //
+    '//-----------------------------------------------------------------//
+    '// Author      | FRE, PCO AG                                       //
+    '//-----------------------------------------------------------------//
+    '// Revision    |  rev. 1.06 rel. 1.06                              //
+    '//-----------------------------------------------------------------//
+    '// Notes       | Some functions are illustrated with an example    //
+    '//             | source code. If the function you need doesn't     //
+    '//             | have some source code sample, please take a look  //
+    '//             | on other functions supplied with source code. You //
+    '//             | will find some usefull code there and you will be //
+    '//             | able to adapt the code to the function you need.  //
+    '//             |                                                   //
+    '//             | To get informations about the ranges of the       //
+    '//             | data values please take a look at the SDK docu.   //
+    '//-----------------------------------------------------------------//
+    '// (c) 2002 PCO AG * Donaupark 11 *                                //
+    '// D-93309      Kelheim / Germany * Phone: +49 (0)9441 / 2005-0 *  //
+    '// Fax: +49 (0)9441 / 2005-20 * Email: info@pco.de                 //
+    '//-----------------------------------------------------------------//
+    '
+    '
+    '//-----------------------------------------------------------------//
+    '// Revision History:                                               //
+    '//-----------------------------------------------------------------//
+    '// Rev.:     | Date:      | Changed:                               //
+    '// --------- | ---------- | ---------------------------------------//
+    '//  0.10     | 03.07.2003 |  new file, FRE                         //
+    '//-----------------------------------------------------------------//
+    '//  0.13     | 08.12.2003 |  Added GetSizes, FRE                   //
+    '//-----------------------------------------------------------------//
+    '//  0.14     | 14.01.2004 |  Added GetCOCRuntime,                  //
+    '//           |            |  Added GetBufferStatus, FRE            //
+    '//-----------------------------------------------------------------//
+    '//  0.15     | 06.02.2004 |  Added SetImagestruct                  //
+    '//           |            |  Added SetStoragestruct                //
+    '//           | 18.02.2004 |  Added Self calibration and correction //
+    '//-----------------------------------------------------------------//
+    '//  0.16     | 23.03.2004 |  Removed single entries for dwDelay    //
+    '//           |            |  and dwExposure, now they are part of  //
+    '//           |            |  the delay/exposure table, FRE         //
+    '//-----------------------------------------------------------------//
+    '//  1.0      | 04.05.2004 |  Released to market                    //
+    '//           |            |                                        //
+    '//-----------------------------------------------------------------//
+    '//  1.01     | 04.05.2004 |  Added FPSExposureMode, FRE            //
+    '//           |            |  Set-Get-1394Transferparameter         //
+    '//-----------------------------------------------------------------//
+    '//  1.02     | 29.07.2004 |  Changed to explicit linking           //
+    '//           |            |  Added CamLink interface capability    //
+    '//           | 23.07.2004 |  Added OpenCameraEx                    //
+    '//           | 06.10.2004 |  Added SetTimeouts                     //
+    '//           | 10.11.2004 |  Added GetBuffer                       //
+    '//-----------------------------------------------------------------//
+    '//  1.03     | 22.02.2005 |  Added AddBufferEx and GetImageEx, FRE //
+    '//           |            |  Allocate sizes adapted due to possible//
+    '//           |            |  crash in case of changing the transfer//
+    '//           |            |  parameters.                           //
+    '//-----------------------------------------------------------------//
+    '//  1.04     | 19.04.2005 |  Added PCO_Get(Set)NoiseFilterMode, FRE//
+    '//           |            |  Added try catch blocks where pointer  //
+    '//           |            |  are passed in. Changed the init. where//
+    '//           |            |  an error occured while retrieving data//
+    '//           |            |  Bugfix: GetImage(Ex) is able to trans.//
+    '//           |            |  more than one image, now...           //
+    '//           | 20.07.2005 |  Added record stop event stuff, FRE    //
+    '//-----------------------------------------------------------------//
+    '//  1.05     | 27.02.2006 |  Added PCO_GetCameraName, FRE          //
+    '//           |            |  Added PCO_xxxHotPixelxxx, FRE         //
+    '//-----------------------------------------------------------------//
+    '//  1.06     | 02.06.2006 |  Added PCO_GetCameraDescriptionEx, FRE //
+    '//           |            |  Added PCO_xxxModulationMode, FRE      //
+    '//           |            |  Added PCO_GetInfoString, FRE          //
+    '//-----------------------------------------------------------------//
+    '
+    '#ifdef SC2_CAM_EXPORTS
+    '#define SC2_SDK_FUNC __declspec(dllexport)
+    '#Else
+    '#define SC2_SDK_FUNC __declspec(dllimport)
+    '#End If
+    '
+    '#ifdef __cplusplus
+    'extern "C" {            //  Assume C declarations for C++
+    '#endif  //C++
+    '
+    '// VERY IMPORTANT INFORMATION:
+    '/*******************************************************************/
+    '/* PLEASE: Do not forget to fill in all wSize Parameters while     */
+    '/* using the structure funtions. Some structures even have embedded*/
+    '/* wSize parameters.                                               */
+    '/*******************************************************************/
+    '/* All indexes, but segment and image parameters are zero based.   */
+    '/* If you access the camera with segment and image parameters the  */
+    '/* base is 1! E.g.
+    '  PCO_Image strImage;
+    '  int err;
+    '  strImage.wSize = sizeof(PCO_Image);
+    '  err = PCO_GetImageStruct(ph, &strImage);
+    '
+    '  // Info about segment 1:
+    '  dwValidImageCnt = strImage.strSegment[0].dwValidImageCnt;
+    '
+    '  // Info about segment 2:
+    '  dwValidImageCnt = strImage.strSegment[1].dwValidImageCnt;
+    '
+    '  // Info about segment 3:
+    '  dwValidImageCnt = strImage.strSegment[2].dwValidImageCnt;
+    '
+    '  // Info about segment 4:
+    '  dwValidImageCnt = strImage.strSegment[3].dwValidImageCnt;
+    '
+    'but:----Access-To-Segment-1-is----
+    '                                ||
+    '                                \/
+    '  err = PCO_GetSegmentStruct(ph, 1, &strImage.strSegment[0].wSize);
+    '
+    'and:
+    '  DWORD dw1stImage = 1; // 1 based !!!!! This accesses the first image.
+    '  DWORD dwLastImage = 2;
+    '
+    'again:-Access-To-Segment-1--
+    '                          ||
+    '                          \/
+    '  err = PCO_GetImageEx(ph, 1, dw1stImage, dwLastImage, sBufNr,
+    '                       wXRes, wYRes, wBitPerPixel);
+    '
+    '/*******************************************************************/
+    '
+    '/////////////////////////////////////////////////////////////////////
+    '/////// General commands ////////////////////////////////////////////
+    '/////////////////////////////////////////////////////////////////////
+    'SC2_SDK_FUNC int WINAPI PCO_GetGeneral(HANDLE ph, PCO_General *strGeneral);
+    Public Declare Function PCO_GetGeneral Lib "sc2_cam.dll" (ByVal hdriver As Long, strGeneral As String) As Long
+
+    '// Gets all data of the general settings in one structure.
+    '// In: HANDLE ph -> Handle to a previously opened camera.
+    '//     PCO_General *strGeneral -> Pointer to a PCO_General structure.
+    '// Out: int -> Error message.
+    '/* Example:
+    '  HANDLE hCamera;
+    '  ...
+    '  PCO_General strGeneral;
+    '  strGeneral.wSize = sizeof(PCO_General);
+    '  int err = PCO_GetGeneral(hCamera, &strGeneral);
+    '  ...
+    '*/
+    '
+    'SC2_SDK_FUNC int WINAPI PCO_GetCameraType(HANDLE ph, PCO_CameraType *strCamType);
+    '// Gets the camera type in one structure.
+    '// In: HANDLE ph -> Handle to a previously opened camera.
+    '//     PCO_CameraType *strCamType -> Pointer to a PCO_CameraType structure.
+    '// Out: int -> Error message.
+    '/* Example:
+    '  HANDLE hCamera;
+    '  ...
+    '  PCO_CameraType strCamType;
+    '  int err = PCO_GetCameraType(hCamera, &strCamType);
+    '  ...
+    '*/
+    '
+    'SC2_SDK_FUNC int WINAPI PCO_GetCameraHealthStatus(HANDLE ph, DWORD* dwWarn, DWORD* dwErr, DWORD* dwStatus);
+    Public Declare Function PCO_GetCameraHealthStatus Lib "sc2_cam.dll" (ByVal hdriver As IntPtr, ByRef lWarning As Integer, ByRef lError As Integer, ByRef lStatus As Integer) As Integer
 	
 	'// Gets the last warnings, errors and status of the camera.
 	'// In: HANDLE ph -> Handle to a previously opened camera.

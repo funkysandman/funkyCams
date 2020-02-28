@@ -130,16 +130,17 @@ namespace ASCOM.Photometrics
             myCam.SetClockingMode("Alternate Normal");
             myCam.SetClearMode("Pre-Exposure");
             myCam.SetClearCycles(4);
-           // myCam.SetEMGain(4);// - doesn't seem to do much
-            myCam.SetReadoutSpeed(0); //20Mhz -
+            // myCam.SetEMGain(4);// - doesn't seem to do much
+            myCam.SetReadoutSpeed(2); //1.25Mhz biggest dynamic range
             myCam.SetTriggerMode("Timed");
             myCam.SetBinning("1");
-            myCam.SetGainState(0);//gain state 1
+            myCam.SetGainState(2);//gain state 3 - highest gain
             myCam.FramesToGet = 1;
             myCam.SetExposureTime(1);
             myCam.SetADCoffset(40); //this value was found to best for zeroing the bias frame
 
-            //   myCam.StartSeqAcq();
+            readoutModes.Add("Live");
+            readoutModes.Add("Normal");
 
             //
             tl.LogMessage("Camera", "Completed initialisation,yo");
@@ -179,7 +180,7 @@ namespace ASCOM.Photometrics
 
                 //copy image frame
                 //check if roi in use
-                
+
                 int tempW = (myCam.Region[0].s2 - myCam.Region[0].s1 + 1) / myCam.Region[0].sbin;
 
                 int tempH = (myCam.Region[0].p2 - myCam.Region[0].p1 + 1) / myCam.Region[0].pbin;
@@ -189,11 +190,11 @@ namespace ASCOM.Photometrics
                 {
                     for (int x = 0; x < tempW; x++)
                     {
-                        if (n<myCam.FrameDataShorts.Length)
-                        { 
-                        cameraImageArray[x, y] = (UInt16)myCam.FrameDataShorts[n];
+                        if (n < myCam.FrameDataShorts.Length)
+                        {
+                            cameraImageArray[x, y] = (UInt16)myCam.FrameDataShorts[n];
                         }
-                       else
+                        else
                         {
                             //data interupted
                             x = tempW;
@@ -413,7 +414,8 @@ namespace ASCOM.Photometrics
         private bool cameraImageReady = false;
         private int[,] cameraImageArray;
         private object[,] cameraImageArrayVariant;
-
+        private bool fastreadout = false;
+        private ArrayList readoutModes = new ArrayList(2);
 
         public void AbortExposure()
         {
@@ -451,9 +453,18 @@ namespace ASCOM.Photometrics
             set
             {
                 tl.LogMessage("BinX Set", value.ToString());
-               // if (value != 1) throw new ASCOM.InvalidValueException("BinX", value.ToString(), "1"); // Only 1 is valid in this simple template
+                // if (value != 1) throw new ASCOM.InvalidValueException("BinX", value.ToString(), "1"); // Only 1 is valid in this simple template
                 myCam.Binning = value;
                 myCam.SetBinning(Convert.ToString(value));
+                if (value == 4)
+                {
+                    fastreadout = true; //always do fast readout for 4x4 so live view is quiker
+                }
+                   
+                else
+                {
+                    fastreadout = false;
+                }
             }
         }
 
@@ -537,7 +548,7 @@ namespace ASCOM.Photometrics
             get
             {
                 tl.LogMessage("CanFastReadout Get", false.ToString());
-                return false;
+                return true;
             }
         }
 
@@ -646,12 +657,12 @@ namespace ASCOM.Photometrics
             {
                 tl.LogMessage("FastReadout Get", "Not implemented");
                 Debug.WriteLine("FastReadout", false);
-                return false;
+                return fastreadout;
             }
             set
             {
                 tl.LogMessage("FastReadout Set", "Not implemented");
-                Debug.WriteLine("FastReadout", true);
+                fastreadout = value;
             }
         }
 
@@ -671,13 +682,13 @@ namespace ASCOM.Photometrics
             {
                 tl.LogMessage("Gain Get", "Not implemented");
                 Debug.WriteLine("Gain", false);
-                return 0;
+                return myCam.GainStateIndex;
             }
             set
             {
                 tl.LogMessage("Gain Set", "Not implemented");
                 Debug.WriteLine("Gain", true);
-               
+
             }
         }
 
@@ -687,7 +698,7 @@ namespace ASCOM.Photometrics
             {
                 tl.LogMessage("GainMax Get", "Not implemented");
                 Debug.WriteLine("GainMax", false);
-                return 0;
+                return 2;
             }
         }
 
@@ -928,7 +939,7 @@ namespace ASCOM.Photometrics
             {
                 tl.LogMessage("ReadoutModes Get", "Not implemented");
                 Debug.WriteLine("ReadoutModes", false);
-                return null;
+                return readoutModes;
             }
         }
 
@@ -972,6 +983,16 @@ namespace ASCOM.Photometrics
         {
             cameraImageReady = false;
             Debug.WriteLine("startExposure");
+            if (fastreadout)
+            {
+                if (myCam.SpeedTableIndex != 0)
+                    myCam.SetReadoutSpeed(0);//20mhz
+            }
+            else
+            {
+                if (myCam.SpeedTableIndex != 2)
+                    myCam.SetReadoutSpeed(2);//1.25mhz
+            }
             myCam.SetExposureTime(Convert.ToUInt32(Duration * 1000));
             if (Duration < 0.0) throw new InvalidValueException("StartExposure", Duration.ToString(), "0.0 upwards");
             if (cameraNumX > ccdWidth) throw new InvalidValueException("StartExposure", cameraNumX.ToString(), ccdWidth.ToString());
@@ -987,17 +1008,7 @@ namespace ASCOM.Photometrics
                 return;
             }
             //setup binning
-            
 
-            //Get estimated read out time and update the label
-            if (myCam.ReadoutTime != 0)
-            {
-                //lblReadOutTime.Text = String.Format("{0} us", myCam.ReadoutTime);
-            }
-            else //if 0 means it is not supported
-            {
-                //lblReadOutTime.Text = String.Format("Not Supported");
-            }
 
             //SetupFrameViewer(FrameViewer);
 

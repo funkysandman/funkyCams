@@ -1140,11 +1140,13 @@ Public Class frmPixelink
             Dim isize As Integer
             Dim iPtr As IntPtr
             iPtr = bmpData.Scan0
-            isize = iWidth * iHeight * 2
-            Dim bayer16(isize) As Byte
+            isize = iWidth * iHeight
+            Dim bayer16(isize * 2) As Byte
+            Dim bayer8(iWidth * iHeight) As Byte
+            Marshal.Copy(pBuf, bayer16, 0, isize * 2)
 
             Dim newsize As Integer
-            Marshal.Copy(pBuf, bayer16, 0, isize - 1)
+
             Dim j As Integer
             ReDim b(iWidth * iHeight)
             Dim b16(iWidth * iHeight * 2) As Byte

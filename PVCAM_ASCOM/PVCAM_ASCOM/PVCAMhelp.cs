@@ -457,7 +457,7 @@ namespace pvcam_helper
         Int16 m_imageSizeX;       //Final Image size depends on multiROI/Centoiding etc., Used for display window and 
         Int16 m_imageSizeY;       //recomposing frame
 
-
+        Boolean m_fastReadout;
 
         IntPtr m_latestFrameAddress;
         Int16 m_hCam;
@@ -3132,12 +3132,14 @@ namespace pvcam_helper
             }
 
             ReportMsg(this, new ReportMessage(String.Format("Readout set to {0}", m_spdTable.ReadoutOption[spdTblIndex].PortDesc), MsgTypes.MSG_STATUS));
-            CamNotif(this, new ReportEvent(CameraNotifications.READOUT_SPEED_CHANGED));
+           // CamNotif(this, new ReportEvent(CameraNotifications.READOUT_SPEED_CHANGED));
             Marshal.FreeHGlobal(unmngValue);
             unmngValue = IntPtr.Zero;
 
             return true;
         }
+
+
 
         //set camera gain state (analog gain), write directly to the camera
         public bool SetGainState(Int16 gainState)
@@ -3156,6 +3158,33 @@ namespace pvcam_helper
             Marshal.FreeHGlobal(unmngGainState);
             return true;
         }
+
+
+        //set camera gain state (analog gain), write directly to the camera
+        public Boolean GetCurrentGainState()
+        {
+
+            Boolean retValue = false;
+            IntPtr unmngCurGain;
+            unmngCurGain = Marshal.AllocHGlobal(sizeof(Int16));
+
+            if (!PVCAM.pl_get_param(m_hCam, PvTypes.PARAM_GAIN_INDEX, (Int16)PvTypes.AttributeIDs.ATTR_CURRENT, unmngCurGain))
+            {
+                ReportMsg(this, new ReportMessage("Getting current gain state failed", MsgTypes.MSG_ERROR));
+                retValue = false;
+            }
+            else
+            {
+                m_GainStateIndex = Marshal.ReadInt16(unmngCurGain);
+                retValue = true;
+            }
+
+            Marshal.FreeHGlobal(unmngCurGain);
+            unmngCurGain = IntPtr.Zero;
+
+            return retValue;
+        }
+
 
         //set EM (Multiplication) gain, write directly to the camera
         public bool SetEMGain(UInt16 emGain)
