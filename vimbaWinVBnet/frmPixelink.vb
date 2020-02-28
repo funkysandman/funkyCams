@@ -792,9 +792,9 @@ Public Class frmPixelink
 
         rc = Api.Initialize(0, h_camera)
         If Not Api.IsSuccess(rc) Then
-                MessageBox.Show("ERROR: Unable to initialize a camera (Error " + rc.ToString() + ")")
-                Return
-            End If
+            MessageBox.Show("ERROR: Unable to initialize a camera (Error " + rc.ToString() + ")")
+            Return
+        End If
 
         helper = New SnapshotHelper(h_camera)
 
