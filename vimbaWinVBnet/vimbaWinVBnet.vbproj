@@ -316,6 +316,9 @@
     <AdditionalFiles Include="BaumerSDKlibs\bgapi2_usb.cti">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </AdditionalFiles>
+    <None Include="device.dat">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="masterDarkSVS4021CSGE_12.raw">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -415,6 +418,9 @@
     </Content>
     <Content Include="libpng16.dll" />
     <Content Include="masterDark.png" />
+    <Content Include="masterDarkDBK 33UX178.raw">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="masterDarkEXO174CBGEC.raw">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
