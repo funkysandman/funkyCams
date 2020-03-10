@@ -132,7 +132,7 @@
   <data name="IcImagingControl1.DeviceState" xml:space="preserve">
     <value>&lt;device_state libver="3.4" filemajor="1" fileminor="0"&gt;
     &lt;device name="DBK 33UX178" base_name="DBK 33UX178" unique_name="DBK 33UX178 48710122"&gt;
-        &lt;videoformat&gt;Y16 (3072x2048)&lt;/videoformat&gt;
+        &lt;videoformat&gt;RGB32 (1280x960)&lt;/videoformat&gt;
         &lt;fps&gt;2.&lt;/fps&gt;
         &lt;fliph&gt;0&lt;/fliph&gt;
         &lt;vcdpropertyitems&gt;
@@ -149,12 +149,12 @@
             &lt;/item&gt;
             &lt;item guid="{284C0E09-010B-45BF-8291-09D90A459B28}" name="Saturation"&gt;
                 &lt;element guid="{B57D3000-0AC6-4819-A609-272A33140ACA}" name="Value"&gt;
-                    &lt;itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E08}" value="128.125" /&gt;
+                    &lt;itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E08}" value="125." /&gt;
                 &lt;/element&gt;
             &lt;/item&gt;
             &lt;item guid="{284C0E0A-010B-45BF-8291-09D90A459B28}" name="Sharpness"&gt;
                 &lt;element guid="{B57D3000-0AC6-4819-A609-272A33140ACA}" name="Value"&gt;
-                    &lt;itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E03}" value="9" /&gt;
+                    &lt;itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E03}" value="0" /&gt;
                 &lt;/element&gt;
             &lt;/item&gt;
             &lt;item guid="{284C0E0B-010B-45BF-8291-09D90A459B28}" name="Gamma"&gt;
@@ -184,7 +184,7 @@
                     &lt;itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E04}" value="0" /&gt;
                 &lt;/element&gt;
                 &lt;element guid="{B57D3000-0AC6-4819-A609-272A33140ACA}" name="Value"&gt;
-                    &lt;itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E08}" value="0." /&gt;
+                    &lt;itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E08}" value="1." /&gt;
                 &lt;/element&gt;
             &lt;/item&gt;
             &lt;item guid="{90D5702E-E43B-4366-AAEB-7A7A10B448B4}" name="Exposure"&gt;
@@ -192,7 +192,7 @@
                     &lt;itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E04}" value="0" /&gt;
                 &lt;/element&gt;
                 &lt;element guid="{B57D3000-0AC6-4819-A609-272A33140ACA}" name="Value"&gt;
-                    &lt;itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E08}" value="5.418799817562103271484375e-02" /&gt;
+                    &lt;itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E08}" value="1.25000005937181413173675537109e-04" /&gt;
                 &lt;/element&gt;
                 &lt;element guid="{65190390-1AD8-4E91-9021-66D64090CC85}" name="Auto"&gt;
                     &lt;itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E04}" value="1" /&gt;
@@ -208,7 +208,7 @@
             &lt;/item&gt;
             &lt;item guid="{C3C9944A-E6F6-4E25-A0BE-53C066AB65D8}" name="Denoise"&gt;
                 &lt;element guid="{B57D3000-0AC6-4819-A609-272A33140ACA}" name="Value"&gt;
-                    &lt;itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E03}" value="8" /&gt;
+                    &lt;itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E03}" value="0" /&gt;
                 &lt;/element&gt;
             &lt;/item&gt;
             &lt;item guid="{E33B9C58-0BF8-442D-8035-B4ABD7AF44AA}" name="Flip Horizontal"&gt;
@@ -228,7 +228,7 @@
             &lt;/item&gt;
             &lt;item guid="{A3E64DA6-736A-489B-8425-04BD2B4AC57A}" name="IMX178 LLP Gain"&gt;
                 &lt;element guid="{B57D3000-0AC6-4819-A609-272A33140ACA}" name="Enabled"&gt;
-                    &lt;itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E04}" value="0" /&gt;
+                    &lt;itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E04}" value="1" /&gt;
                 &lt;/element&gt;
             &lt;/item&gt;
             &lt;item guid="{546541AD-C815-4D82-AFA9-9D59AF9F399E}" name="Highlight Reduction"&gt;

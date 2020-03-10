@@ -476,6 +476,11 @@ Public Class frmIS
         IcImagingControl1.DeviceFrameFilters.Clear()
         IcImagingControl1.LoadDeviceStateFromFile("device.dat", False)
         IcImagingControl1.DeviceFrameRate = 0.2
+        Dim fh As FrameHandlerSink
+
+        fh = IcImagingControl1.Sink
+
+        fh.SnapMode = False
         VCDProp = TIS.Imaging.VCDHelpers.VCDSimpleModule.GetSimplePropertyContainer(IcImagingControl1.VCDPropertyItems)
     End Sub
 
@@ -656,7 +661,7 @@ Public Class frmIS
 
     Private Sub Button7_Click(sender As Object, e As EventArgs) Handles Button7.Click
         'use settings
-
+        'IcImagingControl1.ImageRingBufferSize = 1
         m_camRunning = True
 
 
@@ -668,9 +673,13 @@ Public Class frmIS
         AbsValItf = IcImagingControl1.VCDPropertyItems.FindInterface(TIS.Imaging.VCDIDs.VCDID_Exposure + ":" +
                                                                     TIS.Imaging.VCDIDs.VCDElement_Value + ":" +
                                                                  TIS.Imaging.VCDIDs.VCDInterface_AbsoluteValue)
-        AbsValItf.Value = tbExposureTime.Text / 1000
 
-        ' Retrieve an absolute value interface for exposure
+        AbsValItf.Value = String.Format("{0,16:0.000000e+00}", tbExposureTime.Text / 1000)
+        ' AbsValItf.Value = "3.33000003593042492866516113281e-04"
+
+
+
+        ' Retrieve an absolute value interface for gain
         AbsValItf = IcImagingControl1.VCDPropertyItems.FindInterface(TIS.Imaging.VCDIDs.VCDID_Gain + ":" +
                                                                     TIS.Imaging.VCDIDs.VCDElement_Value + ":" +
                                                                  TIS.Imaging.VCDIDs.VCDInterface_AbsoluteValue)
@@ -681,11 +690,24 @@ Public Class frmIS
                                                                     TIS.Imaging.VCDIDs.VCDElement_Value + ":" +
                                                                  TIS.Imaging.VCDIDs.VCDInterface_AbsoluteValue)
         AbsValItf.Value = 125
+        IcImagingControl1.DeviceFrameRate = 1
+        IcImagingControl1.ImageRingBufferSize = 1
 
+        IcImagingControl1.Update()
+        'Dim fh As FrameHandlerSink
+
+        'fh = IcImagingControl1.Sink
+
+        'fh.SnapMode = True
+        'If Me.tbExposureTime.Text < 3000 Then
+
+        ' IcImagingControl1.MemorySnapImage()
+        'Else
         IcImagingControl1.LiveStart()
 
+        'End If
 
-
+        ' IcImagingControl1.
 
         Button7.Enabled = False
         Button8.Enabled = True
@@ -693,7 +715,8 @@ Public Class frmIS
         startTime = Now
         meteorCheckRunning = True
         Timer2.Enabled = True
-
+        t = New Thread(AddressOf processDetection)
+        t.Start()
     End Sub
 
     Private Sub IcImagingControl1_SizeChanged(sender As Object, e As EventArgs) Handles IcImagingControl1.SizeChanged
