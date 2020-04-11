@@ -49,7 +49,7 @@ Public Class frmIS
     Private t_imaging As Thread
     Private h_camera As Integer
 
-    Private helper As SnapshotHelper
+
     Private night As Boolean = False
     ' Private md As New ObjectDetection.TFDetector()
     Private myImageCodecInfo As ImageCodecInfo
