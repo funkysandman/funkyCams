@@ -150,12 +150,6 @@
     <Compile Include="frmPCO.vb">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="frmPixelink.designer.vb">
-      <DependentUpon>frmPixelink.vb</DependentUpon>
-    </Compile>
-    <Compile Include="frmPixelink.vb">
-      <SubType>Form</SubType>
-    </Compile>
     <Compile Include="frmPointGrey.Designer.vb">
       <DependentUpon>frmPointGrey.vb</DependentUpon>
     </Compile>
@@ -241,16 +235,12 @@
     <Compile Include="PCO\pcoapicall.vb" />
     <Compile Include="program.vb" />
     <Compile Include="queueEntry.vb" />
-    <Compile Include="SnapshotHelper.vb" />
     <Compile Include="Toupcam.vb" />
     <Compile Include="webserver.vb" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="frmPCO.resx">
       <DependentUpon>frmPCO.vb</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="frmPixelink.resx">
-      <DependentUpon>frmPixelink.vb</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="frmPointGrey.resx">
       <DependentUpon>frmPointGrey.vb</DependentUpon>

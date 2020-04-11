@@ -24,9 +24,9 @@ namespace pushImagesToDB
 
             DateTime from_date = DateTime.Now.AddHours(-189999);
             DateTime to_date = DateTime.Now;
-            var directory = new DirectoryInfo("c:\\found");
-            bool pushToCloud = true;
-            bool createYOLO = true;
+            var directory = new DirectoryInfo("e:\\meteor_corpus");
+            bool pushToCloud = false;
+            bool createYOLO = false;
             byte[] buffer;
 
             var files = directory.GetFiles("*.jpg"); //.Where(file => file.LastWriteTime >= from_date && file.LastWriteTime <= to_date);
@@ -98,6 +98,10 @@ namespace pushImagesToDB
                                         }
                                         //newBBox.boundingBoxId = bbId;
                                         newObject.bbox = newBBox;
+                                        if (newBBox.xmax>si.width | newBBox.ymax>si.height | newBBox.xmin > si.width | newBBox.ymin > si.height)
+                                        {
+                                            Console.WriteLine(afile.FullName);
+                                        }
                                         break;
                                     default:
                                         break;
@@ -108,7 +112,7 @@ namespace pushImagesToDB
 
 
                             }
-                            si.detectedObjects.Add(newObject);
+                           // si.detectedObjects.Add(newObject);
 
 
                         }
