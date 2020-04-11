@@ -343,7 +343,7 @@ Partial Class frmSVSVistek
         'tbMultiplier
         '
         Me.tbMultiplier.Location = New System.Drawing.Point(160, 372)
-        Me.tbMultiplier.Margin = New System.Windows.Forms.Padding(2, 2, 2, 2)
+        Me.tbMultiplier.Margin = New System.Windows.Forms.Padding(2)
         Me.tbMultiplier.Name = "tbMultiplier"
         Me.tbMultiplier.Size = New System.Drawing.Size(35, 20)
         Me.tbMultiplier.TabIndex = 40
@@ -360,7 +360,7 @@ Partial Class frmSVSVistek
         'Button10
         '
         Me.Button10.Location = New System.Drawing.Point(312, 423)
-        Me.Button10.Margin = New System.Windows.Forms.Padding(2, 2, 2, 2)
+        Me.Button10.Margin = New System.Windows.Forms.Padding(2)
         Me.Button10.Name = "Button10"
         Me.Button10.Size = New System.Drawing.Size(36, 18)
         Me.Button10.TabIndex = 44
@@ -380,7 +380,7 @@ Partial Class frmSVSVistek
         'tbPath
         '
         Me.tbPath.Location = New System.Drawing.Point(48, 423)
-        Me.tbPath.Margin = New System.Windows.Forms.Padding(2, 2, 2, 2)
+        Me.tbPath.Margin = New System.Windows.Forms.Padding(2)
         Me.tbPath.Name = "tbPath"
         Me.tbPath.Size = New System.Drawing.Size(252, 20)
         Me.tbPath.TabIndex = 42

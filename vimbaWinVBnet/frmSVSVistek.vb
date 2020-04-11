@@ -894,4 +894,43 @@ Public Class frmSVSVistek
         End Try
     End Function
 
+    Private Sub lblDayNight_TextChanged(sender As Object, e As EventArgs) Handles lblDayNight.TextChanged
+        'stop stream
+        If mySVCam Is Nothing Then Exit Sub
+
+            mySVCam.stopAcquisitionThread()
+        If lblDayNight.Text = "night" Then
+
+            tbExposureTime.Text = tbNightExp.Text
+
+            'night mode
+            ' If Not myWebServer Is Nothing Then
+            If cbUseDarks.Checked Then
+                mySVCam.useDarks = True
+            Else
+                mySVCam.useDarks = False
+            End If
+            'End If
+            mySVCam.setParams(Val(Me.tbExposureTime.Text), Val(Me.tbNightAgain.Text))
+
+        Else
+            'day mode
+
+            tbExposureTime.Text = tbDayTimeExp.Text
+
+
+            mySVCam.setParams(Val(Me.tbExposureTime.Text), Val(Me.tbDayGain.Text))
+
+
+        End If
+        'start stream
+        If Me.cbUseTrigger.Checked Then
+
+            mySVCam.startAcquisitionTriggerWidthThread(AddressOf Me.received_frame)
+        Else
+            mySVCam.startAcquisitionThread(AddressOf Me.received_frame)
+        End If
+    End Sub
+
+
 End Class
