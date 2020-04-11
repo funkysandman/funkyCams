@@ -565,11 +565,11 @@ namespace SVCamApi
                             //assuming a timeout happened...
                             //send another buffer
                             //myApi.SVS_StreamQueueBuffer(hStream, hBuffer);
-                            myApi.SVS_FeatureGetByName(hRemoteDevice, SVcamApi.CameraFeature.AcquisitionStart, ref hFeature);
-                            myApi.SVS_StreamQueueBuffer(hStream, hBuffer);
-                            ret = myApi.SVS_FeatureCommandExecute(hRemoteDevice, hFeature, 1);
-                            Console.WriteLine("call acquisition start:{0}", ret);
-                            //return false;
+                            //myApi.SVS_FeatureGetByName(hRemoteDevice, SVcamApi.CameraFeature.AcquisitionStart, ref hFeature);
+                            //myApi.SVS_StreamQueueBuffer(hStream, hBuffer);
+                            //ret = myApi.SVS_FeatureCommandExecute(hRemoteDevice, hFeature, 1);
+                            //Console.WriteLine("call acquisition start:{0}", ret);
+                            return false;
 
                         }
                     }
@@ -643,7 +643,7 @@ namespace SVCamApi
                 }
 
                 //  set acquisitionstart 
-                uint ExecuteTimeout = 10000;
+                uint ExecuteTimeout = 30000;
                 hFeature = IntPtr.Zero;
 
 
@@ -1217,20 +1217,20 @@ namespace SVCamApi
                                     dpixel1 = Convert.ToInt32(Convert.ToDouble(dpixel1) * _darkmultiplier);
 
                                     dpixel2 = Convert.ToInt32(Convert.ToDouble(dpixel2) * _darkmultiplier);
-
+                                    int pixelCutOff = 220;
                                     if (useDarks)
                                     {
 
                                         //pixel1 = Math.Min(pixel1 + 50, 4095);
-                                        // if (dpixel1 > pixelCutOff) { 
+                                         if (dpixel1 > pixelCutOff) { 
                                        pixel1 = Math.Max(pixel1 - dpixel1, 0);
-                                        //  }
+                                          }
                                        // pixel1 = dpixel1;
-                                        //   if (dpixel2 > pixelCutOff)
-                                        //   {
+                                           if (dpixel2 > pixelCutOff)
+                                           {
                                         pixel2 = Math.Max(pixel2 - dpixel2, 0);
                                      //   pixel2 = dpixel2;
-                                        //   }
+                                           }
                                     }
 
 
@@ -1276,7 +1276,7 @@ namespace SVCamApi
                                     BitmapData bmpData = b.LockBits(new Rectangle(0, 0, b.Width, b.Height), ImageLockMode.WriteOnly, b.PixelFormat);
 
                                     Console.WriteLine("about to copy buffer into bitmapdata");
-                                    Marshal.Copy(imagebufferRGB[currentIdex].imagebytes, 0, bmpData.Scan0, imagebufferRGB[currentIdex].imagebytes.Length/2);
+                                    Marshal.Copy(imagebufferRGB[currentIdex].imagebytes, 0, bmpData.Scan0, imagebufferRGB[currentIdex].imagebytes.Length);
                                     Console.WriteLine("copied buffer into bitmapdata");
 
 
@@ -2115,6 +2115,9 @@ namespace SVCamApi
 
             acqThreadIsRuning = false;
 
+
+            Console.WriteLine("stopped acquisition");
+            current_selected_cam.closeConnection();
             //acqThread.Abort();
 
             //if (current_selected_cam.bufferInfoDest.pImagePtr != IntPtr.Zero)
@@ -2295,7 +2298,7 @@ namespace SVCamApi
             {
                 if (cam.featureInfolist.ElementAt(j).SVFeaturInf.displayName == "Pixel Format")
                 {
-                    ret = SVSCam.myApi.SVS_FeatureEnumSubFeatures(cam.hRemoteDevice, cam.featureInfolist.ElementAt(j).hFeature, 2, ref subFeatureName, 512, ref pValue);//3=bayerRG12packed,r=bayerRG8
+                    ret = SVSCam.myApi.SVS_FeatureEnumSubFeatures(cam.hRemoteDevice, cam.featureInfolist.ElementAt(j).hFeature, 3, ref subFeatureName, 512, ref pValue);//3=bayerRG12packed,r=bayerRG8
                     ret = SVSCam.myApi.SVS_FeatureSetValueInt64Enum(cam.hRemoteDevice, cam.featureInfolist.ElementAt(j).hFeature, pValue);
                     Console.WriteLine("set pixel format");
 
@@ -2329,7 +2332,7 @@ namespace SVCamApi
             //set packet delay
             ret = SVSCam.myApi.SVS_FeatureGetByName(cam.hRemoteDevice, "GevSCPD", ref phFeature);
             ret = SVSCam.myApi.SVS_FeatureGetInfo(cam.hRemoteDevice, phFeature, ref info.SVFeaturInf);
-            ret = SVSCam.myApi.SVS_FeatureSetValueInt64(cam.hRemoteDevice, phFeature, 10000);//packet delay
+            ret = SVSCam.myApi.SVS_FeatureSetValueInt64(cam.hRemoteDevice, phFeature, 10000000);//packet delay
             //turn on triggerwidth
             ret = SVSCam.myApi.SVS_FeatureGetByName(cam.hRemoteDevice, "ExposureMode", ref phFeature);
             ret = SVSCam.myApi.SVS_FeatureGetInfo(cam.hRemoteDevice, phFeature, ref info.SVFeaturInf);
@@ -2549,8 +2552,6 @@ namespace SVCamApi
                 if (!cam.grab())
                 {
                     stopAcquisitionThread();
-                    Console.WriteLine("stopped acquisition");
-                    
                     startAcquisitionThread(m_frh);
                     Console.WriteLine("called start acquisition");
                     return;

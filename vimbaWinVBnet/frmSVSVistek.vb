@@ -778,6 +778,7 @@ Public Class frmSVSVistek
         Button3.Enabled = False
         Button1.Enabled = True
         mySVCam.stopAcquisitionThread()
+
         Timer2.Enabled = False
 
     End Sub
