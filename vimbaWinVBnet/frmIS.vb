@@ -1,567 +1,742 @@
-﻿Imports System.IO
+﻿Imports System
+Imports System.IO
+Imports System.Drawing
+Imports System.Drawing.Imaging
+Imports System.Collections
+Imports System.ComponentModel
+Imports System.Windows.Forms
+Imports System.Data
 Imports System.Runtime.InteropServices
-Imports QCamManagedDriver
+Imports System.Threading
+Imports System.Net.Http
+Imports System.Collections.Specialized
+Imports vimbaWinVBnet.vimbaWinVBnet
 Imports TIS.Imaging
+Public Class frmIS
+    Dim myDetectionQueue As New Queue(Of queueEntry)
+    Private VCDProp As TIS.Imaging.VCDHelpers.VCDSimpleProperty
 
-<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()>
-Partial Class frmIS
-    Inherits System.Windows.Forms.Form
+    Private mhCamera As IntPtr
+    Private mDisplayPanel As myPanel
+    Private mIsMono As Boolean
+    Private mDisplayBitmap As Bitmap
+    'Private mFrameCallback As QCamM_AsyncCallback
+    'Private mFrame1 As QCamM_Frame
+    ' Private mFrame2 As QCamM_Frame
+    'Private mRgbFrame As QCamM_Frame
+    ' Private mSettings As QCamM_SettingsEx
+    Private myWebServer As WebServer
+    Private checkBox1 As CheckBox
+    Private tbExposure As TrackBar
+    Private lblExposureVal As Label
+    Private panel1 As Panel
+    Private gbAcquisition As GroupBox
+    Private gbExposure As GroupBox
+    Private gbGain As GroupBox
+    Private lblGainVal As Label
+    Private running As Boolean
+    Private gbInfo As GroupBox
+    Private lblCameraModel As Label
+    Private bmp As Bitmap
+    Private imageBytes As Byte()
+    Private bmp2 As Bitmap
+    Private lblSerNum As Label
+    Private frames As Integer
+    Private startTime As DateTime
+    Private gotFrameTime As DateTime
+    Private dark() As UShort
+    Private t As Thread
+    Private t_imaging As Thread
+    Private h_camera As Integer
 
-    'Form overrides dispose to clean up the component list.
-    <System.Diagnostics.DebuggerNonUserCode()>
-    Protected Overrides Sub Dispose(ByVal disposing As Boolean)
-        Try
-            'mCamList = New QCamM_CamListItem(9) {}
-            'Dim listLen As UInteger = 10
-            'QCam.QCamM_ListCameras(mCamList, listLen)
+    Private helper As SnapshotHelper
+    Private night As Boolean = False
+    ' Private md As New ObjectDetection.TFDetector()
+    Private myImageCodecInfo As ImageCodecInfo
+    Private myEncoder As System.Drawing.Imaging.Encoder
+    Private myEncoderParameter As EncoderParameter
+    Private myEncoderParameters As EncoderParameters
+    Private meteorCheckRunning As Boolean = False
+    Private m_camRunning As Boolean = False
+    Private m_grabbing As Boolean = False
+    Private rawImage As Byte()
 
-            'If (listLen > 0) AndAlso (mCamList(0).isOpen = 1) Then
-            '    Debug.Print("closing camera")
-            '    QCam.QCamM_CloseCamera(mhCamera)
-            '    Debug.Print("camera closed")
-            'End If
-            If disposing AndAlso components IsNot Nothing Then
-                components.Dispose()
+    Shared m_pics As RingBitmap
+    Private m_grabbedframe As Boolean
+    Private m_grabbedframe_err As Integer = 0
+
+    Private m_syncLock As Object = New Object   '// Sync object protecting the following member data
+    Public Shared iWidth As Integer
+    Public Shared iHeight As Integer
+
+
+    '//
+    '// Callback function for Api.GetClip
+    '// Called by a thread other than that which called Api.GetClip, therefore we syncronize access to the member data modified
+    '//
+
+
+    Public Class RingBitmap
+
+        Private m_Size As Integer = 0
+
+        Private m_Bitmaps As Bitmap()
+
+        Private m_BitmapSelector As Integer = 0
+
+        Private m_buffers()() As Byte
+        Public Sub New(s As Integer)
+
+            m_Size = s
+            m_Bitmaps = New Bitmap(m_Size - 1) {}
+            ReDim m_buffers(m_Size - 1)
+        End Sub
+        Public ReadOnly Property Image As Image
+            Get
+                Debug.Print("getting bitmap " & m_BitmapSelector)
+                Return m_Bitmaps(m_BitmapSelector)
+            End Get
+        End Property
+        Public ReadOnly Property ImageBytes As Byte()
+            Get
+                Debug.Print("getting bitmap " & m_BitmapSelector)
+                'copy raw data to byte array
+
+
+                Return m_buffers(m_BitmapSelector)
+            End Get
+        End Property
+
+        Public Sub FillNextBitmap(b As Byte())
+            SwitchBitmap()
+            m_buffers(m_BitmapSelector) = b
+
+        End Sub
+        'Public Sub FillNextBitmap(frame As UShort())
+
+        '    ' switch to Bitmap object which Is currently Not in use by GUI
+        '    SwitchBitmap()
+        '    Debug.Print("fillnextbitmap bitmapselector: " & m_BitmapSelector)
+        '    Try
+
+        '        If (m_Bitmaps(m_BitmapSelector) Is Nothing) Then
+        '            Debug.Print("making new bitmap")
+        '            m_Bitmaps(m_BitmapSelector) = New Bitmap(iXres, iYres, PixelFormat.Format24bppRgb)
+        '            Dim ncp As System.Drawing.Imaging.ColorPalette = m_Bitmaps(m_BitmapSelector).Palette
+        '            For j As Integer = 0 To 255
+        '                ncp.Entries(j) = System.Drawing.Color.FromArgb(255, j, j, j)
+        '            Next
+        '            m_Bitmaps(m_BitmapSelector).Palette = ncp
+        '        End If
+
+
+        '    Catch
+        '    End Try
+
+        '    Try
+        '        'copy frame into bitmap
+        '        Dim rawData(frame.bufferSize) As Byte
+
+
+
+        '        Marshal.Copy(frame.pBuffer, rawData, 0, frame.bufferSize)
+
+        '        m_buffers(m_BitmapSelector) = rawData
+
+        '        Dim BoundsRect = New Rectangle(0, 0, frame.width, frame.height)
+        '        Dim bmpData As System.Drawing.Imaging.BitmapData = m_Bitmaps(m_BitmapSelector).LockBits(BoundsRect, System.Drawing.Imaging.ImageLockMode.[WriteOnly], m_Bitmaps(m_BitmapSelector).PixelFormat)
+
+        '        Dim ptr As IntPtr = bmpData.Scan0
+
+        '        Dim bytes As Integer = frame.bufferSize
+        '        For i = 1 To 100
+        '            Debug.Print(rawData(i))
+        '        Next
+
+
+        '        Marshal.Copy(rawData, 0, ptr, bytes)
+        '        m_Bitmaps(m_BitmapSelector).UnlockBits(bmpData)
+        '        m_Bitmaps(m_BitmapSelector).RotateFlip(RotateFlipType.Rotate180FlipNone)
+
+        '    Catch
+
+        '        Console.WriteLine("error during frame fill")
+        '    End Try
+
+
+        'End Sub
+        Private Sub SwitchBitmap()
+            m_BitmapSelector += 1
+
+            If m_Size = m_BitmapSelector Then
+                m_BitmapSelector = 0
             End If
-        Finally
-            MyBase.Dispose(disposing)
+        End Sub
+    End Class
+    Private Sub StopStream()
+        'QCam.QCamM_Abort(mhCamera)
+        'QCam.QCamM_SetStreaming(mhCamera, 0)
+    End Sub
+
+    Private Sub StartStream()
+        'QCam.QCamM_Abort(mhCamera)
+        'QCam.QCamM_SetStreaming(mhCamera, 0)
+        'QCam.QCamM_SetStreaming(mhCamera, 1)
+        'QueueFrame(1)
+        'QueueFrame(2)
+    End Sub
+
+    Private Function QueueFrame(ByVal frameNum As UInteger) As Boolean
+        'Dim err As QCamM_Err
+
+        'If frameNum = 1 Then
+        '    err = QCam.QCamM_QueueFrame(Me.mhCamera, mFrame1, mFrameCallback, CUInt(QCamM_qcCallbackFlags.qcCallbackDone), IntPtr.Zero, frameNum)
+        'ElseIf frameNum = 2 Then
+        '    err = QCam.QCamM_QueueFrame(Me.mhCamera, mFrame2, mFrameCallback, CUInt(QCamM_qcCallbackFlags.qcCallbackDone), IntPtr.Zero, frameNum)
+        'Else
+
+        '    Return False
+        'End If
+
+        'If err = QCamM_Err.qerrSuccess Then
+        '    Return True
+        'Else
+        '    Debug.Print("err is:" & err)
+        '    Return False
+        'End If
+    End Function
+    Private Function OpenCamera() As Boolean
+        'mCamList = New QCamM_CamListItem(9) {}
+        'Dim listLen As UInteger = 10
+        'QCam.QCamM_ListCameras(mCamList, listLen)
+
+        'If (listLen > 0) AndAlso (mCamList(0).isOpen = 0) Then
+
+        '    If QCam.QCamM_OpenCamera(mCamList(0).cameraId, mhCamera) <> QCamM_Err.qerrSuccess Then
+        '        Return False
+        '    End If
+
+        '    Return True
+        'Else
+        '    If (listLen > 0) And (mCamList(0).isOpen = 1) Then
+        '        Debug.Print("camera already open")
+        '        Return True 'already open
+
+        '    Else
+        '        'msgbox("no camera")
+        '    End If
+        'End If
+
+    End Function
+    Private Function ToUInt16(ByVal s As Int16) As UInt16
+        If (s And &H8000) = 0 Then
+            Return CType(s, UInt16)
+        Else
+            Return CType(UInt16.MaxValue + 1 + CType(s, Int32), UInt16)
+        End If
+    End Function
+
+    Private Function ReadY16(ByVal buf As TIS.Imaging.ImageBuffer, ByVal row As Integer, ByVal col As Integer) As UInt16
+        ' Y16 is top-down, the first line has index 0
+        Dim offset As Integer = row * buf.BytesPerLine + col * 2
+
+        Dim val As Int16 = System.Runtime.InteropServices.Marshal.ReadInt16(buf.GetIntPtr(), offset)
+
+        Return ToUInt16(val)
+    End Function
+    Private Function ToInt16(ByVal us As UInt16) As Int16
+        If (us And &H8000) = 0 Then
+            Return CType(us, Int16)
+        Else
+            Return CType(CType(us, Int32) - UInt16.MaxValue - 1, Int16)
+        End If
+    End Function
+
+    Private Sub WriteY16(ByVal buf As TIS.Imaging.ImageBuffer, ByVal row As Integer, ByVal col As Integer, ByVal value As UInt16)
+
+        Dim offset As Integer = row * buf.BytesPerLine + col * 2
+
+        System.Runtime.InteropServices.Marshal.WriteInt16(buf.GetIntPtr(), offset, ToInt16(value))
+    End Sub
+
+    Public Sub loadMasterDark()
+        Dim filename As String
+        Dim bReader As BinaryReader
+        Dim multiplier As Decimal
+
+
+        Try
+
+            If IcImagingControl1.Device = "" Then Exit Sub
+
+            multiplier = Val(tbMultiplier.Text)
+            filename = String.Format("masterDark{0}.raw", IcImagingControl1.Device)
+            Dim fStream As New FileStream(filename, FileMode.Open)
+            bReader = New BinaryReader(fStream)
+            ReDim dark(fStream.Length / 2)
+            For i = 0 To fStream.Length / 2 - 1
+                dark(i) = bReader.ReadUInt16()
+                dark(i) = dark(i) * multiplier
+            Next
+            fStream.Close()
+
+        Catch ex As Exception
+            MsgBox("problem reading dark file")
+        End Try
+
+
+
+
+    End Sub
+
+
+    Public Sub processDetection()
+        Dim aQE As queueEntry
+        While (meteorCheckRunning)
+            If myDetectionQueue.Count > 0 Then
+                aQE = myDetectionQueue.Dequeue()
+
+                Functions.CallAzureMeteorDetection(aQE)
+
+
+                aQE = Nothing
+
+            End If
+            ' Console.WriteLine("in the queue:{0}", myDetectionQueue.Count)
+            Thread.Sleep(100)
+        End While
+
+    End Sub
+    Public Async Function CallAzureMeteorDetection(qe As queueEntry) As Task
+
+
+        '        Dim apiURL As String = "https://azuremeteordetect20181212113628.azurewebsites.net/api/detection?code=zi3Lrr58mJB3GTut0lktSLIzb08E1dLkHXAbX6s07bd46IoZmm1vqQ==&file=" + file
+        Dim apiURL As String = "http://192.168.1.199:7071/api/detection"
+        Dim myUriBuilder As New UriBuilder(apiURL)
+
+
+        Dim query As NameValueCollection = Web.HttpUtility.ParseQueryString(String.Empty)
+
+        query("file") = qe.filename
+        query("dateTaken") = qe.dateTaken.ToString("MM/dd/yyyy hh:mm tt")
+        query("cameraID") = qe.cameraID
+        query("width") = qe.width
+        query("height") = qe.height
+        myUriBuilder.Query = query.ToString
+
+
+        Dim client As New HttpClient()
+
+        Dim byteContent = New ByteArrayContent(qe.img)
+        Try
+
+
+            Dim response = client.PostAsync(myUriBuilder.ToString, byteContent)
+            Dim responseString = response.Result
+            byteContent = Nothing
+
+        Catch ex As Exception
+            Console.WriteLine("calling meteor detection:" & ex.Message)
+        End Try
+    End Function
+
+
+    'Public Sub GrabFrame()
+    '    Dim width, height As UInteger
+    '    Dim err As QCamM_Err = QCamM_Err.qerrSuccess
+    '    Dim sizeInBytes As UInteger = 0
+    '    QCam.QCamM_GetInfo(mhCamera, QCamM_Info.qinfImageSize, sizeInBytes)
+    '    err = QCam.QCamM_GrabFrame(mhCamera, mFrame1)
+    '    width = mFrame1.width
+    '    height = mFrame1.height
+    '    Dim bmp As Bitmap = Nothing
+
+    '    If mIsMono Then
+    '        bmp = New Bitmap(CInt(width), CInt(height), CInt(width), PixelFormat.Format8bppIndexed, mFrame1.pBuffer)
+    '        Dim pt As ColorPalette = bmp.Palette
+
+    '        For i As Integer = 0 To pt.Entries.Length - 1
+    '            pt.Entries(i) = Color.FromArgb(i, i, i)
+    '        Next
+
+    '        bmp.Palette = pt
+    '    Else
+    '        QCamImgfnc.QCamM_BayerToRgb(QCamM_qcBayerInterp.qcBayerInterpFast, mFrame1, mRgbFrame)
+    '        bmp = New Bitmap(CInt(width), CInt(height), CInt(width) * 3, PixelFormat.Format24bppRgb, mRgbFrame.pBuffer)
+    '    End If
+
+    '    mDisplayBitmap = bmp
+    '    PictureBox1.Image = bmp
+
+    '    Try
+
+    '        Using fs As FileStream = New FileStream("image.raw", FileMode.Create)
+    '            Dim bw As BinaryWriter = New System.IO.BinaryWriter(fs)
+
+    '            For i As Integer = 0 To mFrame1.size - 1 Step 1
+    '                ' bw.Write(Marshal.ReadByte(mFrame1.pBuffer, i + 1))
+    '                bw.Write(Marshal.ReadByte(mFrame1.pBuffer, i))
+    '            Next
+
+    '            bw.Close()
+    '        End Using
+
+    '    Catch e As Exception
+    '        MessageBox.Show("Unable to save the image data: " & e.Message)
+    '    End Try
+    'End Sub
+
+    'Private Sub Button7_Click(sender As Object, e As EventArgs) Handles Button7.Click
+    '    myCam.ExposureTime = Val(tbExposureTime.Text) / 1000 ' expecting ms
+    '    ' myCam.ReadCameraParams()
+
+    '    If Not myCam.AcqSetup(pvcam_helper.PVCamCamera.AcqTypes.ACQ_TYPE_CONTINUOUS) Then
+    '        Return
+    '    End If
+
+    '    If myCam.ReadoutTime <> 0 Then
+    '    Else
+    '    End If
+    '    ' myCam.ReadCameraParams()
+    '    myCam.FramesToGet = myCam.RUN_UNTIL_STOPPED
+    '    If Not myCam.StartContinuousAcquisition() Then
+    '        Return
+    '    End If
+    '    ''use settings
+    '    'Dim err As QCamM_Err
+    '    'm_camRunning = True
+
+    '    'QCam.QCamM_SetParam(mSettings, QCamM_Param.qprmGain, CUInt((tbGain.Text)))
+
+
+    '    'QCam.QCamM_SetParam(mSettings, QCamM_Param.qprmExposure, tbExposureTime.Text)
+    '    'err = QCam.QCamM_SendSettingsToCam(mhCamera, mSettings)
+
+    '    'If lblDayNight.Text = "night" Then
+    '    '    StartStream()
+    '    'Else
+    '    '    TimerAcquistionRate.Enabled = True
+    '    'End If
+
+    '    Button7.Enabled = False
+    '    Button8.Enabled = True
+
+    '    startTime = Now
+    '    meteorCheckRunning = True
+    '    Timer2.Enabled = True
+    '    t = New Thread(AddressOf processDetection)
+    '    t.Start()
+    'End Sub
+
+    Private Sub Button8_Click(sender As Object, e As EventArgs) Handles Button8.Click
+        m_camRunning = False
+        ' rc = Api.SetStreamState(h_camera, StreamState.Stop)
+        TimerAcquistionRate.Enabled = False
+        't.Abort()
+        IcImagingControl1.LiveStop()
+        meteorCheckRunning = False
+        Button7.Enabled = True
+        Button8.Enabled = False
+    End Sub
+
+    Private Sub frmIS_Load(sender As Object, e As EventArgs) Handles Me.Load
+        getCameraReady()
+        myImageCodecInfo = GetEncoderInfo("image/jpeg")
+
+        ' Create an Encoder object based on the GUID
+        ' for the Quality parameter category.
+        myEncoder = System.Drawing.Imaging.Encoder.Quality
+
+        ' Create an EncoderParameters object.
+        ' An EncoderParameters object has an array of EncoderParameter
+        ' objects. In this case, there is only one
+        ' EncoderParameter object in the array.
+        myEncoderParameters = New EncoderParameters(1)
+
+        ' Save the bitmap as a JPEG file with quality level 25.
+        myEncoderParameter = New EncoderParameter(myEncoder, CType(99L, Int32))
+        myEncoderParameters.Param(0) = myEncoderParameter
+        ' md.LoadModel("c:\tmp\frozen_inference_graph_orig.pb", "c:\tmp\mscoco_label_map.pbtxt")
+    End Sub
+
+
+    Private Sub getCameraReady()
+        'try to open camera
+
+        If Not IcImagingControl1.DeviceValid() Then
+            IcImagingControl1.ShowDeviceSettingsDialog()
+
+            If Not IcImagingControl1.DeviceValid Then
+                MsgBox("No device was selected.", MsgBoxStyle.Information, "Grabbing an Image")
+
+                Me.Close()
+            End If
+        End If
+
+        IcImagingControl1.DeviceFrameFilters.Clear()
+        IcImagingControl1.LoadDeviceStateFromFile("device.dat", False)
+        IcImagingControl1.DeviceFrameRate = 0.2
+        Dim fh As FrameHandlerSink
+
+        fh = IcImagingControl1.Sink
+
+        fh.SnapMode = False
+        VCDProp = TIS.Imaging.VCDHelpers.VCDSimpleModule.GetSimplePropertyContainer(IcImagingControl1.VCDPropertyItems)
+    End Sub
+
+
+
+
+
+    Private Sub Timer3_Tick(sender As Object, e As EventArgs) Handles Timer3.Tick
+        Dim seconds As Integer
+
+        seconds = DateDiff(DateInterval.Second, startTime, Now)
+        txtFps.Text = frames / seconds
+    End Sub
+    Private Shared Function GetEncoderInfo(ByVal mimeType As String) As ImageCodecInfo
+        Dim j As Integer
+        Dim encoders() As ImageCodecInfo
+        encoders = ImageCodecInfo.GetImageEncoders()
+
+        j = 0
+        While j < encoders.Length
+            If encoders(j).MimeType = mimeType Then
+                Return encoders(j)
+            End If
+            j += 1
+        End While
+        Return Nothing
+
+    End Function 'GetEncoderInfo
+
+
+
+    Private Sub Button5_Click(sender As Object, e As EventArgs) Handles Button5.Click
+        Button5.Enabled = False
+        Button6.Enabled = True
+        myWebServer = WebServer.getWebServer
+
+        myWebServer.StartWebServer(Me, Val(Me.tbPort.Text))
+        myWebServer.ImageDirectory = "c:\web\images\"
+        myWebServer.VirtualRoot = "c:\web\"
+    End Sub
+
+    Public Function getLastImage() As Bitmap
+        Dim stopWatch As Stopwatch = New Stopwatch()
+        stopWatch.Start()
+
+        While m_grabbing AndAlso stopWatch.ElapsedMilliseconds < 20000
+
+        End While
+
+        stopWatch.[Stop]()
+        Dim x As New Bitmap(iWidth, iHeight, Imaging.PixelFormat.Format24bppRgb)
+        Dim BoundsRect = New Rectangle(0, 0, iWidth, iHeight)
+        Dim bmpData As System.Drawing.Imaging.BitmapData = x.LockBits(BoundsRect, System.Drawing.Imaging.ImageLockMode.[WriteOnly], x.PixelFormat)
+        Dim ptr As IntPtr = bmpData.Scan0
+        System.Runtime.InteropServices.Marshal.Copy(m_pics.ImageBytes, 0, ptr, iWidth * iHeight * 3 - 1) 'copy into bitmap
+
+
+        x.UnlockBits(bmpData)
+        Return x
+
+
+
+    End Function
+    Public Function getLastImageArray() As Byte()
+        Dim stopWatch As Stopwatch = New Stopwatch()
+        stopWatch.Start()
+
+        While m_grabbing AndAlso stopWatch.ElapsedMilliseconds < 20000
+
+        End While
+
+        stopWatch.[Stop]()
+        Return m_pics.ImageBytes
+
+
+    End Function
+    Private Sub Button6_Click(sender As Object, e As EventArgs) Handles Button6.Click
+        Button5.Enabled = True
+        Button6.Enabled = False
+        myWebServer.StopWebServer()
+    End Sub
+
+
+
+    Private Sub Timer1_Tick(sender As Object, e As EventArgs) Handles Timer1.Tick
+
+        Try
+
+
+
+            Dim currentMode As Boolean
+            currentMode = False
+
+            If Now.Hour >= cboNight.SelectedItem Or Now.Hour <= cboDay.SelectedItem Then
+                night = True
+            Else
+                night = False
+            End If
+            ' If currentMode <> night Then
+
+            If night Then
+                'axfgcontrolctrl2.ExposureTimeAuto = "Off"
+                '  axfgcontrolctrl2.AcquisitionMode = "Continuous"
+
+                tbExposureTime.Text = tbNightExp.Text
+                tbGain.Text = tbNightAgain.Text
+                lblDayNight.Text = "night"
+                'night mode
+
+
+            Else
+                'day mode
+
+                tbExposureTime.Text = tbDayTimeExp.Text
+                tbGain.Text = tbDayGain.Text
+                lblDayNight.Text = "day"
+
+
+            End If
+            'End If
+            ' Dim err As QCamM_Err
+            'QCam.QCamM_SetParam(mSettings, QCamM_Param.qprmGain, CUInt((tbNightAgain.Text)))
+            ' QCam.QCamM_SetParam(mSettings, QCamM_Param.qprmExposure, tbExposureTime.Text)
+            'err = QCam.QCamM_SendSettingsToCam(mhCamera, mSettings)
+        Catch ex As Exception
+
         End Try
     End Sub
 
-    'Required by the Windows Form Designer
-    Private components As System.ComponentModel.IContainer
 
-    'NOTE: The following procedure is required by the Windows Form Designer
-    'It can be modified using the Windows Form Designer.  
-    'Do not modify it using the code editor.
-    <System.Diagnostics.DebuggerStepThrough()>
-    Private Sub InitializeComponent()
-        Me.components = New System.ComponentModel.Container()
-        Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(frmIS))
-        Me.Label6 = New System.Windows.Forms.Label()
-        Me.cbMeteors = New System.Windows.Forms.CheckBox()
-        Me.txtFps = New System.Windows.Forms.TextBox()
-        Me.cbSaveImages = New System.Windows.Forms.CheckBox()
-        Me.Button10 = New System.Windows.Forms.Button()
-        Me.Label5 = New System.Windows.Forms.Label()
-        Me.tbPath = New System.Windows.Forms.TextBox()
-        Me.Button8 = New System.Windows.Forms.Button()
-        Me.Button7 = New System.Windows.Forms.Button()
-        Me.Button6 = New System.Windows.Forms.Button()
-        Me.tbPort = New System.Windows.Forms.TextBox()
-        Me.tbMultiplier = New System.Windows.Forms.TextBox()
-        Me.cbUseDarks = New System.Windows.Forms.CheckBox()
-        Me.Button5 = New System.Windows.Forms.Button()
-        Me.Label1 = New System.Windows.Forms.Label()
-        Me.Button2 = New System.Windows.Forms.Button()
-        Me.Label8 = New System.Windows.Forms.Label()
-        Me.Label7 = New System.Windows.Forms.Label()
-        Me.tbNightAgain = New System.Windows.Forms.TextBox()
-        Me.lblDayNight = New System.Windows.Forms.Label()
-        Me.tbExposureTime = New System.Windows.Forms.TextBox()
-        Me.Label4 = New System.Windows.Forms.Label()
-        Me.tbDayGain = New System.Windows.Forms.TextBox()
-        Me.tbNightExp = New System.Windows.Forms.TextBox()
-        Me.tbDayTimeExp = New System.Windows.Forms.TextBox()
-        Me.Label9 = New System.Windows.Forms.Label()
-        Me.Label10 = New System.Windows.Forms.Label()
-        Me.cboNight = New System.Windows.Forms.ComboBox()
-        Me.cboDay = New System.Windows.Forms.ComboBox()
-        Me.Label11 = New System.Windows.Forms.Label()
-        Me.tbGain = New System.Windows.Forms.TextBox()
-        Me.Timer1 = New System.Windows.Forms.Timer(Me.components)
-        Me.Timer2 = New System.Windows.Forms.Timer(Me.components)
-        Me.Timer3 = New System.Windows.Forms.Timer(Me.components)
-        Me.TimerAcquistionRate = New System.Windows.Forms.Timer(Me.components)
-        Me.tbStatus = New System.Windows.Forms.TextBox()
-        Me.tbLower = New System.Windows.Forms.TextBox()
-        Me.tbUpper = New System.Windows.Forms.TextBox()
-        Me.Label2 = New System.Windows.Forms.Label()
-        Me.Label3 = New System.Windows.Forms.Label()
-        Me.IcImagingControl1 = New TIS.Imaging.ICImagingControl()
-        CType(Me.IcImagingControl1, System.ComponentModel.ISupportInitialize).BeginInit()
-        Me.SuspendLayout()
-        '
-        'Label6
-        '
-        Me.Label6.AutoSize = True
-        Me.Label6.Location = New System.Drawing.Point(664, 384)
-        Me.Label6.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
-        Me.Label6.Name = "Label6"
-        Me.Label6.Size = New System.Drawing.Size(27, 17)
-        Me.Label6.TabIndex = 74
-        Me.Label6.Text = "fps"
-        '
-        'cbMeteors
-        '
-        Me.cbMeteors.AutoSize = True
-        Me.cbMeteors.Location = New System.Drawing.Point(512, 407)
-        Me.cbMeteors.Margin = New System.Windows.Forms.Padding(4)
-        Me.cbMeteors.Name = "cbMeteors"
-        Me.cbMeteors.Size = New System.Drawing.Size(124, 21)
-        Me.cbMeteors.TabIndex = 73
-        Me.cbMeteors.Text = "detect meteors"
-        Me.cbMeteors.UseVisualStyleBackColor = True
-        '
-        'txtFps
-        '
-        Me.txtFps.Location = New System.Drawing.Point(668, 405)
-        Me.txtFps.Margin = New System.Windows.Forms.Padding(4)
-        Me.txtFps.Name = "txtFps"
-        Me.txtFps.Size = New System.Drawing.Size(63, 22)
-        Me.txtFps.TabIndex = 72
-        '
-        'cbSaveImages
-        '
-        Me.cbSaveImages.AutoSize = True
-        Me.cbSaveImages.Location = New System.Drawing.Point(512, 379)
-        Me.cbSaveImages.Margin = New System.Windows.Forms.Padding(4)
-        Me.cbSaveImages.Name = "cbSaveImages"
-        Me.cbSaveImages.Size = New System.Drawing.Size(109, 21)
-        Me.cbSaveImages.TabIndex = 71
-        Me.cbSaveImages.Text = "save images"
-        Me.cbSaveImages.UseVisualStyleBackColor = True
-        '
-        'Button10
-        '
-        Me.Button10.Location = New System.Drawing.Point(427, 416)
-        Me.Button10.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
-        Me.Button10.Name = "Button10"
-        Me.Button10.Size = New System.Drawing.Size(48, 22)
-        Me.Button10.TabIndex = 70
-        Me.Button10.Text = "..."
-        Me.Button10.UseVisualStyleBackColor = True
-        '
-        'Label5
-        '
-        Me.Label5.AutoSize = True
-        Me.Label5.Location = New System.Drawing.Point(27, 418)
-        Me.Label5.Name = "Label5"
-        Me.Label5.Size = New System.Drawing.Size(40, 17)
-        Me.Label5.TabIndex = 69
-        Me.Label5.Text = "path:"
-        '
-        'tbPath
-        '
-        Me.tbPath.Location = New System.Drawing.Point(75, 416)
-        Me.tbPath.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
-        Me.tbPath.Name = "tbPath"
-        Me.tbPath.Size = New System.Drawing.Size(335, 22)
-        Me.tbPath.TabIndex = 68
-        Me.tbPath.Text = "c:\image_img_src"
-        '
-        'Button8
-        '
-        Me.Button8.Enabled = False
-        Me.Button8.Location = New System.Drawing.Point(639, 336)
-        Me.Button8.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
-        Me.Button8.Name = "Button8"
-        Me.Button8.Size = New System.Drawing.Size(103, 31)
-        Me.Button8.TabIndex = 63
-        Me.Button8.Text = "stop capture"
-        Me.Button8.TextAlign = System.Drawing.ContentAlignment.MiddleRight
-        Me.Button8.UseVisualStyleBackColor = True
-        '
-        'Button7
-        '
-        Me.Button7.Location = New System.Drawing.Point(515, 336)
-        Me.Button7.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
-        Me.Button7.Name = "Button7"
-        Me.Button7.Size = New System.Drawing.Size(103, 31)
-        Me.Button7.TabIndex = 62
-        Me.Button7.Text = "start capture"
-        Me.Button7.UseVisualStyleBackColor = True
-        '
-        'Button6
-        '
-        Me.Button6.Enabled = False
-        Me.Button6.Location = New System.Drawing.Point(347, 458)
-        Me.Button6.Margin = New System.Windows.Forms.Padding(4)
-        Me.Button6.Name = "Button6"
-        Me.Button6.Size = New System.Drawing.Size(151, 28)
-        Me.Button6.TabIndex = 61
-        Me.Button6.Text = "stop webserver"
-        Me.Button6.UseVisualStyleBackColor = True
-        '
-        'tbPort
-        '
-        Me.tbPort.Location = New System.Drawing.Point(291, 462)
-        Me.tbPort.Margin = New System.Windows.Forms.Padding(4)
-        Me.tbPort.Name = "tbPort"
-        Me.tbPort.Size = New System.Drawing.Size(47, 22)
-        Me.tbPort.TabIndex = 60
-        Me.tbPort.Text = "8070"
-        '
-        'tbMultiplier
-        '
-        Me.tbMultiplier.Location = New System.Drawing.Point(668, 464)
-        Me.tbMultiplier.Margin = New System.Windows.Forms.Padding(4)
-        Me.tbMultiplier.Name = "tbMultiplier"
-        Me.tbMultiplier.Size = New System.Drawing.Size(47, 22)
-        Me.tbMultiplier.TabIndex = 59
-        Me.tbMultiplier.Text = "1.0"
-        '
-        'cbUseDarks
-        '
-        Me.cbUseDarks.AutoSize = True
-        Me.cbUseDarks.Location = New System.Drawing.Point(516, 475)
-        Me.cbUseDarks.Margin = New System.Windows.Forms.Padding(4)
-        Me.cbUseDarks.Name = "cbUseDarks"
-        Me.cbUseDarks.Size = New System.Drawing.Size(143, 21)
-        Me.cbUseDarks.TabIndex = 54
-        Me.cbUseDarks.Text = "use darks at night"
-        Me.cbUseDarks.UseVisualStyleBackColor = True
-        '
-        'Button5
-        '
-        Me.Button5.Location = New System.Drawing.Point(132, 459)
-        Me.Button5.Margin = New System.Windows.Forms.Padding(4)
-        Me.Button5.Name = "Button5"
-        Me.Button5.Size = New System.Drawing.Size(151, 28)
-        Me.Button5.TabIndex = 53
-        Me.Button5.Text = "start webserver"
-        Me.Button5.UseVisualStyleBackColor = True
-        '
-        'Label1
-        '
-        Me.Label1.AutoSize = True
-        Me.Label1.Location = New System.Drawing.Point(531, 250)
-        Me.Label1.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
-        Me.Label1.Name = "Label1"
-        Me.Label1.Size = New System.Drawing.Size(0, 17)
-        Me.Label1.TabIndex = 52
-        '
-        'Button2
-        '
-        Me.Button2.Location = New System.Drawing.Point(516, 439)
-        Me.Button2.Margin = New System.Windows.Forms.Padding(4)
-        Me.Button2.Name = "Button2"
-        Me.Button2.Size = New System.Drawing.Size(104, 28)
-        Me.Button2.TabIndex = 49
-        Me.Button2.Text = "take darks"
-        Me.Button2.UseVisualStyleBackColor = True
-        '
-        'Label8
-        '
-        Me.Label8.AutoSize = True
-        Me.Label8.Location = New System.Drawing.Point(695, 11)
-        Me.Label8.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
-        Me.Label8.Name = "Label8"
-        Me.Label8.Size = New System.Drawing.Size(39, 17)
-        Me.Label8.TabIndex = 94
-        Me.Label8.Text = "night"
-        '
-        'Label7
-        '
-        Me.Label7.AutoSize = True
-        Me.Label7.Location = New System.Drawing.Point(620, 11)
-        Me.Label7.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
-        Me.Label7.Name = "Label7"
-        Me.Label7.Size = New System.Drawing.Size(31, 17)
-        Me.Label7.TabIndex = 93
-        Me.Label7.Text = "day"
-        '
-        'tbNightAgain
-        '
-        Me.tbNightAgain.Location = New System.Drawing.Point(699, 44)
-        Me.tbNightAgain.Margin = New System.Windows.Forms.Padding(4)
-        Me.tbNightAgain.Name = "tbNightAgain"
-        Me.tbNightAgain.Size = New System.Drawing.Size(61, 22)
-        Me.tbNightAgain.TabIndex = 90
-        Me.tbNightAgain.Text = "32"
-        '
-        'lblDayNight
-        '
-        Me.lblDayNight.AutoSize = True
-        Me.lblDayNight.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.lblDayNight.Location = New System.Drawing.Point(492, 302)
-        Me.lblDayNight.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
-        Me.lblDayNight.Name = "lblDayNight"
-        Me.lblDayNight.Size = New System.Drawing.Size(26, 17)
-        Me.lblDayNight.TabIndex = 85
-        Me.lblDayNight.Text = "---"
-        '
-        'tbExposureTime
-        '
-        Me.tbExposureTime.Enabled = False
-        Me.tbExposureTime.Location = New System.Drawing.Point(699, 299)
-        Me.tbExposureTime.Margin = New System.Windows.Forms.Padding(4)
-        Me.tbExposureTime.Name = "tbExposureTime"
-        Me.tbExposureTime.Size = New System.Drawing.Size(59, 22)
-        Me.tbExposureTime.TabIndex = 84
-        Me.tbExposureTime.Text = "5000"
-        '
-        'Label4
-        '
-        Me.Label4.AutoSize = True
-        Me.Label4.Location = New System.Drawing.Point(492, 48)
-        Me.Label4.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
-        Me.Label4.Name = "Label4"
-        Me.Label4.Size = New System.Drawing.Size(82, 17)
-        Me.Label4.TabIndex = 83
-        Me.Label4.Text = "analog gain"
-        '
-        'tbDayGain
-        '
-        Me.tbDayGain.Location = New System.Drawing.Point(624, 44)
-        Me.tbDayGain.Margin = New System.Windows.Forms.Padding(4)
-        Me.tbDayGain.Name = "tbDayGain"
-        Me.tbDayGain.Size = New System.Drawing.Size(61, 22)
-        Me.tbDayGain.TabIndex = 82
-        Me.tbDayGain.Text = "1"
-        '
-        'tbNightExp
-        '
-        Me.tbNightExp.Location = New System.Drawing.Point(699, 252)
-        Me.tbNightExp.Margin = New System.Windows.Forms.Padding(4)
-        Me.tbNightExp.Name = "tbNightExp"
-        Me.tbNightExp.Size = New System.Drawing.Size(59, 22)
-        Me.tbNightExp.TabIndex = 81
-        Me.tbNightExp.Text = "5000"
-        '
-        'tbDayTimeExp
-        '
-        Me.tbDayTimeExp.Location = New System.Drawing.Point(697, 185)
-        Me.tbDayTimeExp.Margin = New System.Windows.Forms.Padding(4)
-        Me.tbDayTimeExp.Name = "tbDayTimeExp"
-        Me.tbDayTimeExp.Size = New System.Drawing.Size(59, 22)
-        Me.tbDayTimeExp.TabIndex = 80
-        Me.tbDayTimeExp.Text = ".225"
-        '
-        'Label9
-        '
-        Me.Label9.AutoSize = True
-        Me.Label9.Location = New System.Drawing.Point(492, 231)
-        Me.Label9.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
-        Me.Label9.Name = "Label9"
-        Me.Label9.Size = New System.Drawing.Size(39, 17)
-        Me.Label9.TabIndex = 79
-        Me.Label9.Text = "night"
-        '
-        'Label10
-        '
-        Me.Label10.AutoSize = True
-        Me.Label10.Location = New System.Drawing.Point(491, 166)
-        Me.Label10.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
-        Me.Label10.Name = "Label10"
-        Me.Label10.Size = New System.Drawing.Size(31, 17)
-        Me.Label10.TabIndex = 78
-        Me.Label10.Text = "day"
-        '
-        'cboNight
-        '
-        Me.cboNight.DisplayMember = "6"
-        Me.cboNight.FormattingEnabled = True
-        Me.cboNight.Items.AddRange(New Object() {"15", "16", "17", "18", "19", "20", "21", "22", "23"})
-        Me.cboNight.Location = New System.Drawing.Point(495, 252)
-        Me.cboNight.Margin = New System.Windows.Forms.Padding(4)
-        Me.cboNight.Name = "cboNight"
-        Me.cboNight.Size = New System.Drawing.Size(144, 24)
-        Me.cboNight.TabIndex = 77
-        Me.cboNight.ValueMember = "6"
-        '
-        'cboDay
-        '
-        Me.cboDay.DisplayMember = "displayMember"
-        Me.cboDay.FormattingEnabled = True
-        Me.cboDay.Items.AddRange(New Object() {"4", "5", "6", "7", "8", "9"})
-        Me.cboDay.Location = New System.Drawing.Point(496, 185)
-        Me.cboDay.Margin = New System.Windows.Forms.Padding(4)
-        Me.cboDay.Name = "cboDay"
-        Me.cboDay.Size = New System.Drawing.Size(144, 24)
-        Me.cboDay.TabIndex = 76
-        Me.cboDay.ValueMember = "displayMember"
-        '
-        'Label11
-        '
-        Me.Label11.AutoSize = True
-        Me.Label11.Location = New System.Drawing.Point(509, 190)
-        Me.Label11.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
-        Me.Label11.Name = "Label11"
-        Me.Label11.Size = New System.Drawing.Size(0, 17)
-        Me.Label11.TabIndex = 75
-        '
-        'tbGain
-        '
-        Me.tbGain.Location = New System.Drawing.Point(579, 299)
-        Me.tbGain.Margin = New System.Windows.Forms.Padding(4)
-        Me.tbGain.Name = "tbGain"
-        Me.tbGain.Size = New System.Drawing.Size(61, 22)
-        Me.tbGain.TabIndex = 95
-        Me.tbGain.Text = "4000"
-        '
-        'Timer1
-        '
-        Me.Timer1.Enabled = True
-        Me.Timer1.Interval = 1000
-        '
-        'Timer2
-        '
-        Me.Timer2.Interval = 1000
-        '
-        'Timer3
-        '
-        '
-        'TimerAcquistionRate
-        '
-        Me.TimerAcquistionRate.Interval = 1000
-        '
-        'tbStatus
-        '
-        Me.tbStatus.Location = New System.Drawing.Point(493, 124)
-        Me.tbStatus.Margin = New System.Windows.Forms.Padding(4)
-        Me.tbStatus.Name = "tbStatus"
-        Me.tbStatus.Size = New System.Drawing.Size(263, 22)
-        Me.tbStatus.TabIndex = 96
-        '
-        'tbLower
-        '
-        Me.tbLower.Location = New System.Drawing.Point(135, 512)
-        Me.tbLower.Margin = New System.Windows.Forms.Padding(4)
-        Me.tbLower.Name = "tbLower"
-        Me.tbLower.Size = New System.Drawing.Size(81, 22)
-        Me.tbLower.TabIndex = 97
-        Me.tbLower.Text = "10"
-        '
-        'tbUpper
-        '
-        Me.tbUpper.Location = New System.Drawing.Point(291, 512)
-        Me.tbUpper.Margin = New System.Windows.Forms.Padding(4)
-        Me.tbUpper.Name = "tbUpper"
-        Me.tbUpper.Size = New System.Drawing.Size(81, 22)
-        Me.tbUpper.TabIndex = 98
-        Me.tbUpper.Text = "4096"
-        '
-        'Label2
-        '
-        Me.Label2.AutoSize = True
-        Me.Label2.Location = New System.Drawing.Point(84, 516)
-        Me.Label2.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
-        Me.Label2.Name = "Label2"
-        Me.Label2.Size = New System.Drawing.Size(41, 17)
-        Me.Label2.TabIndex = 99
-        Me.Label2.Text = "lower"
-        '
-        'Label3
-        '
-        Me.Label3.AutoSize = True
-        Me.Label3.Location = New System.Drawing.Point(240, 516)
-        Me.Label3.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
-        Me.Label3.Name = "Label3"
-        Me.Label3.Size = New System.Drawing.Size(45, 17)
-        Me.Label3.TabIndex = 100
-        Me.Label3.Text = "upper"
-        '
-        'IcImagingControl1
-        '
-        Me.IcImagingControl1.AutoScroll = True
-        Me.IcImagingControl1.AutoScrollMinSize = New System.Drawing.Size(150, 150)
-        Me.IcImagingControl1.BackColor = System.Drawing.Color.White
-        Me.IcImagingControl1.DeviceListChangedExecutionMode = TIS.Imaging.EventExecutionMode.Invoke
-        Me.IcImagingControl1.DeviceLostExecutionMode = TIS.Imaging.EventExecutionMode.AsyncInvoke
-        Me.IcImagingControl1.DeviceState = resources.GetString("IcImagingControl1.DeviceState")
-        Me.IcImagingControl1.ImageAvailableExecutionMode = TIS.Imaging.EventExecutionMode.AsyncInvoke
-        Me.IcImagingControl1.LiveCaptureContinuous = True
-        Me.IcImagingControl1.LiveDisplayPosition = New System.Drawing.Point(0, 0)
-        Me.IcImagingControl1.Location = New System.Drawing.Point(31, 21)
-        Me.IcImagingControl1.Margin = New System.Windows.Forms.Padding(4)
-        Me.IcImagingControl1.MemoryCurrentGrabberColorformat = TIS.Imaging.ICImagingControlColorformats.ICY16
-        Me.IcImagingControl1.Name = "IcImagingControl1"
-        Me.IcImagingControl1.ScrollbarsEnabled = True
-        Me.IcImagingControl1.Size = New System.Drawing.Size(444, 379)
-        Me.IcImagingControl1.TabIndex = 101
-        '
-        'frmIS
-        '
-        Me.AutoScaleDimensions = New System.Drawing.SizeF(8.0!, 16.0!)
-        Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(773, 550)
-        Me.Controls.Add(Me.IcImagingControl1)
-        Me.Controls.Add(Me.Label3)
-        Me.Controls.Add(Me.Label2)
-        Me.Controls.Add(Me.tbUpper)
-        Me.Controls.Add(Me.tbLower)
-        Me.Controls.Add(Me.tbStatus)
-        Me.Controls.Add(Me.tbGain)
-        Me.Controls.Add(Me.Label8)
-        Me.Controls.Add(Me.Label7)
-        Me.Controls.Add(Me.tbNightAgain)
-        Me.Controls.Add(Me.lblDayNight)
-        Me.Controls.Add(Me.tbExposureTime)
-        Me.Controls.Add(Me.Label4)
-        Me.Controls.Add(Me.tbDayGain)
-        Me.Controls.Add(Me.tbNightExp)
-        Me.Controls.Add(Me.tbDayTimeExp)
-        Me.Controls.Add(Me.Label9)
-        Me.Controls.Add(Me.Label10)
-        Me.Controls.Add(Me.cboNight)
-        Me.Controls.Add(Me.cboDay)
-        Me.Controls.Add(Me.Label11)
-        Me.Controls.Add(Me.Label6)
-        Me.Controls.Add(Me.cbMeteors)
-        Me.Controls.Add(Me.txtFps)
-        Me.Controls.Add(Me.cbSaveImages)
-        Me.Controls.Add(Me.Button10)
-        Me.Controls.Add(Me.Label5)
-        Me.Controls.Add(Me.tbPath)
-        Me.Controls.Add(Me.Button8)
-        Me.Controls.Add(Me.Button7)
-        Me.Controls.Add(Me.Button6)
-        Me.Controls.Add(Me.tbPort)
-        Me.Controls.Add(Me.tbMultiplier)
-        Me.Controls.Add(Me.cbUseDarks)
-        Me.Controls.Add(Me.Button5)
-        Me.Controls.Add(Me.Label1)
-        Me.Controls.Add(Me.Button2)
-        Me.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
-        Me.Name = "frmIS"
-        Me.Text = "frmImagingSource"
-        CType(Me.IcImagingControl1, System.ComponentModel.ISupportInitialize).EndInit()
-        Me.ResumeLayout(False)
-        Me.PerformLayout()
+
+    Private Sub lblDayNight_TextChanged(sender As Object, e As EventArgs) Handles lblDayNight.TextChanged
+
+        If m_camRunning Then
+
+
+            Dim AbsValItf As TIS.Imaging.VCDAbsoluteValueProperty
+
+
+
+            ' Retrieve an absolute value interface for exposure
+            AbsValItf = IcImagingControl1.VCDPropertyItems.FindInterface(TIS.Imaging.VCDIDs.VCDID_Exposure + ":" +
+                                                                        TIS.Imaging.VCDIDs.VCDElement_Value + ":" +
+                                                                     TIS.Imaging.VCDIDs.VCDInterface_AbsoluteValue)
+
+            AbsValItf.Value = String.Format("{0,16:0.000000e+00}", tbExposureTime.Text / 1000)
+            ' AbsValItf.Value = "3.33000003593042492866516113281e-04"
+
+
+
+            ' Retrieve an absolute value interface for gain
+            AbsValItf = IcImagingControl1.VCDPropertyItems.FindInterface(TIS.Imaging.VCDIDs.VCDID_Gain + ":" +
+                                                                        TIS.Imaging.VCDIDs.VCDElement_Value + ":" +
+                                                                     TIS.Imaging.VCDIDs.VCDInterface_AbsoluteValue)
+            AbsValItf.Value = tbGain.Text
+
+
+            AbsValItf = IcImagingControl1.VCDPropertyItems.FindInterface(TIS.Imaging.VCDIDs.VCDID_Saturation + ":" +
+                                                                        TIS.Imaging.VCDIDs.VCDElement_Value + ":" +
+                                                                     TIS.Imaging.VCDIDs.VCDInterface_AbsoluteValue)
+            AbsValItf.Value = 125
+            IcImagingControl1.DeviceFrameRate = 1
+            IcImagingControl1.ImageRingBufferSize = 1
+
+            IcImagingControl1.Update()
+            'Dim fh As FrameHandlerSink
+        End If
+        'fh = IcImagingControl1.Sink
+
+        'fh.SnapMode = True
+        'If Me.tbExposureTime.Text < 3000 Then
+
+        ' IcImagingControl1.MemorySnapImage()
+        'Else
+        'IcImagingControl1.LiveStart()
 
     End Sub
 
-    Friend WithEvents Label6 As Label
-    Friend WithEvents cbMeteors As CheckBox
-    Friend WithEvents txtFps As TextBox
-    Friend WithEvents cbSaveImages As CheckBox
-    Friend WithEvents Button10 As Button
-    Friend WithEvents Label5 As Label
-    Friend WithEvents tbPath As TextBox
-    Friend WithEvents Button8 As Button
-    Friend WithEvents Button7 As Button
-    Friend WithEvents Button6 As Button
-    Friend WithEvents tbPort As TextBox
-    Friend WithEvents tbMultiplier As TextBox
-    Friend WithEvents cbUseDarks As CheckBox
-    Friend WithEvents Button5 As Button
-    Friend WithEvents Label1 As Label
-    Friend WithEvents Button2 As Button
-    Friend WithEvents Label8 As Label
-    Friend WithEvents Label7 As Label
-    Friend WithEvents tbNightAgain As TextBox
-    Friend WithEvents lblDayNight As Label
-    Friend WithEvents tbExposureTime As TextBox
-    Friend WithEvents Label4 As Label
-    Friend WithEvents tbDayGain As TextBox
-    Friend WithEvents tbNightExp As TextBox
-    Friend WithEvents tbDayTimeExp As TextBox
-    Friend WithEvents Label9 As Label
-    Friend WithEvents Label10 As Label
-    Friend WithEvents cboNight As ComboBox
-    Friend WithEvents cboDay As ComboBox
-    Friend WithEvents Label11 As Label
-    Friend WithEvents tbGain As TextBox
-    Friend WithEvents Timer1 As Timer
-    Friend WithEvents Timer2 As Timer
-    Friend WithEvents Timer3 As Timer
-    Friend WithEvents TimerAcquistionRate As Timer
-    Friend WithEvents tbStatus As TextBox
-    Friend WithEvents tbLower As TextBox
-    Friend WithEvents tbUpper As TextBox
-    Friend WithEvents Label2 As Label
-    Friend WithEvents Label3 As Label
+    Private Sub frmIS_Closing(sender As Object, e As CancelEventArgs) Handles Me.Closing
+        Dim i As Object
+
+        If hdialog <> 0 Then
+            PCO_CloseDialogCam(hdialog)
+        End If
+
+        PCO_SetRecordingState(hdriver, 0)
+        PCO_FreeBuffer(hdriver, nBuf) 'essential call, otherwise you'll get a memory leak
+        errorCode = PCO_CloseCamera(hdriver)
+        hdriver = 0
+        i = errorCode
+
+
+
+    End Sub
+
+
+
+    Private Sub Button7_Click(sender As Object, e As EventArgs) Handles Button7.Click
+        'use settings
+        'IcImagingControl1.ImageRingBufferSize = 1
+        m_camRunning = True
+
+
+        'VCDProp.RangeValue(VCDIDs.VCDID_Exposure) = -1
+        Dim AbsValItf As TIS.Imaging.VCDAbsoluteValueProperty
+
+
+        ' Retrieve an absolute value interface for exposure
+        AbsValItf = IcImagingControl1.VCDPropertyItems.FindInterface(TIS.Imaging.VCDIDs.VCDID_Exposure + ":" +
+                                                                    TIS.Imaging.VCDIDs.VCDElement_Value + ":" +
+                                                                 TIS.Imaging.VCDIDs.VCDInterface_AbsoluteValue)
+
+        AbsValItf.Value = String.Format("{0,16:0.000000e+00}", tbExposureTime.Text / 1000)
+        ' AbsValItf.Value = "3.33000003593042492866516113281e-04"
+
+
+
+        ' Retrieve an absolute value interface for gain
+        AbsValItf = IcImagingControl1.VCDPropertyItems.FindInterface(TIS.Imaging.VCDIDs.VCDID_Gain + ":" +
+                                                                    TIS.Imaging.VCDIDs.VCDElement_Value + ":" +
+                                                                 TIS.Imaging.VCDIDs.VCDInterface_AbsoluteValue)
+        AbsValItf.Value = tbGain.Text
+
+
+        AbsValItf = IcImagingControl1.VCDPropertyItems.FindInterface(TIS.Imaging.VCDIDs.VCDID_Saturation + ":" +
+                                                                    TIS.Imaging.VCDIDs.VCDElement_Value + ":" +
+                                                                 TIS.Imaging.VCDIDs.VCDInterface_AbsoluteValue)
+        AbsValItf.Value = 125
+        IcImagingControl1.DeviceFrameRate = 1
+        IcImagingControl1.ImageRingBufferSize = 1
+
+        IcImagingControl1.Update()
+        'Dim fh As FrameHandlerSink
+
+        'fh = IcImagingControl1.Sink
+
+        'fh.SnapMode = True
+        'If Me.tbExposureTime.Text < 3000 Then
+
+        ' IcImagingControl1.MemorySnapImage()
+        'Else
+        IcImagingControl1.LiveStart()
+
+        'End If
+
+        ' IcImagingControl1.
+
+        Button7.Enabled = False
+        Button8.Enabled = True
+
+        startTime = Now
+        meteorCheckRunning = True
+        Timer2.Enabled = True
+        t = New Thread(AddressOf processDetection)
+        t.Start()
+    End Sub
 
 
 
@@ -593,11 +768,11 @@ Partial Class frmIS
         'IcImagingControl1.VideoFormat = "RGB24 (3072x2048)"
         Dim newPixelValue As UInt16
         Dim dPixelValue As UInt16
-        Dim multiplier As Decimal
+        Dim multiplier
 
         multiplier = Val(tbMultiplier.Text)
         'subtract dark here while in 16bit gray mode
-        If cbUseDarks.Checked Then
+        If cbUseDarks.Checked And lblDayNight.Text = "night" Then
             If dark Is Nothing Then
                 loadMasterDark()
             End If
@@ -616,6 +791,10 @@ Partial Class frmIS
             Next
 
         End If
+        Debug.WriteLine("subtracted dark")
+        'Dim ffi As TIS.Imaging.FrameFilterInfo = CType(lstFrameFilters.SelectedItem, TIS.Imaging.FrameFilterInfo)
+        'Dim newFrameFilter As TIS.Imaging.FrameFilter = IcImagingControl1.FrameFilterInfos
+
 
         'debayer to rgb24
         Dim mTransformImage As BGAPI2.Image = Nothing
@@ -623,12 +802,22 @@ Partial Class frmIS
         ' Dim buff As BGAPI2.Buffer = New BGAPI2.Buffer()
         Dim imgProcessor As New BGAPI2.ImageProcessor()
 
+        If (imgProcessor.NodeList.GetNodePresent("DemosaicingMethod")) Then
 
+            imgProcessor.NodeList("DemosaicingMethod").Value = "Baumer5x5"
+
+
+        End If
 
         Dim outImage(iWidth * iHeight * 3) As Byte
         mImage = imgProcessor.CreateImage(iWidth, iHeight, "BayerBG16", e.ImageBuffer.GetImageDataPtr, e.ImageBuffer.ActualDataSize)
 
-        mTransformImage = imgProcessor.CreateTransformedImage(mImage, "BayerBG12")
+        mTransformImage = imgProcessor.CreateTransformedImage(mImage, "BayerBG8")
+
+
+
+
+
 
         mTransformImage = imgProcessor.CreateTransformedImage(mTransformImage, "RGB8")
 
@@ -768,4 +957,13 @@ Partial Class frmIS
     Private Sub tbMultiplier_TextChanged(sender As Object, e As EventArgs) Handles tbMultiplier.TextChanged
         loadMasterDark()
     End Sub
+
+    Private Sub Timer2_Tick(sender As Object, e As EventArgs) Handles Timer2.Tick
+
+    End Sub
+
+
+
+
 End Class
+

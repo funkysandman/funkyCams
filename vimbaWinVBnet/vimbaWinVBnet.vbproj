@@ -114,9 +114,9 @@
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xaml" />
     <Reference Include="System.XML" />
-    <Reference Include="TIS.Imaging.ICImagingControl34, Version=3.4.4.2744, Culture=neutral, PublicKeyToken=257805929e8b7928, processorArchitecture=x86">
+    <Reference Include="TIS.Imaging.ICImagingControl34, Version=3.4.4.2744, Culture=neutral, PublicKeyToken=257805929e8b7928, processorArchitecture=AMD64">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\Program Files (x86)\Common Files\IC Imaging Control 3.4\bin\v4.0.30319\x86\TIS.Imaging.ICImagingControl34.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\Program Files\Common Files\IC Imaging Control 3.4\bin\v4.0.30319\x64\TIS.Imaging.ICImagingControl34.dll</HintPath>
     </Reference>
     <Reference Include="VimbaNET, Version=1.7.0.24184, Culture=neutral, PublicKeyToken=96b729f24f119b9a, processorArchitecture=x86">
       <SpecificVersion>False</SpecificVersion>
@@ -449,6 +449,12 @@
     </Content>
     <Content Include="SVGenSDK64.dll" />
     <Content Include="SVLog64.dll" />
+    <Content Include="TIS_UDSHL11.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TIS_UDSHL11_x64.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="toupcam.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
