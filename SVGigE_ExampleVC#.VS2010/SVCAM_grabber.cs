@@ -1173,7 +1173,7 @@ namespace SVCamApi
                             //load dark array from file
                             //
                             
-                            //File.WriteAllBytes("test.raw", rawImage.imagebytes);
+                            File.WriteAllBytes("test.raw", rawImage.imagebytes);
                             int x;
                             if (useDarks)
                             {
@@ -1318,6 +1318,9 @@ namespace SVCamApi
                             //subtract darks
                             //load dark array from file
                             //
+
+                            
+                            //
                             File.WriteAllBytes( "test.raw", rawImage.imagebytes);
                                 Random r = new Random();
                                 int x;
@@ -1427,15 +1430,25 @@ namespace SVCamApi
                             int maxvalue = 0;
                             int minvalue = 65535;
                             int newValue = 0;
+                            int biasValue = 0;
                             long total = 0;
                             byte temp;
                             Single multiplier = Convert.ToSingle(upper - lower) / 256;
                             byte[] monoImage = new byte[imageSizeX * imageSizeY];
+
+                            byte[] biasImage = new byte[imageSizeX * imageSizeY * 2];
+                            biasImage = File.ReadAllBytes("svs12bias.raw");
                             File.WriteAllBytes("16bittestB4.raw", rawImage.imagebytes);
                             for (int x =0;x<rawImage.imagebytes.Length; x=x+2)
                             {
                                 value = Convert.ToInt16(rawImage.imagebytes[x +1])*256  + Convert.ToInt16(rawImage.imagebytes[x ]) ;
                                 value = value >> 4;
+                                biasValue = Convert.ToInt16(biasImage[x + 1]) * 256 + Convert.ToInt16(biasImage[x]);
+                                biasValue = biasValue >> 4;
+
+                               // value =Math.Max(0, value - biasValue);
+
+
                                 if (value > maxvalue ) maxvalue = value;
                                 if (value < minvalue) minvalue = value;
                                 total = total + value;

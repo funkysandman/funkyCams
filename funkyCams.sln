@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26228.73
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GigeApi_", "SVGigE_ExampleVC#.VS2010\GigeApi_.csproj", "{B209E79D-9E9E-475E-9300-076E0062DABB}"
-EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "vimbaWinVBnet", "vimbaWinVBnet\vimbaWinVBnet.vbproj", "{42B2FBF8-9644-4638-8EE8-62DC98B22787}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BaslerImageGrabber", "BaslerGrab\BaslerImageGrabber.csproj", "{6DE4CADD-9D37-48FF-A80C-E56B83720FB0}"
@@ -67,26 +65,6 @@ Global
 		RelWithDebInfo|x86 = RelWithDebInfo|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{B209E79D-9E9E-475E-9300-076E0062DABB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B209E79D-9E9E-475E-9300-076E0062DABB}.Debug|x64.ActiveCfg = Debug|x64
-		{B209E79D-9E9E-475E-9300-076E0062DABB}.Debug|x86.ActiveCfg = Debug|x86
-		{B209E79D-9E9E-475E-9300-076E0062DABB}.MinSizeRel|Any CPU.ActiveCfg = Release|Any CPU
-		{B209E79D-9E9E-475E-9300-076E0062DABB}.MinSizeRel|Any CPU.Build.0 = Release|Any CPU
-		{B209E79D-9E9E-475E-9300-076E0062DABB}.MinSizeRel|x64.ActiveCfg = Release|x64
-		{B209E79D-9E9E-475E-9300-076E0062DABB}.MinSizeRel|x64.Build.0 = Release|x64
-		{B209E79D-9E9E-475E-9300-076E0062DABB}.MinSizeRel|x86.ActiveCfg = Release|x86
-		{B209E79D-9E9E-475E-9300-076E0062DABB}.MinSizeRel|x86.Build.0 = Release|x86
-		{B209E79D-9E9E-475E-9300-076E0062DABB}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B209E79D-9E9E-475E-9300-076E0062DABB}.Release|x64.ActiveCfg = Release|x64
-		{B209E79D-9E9E-475E-9300-076E0062DABB}.Release|x64.Build.0 = Release|x64
-		{B209E79D-9E9E-475E-9300-076E0062DABB}.Release|x86.ActiveCfg = Release|x86
-		{B209E79D-9E9E-475E-9300-076E0062DABB}.Release|x86.Build.0 = Release|x86
-		{B209E79D-9E9E-475E-9300-076E0062DABB}.RelWithDebInfo|Any CPU.ActiveCfg = Release|Any CPU
-		{B209E79D-9E9E-475E-9300-076E0062DABB}.RelWithDebInfo|Any CPU.Build.0 = Release|Any CPU
-		{B209E79D-9E9E-475E-9300-076E0062DABB}.RelWithDebInfo|x64.ActiveCfg = Release|x64
-		{B209E79D-9E9E-475E-9300-076E0062DABB}.RelWithDebInfo|x64.Build.0 = Release|x64
-		{B209E79D-9E9E-475E-9300-076E0062DABB}.RelWithDebInfo|x86.ActiveCfg = Release|x86
-		{B209E79D-9E9E-475E-9300-076E0062DABB}.RelWithDebInfo|x86.Build.0 = Release|x86
 		{42B2FBF8-9644-4638-8EE8-62DC98B22787}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{42B2FBF8-9644-4638-8EE8-62DC98B22787}.Debug|x64.ActiveCfg = Debug|Any CPU
 		{42B2FBF8-9644-4638-8EE8-62DC98B22787}.Debug|x86.ActiveCfg = Debug|Any CPU
