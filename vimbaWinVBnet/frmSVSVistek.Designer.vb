@@ -160,7 +160,7 @@ Partial Class frmSVSVistek
         'Timer1
         '
         Me.Timer1.Enabled = True
-        Me.Timer1.Interval = 10000
+        Me.Timer1.Interval = 2000
         '
         'tbDayTimeExp
         '

@@ -400,7 +400,31 @@ Public Class frmSVSVistek
 
 
             b.Save(filename, myImageCodecInfo, myEncoderParameters)
+            'delete all files 24 hrs older underneath path
+            Try
+                Dim dtCreated As DateTime
+                Dim dtToday As DateTime = Today.Date
+                Dim diObj As DirectoryInfo
+                Dim ts As TimeSpan
+                Dim lstDirsToDelete As New List(Of String)
 
+                For Each sSubDir As String In Directory.GetDirectories(Me.tbPath.Text)
+                    diObj = New DirectoryInfo(sSubDir)
+                    dtCreated = diObj.CreationTime
+
+                    ts = dtToday - dtCreated
+
+                    'Add whatever storing you want here for all folders...
+
+                    If ts.Days >= 1 Then
+                        lstDirsToDelete.Add(sSubDir)
+                        'Store whatever values you want here... like how old the folder is
+                        diObj.Delete(True) 'True for recursive deleting
+                    End If
+                Next
+            Catch ex As Exception
+                'MessageBox.Show(ex.Message, "Error Deleting Folder", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            End Try
 
         End If
         If cbMeteors.Checked And lblDayNight.Text.ToLower = "night" Then
@@ -577,37 +601,29 @@ Public Class frmSVSVistek
             Else
                 currentMode = False
             End If
-            If currentMode <> night Then
-                night = currentMode
+            '  If currentMode <> night Then
+            night = currentMode
                 If night Then
 
                     tbExposureTime.Text = tbNightExp.Text
                     lblDayNight.Text = "night"
-                    'night mode
-                    ' If Not myWebServer Is Nothing Then
-                    If cbUseDarks.Checked Then
-                        mySVCam.useDarks = True
-                    Else
-                        mySVCam.useDarks = False
-                    End If
-                    'End If
-                    mySVCam.setParams(Val(Me.tbExposureTime.Text), Val(Me.tbNightAgain.Text))
+                'night mode
 
-                Else
+
+            Else
                     'day mode
 
                     tbExposureTime.Text = tbDayTimeExp.Text
 
                     lblDayNight.Text = "day"
-                    mySVCam.setParams(Val(Me.tbExposureTime.Text), Val(Me.tbDayGain.Text))
-
-
-                End If
-                'End If
-
 
 
             End If
+            'End If
+
+
+
+            ' End If
 
         Catch ex As Exception
 
@@ -897,8 +913,10 @@ Public Class frmSVSVistek
     Private Sub lblDayNight_TextChanged(sender As Object, e As EventArgs) Handles lblDayNight.TextChanged
         'stop stream
         If mySVCam Is Nothing Then Exit Sub
+        If Not mySVCam.acqThreadIsRuning Then Exit Sub
 
-            mySVCam.stopAcquisitionThread()
+        mySVCam.stopAcquisitionThread()
+
         If lblDayNight.Text = "night" Then
 
             tbExposureTime.Text = tbNightExp.Text

@@ -876,7 +876,30 @@ Public Class frmIS
 
             x.Save(filename, myImageCodecInfo, myEncoderParameters)
             x.Dispose()
+            Try
+                Dim dtCreated As DateTime
+                Dim dtToday As DateTime = Today.Date
+                Dim diObj As DirectoryInfo
+                Dim ts As TimeSpan
+                Dim lstDirsToDelete As New List(Of String)
 
+                For Each sSubDir As String In Directory.GetDirectories(Me.tbPath.Text)
+                    diObj = New DirectoryInfo(sSubDir)
+                    dtCreated = diObj.CreationTime
+
+                    ts = dtToday - dtCreated
+
+                    'Add whatever storing you want here for all folders...
+
+                    If ts.Days >= 1 Then
+                        lstDirsToDelete.Add(sSubDir)
+                        'Store whatever values you want here... like how old the folder is
+                        diObj.Delete(True) 'True for recursive deleting
+                    End If
+                Next
+            Catch ex As Exception
+                'MessageBox.Show(ex.Message, "Error Deleting Folder", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            End Try
         End If
 
 
