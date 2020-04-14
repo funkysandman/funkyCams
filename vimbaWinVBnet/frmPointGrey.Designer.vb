@@ -325,7 +325,7 @@ Partial Class frmPointGrey
         '
         Me.cboNight.DisplayMember = "6"
         Me.cboNight.FormattingEnabled = True
-        Me.cboNight.Items.AddRange(New Object() {"15", "16", "17", "18", "19", "20", "21", "22", "23"})
+        Me.cboNight.Items.AddRange(New Object() {"13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23"})
         Me.cboNight.Location = New System.Drawing.Point(371, 205)
         Me.cboNight.Name = "cboNight"
         Me.cboNight.Size = New System.Drawing.Size(109, 21)
@@ -336,7 +336,7 @@ Partial Class frmPointGrey
         '
         Me.cboDay.DisplayMember = "displayMember"
         Me.cboDay.FormattingEnabled = True
-        Me.cboDay.Items.AddRange(New Object() {"4", "5", "6", "7", "8", "9"})
+        Me.cboDay.Items.AddRange(New Object() {"4", "5", "6", "7", "8", "9", "10", "11", "12"})
         Me.cboDay.Location = New System.Drawing.Point(372, 150)
         Me.cboDay.Name = "cboDay"
         Me.cboDay.Size = New System.Drawing.Size(109, 21)

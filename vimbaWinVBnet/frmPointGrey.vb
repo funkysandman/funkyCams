@@ -1145,38 +1145,15 @@ Public Class frmPointGrey
 
 
     Private Sub lblDayNight_TextChanged(sender As Object, e As EventArgs) Handles lblDayNight.TextChanged
-        'Dim err As QCamM_Err
 
-        'If Not mSettings Is Nothing Then
-        '    Debug.Print("setting gain to " & tbGain.Text)
-        ''    Debug.Print("setting exposure to " & tbExposureTime.Text)
-        'If lblDayNight.Text = "day" Then
-        '    'set exposure and gain
-
-
-        'Else
-        '    TimerAcquistionRate.Enabled = False
-        '    If m_camRunning Then
-        '        StartStream()
-
-        '    End If
-        'End If
-
-        '    QCam.QCamM_SetParam(mSettings, QCamM_Param.qprmGain, CUInt((tbGain.Text)))
-        '    QCam.QCamM_SetParam(mSettings, QCamM_Param.qprmExposure, tbExposureTime.Text)
-        '    err = QCam.QCamM_SendSettingsToCam(mhCamera, mSettings)
-        'End If
         If Not m_cam Is Nothing Then
             setExposure(CDbl(tbExposureTime.Text))
+            setGain(CDbl(tbGain.Text))
         End If
 
     End Sub
 
-    Private Sub frmPointGrey_Closing(sender As Object, e As CancelEventArgs) Handles Me.Closing
 
-
-
-    End Sub
 
     Private Sub TimerAcquistionRate_Tick(sender As Object, e As EventArgs) Handles TimerAcquistionRate.Tick
 
