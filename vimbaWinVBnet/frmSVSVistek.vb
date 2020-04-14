@@ -915,7 +915,7 @@ Public Class frmSVSVistek
         If mySVCam Is Nothing Then Exit Sub
         If Not mySVCam.acqThreadIsRuning Then Exit Sub
 
-        mySVCam.stopAcquisitionThread()
+        'mySVCam.stopAcquisitionThread()
 
         If lblDayNight.Text = "night" Then
 
@@ -942,12 +942,12 @@ Public Class frmSVSVistek
 
         End If
         'start stream
-        If Me.cbUseTrigger.Checked Then
+        'If Me.cbUseTrigger.Checked Then
 
-            mySVCam.startAcquisitionTriggerWidthThread(AddressOf Me.received_frame)
-        Else
-            mySVCam.startAcquisitionThread(AddressOf Me.received_frame)
-        End If
+        '    mySVCam.startAcquisitionTriggerWidthThread(AddressOf Me.received_frame)
+        'Else
+        '    mySVCam.startAcquisitionThread(AddressOf Me.received_frame)
+        'End If
     End Sub
 
 

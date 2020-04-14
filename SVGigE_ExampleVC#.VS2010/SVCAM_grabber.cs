@@ -171,25 +171,32 @@ namespace SVCamApi
         public void setParams(int duration, float aGain)
         {
 
+            bool wasrunning = acqThreadIsRuning;
+            //if (acqThreadIsRuning)
+            //    current_selected_cam.StreamingChannelClose();
+
+
+
+
             m_duration = duration;
             m_aGain = aGain;
             
-         
+           
             IntPtr phFeature = IntPtr.Zero;
-            Camera cam = current_selected_cam;
-            cam.duration = duration;
+           
+            current_selected_cam.duration = duration;
             SVCamApi.SVcamApi.SVSCamApiReturn ret;
             phFeature = IntPtr.Zero;
-            ret = SVSCam.myApi.SVS_FeatureGetByName(cam.hRemoteDevice, "Gain", ref phFeature);
-            ret = SVSCam.myApi.SVS_FeatureSetValueFloat(cam.hRemoteDevice, phFeature, (float)aGain);
+            ret = SVSCam.myApi.SVS_FeatureGetByName(current_selected_cam.hRemoteDevice, "Gain", ref phFeature);
+            ret = SVSCam.myApi.SVS_FeatureSetValueFloat(current_selected_cam.hRemoteDevice, phFeature, (float)aGain);
 
             SVcamApi._SVCamFeaturInf info = new SVcamApi._SVCamFeaturInf();
             //SVSCam.myApi.SVS_FeatureGetByName(cam.hRemoteDevice, "GainRaw", ref phFeature);
             //cam.getFeatureValue(phFeature, ref info);
 
             phFeature = IntPtr.Zero;
-            SVSCam.myApi.SVS_FeatureGetByName(cam.hRemoteDevice, "ExposureTime", ref phFeature);
-            SVSCam.myApi.SVS_FeatureSetValueFloat(cam.hRemoteDevice, phFeature, duration);
+            ret = SVSCam.myApi.SVS_FeatureGetByName(current_selected_cam.hRemoteDevice, "ExposureTime", ref phFeature);
+            ret = SVSCam.myApi.SVS_FeatureSetValueFloat(current_selected_cam.hRemoteDevice, phFeature, duration);
 
             //phFeature = IntPtr.Zero;
             //SVSCam.myApi.SVS_FeatureGetByName(cam.hRemoteDevice, "AcquisitionFrameRate", ref phFeature);
@@ -203,10 +210,10 @@ namespace SVCamApi
 
 
             phFeature = IntPtr.Zero;
-            ret = SVSCam.myApi.SVS_FeatureGetByName(cam.hRemoteDevice, "ExposureAuto", ref phFeature);
+            ret = SVSCam.myApi.SVS_FeatureGetByName(current_selected_cam.hRemoteDevice, "ExposureAuto", ref phFeature);
             info = new SVcamApi._SVCamFeaturInf();
-            SVSCam.myApi.SVS_FeatureGetByName(cam.hRemoteDevice, "ExposureAuto", ref phFeature);
-            cam.getFeatureValue(phFeature, ref info);
+            ret = SVSCam.myApi.SVS_FeatureGetByName(current_selected_cam.hRemoteDevice, "ExposureAuto", ref phFeature);
+            current_selected_cam.getFeatureValue(phFeature, ref info);
 
             //if (duration > 100000)//only bother with autoexposure during the day with short shutter times
             //{
@@ -217,9 +224,10 @@ namespace SVCamApi
             //else
             //{
             //    //ret = SVSCam.myApi.SVS_FeatureSetValueInt64Enum(cam.hRemoteDevice, phFeature, (int) 1);
-               
-            //}
 
+            //}
+            //if (wasrunning)
+            //    current_selected_cam.StreamingChannelOpen();
 
         }
 
@@ -2117,7 +2125,7 @@ namespace SVCamApi
 
 
             Console.WriteLine("stopped acquisition");
-            current_selected_cam.closeConnection();
+            current_selected_cam.StreamingChannelClose();
             //acqThread.Abort();
 
             //if (current_selected_cam.bufferInfoDest.pImagePtr != IntPtr.Zero)
