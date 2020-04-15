@@ -2125,6 +2125,7 @@ namespace SVCamApi
 
 
             Console.WriteLine("stopped acquisition");
+            current_selected_cam.acquisitionStop();
             current_selected_cam.StreamingChannelClose();
             //acqThread.Abort();
 
@@ -2560,11 +2561,12 @@ namespace SVCamApi
             {
                 if (!cam.grab())
                 {
+                    if (acqThreadIsRuning) { 
                     stopAcquisitionThread();
                     startAcquisitionThread(m_frh);
                     Console.WriteLine("called start acquisition");
                     return;
-
+                    }
                 } 
                 else
                 { 
@@ -2605,9 +2607,9 @@ namespace SVCamApi
             //int i = curentCamIndex;
             //Console.WriteLine("closing connection");
             //current_selected_cam.closeConnection();
-            current_selected_cam.acquisitionStop();
-            current_selected_cam.is_opened = false;
-            current_selected_cam.StreamingChannelClose();
+            //current_selected_cam.acquisitionStop();
+            //current_selected_cam.is_opened = false;
+            //current_selected_cam.StreamingChannelClose();
 
 
             //openCamera(curentCamIndex);
