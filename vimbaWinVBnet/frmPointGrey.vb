@@ -358,7 +358,7 @@ Public Class frmPointGrey
                 ms.Close()
 
             End If
-            If myForm.cbSaveImages.Checked = True Then
+            If myForm.cbSaveImages.Checked = True And myForm.lblDayNight.Text = "night" Then
                 System.IO.Directory.CreateDirectory(Path.Combine(myForm.tbPath.Text, folderName))
                 Dim x As Bitmap
                 x = myForm.getLastImage

@@ -293,7 +293,7 @@ Public Class frmAVT
 
 
 
-        If Me.cbSaveImages.Checked = True Then
+        If Me.cbSaveImages.Checked = True And Me.lblDayNight.Text = "night" Then
             System.IO.Directory.CreateDirectory(Path.Combine(Me.tbPath.Text, folderName))
 
 

@@ -571,6 +571,9 @@ namespace SVCamApi
                             Console.WriteLine("ERROR:{0}", ret);
                             framesLost++;
                             //assuming a timeout happened...
+
+                            //
+
                             //send another buffer
                             //myApi.SVS_StreamQueueBuffer(hStream, hBuffer);
                             //myApi.SVS_FeatureGetByName(hRemoteDevice, SVcamApi.CameraFeature.AcquisitionStart, ref hFeature);
@@ -2336,13 +2339,13 @@ namespace SVCamApi
             }
             else
             {
-                ret = SVSCam.myApi.SVS_FeatureSetValueFloat(cam.hRemoteDevice, phFeature, (float)0.2);
-                //ret = SVSCam.myApi.SVS_FeatureSetValueFloat(cam.hRemoteDevice, phFeature, Math.Min((float)999220 / cam.duration, (float)2));
+               ret = SVSCam.myApi.SVS_FeatureSetValueFloat(cam.hRemoteDevice, phFeature, (float)0.2);
+               // ret = SVSCam.myApi.SVS_FeatureSetValueFloat(cam.hRemoteDevice, phFeature, Math.Min((float)999220 / cam.duration, (float)2));
             }
             //set packet delay
             ret = SVSCam.myApi.SVS_FeatureGetByName(cam.hRemoteDevice, "GevSCPD", ref phFeature);
             ret = SVSCam.myApi.SVS_FeatureGetInfo(cam.hRemoteDevice, phFeature, ref info.SVFeaturInf);
-            ret = SVSCam.myApi.SVS_FeatureSetValueInt64(cam.hRemoteDevice, phFeature, 10000000);//packet delay
+            ret = SVSCam.myApi.SVS_FeatureSetValueInt64(cam.hRemoteDevice, phFeature, 5000000);//packet delay
             //turn on triggerwidth
             ret = SVSCam.myApi.SVS_FeatureGetByName(cam.hRemoteDevice, "ExposureMode", ref phFeature);
             ret = SVSCam.myApi.SVS_FeatureGetInfo(cam.hRemoteDevice, phFeature, ref info.SVFeaturInf);
@@ -2561,8 +2564,11 @@ namespace SVCamApi
             {
                 if (!cam.grab())
                 {
-                    if (acqThreadIsRuning) { 
+                    if (acqThreadIsRuning) {
+                     Console.WriteLine("going to cycle camera");
                     stopAcquisitionThread();
+                    current_selected_cam.closeConnection();
+                    current_selected_cam.openConnection();
                     startAcquisitionThread(m_frh);
                     Console.WriteLine("called start acquisition");
                     return;

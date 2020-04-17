@@ -24,9 +24,9 @@ Public Module Functions
 
             Dim byteContent = New ByteArrayContent(qe.img)
             Try
+            Console.WriteLine("file: " & qe.filename)
 
-
-                Dim response = client.PostAsync(myUriBuilder.ToString, byteContent)
+            Dim response = client.PostAsync(myUriBuilder.ToString, byteContent)
                 Dim responseString = response.Result
                 byteContent = Nothing
 
