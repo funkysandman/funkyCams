@@ -386,7 +386,18 @@ Public Class frmAVT
         End If
 
     End Sub
+    Private Sub btnStartWeb_Click(sender As Object, e As EventArgs) Handles btnStartWeb.Click
+        btnStartWeb.Enabled = False
+        btnStopWeb.Enabled = True
+        myWebServer = WebServer.getWebServer
 
+        myWebServer.StartWebServer(v.m_Camera, Me, Val(Me.tbPort.Text))
+        myWebServer.ImageDirectory = "c:\web\images\"
+        myWebServer.VirtualRoot = "c:\web\"
+
+
+
+    End Sub
 
 
     Private Sub btnStopWeb_Click(sender As Object, e As EventArgs) Handles btnStopWeb.Click
@@ -447,6 +458,7 @@ Public Class frmAVT
 
         v.OpenCamera(cmbCam.SelectedItem)
         loadProfile(cmbCam.SelectedItem)
+        lblDayNight.Text = ""
     End Sub
 
 
