@@ -10,65 +10,13 @@ Imports System.Collections.Specialized
 Imports vimbaWinVBnet.vimbaWinVBnet
 
 Public Class frmAVT
+    Inherits frmMaster
     'Dim v As New AVT.VmbAPINET.Vimba
     ' Dim WithEvents myCam As AVT.VmbAPINET.Camera
-    Dim myDetectionQueue As New Queue(Of queueEntry)
-    Dim client As New HttpClient()
-    Dim night As Boolean
-    Private myWebServer As WebServer
-    Dim rawDark() As Byte
-    Dim running As Boolean = False
-    Dim b As Bitmap
-    Dim myTimer As New System.Timers.Timer
-    Dim myCamID As String
-    Dim nightset As Boolean
-    ' Dim md As New ObjectDetection.TFDetector()
     Dim v As AsynchronousGrab.VimbaHelper
-    Dim dark() As Byte
-    Dim frames As Integer
-    Dim startTime As Date
-    Dim myImageCodecInfo As ImageCodecInfo
-    Dim myEncoder As System.Drawing.Imaging.Encoder
-    Dim myEncoderParameter As EncoderParameter
-    Dim myEncoderParameters As EncoderParameters
-    Dim t As Thread
-    Dim meteorCheckRunning As Boolean = False
+    Dim b As Bitmap
+    Dim myCamID As String
 
-    Public Sub New()
-
-        ' This call is required by the designer.
-        InitializeComponent()
-
-        ' Add any initialization after the InitializeComponent() call.
-        'setup dark
-
-    End Sub
-
-    Private Shared Function GetEncoderInfo(ByVal mimeType As String) As ImageCodecInfo
-        Dim j As Integer
-        Dim encoders() As ImageCodecInfo
-        encoders = ImageCodecInfo.GetImageEncoders()
-
-        j = 0
-        While j < encoders.Length
-            If encoders(j).MimeType = mimeType Then
-                Return encoders(j)
-            End If
-            j += 1
-        End While
-        Return Nothing
-
-    End Function 'GetEncoderInfo
-    Private Sub checkForThings()
-        'copy of b
-        'Dim c As New Bitmap(b)
-        'c.Tag = "copy"
-        'If Not md.isExamining Then
-        '    md.examine(b)
-        'End If
-
-
-    End Sub
     Function darkFunction(pixeld As Long, arg As Long, slope As Long) As Int16
         Dim subtract
 
@@ -166,100 +114,12 @@ Public Class frmAVT
             End Try
 
 
-            'Dim raw As System.Drawing.Imaging.BitmapData = Nothing
-            '' 'Freeze the image in memory
-            'raw = b.LockBits(New Rectangle(0, 0,
-            ' b.Width, b.Height),
-            ' System.Drawing.Imaging.ImageLockMode.ReadOnly,
-            'b.PixelFormat)
-            'Dim size As Integer = b.Width * b.Height * 3
-
-            'Dim rawImage() As Byte = New Byte(size - 1) {}
-            '''Copy the image into the byte()
-            'System.Runtime.InteropServices.Marshal.Copy(raw.Scan0, rawImage, 0, size)
-
-
-            'Dim multiplier
-            'multiplier = Val(Me.tbMultiplier.Text)
-            ''
-            ''subtract the dark
-            'If cbUseDarks.Checked Then
-            '    Dim aByte As Integer
-            '    Try
-
-            '        Dim aNewValue As Byte
-            '        Dim offset As Integer
-            '        For aByte = 0 To size - 1
-            '            If dark(aByte) > 220 Then
-            '                aNewValue = CByte(Math.Max(0, CLng(rawImage(aByte)) - CLng(dark(aByte))))
-            '                rawImage(aByte) = aNewValue
-            '            End If
-
-            '        Next
-            '        writeline("subtracted dark")
-            '    Catch ex As Exception
-            '        MsgBox(ex.Message)
-            '    End Try
-            'End If
-
-            'Dim raw2 As System.Drawing.Imaging.BitmapData = Nothing
-
-
-            '' 'Freeze the image in memory
-
-            ''raw2 = d2.LockBits(New Rectangle(0, 0,
-            '' d2.Width, d2.Height),
-            '' System.Drawing.Imaging.ImageLockMode.ReadOnly,
-            ''d2.PixelFormat)
-            ''size = raw2.Height * raw2.Stride
-
-            '' Dim rawImage2() As Byte = New Byte(size - 1) {}
-            '' 'Copy the image into the byte()
-            'System.Runtime.InteropServices.Marshal.Copy(rawImage, 0, raw.Scan0, size)
-
-            ''If Not raw2 Is Nothing Then
-            ''    ' Unfreeze the memory for the image
-            ''    d2.UnlockBits(raw2)
-            ''End If
-
-
-
-            'b.UnlockBits(raw)
 
 
 
         Else '
 
             dark = Nothing
-
-            'copy buffer into bitmap
-            'b = New Bitmap(CInt(args.Frame.Width), CInt(args.Frame.Height), PixelFormat.Format24bppRgb)
-
-            '' Lock the bitmap's bits.  
-            'Dim rect As New Rectangle(0, 0, b.Width, b.Height)
-            'Dim bmpData As System.Drawing.Imaging.BitmapData = b.LockBits(rect, System.Drawing.Imaging.ImageLockMode.ReadWrite, b.PixelFormat)
-
-            '' Get the address of the first line.
-            'Dim ptr As IntPtr = bmpData.Scan0
-
-            '' Declare an array to hold the bytes of the bitmap.
-            '' This code is specific to a bitmap with 24 bits per pixels.
-            'Dim bytes As Integer = Math.Abs(bmpData.Stride) * b.Height
-            'Dim rgbValues(bytes - 1) As Byte
-
-            ''' Copy the RGB values into the array.
-            ''System.Runtime.InteropServices.Marshal.Copy(ptr, rgbValues, 0, bytes)
-
-            ''' Set every third value to 255. A 24bpp image will look red.
-            ''For counter As Integer = 2 To rgbValues.Length - 1 Step 3
-            ''    rgbValues(counter) = 255
-            ''Next
-
-            '' Copy the RGB values back to the bitmap
-            'System.Runtime.InteropServices.Marshal.Copy(args.Frame.Buffer, 0, ptr, args.Frame.BufferSize)
-
-            '' Unlock the bits.
-            'b.UnlockBits(bmpData)
 
 
 
@@ -298,30 +158,16 @@ Public Class frmAVT
 
 
             b.Save(filename, myImageCodecInfo, myEncoderParameters)
-            Try
-                Dim dtCreated As DateTime
-                Dim dtToday As DateTime = Today.Date
-                Dim diObj As DirectoryInfo
-                Dim ts As TimeSpan
-                Dim lstDirsToDelete As New List(Of String)
 
-                For Each sSubDir As String In Directory.GetDirectories(Me.tbPath.Text)
-                    diObj = New DirectoryInfo(sSubDir)
-                    dtCreated = diObj.CreationTime
 
-                    ts = dtToday - dtCreated
+            If t_cleanup.ThreadState = ThreadState.Unstarted Or t_cleanup.ThreadState = ThreadState.Stopped Then
+                t_cleanup = New Thread(AddressOf cleanFolders)
 
-                    'Add whatever storing you want here for all folders...
+                t_cleanup.Start()
+            Else
 
-                    If ts.Days >= 1 Then
-                        lstDirsToDelete.Add(sSubDir)
-                        'Store whatever values you want here... like how old the folder is
-                        diObj.Delete(True) 'True for recursive deleting
-                    End If
-                Next
-            Catch ex As Exception
-                'MessageBox.Show(ex.Message, "Error Deleting Folder", MessageBoxButtons.OK, MessageBoxIcon.Error)
-            End Try
+                Debug.WriteLine("threadstate:" & t_cleanup.ThreadState)
+            End If
 
         End If
         If cbMeteors.Checked And lblDayNight.Text = "night" Then
@@ -352,21 +198,7 @@ Public Class frmAVT
         running = False
 
     End Sub
-    Public Sub processDetection()
-        Dim aQE As queueEntry
-        While (meteorCheckRunning)
-            If myDetectionQueue.Count > 0 Then
-                aQE = myDetectionQueue.Dequeue()
-                Functions.CallAzureMeteorDetection(aQE)
 
-                aQE = Nothing
-
-            End If
-            ' Console.WriteLine(myDetectionQueue.Count)
-            Thread.Sleep(1000)
-        End While
-
-    End Sub
 
 
 
@@ -392,137 +224,86 @@ Public Class frmAVT
 
         v.Startup()
 
-        'Dim cl As List(Of CameraInfo)
-        'cl = v.CameraList
-        'cbCam.Items.Clear()
-
-        'For Each c As CameraInfo In cl
-        '    cbCam.Items.Add(c.ID)
-        'Next
 
     End Sub
     Private Sub shutdown()
         v.Shutdown()
-        cbCam.Items.Clear()
-        MsgBox("shutdown complete")
+
 
     End Sub
-    Private Sub Timer1_Tick(sender As Object, e As EventArgs) Handles Timer1.Tick
+    Private Sub Timer1_Tick(sender As Object, e As EventArgs) Handles TimerDayNight.Tick
+
         Try
 
-
-            Timer1.Enabled = False
 
 
             Dim currentMode As Boolean
             currentMode = False
 
-            If Now.Hour >= Me.ComboBox2.SelectedItem Or Now.Hour <= ComboBox1.SelectedItem Then
-                currentMode = True
+            If Now.Hour >= cboNight.SelectedItem Or Now.Hour <= cboDay.SelectedItem Then
+                night = True
             Else
-                currentMode = False
+                night = False
             End If
+            ' If currentMode <> night Then
 
-            If currentMode <> night Or Not nightset Then
-                night = currentMode
-                nightset = True
+            If night Then
+                'axfgcontrolctrl2.ExposureTimeAuto = "Off"
+                '  axfgcontrolctrl2.AcquisitionMode = "Continuous"
 
-                If night Then
-
-                    'tbExposureTime.Text = tbNightExp.Text
-                    lblDayNight.Text = "night"
-                    ''night mode
-                    ''   m_CCamera.setGainExposure(Val(Me.tbNightAgain.Text), Val(Me.tbExposureTime.Text))
-
-                Else
-                    'v.m_Camera.LoadCameraSettings(Application.StartupPath & "\day_gc1380ch.xml")
-                    'day mode
-
-                    'tbExposureTime.Text = tbDayTimeExp.Text
-
-                    lblDayNight.Text = "day"
-                    '' m_CCamera.setGainExposure(Val(Me.tbDayGain.Text), Val(Me.tbExposureTime.Text))
+                tbExposureTime.Text = tbNightExp.Text
+                tbGain.Text = tbNightAgain.Text
+                lblDayNight.Text = "night"
+                'night mode
 
 
+            Else
+                'day mode
 
-                End If
-                'End If
+                tbExposureTime.Text = tbDayTimeExp.Text
+                tbGain.Text = tbDayGain.Text
+                lblDayNight.Text = "day"
 
-                writeline("set gain & exposure")
 
             End If
-
+            'End If
+            ' Dim err As QCamM_Err
+            'QCam.QCamM_SetParam(mSettings, QCamM_Param.qprmGain, CUInt((tbNightAgain.Text)))
+            ' QCam.QCamM_SetParam(mSettings, QCamM_Param.qprmExposure, tbExposureTime.Text)
+            'err = QCam.QCamM_SendSettingsToCam(mhCamera, mSettings)
         Catch ex As Exception
 
-            Timer1.Enabled = True
-
         End Try
-        Timer1.Enabled = True
     End Sub
 
 
-    Private Sub Form1_Load(sender As Object, e As EventArgs) Handles MyBase.Load
-        'Vimba sys = new Vimba(); CameraCollection cameras = null;qu
-        'try { sys.Startup(); cameras = sys.Cameras;
-        'foreach (Camera camera in cameras) { try { camera.Open( VmbAccessModeType.VmbAccessModeFull ); Console.WriteLine( "Camera opened" ); camera.Close(); } catch ( VimbaException ve ) { Console.WriteLine( "Error : " + ve.MapReturnCodeToString() ); } }
-        '} finally { sys.Shutdown(); }
+    Private Sub Form1_Load(sender As Object, e As EventArgs) Handles Me.Load
 
 
-        ''setup camera timer
-        'myTimer.Interval = 20000
-
-        'AddHandler myTimer.Elapsed, AddressOf Me.Health_Tick
-
-        'startup()
-
-
-        'm_cam.SaveImage(Application.StartupPath & "\junk.jpg", 10)
-        ' Get an ImageCodecInfo object that represents the JPEG codec.
-        myImageCodecInfo = GetEncoderInfo("image/jpeg")
-
-        ' Create an Encoder object based on the GUID
-        ' for the Quality parameter category.
-        myEncoder = System.Drawing.Imaging.Encoder.Quality
-
-        ' Create an EncoderParameters object.
-        ' An EncoderParameters object has an array of EncoderParameter
-        ' objects. In this case, there is only one
-        ' EncoderParameter object in the array.
-        myEncoderParameters = New EncoderParameters(1)
-
-        ' Save the bitmap as a JPEG file with quality level 25.
-        myEncoderParameter = New EncoderParameter(myEncoder, CType(100L, Int32))
-        myEncoderParameters.Param(0) = myEncoderParameter
 
         Dim cams As List(Of CameraInfo)
-        ComboBox2.SelectedIndex = 1
-        ComboBox1.SelectedIndex = 1
+
 
 
         startup()
         cams = v.CameraList
-        'md.LoadModel("c:\tmp\frozen_inference_graph.pb", "c:\tmp\object-detection.pbtxt")
-        '  md.LoadModel("c:\tmp\frozen_inference_graph_orig.pb", "c:\tmp\mscoco_label_map.pbtxt")
         For Each c As CameraInfo In cams
             '    'only one camera so grab it
-            cbCam.Items.Add(c.ID)
+            cmbCam.Items.Add(c.ID)
         Next
+        'load defaults
 
-
-
-    End Sub
-
-    Private Sub Button1_Click(sender As Object, e As EventArgs)
-        'Dim f As Frame
-        'Dim b As Bitmap
-
-        'myCam.AcquireSingleImage(f, 100000)
-        'f.Fill(b)
-        'PictureBox1.Image = b
-        'PictureBox1.SizeMode = PictureBoxSizeMode.Zoom
-
+        tbPort.Text = "8099"
+        tbPath.Text = "e:\image_avt"
+        tbDayTimeExp.Text = "500"
+        tbNightExp.Text = "7500000"
+        tbDayGain.Text = "0"
+        tbNightAgain.Text = "27"
+        MyBase.Form_Load(sender, e)
 
     End Sub
+
+
 
     Private Sub Button2_Click(sender As Object, e As EventArgs) Handles Button2.Click
         MsgBox("cover lens cap")
@@ -592,37 +373,7 @@ Public Class frmAVT
 
     'End Sub
 
-    Private Sub Button5_Click(sender As Object, e As EventArgs) Handles Button5.Click
-        Button5.Enabled = False
-        Button6.Enabled = True
-        myWebServer = WebServer.getWebServer
 
-        myWebServer.StartWebServer(v.m_Camera, Me, Val(Me.tbPort.Text))
-        myWebServer.ImageDirectory = "c:\web\images\"
-        myWebServer.VirtualRoot = "c:\web\"
-
-        If Now.Hour > Me.ComboBox2.SelectedItem Or Now.Hour < ComboBox1.SelectedItem Then
-            night = True
-        Else
-            night = False
-        End If
-
-
-        If night Then
-            '        myCam.LoadCameraSettings(Application.StartupPath & "\night_gc1380ch.xml")
-            If cbUseDarks.Checked Then
-                myWebServer.useDarks = True
-            Else
-                myWebServer.useDarks = False
-            End If
-        Else
-            '         myCam.LoadCameraSettings(Application.StartupPath & "\day_gc1380ch.xml")
-            myWebServer.useDarks = False
-
-        End If
-
-
-    End Sub
 
     Private Sub CheckBox1_CheckedChanged(sender As Object, e As EventArgs) Handles cbUseDarks.CheckedChanged
         If Not myWebServer Is Nothing Then
@@ -638,24 +389,26 @@ Public Class frmAVT
 
 
 
-    Private Sub Button6_Click(sender As Object, e As EventArgs) Handles Button6.Click
-        Button5.Enabled = True
-        Button6.Enabled = False
+    Private Sub btnStopWeb_Click(sender As Object, e As EventArgs) Handles btnStopWeb.Click
+
+        btnStartWeb.Enabled = True
+        btnStopWeb.Enabled = False
         myWebServer.StopWebServer()
+
     End Sub
 
-    Private Sub Button7_Click(sender As Object, e As EventArgs) Handles Button7.Click
+    Private Sub btnStart_Click(sender As Object, e As EventArgs) Handles btnStart.Click
 
         'If myCam Is Nothing Then
         '    MsgBox("select a camera")
         '    cbCam.Focus()
         '    Exit Sub
 
-        Button7.Enabled = False
-        Button8.Enabled = True
+        btnStart.Enabled = False
+        btnStop.Enabled = True
         startTime = Now
-        Timer1.Enabled = True
-        Timer3.Enabled = True
+        TimerDayNight.Enabled = True
+        TimerFPS.Enabled = True
         meteorCheckRunning = True
         If t Is Nothing Then
 
@@ -670,93 +423,38 @@ Public Class frmAVT
         End If
 
 
-        'If Now.Hour >= ComboBox2.SelectedItem Or Now.Hour <= ComboBox1.SelectedItem Then
-        '    night = True 'night
-        'Else
-        '    night = False 'day
-        'End If
+
         v.StartContinuousImageAcquisition(AddressOf Me.received_frame)
 
-        'myCam.StartContinuousImageAcquisition(1)
-        'myCam.StartCapture()
     End Sub
 
-    Private Sub Button8_Click(sender As Object, e As EventArgs) Handles Button8.Click
-        Button7.Enabled = True
-        Button8.Enabled = False
+    Private Sub btnStop_Click(sender As Object, e As EventArgs) Handles btnStop.Click
+        btnStart.Enabled = True
+        btnStop.Enabled = False
 
         v.StopContinuousImageAcquisition()
         meteorCheckRunning = False
-        'myCam.StopContinuousImageAcquisition()
-    End Sub
-
-    Private Sub Button9_Click(sender As Object, e As EventArgs)
-        'Dim f As Frame
-
-        'myCam.AcquireSingleImage(f, 10000)
-        'MsgBox("frame acquired")
-    End Sub
-
-    Private Sub Timer2_Tick(sender As Object, e As EventArgs)
-        'shutter timer
-        'Try
-        '    myCam.StopContinuousImageAcquisition()
-        'Catch ex As Exception
-
-        'End Try
-
-        ' myCam.StartContinuousImageAcquisition(1)
 
     End Sub
 
-    Private Sub Timer3_Tick(sender As Object, e As EventArgs) Handles Timer3.Tick
 
-        Dim seconds As Integer
 
-        seconds = DateDiff(DateInterval.Second, startTime, Now)
-        txtFps.Text = frames / seconds
-        '
-        'writeline("timeout - close and restart")
-        'Timer3.Enabled = False
-        'myCam.Close()
-        'myCam.Open(VmbAccessModeType.VmbAccessModeFull)
-        'myCam.StartContinuousImageAcquisition(1)
-    End Sub
 
-    Private Sub cbCam_SelectedIndexChanged(sender As Object, e As EventArgs) Handles cbCam.SelectedIndexChanged
-        'myCam = v.GetCameraByID(cbCam.SelectedItem)
-        'myCamID = myCam.Id
-        'myCam.Open(VmbAccessModeType.VmbAccessModeFull)
-        v.OpenCamera(cbCam.SelectedItem)
+
+
+
+    Private Sub cmbCam_SelectedIndexChanged(sender As Object, e As EventArgs) Handles cmbCam.SelectedIndexChanged
+
+        v.OpenCamera(cmbCam.SelectedItem)
+        loadProfile(cmbCam.SelectedItem)
     End Sub
 
 
 
-    Private Sub frmAVT_Leave(sender As Object, e As EventArgs) Handles Me.Leave
 
-    End Sub
 
-    Private Sub Button9_Click_1(sender As Object, e As EventArgs)
-        'Next
 
-    End Sub
 
-    Private Sub Button1_Click_1(sender As Object, e As EventArgs) Handles Button1.Click
-        Dim vimba As New Vimba
-
-        vimba = New Vimba()
-
-        vimba.Startup()
-
-    End Sub
-
-    Private Sub Button9_Click_2(sender As Object, e As EventArgs) Handles Button9.Click
-        shutdown()
-    End Sub
-
-    Private Sub Button3_Click(sender As Object, e As EventArgs) Handles Button3.Click
-
-    End Sub
 
     Private Sub Button10_Click(sender As Object, e As EventArgs) Handles Button10.Click
 
@@ -765,23 +463,13 @@ Public Class frmAVT
 
     End Sub
 
-    Private Sub Button4_Click(sender As Object, e As EventArgs) Handles Button4.Click
-
-    End Sub
 
     Private Sub tbMultiplier_TextChanged(sender As Object, e As EventArgs) Handles tbMultiplier.TextChanged
         dark = Nothing
 
     End Sub
 
-    Private Sub cbMeteors_CheckedChanged(sender As Object, e As EventArgs) Handles cbMeteors.CheckedChanged
-        'If Not cbMeteors.Checked Then
-        '    md.LoadModel("c:\tmp\frozen_inference_graph_orig.pb", "c:\tmp\mscoco_label_map.pbtxt")
 
-        'Else
-        '    md.LoadModel("c:\tmp\frozen_inference_graph.pb", "c:\tmp\object-detection.pbtxt")
-        'End If
-    End Sub
 
     Private Sub frmAVT_Closing(sender As Object, e As CancelEventArgs) Handles Me.Closing
         On Error Resume Next
@@ -805,7 +493,5 @@ Public Class frmAVT
 
     End Sub
 
-    Private Sub lblDayNight_Click(sender As Object, e As EventArgs) Handles lblDayNight.Click
 
-    End Sub
 End Class
