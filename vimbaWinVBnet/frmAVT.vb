@@ -283,7 +283,7 @@ Public Class frmAVT
 
         Dim cams As List(Of CameraInfo)
 
-
+        Me.cbUseTrigger.Visible = False
 
         startup()
         cams = v.CameraList

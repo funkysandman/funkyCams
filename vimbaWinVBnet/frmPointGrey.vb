@@ -555,7 +555,7 @@ Public Class frmPointGrey
     End Sub
 
 
-    Private Sub btnStart_Click(sender As Object, e As EventArgs) Handles btnStart.Click
+    Private Sub btnStart_Click(sender As Object, e As EventArgs)
         lost = 0
         running = True
         setExposure(CDbl(tbExposureTime.Text))
@@ -577,7 +577,7 @@ Public Class frmPointGrey
         t.Start()
     End Sub
 
-    Private Sub btnStop_Click(sender As Object, e As EventArgs) Handles btnStop.Click
+    Private Sub btnStop_Click(sender As Object, e As EventArgs)
         running = False
         TimerFPS.Enabled = False
         m_cam.EndAcquisition()
@@ -588,7 +588,8 @@ Public Class frmPointGrey
 
     Private Sub frmPointGrey_Load(sender As Object, e As EventArgs) Handles Me.Load
         getCameraReady()
-
+        Me.cmbCam.Visible = False
+        Me.cbUseTrigger.Visible = False
         MyBase.Form_Load(sender, e)
         'load defaults
         tbPort.Text = "8060"
@@ -645,7 +646,7 @@ Public Class frmPointGrey
 
 
 
-    Private Sub btnStartWeb_Click(sender As Object, e As EventArgs) Handles btnStartWeb.Click
+    Private Sub btnStartWeb_Click(sender As Object, e As EventArgs)
         btnStopWeb.Enabled = True
         btnStartWeb.Enabled = False
         myWebServer = WebServer.getWebServer
@@ -697,7 +698,7 @@ Public Class frmPointGrey
 
     End Function
 
-    Private Sub btnStopWeb_Click(sender As Object, e As EventArgs) Handles btnStopWeb.Click
+    Private Sub btnStopWeb_Click(sender As Object, e As EventArgs)
         btnStartWeb.Enabled = True
         btnStopWeb.Enabled = False
         myWebServer.StopWebServer()
@@ -748,7 +749,7 @@ Public Class frmPointGrey
 
 
 
-    Private Sub lblDayNight_TextChanged(sender As Object, e As EventArgs) Handles lblDayNight.TextChanged
+    Private Sub lblDayNight_TextChanged(sender As Object, e As EventArgs)
 
         If Not m_cam Is Nothing Then
             setExposure(CDbl(tbExposureTime.Text))
@@ -943,7 +944,7 @@ Public Class frmPointGrey
 
     End Function
 
-    Private Sub Button2_Click(sender As Object, e As EventArgs) Handles Button2.Click
+    Private Sub Button2_Click(sender As Object, e As EventArgs)
         'take ten darks
         m_cam.UnregisterEvent(m_imageEventListener)
         Dim numDarks As Integer = 10
@@ -975,7 +976,18 @@ Public Class frmPointGrey
         MsgBox("finished darks")
     End Sub
 
+    Private Sub InitializeComponent()
+        Me.SuspendLayout()
+        '
+        'frmPointGrey
+        '
+        Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
+        Me.ClientSize = New System.Drawing.Size(422, 525)
+        Me.Name = "frmPointGrey"
+        Me.ResumeLayout(False)
+        Me.PerformLayout()
 
+    End Sub
 
 
 End Class
