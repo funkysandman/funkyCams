@@ -2339,13 +2339,13 @@ namespace SVCamApi
             }
             else
             {
-               ret = SVSCam.myApi.SVS_FeatureSetValueFloat(cam.hRemoteDevice, phFeature, (float)0.2);
-               // ret = SVSCam.myApi.SVS_FeatureSetValueFloat(cam.hRemoteDevice, phFeature, Math.Min((float)999220 / cam.duration, (float)2));
+              // ret = SVSCam.myApi.SVS_FeatureSetValueFloat(cam.hRemoteDevice, phFeature, (float)0.2);
+               ret = SVSCam.myApi.SVS_FeatureSetValueFloat(cam.hRemoteDevice, phFeature, Math.Min((float)999220 / cam.duration, (float)2));
             }
             //set packet delay
-            ret = SVSCam.myApi.SVS_FeatureGetByName(cam.hRemoteDevice, "GevSCPD", ref phFeature);
-            ret = SVSCam.myApi.SVS_FeatureGetInfo(cam.hRemoteDevice, phFeature, ref info.SVFeaturInf);
-            ret = SVSCam.myApi.SVS_FeatureSetValueInt64(cam.hRemoteDevice, phFeature, 5000000);//packet delay
+            //ret = SVSCam.myApi.SVS_FeatureGetByName(cam.hRemoteDevice, "GevSCPD", ref phFeature);
+            //ret = SVSCam.myApi.SVS_FeatureGetInfo(cam.hRemoteDevice, phFeature, ref info.SVFeaturInf);
+            //ret = SVSCam.myApi.SVS_FeatureSetValueInt64(cam.hRemoteDevice, phFeature, 5000000);//packet delay
             //turn on triggerwidth
             ret = SVSCam.myApi.SVS_FeatureGetByName(cam.hRemoteDevice, "ExposureMode", ref phFeature);
             ret = SVSCam.myApi.SVS_FeatureGetInfo(cam.hRemoteDevice, phFeature, ref info.SVFeaturInf);

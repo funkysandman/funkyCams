@@ -333,9 +333,7 @@ Public Class frmMaster
 
 
 
-    Private Sub Timer3_Tick(sender As Object, e As EventArgs) Handles TimerFPS.Tick
 
-    End Sub
     Public Sub processDetection()
         Dim aQE As queueEntry
         While (meteorCheckRunning)

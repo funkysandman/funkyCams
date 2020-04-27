@@ -12,18 +12,18 @@ Public Class frmSVSVistek
     Inherits frmMaster
 
     Private mySVCam As SVCamApi.SVCamGrabber
-    Private killing As Boolean = False
-    Private b As Bitmap
-    Private running As Boolean
-    Private frames As Integer
-    Private startTime As DateTime
-    Private gotFrameTime As DateTime
-    Private dark() As Byte
-    Private meteorCheckRunning As Boolean = False
+    'Private killing As Boolean = False
+    'Private b As Bitmap
+    'Private running As Boolean
+    'Private frames As Integer
+    'Private startTime As DateTime
+    'Private gotFrameTime As DateTime
+    'Private dark() As Byte
 
-    Private camThread As Thread
-    Private t As Thread
-    Private lost As Integer = 0
+
+    'Private camThread As Thread
+    'Private t As Thread
+    'Private lost As Integer = 0
 
 
 
@@ -360,9 +360,7 @@ Public Class frmSVSVistek
 
     End Sub
 
-    Private Sub tbNightExp_TextChanged(sender As Object, e As EventArgs)
 
-    End Sub
 
     Private Sub Button2_Click(sender As Object, e As EventArgs)
 
@@ -473,17 +471,22 @@ Public Class frmSVSVistek
                 mySVCam.useDarks = False
             End If
             'End If
-            mySVCam.setParams(Val(Me.tbExposureTime.Text), Val(Me.tbNightAgain.Text))
+            'if the camera is running...stop exposing
+            mySVCam.stopAcquisitionThread()
 
+            mySVCam.setParams(Val(Me.tbExposureTime.Text), Val(Me.tbNightAgain.Text))
+            mySVCam.prepareCameraForTimed(mySVCam.current_selected_cam)
+            mySVCam.startAcquisitionThread(AddressOf Me.received_frame)
         Else
             'day mode
             tbGain.Text = tbDayGain.Text
             tbExposureTime.Text = tbDayTimeExp.Text
 
+            mySVCam.stopAcquisitionThread()
 
             mySVCam.setParams(Val(Me.tbExposureTime.Text), Val(Me.tbDayGain.Text))
-
-
+            mySVCam.prepareCameraForTimed(mySVCam.current_selected_cam)
+            mySVCam.startAcquisitionThread(AddressOf Me.received_frame)
         End If
         'start stream
         'If Me.cbUseTrigger.Checked Then

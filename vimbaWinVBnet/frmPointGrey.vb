@@ -265,15 +265,17 @@ Public Class frmPointGrey
             ''//myApi.SVS_UtilBufferBayerToRGB(ImageInfo, ref imagebufferRGB[currentIdex].imagebytes[0], imageSizeX * imageSizeY );
             ''BGAPI2.Image mTransformImage = null;
             ''BGAPI2.Buffer mBufferFilled = New BGAPI2.Buffer();
-            Dim pImagePtr As IntPtr
+            '' Dim pImagePtr As IntPtr
             Dim convertedImage As IManagedImage = image.Convert(PixelFormatEnums.RGB8, ColorProcessingAlgorithm.NEAREST_NEIGHBOR_AVG)
 
-            mImage = imgProcessor.CreateImage(image.Width, image.Height, "BayerRG8", image.DataPtr, image.Width * image.Height)
+
+
+            'mImage = imgProcessor.CreateImage(image.Width, image.Height, "BayerGB8", image.DataPtr, image.Width * image.Height)
 
             'ULong imageBufferAddress = (ULong)ImageInfo.pImagePtr;
-            mTransformImage = imgProcessor.CreateTransformedImage(mImage, "BGR8")
+            ' mTransformImage = imgProcessor.CreateTransformedImage(mImage, "GBR8")
 
-            System.Runtime.InteropServices.Marshal.Copy(mTransformImage.Buffer, convertedImage.ManagedData, 0, image.Width * image.Height * 3)
+            ' System.Runtime.InteropServices.Marshal.Copy(mTransformImage.Buffer, convertedImage.ManagedData, 0, image.Width * image.Height * 3)
 
             System.IO.File.WriteAllBytes("pgxxx.raw", image.ManagedData)
             System.IO.File.WriteAllBytes("pgxxxyy.raw", convertedImage.ManagedData)
@@ -356,7 +358,7 @@ Public Class frmPointGrey
                     myForm.t_cleanup.Start()
                 Else
 
-                    Debug.WriteLine("threadstate:" & myForm.t_cleanup.ThreadState)
+                    ' Debug.WriteLine("threadstate:" & myForm.t_cleanup.ThreadState)
                 End If
             End If
             image.Release()
@@ -655,31 +657,31 @@ Public Class frmPointGrey
         myWebServer.ImageDirectory = "c:\web\images\"
         myWebServer.VirtualRoot = "c:\web\"
     End Sub
-    Public Function getLastImage() As Bitmap
-        Dim stopWatch As Stopwatch = New Stopwatch()
-        stopWatch.Start()
+    'Public Function getLastImage() As Bitmap
+    '    Dim stopWatch As Stopwatch = New Stopwatch()
+    '    stopWatch.Start()
 
-        'While running AndAlso stopWatch.ElapsedMilliseconds < 20000
+    '    'While running AndAlso stopWatch.ElapsedMilliseconds < 20000
 
-        'End While
+    '    'End While
 
-        stopWatch.[Stop]()
+    '    stopWatch.[Stop]()
 
-        'Dim x As New Bitmap(b)
-        Debug.Print("get last image")
+    '    'Dim x As New Bitmap(b)
+    '    Debug.Print("get last image")
 
-        Dim x As New Bitmap(m_pics.width, m_pics.height, PixelFormat.Format24bppRgb)
-        Dim BoundsRect = New Rectangle(0, 0, m_pics.width, m_pics.height)
-        Dim bmpData As System.Drawing.Imaging.BitmapData = x.LockBits(BoundsRect, System.Drawing.Imaging.ImageLockMode.[WriteOnly], x.PixelFormat)
-        Dim ptr As IntPtr = bmpData.Scan0
-        System.Runtime.InteropServices.Marshal.Copy(m_pics.ImageBytes, 0, ptr, m_pics.dataSize) 'copy into bitmap
+    '    Dim x As New Bitmap(m_pics.width, m_pics.height, PixelFormat.Format24bppRgb)
+    '    Dim BoundsRect = New Rectangle(0, 0, m_pics.width, m_pics.height)
+    '    Dim bmpData As System.Drawing.Imaging.BitmapData = x.LockBits(BoundsRect, System.Drawing.Imaging.ImageLockMode.[WriteOnly], x.PixelFormat)
+    '    Dim ptr As IntPtr = bmpData.Scan0
+    '    System.Runtime.InteropServices.Marshal.Copy(m_pics.ImageBytes, 0, ptr, m_pics.dataSize) 'copy into bitmap
 
 
-        x.UnlockBits(bmpData)
-        Return x
+    '    x.UnlockBits(bmpData)
+    '    Return x
 
-        'Return m_pics.Bitmap
-    End Function
+    '    'Return m_pics.Bitmap
+    'End Function
     Public Function getLastImageArray() As Byte()
         Dim stopWatch As Stopwatch = New Stopwatch()
         stopWatch.Start()
@@ -748,8 +750,8 @@ Public Class frmPointGrey
     End Sub
 
 
+    Private Overloads Sub lblDayNight_TextChanged(sender As Object, e As EventArgs) Handles lblDayNight.TextChanged
 
-    Private Sub lblDayNight_TextChanged(sender As Object, e As EventArgs) Handles lblDayNight.TextChanged
 
         If Not m_cam Is Nothing Then
             setExposure(CDbl(tbExposureTime.Text))
@@ -944,7 +946,7 @@ Public Class frmPointGrey
 
     End Function
 
-    Private Sub Button2_Click(sender As Object, e As EventArgs)
+    Private Sub Button2_Click(sender As Object, e As EventArgs) Handles Button2.Click
         'take ten darks
         m_cam.UnregisterEvent(m_imageEventListener)
         Dim numDarks As Integer = 10
