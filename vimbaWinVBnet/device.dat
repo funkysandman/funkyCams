@@ -96,7 +96,7 @@
             </item>
             <item guid="{A3E64DA6-736A-489B-8425-04BD2B4AC57A}" name="IMX178 LLP Gain">
                 <element guid="{B57D3000-0AC6-4819-A609-272A33140ACA}" name="Enabled">
-                    <itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E04}" value="0" />
+                    <itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E04}" value="1" />
                 </element>
             </item>
             <item guid="{546541AD-C815-4D82-AFA9-9D59AF9F399E}" name="Highlight Reduction">
