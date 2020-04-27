@@ -94,6 +94,7 @@
     <Reference Include="Microsoft.QualityTools.Testing.Fakes, Version=12.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
     </Reference>
+    <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL" />
     <Reference Include="PixeLINK.API">
       <HintPath>..\..\..\..\..\..\Program Files (x86)\PixeLINK\dotnet\PixeLINK.API.dll</HintPath>
     </Reference>
@@ -110,13 +111,16 @@
     <Reference Include="System.Deployment" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Net.Http" />
+    <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Web" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xaml" />
     <Reference Include="System.XML" />
-    <Reference Include="TIS.Imaging.ICImagingControl34, Version=3.4.4.2744, Culture=neutral, PublicKeyToken=257805929e8b7928, processorArchitecture=x86">
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Xml.Serialization" />
+    <Reference Include="TIS.Imaging.ICImagingControl34, Version=3.4.4.2744, Culture=neutral, PublicKeyToken=257805929e8b7928, processorArchitecture=AMD64">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\Program Files (x86)\Common Files\IC Imaging Control 3.4\bin\v4.0.30319\x86\TIS.Imaging.ICImagingControl34.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\Program Files\Common Files\IC Imaging Control 3.4\bin\v4.0.30319\x64\TIS.Imaging.ICImagingControl34.dll</HintPath>
     </Reference>
     <Reference Include="VimbaNET, Version=1.7.0.24184, Culture=neutral, PublicKeyToken=96b729f24f119b9a, processorArchitecture=x86">
       <SpecificVersion>False</SpecificVersion>
@@ -147,11 +151,18 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include=".vb" />
+    <Compile Include="IniFile.vb" />
     <Compile Include="device.vb" />
     <Compile Include="frmIS.designer.vb">
       <DependentUpon>frmIS.vb</DependentUpon>
     </Compile>
     <Compile Include="frmIS.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmMaster.Designer.vb">
+      <DependentUpon>frmMaster.vb</DependentUpon>
+    </Compile>
+    <Compile Include="frmMaster.vb">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="frmPCO.designer.vb">
@@ -160,20 +171,8 @@
     <Compile Include="frmPCO.vb">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="frmPixelink.designer.vb">
-      <DependentUpon>frmPixelink.vb</DependentUpon>
-    </Compile>
-    <Compile Include="frmPixelink.vb">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="frmPointGrey.Designer.vb">
-      <DependentUpon>frmPointGrey.vb</DependentUpon>
-    </Compile>
     <Compile Include="frmPointGrey.vb">
       <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="frmSVSVistek.Designer.vb">
-      <DependentUpon>frmSVSVistek.vb</DependentUpon>
     </Compile>
     <Compile Include="frmSVSVistek.vb">
       <SubType>Form</SubType>
@@ -191,10 +190,6 @@
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="frmAVT.vb">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="frmAVT.Designer.vb">
-      <DependentUpon>frmAVT.vb</DependentUpon>
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="frmFoculs.Designer.vb">
@@ -251,7 +246,6 @@
     <Compile Include="PCO\pcoapicall.vb" />
     <Compile Include="program.vb" />
     <Compile Include="queueEntry.vb" />
-    <Compile Include="SnapshotHelper.vb" />
     <Compile Include="Toupcam.vb" />
     <Compile Include="webserver.vb" />
   </ItemGroup>
@@ -259,11 +253,11 @@
     <EmbeddedResource Include="frmIS.resx">
       <DependentUpon>frmIS.vb</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="frmMaster.resx">
+      <DependentUpon>frmMaster.vb</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="frmPCO.resx">
       <DependentUpon>frmPCO.vb</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="frmPixelink.resx">
-      <DependentUpon>frmPixelink.vb</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="frmPointGrey.resx">
       <DependentUpon>frmPointGrey.vb</DependentUpon>
@@ -449,6 +443,12 @@
     </Content>
     <Content Include="SVGenSDK64.dll" />
     <Content Include="SVLog64.dll" />
+    <Content Include="TIS_UDSHL11.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TIS_UDSHL11_x64.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="toupcam.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
