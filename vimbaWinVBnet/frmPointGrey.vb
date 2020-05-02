@@ -228,6 +228,7 @@ Public Class frmPointGrey
 
             'image.Save("pgDark.raw")
             'darks
+            Dim pixel, dPixel, newPixel As Long
             If myForm.cbUseDarks.Checked And myForm.lblDayNight.Text = "night" Then
                 If myForm.dark Is Nothing Then
                     myForm.dark = System.IO.File.ReadAllBytes("pgdark.raw")
@@ -236,14 +237,48 @@ Public Class frmPointGrey
                     '    myForm.dark(i) = CByte(CInt(myForm.dark(i)) * mult)
                     'Next
                 End If
+
                 Dim mult As Decimal
+                Dim range As Integer
+                range = myForm.tbUpper.Text - myForm.tbLower.Text
+                Dim multiplier As Single
+                multiplier = 65355 / range
+                'Dim lower, upper As Integer
+                'lower = CInt(myForm.tbLower.Text)
+                'upper = CInt(myForm.tbUpper.Text)
+                Dim darkCutOff As Integer = myForm.tbDarkCutOff.Text
                 mult = Val(myForm.tbMultiplier.Text)
-                For i = 0 To image.DataSize - 1
-                    image.ManagedData(i) = CByte(Math.Max(0, CInt(image.ManagedData(i)) - CInt(myForm.dark(i)) * mult))
+                For i = 0 To image.DataSize - 1 Step 2
+                    pixel = image.ManagedData(i) + image.ManagedData(i + 1) * 256
+                    dPixel = myForm.dark(i) + myForm.dark(i + 1) * 256
+                    If (dPixel > darkCutOff) Then
+                        pixel = Math.Max(0, pixel - (dPixel * mult))
+                    End If
+
+
+
+                    'newPixel = CByte(Math.Max(0, CInt(image.ManagedData(i)) - CInt(myForm.dark(i)) * mult))
+
+
+                    pixel = CInt(pixel * multiplier)
+
+
+                    'value = value * 255 / span
+                    If pixel > 65355 Then
+                        pixel = 65355
+                    End If
+                    If pixel < 0 Then
+                        pixel = 0
+                    End If
+
+
+                    image.ManagedData(i + 1) = CByte(pixel >> 8)
+
+                    image.ManagedData(i) = CByte(pixel And &HFF)
+
+
+
                 Next
-                '
-
-
 
                 'copy managedData back to image
                 System.Runtime.InteropServices.Marshal.Copy(image.ManagedData, 0, image.DataPtr, image.DataSize - 1)
@@ -251,6 +286,40 @@ Public Class frmPointGrey
                 'image.PixelFormat = PixelFormatEnums.BayerRG16
 
             End If
+            'stretch image
+
+            Dim value As Integer
+
+
+
+            'For i = 0 To image.DataSize - 1 Step 2  ' This loop converts from 16bit to 8bit using min and max
+            '    pixel = image.ManagedData(i) + image.ManagedData(i + 1) * 256
+            '    'value = value >> 2
+
+            '    ''Debug.Print(value)
+            '    'If value < 0 Then ' Type cast from short to ushort? Forget it: Not with VB
+            '    '    value = value * -1
+            '    '    value = value + &H8000
+            '    'End If
+            '    'value = value - lower
+            '    'If value < 0 Then
+            '    '    value = 0
+            '    'End If
+
+
+
+            '    image.ManagedData(i + 1) = CByte(pixel >> 8)
+
+            '    image.ManagedData(i) = CByte(pixel And &HFF)
+
+
+
+            'Next
+
+            ' Marshal.Copy(Image24, 0, bmpData.Scan0, isize) ' Copy intermediate buffer to the bitmap
+
+
+
 
             Dim mTransformImage As BGAPI2.Image = Nothing
             Dim mImage As BGAPI2.Image = Nothing
@@ -266,22 +335,26 @@ Public Class frmPointGrey
             ''BGAPI2.Image mTransformImage = null;
             ''BGAPI2.Buffer mBufferFilled = New BGAPI2.Buffer();
             '' Dim pImagePtr As IntPtr
-            Dim convertedImage As IManagedImage = image.Convert(PixelFormatEnums.RGB8, ColorProcessingAlgorithm.NEAREST_NEIGHBOR_AVG)
+            ' Dim convertedImage As IManagedImage = image.Convert(PixelFormatEnums., ColorProcessingAlgorithm.NEAREST_NEIGHBOR_AVG)
 
 
+            Dim convertedImage As New ManagedImage
+            ' image.Convert(PixelFormatEnums.RGB8, ColorProcessingAlgorithm.NEAREST_NEIGHBOR_AVG)
+            'image.ConvertToBitmapSource(PixelFormatEnums.RGB8, ColorProcessingAlgorithm.NEAREST_NEIGHBOR_AVG)
 
-            'mImage = imgProcessor.CreateImage(image.Width, image.Height, "BayerGB8", image.DataPtr, image.Width * image.Height)
+            image.Convert(convertedImage, PixelFormatEnums.BGR8, ColorProcessingAlgorithm.DEFAULT)
+            'mImage = imgProcessor.CreateImage(image.Width, image.Height, "BayerGB16", image.DataPtr, image.Width * image.Height * 2)
 
-            'ULong imageBufferAddress = (ULong)ImageInfo.pImagePtr;
-            ' mTransformImage = imgProcessor.CreateTransformedImage(mImage, "GBR8")
+            ''ULong imageBufferAddress = (ULong)ImageInfo.pImagePtr;
+            'mTransformImage = imgProcessor.CreateTransformedImage(mImage, "RGB8")
 
-            ' System.Runtime.InteropServices.Marshal.Copy(mTransformImage.Buffer, convertedImage.ManagedData, 0, image.Width * image.Height * 3)
+            'System.Runtime.InteropServices.Marshal.Copy(mTransformImage.Buffer, convertedImage.ManagedData, 0, image.Width * image.Height * 3)
 
             System.IO.File.WriteAllBytes("pgxxx.raw", image.ManagedData)
             System.IO.File.WriteAllBytes("pgxxxyy.raw", convertedImage.ManagedData)
 
             'Dim convertedImage As IManagedImage = image.Convert(PixelFormatEnums.RGB8, ColorProcessingAlgorithm.NEAREST_NEIGHBOR_AVG)
-            System.IO.File.WriteAllBytes("pgconvert.raw", image.ManagedData)
+            ' System.IO.File.WriteAllBytes("pgconvert.raw", mTransformImage.Buffer)
             'convertedImage.ConvertToWriteAbleBitmap(PixelFormatEnums.BGR8, convertedImage)
 
 

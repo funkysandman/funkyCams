@@ -53,6 +53,7 @@ Public Class frmMaster
         Public Property minValue As Integer
         Public Property maxValue As Integer
         Public Property darkMultiplier As String
+        Public Property darkCutOff As Integer
         Public Sub readSettings()
 
             'try to read settings file
@@ -77,6 +78,7 @@ Public Class frmMaster
                 Me.maxValue = jsonResulttodict.Item("maxValue")
                 Me.minValue = jsonResulttodict.Item("minValue")
                 Me.darkMultiplier = jsonResulttodict.Item("darkMultiplier")
+                Me.darkCutOff = jsonResulttodict.Item("darkCutOff")
             Catch ex As Exception
 
             End Try
@@ -274,7 +276,7 @@ Public Class frmMaster
         tbMultiplier.Text = mySettings.darkMultiplier
         tbLower.Text = mySettings.minValue
         tbUpper.Text = mySettings.maxValue
-
+        tbDarkCutOff.Text = mySettings.darkCutOff
 
     End Sub
 

@@ -1270,6 +1270,14 @@ namespace SVCamApi
                             //subtract dark
                             //File.WriteAllBytes("test.raw", rawImage.imagebytes);
                             //copy back to imageInfo
+
+                            //apply lut here
+
+
+
+
+
+                            //
                             Marshal.Copy(rawImage.imagebytes, 0, ImageInfo.pImagePtr, imageSizeX*imageSizeY*3/2);
 
                             ////debayer buffer into RGB
@@ -1343,18 +1351,13 @@ namespace SVCamApi
 
                                     pixel = rawImage.imagebytes[k] + rawImage.imagebytes[k + 1] * 256;
                                     dpixel = masterDark[k] + masterDark[k+1] * 256;
-                                    //Console.WriteLine(pixel);
-                                   // pixel = Math.Max(pixel - dpixel, 0);
-                                    //byte bb;
-                                    //bb = rawImage.imagebytes[k];
-                                    //rawImage.imagebytes[k] = rawImage.imagebytes[k + 1];
-                                    //rawImage.imagebytes[k + 1] = bb;
+
 
                                     rawImage.imagebytes[k] = (byte)(pixel >> 8);
                                     rawImage.imagebytes[k + 1] = (byte)(pixel & 0xFF00);
-                                    ////if ((masterDark[k]) > 250)
+                           
 
-                                    //    rawImage.imagebytes[k] = (byte)Math.Max(0, rawImage.imagebytes[k] - _darkmultiplier * (masterDark[k]));
+                                        rawImage.imagebytes[k] = (byte)Math.Max(0, rawImage.imagebytes[k] - _darkmultiplier * (masterDark[k]));
 
                                 }
                                 }
