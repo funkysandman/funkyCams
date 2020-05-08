@@ -87,6 +87,9 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="AxInterop.FGControlLib">
+      <HintPath>.\AxInterop.FGControlLib.dll</HintPath>
+    </Reference>
     <Reference Include="bgapi2_genicam_dotnet, Version=2.9.18334.18905, Culture=neutral, PublicKeyToken=0551630d1b572f70, processorArchitecture=AMD64">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>BaumerSDKlibs\bgapi2_genicam_dotnet.dll</HintPath>
@@ -94,7 +97,9 @@
     <Reference Include="Microsoft.QualityTools.Testing.Fakes, Version=12.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
     </Reference>
-    <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL" />
+    <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.12.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="PixeLINK.API">
       <HintPath>..\..\..\..\..\..\Program Files (x86)\PixeLINK\dotnet\PixeLINK.API.dll</HintPath>
     </Reference>
@@ -103,8 +108,8 @@
     <Reference Include="QCamManagedDriver">
       <HintPath>..\..\..\..\..\..\Program Files\QImaging\SDK\libs\i386\QCamManagedDriver\NETv4.0\QCamManagedDriver.dll</HintPath>
     </Reference>
-    <Reference Include="SpinnakerNETd_v140">
-      <HintPath>..\..\..\..\..\..\Program Files\Point Grey Research\Spinnaker\bin64\vs2015\SpinnakerNETd_v140.dll</HintPath>
+    <Reference Include="SpinnakerNET_v140">
+      <HintPath>..\..\..\..\..\..\..\Program Files\Point Grey Research\Spinnaker\bin64\vs2015\SpinnakerNET_v140.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -396,6 +401,15 @@
     <Content Include="BaumerSDKlibs\MathParser_MD_VC120_v3_0.dll" />
     <Content Include="BaumerSDKlibs\NodeMapData_MD_VC120_v3_0.dll" />
     <Content Include="BaumerSDKlibs\XmlParser_MD_VC120_v3_0.dll" />
+    <Content Include="bgapi2_genicam.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="dark_DEV_000F310241C9.raw">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="dark_DEV_000F31025CF4.raw">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="day.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <SubType>Designer</SubType>
@@ -411,6 +425,12 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="libpng16.dll" />
+    <Content Include="log4cpp_MD_VC120_v3_0_baumer.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Log_MD_VC120_v3_0_baumer.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="masterDark.png" />
     <Content Include="masterDarkDBK 33UX178.raw">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -419,6 +439,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="masterSVSDark.raw">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MathParser_MD_VC120_v3_0_baumer.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="night.xml">
@@ -430,6 +453,12 @@
       <SubType>Designer</SubType>
     </Content>
     <Content Include="night_gt2450.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="NodeMapData_MD_VC120_v3_0_baumer.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="pgDark.raw">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="SC2_Cam.dll">
@@ -450,6 +479,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="toupcam.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="XmlParser_MD_VC120_v3_0_baumer.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

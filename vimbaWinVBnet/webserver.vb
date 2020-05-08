@@ -371,13 +371,13 @@ Public Class WebServer
 
     'Here is where we check our XML file and see what MIME types are defined and handle the accordingly.
     Private Sub loadGigEDarks()
-        Dim fs As FileStream
-        fs = New FileStream(Application.StartupPath & "\darkGigE.drk", FileMode.Open)
+        'Dim fs As FileStream
+        'fs = New FileStream(Application.StartupPath & "\darkGigE.drk", FileMode.Open)
 
-        '
-        rawDark = New Byte(2457656) {}
-        fs.Read(rawDark, 0, rawDark.Length - 1)
-        fs.Close()
+        ''
+        'rawDark = New Byte(2457656) {}
+        'fs.Read(rawDark, 0, rawDark.Length - 1)
+        'fs.Close()
     End Sub
     Private Sub loadFirewireEDarks()
         Dim fs As FileStream

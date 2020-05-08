@@ -324,7 +324,7 @@ Public Class frmPointGrey
             Dim mTransformImage As BGAPI2.Image = Nothing
             Dim mImage As BGAPI2.Image = Nothing
             ' Dim buff As BGAPI2.Buffer = New BGAPI2.Buffer()
-            Dim imgProcessor As New BGAPI2.ImageProcessor()
+            'Dim imgProcessor As New BGAPI2.ImageProcessor()
 
 
             '            //copy back to imageInfo
@@ -350,8 +350,8 @@ Public Class frmPointGrey
 
             'System.Runtime.InteropServices.Marshal.Copy(mTransformImage.Buffer, convertedImage.ManagedData, 0, image.Width * image.Height * 3)
 
-            System.IO.File.WriteAllBytes("pgxxx.raw", image.ManagedData)
-            System.IO.File.WriteAllBytes("pgxxxyy.raw", convertedImage.ManagedData)
+            ' System.IO.File.WriteAllBytes("pgxxx.raw", image.ManagedData)
+            ' System.IO.File.WriteAllBytes("pgxxxyy.raw", convertedImage.ManagedData)
 
             'Dim convertedImage As IManagedImage = image.Convert(PixelFormatEnums.RGB8, ColorProcessingAlgorithm.NEAREST_NEIGHBOR_AVG)
             ' System.IO.File.WriteAllBytes("pgconvert.raw", mTransformImage.Buffer)

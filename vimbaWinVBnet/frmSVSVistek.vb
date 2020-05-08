@@ -329,7 +329,7 @@ Public Class frmSVSVistek
             tbExposureTime.Text = tbDayTimeExp.Text
 
             lblDayNight.Text = "day"
-
+            mySVCam.useDarks = False
 
         End If
         If LCase(Me.lblDayNight.Text) = "day" Then

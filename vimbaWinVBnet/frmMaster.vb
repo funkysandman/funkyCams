@@ -433,4 +433,6 @@ Public Class frmMaster
         mySettings.writeSettings()
 
     End Sub
+
+
 End Class

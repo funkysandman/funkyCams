@@ -438,7 +438,12 @@ Public Class frmAVT
         v.StartContinuousImageAcquisition(AddressOf Me.received_frame)
 
     End Sub
+    Private Sub TimerFPS_Tick(sender As Object, e As EventArgs) Handles TimerFPS.Tick
+        Dim seconds As Integer
 
+        seconds = DateDiff(DateInterval.Second, startTime, Now)
+        txtFps.Text = frames / seconds
+    End Sub
     Private Sub btnStop_Click(sender As Object, e As EventArgs) Handles btnStop.Click
         btnStart.Enabled = True
         btnStop.Enabled = False
