@@ -302,7 +302,7 @@ Public Class frmMaster
 
 
 
-    Private Sub frmSVSVistek_Closing(sender As Object, e As CancelEventArgs)
+    Private Sub frmSVSVistek_Closing(sender As Object, e As CancelEventArgs) Handles Me.Closing
         On Error Resume Next
 
         'md = Nothing

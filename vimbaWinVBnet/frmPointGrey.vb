@@ -1051,18 +1051,18 @@ Public Class frmPointGrey
         MsgBox("finished darks")
     End Sub
 
-    Private Sub InitializeComponent()
-        Me.SuspendLayout()
-        '
-        'frmPointGrey
-        '
-        Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
-        Me.ClientSize = New System.Drawing.Size(422, 525)
-        Me.Name = "frmPointGrey"
-        Me.ResumeLayout(False)
-        Me.PerformLayout()
+    'Private Sub InitializeComponent()
+    '    Me.SuspendLayout()
+    '    '
+    '    'frmPointGrey
+    '    '
+    '    Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
+    '    Me.ClientSize = New System.Drawing.Size(422, 525)
+    '    Me.Name = "frmPointGrey"
+    '    Me.ResumeLayout(False)
+    '    Me.PerformLayout()
 
-    End Sub
+    'End Sub
 
 
 End Class
