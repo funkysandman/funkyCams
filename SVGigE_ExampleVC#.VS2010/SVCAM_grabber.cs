@@ -265,7 +265,7 @@ namespace SVCamApi
             uint dsBufcount = 0;
             bool isStreaming = false;
             // public byte[] buff = null;
-
+            public bool isGrabbing = false;
 
             // public Thread thread = null;
             public bool threadIsRuning = false;
@@ -539,7 +539,7 @@ namespace SVCamApi
 
                     //temp = 0;
                     // myApi.Gige_Camera_getSensorTemperature(hCamera, ref temp);
-                    IntPtr phFeature = IntPtr.Zero;
+                    IntPtr phFeature = IntPtr.Zero;;
                     phFeature = IntPtr.Zero;
                                        
                     camTemp = "na";
@@ -2569,9 +2569,11 @@ namespace SVCamApi
             Camera cam = this.current_selected_cam;
             while (acqThreadIsRuning)
             {
+                cam.isGrabbing = true;
                 if (!cam.grab())
                 {
                     if (acqThreadIsRuning) {
+                        cam.isGrabbing = false;
                         continue;
                     // Console.WriteLine("going to cycle camera");
                     //stopAcquisitionThread();
@@ -2584,6 +2586,7 @@ namespace SVCamApi
                 } 
                 else
                 { 
+                
                 Console.WriteLine("inside while loop");
 
                 // Check if a RGB image( Bayer buffer format) arrived
@@ -2607,7 +2610,7 @@ namespace SVCamApi
                 cam.imageSizeY = sizeY;
                 cam.addnewImageData2(cam.bufferInfoDest, isImgRGB);
                 cam.isrgb = isImgRGB;
-                    //
+                    cam.isGrabbing = false;
                 }
 
 

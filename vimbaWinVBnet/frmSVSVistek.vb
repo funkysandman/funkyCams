@@ -457,7 +457,10 @@ Public Class frmSVSVistek
         If Not mySVCam.acqThreadIsRuning Then Exit Sub
 
         'halt camera and wait for it to stop
-        mySVCam.stopAcquisitionThread()
+        While (mySVCam.current_selected_cam.isGrabbing)
+            Application.DoEvents()
+        End While
+        ' mySVCam.stopAcquisitionThread()
 
 
         If lblDayNight.Text = "night" Then
@@ -491,12 +494,12 @@ Public Class frmSVSVistek
             mySVCam.startAcquisitionThread(AddressOf Me.received_frame)
         End If
         'start Stream
-        If Me.cbUseTrigger.Checked Then
+        'If Me.cbUseTrigger.Checked Then
 
-            mySVCam.startAcquisitionTriggerWidthThread(AddressOf Me.received_frame)
-        Else
-            mySVCam.startAcquisitionThread(AddressOf Me.received_frame)
-        End If
+        '    mySVCam.startAcquisitionTriggerWidthThread(AddressOf Me.received_frame)
+        'Else
+        '    mySVCam.startAcquisitionThread(AddressOf Me.received_frame)
+        ' End If
     End Sub
 
     'Private Sub InitializeComponent()
