@@ -95,9 +95,6 @@
       <SpecificVersion>False</SpecificVersion>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL" />
-    <Reference Include="PixeLINK.API">
-      <HintPath>..\..\..\..\..\..\Program Files (x86)\PixeLINK\dotnet\PixeLINK.API.dll</HintPath>
-    </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="QCamManagedDriver">
@@ -151,6 +148,15 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include=".vb" />
+    <Compile Include="frmBasler.Designer.vb">
+      <DependentUpon>frmBasler.vb</DependentUpon>
+    </Compile>
+    <Compile Include="frmBasler.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmScout.vb">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="IniFile.vb" />
     <Compile Include="device.vb" />
     <Compile Include="frmIS.designer.vb">
@@ -250,6 +256,9 @@
     <Compile Include="webserver.vb" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="frmBasler.resx">
+      <DependentUpon>frmBasler.vb</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="frmIS.resx">
       <DependentUpon>frmIS.vb</DependentUpon>
     </EmbeddedResource>
@@ -261,6 +270,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="frmPointGrey.resx">
       <DependentUpon>frmPointGrey.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmScout.resx">
+      <DependentUpon>frmScout.vb</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="frmSVSVistek.resx">
       <DependentUpon>frmSVSVistek.vb</DependentUpon>
@@ -461,6 +473,10 @@
       <Project>{1fb459e7-7c5d-45c3-bf6e-428c9cd191ba}</Project>
       <Name>AsynchronousGrabForms</Name>
     </ProjectReference>
+    <ProjectReference Include="..\BaslerGrab\BaslerImageGrabber.csproj">
+      <Project>{6de4cadd-9d37-48ff-a80c-e56b83720fb0}</Project>
+      <Name>BaslerImageGrabber</Name>
+    </ProjectReference>
     <ProjectReference Include="..\BaumerAPI\BaumerAPI.csproj">
       <Project>{782f80d9-c751-4664-a6be-f6f499bdd581}</Project>
       <Name>BaumerAPI</Name>
@@ -468,6 +484,10 @@
     <ProjectReference Include="..\PVcamHelper\PVcamHelper.csproj">
       <Project>{cff8e983-451b-4bbf-874a-0af38aba86a6}</Project>
       <Name>PVcamHelper</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Pylon.NETSupportLibrary\Pylon.NETSupportLibrary.csproj">
+      <Project>{3eafc9f5-d49f-4f9f-86c8-fbd231b07d2e}</Project>
+      <Name>Pylon.NETSupportLibrary</Name>
     </ProjectReference>
     <ProjectReference Include="..\SVGigE_ExampleVC#.VS2010\GigeApi_.csproj">
       <Project>{b209e79d-9e9e-475e-9300-076e0062dabb}</Project>

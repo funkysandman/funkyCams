@@ -12,7 +12,7 @@ AppPublisherURL=mailto:funkysandman@gmail.com
 AppSupportURL=http://tech.groups.yahoo.com/group/ASCOM-Talk/
 AppUpdatesURL=http://ascom-standards.org/
 VersionInfoVersion=1.0.0
-MinVersion=0,5.0.2195sp4
+;MinVersion=0,5.0.2195sp4
 DefaultDirName="{cf}\ASCOM\Camera"
 DisableDirPage=yes
 DisableProgramGroupPage=yes
@@ -34,9 +34,9 @@ Name: "{cf}\ASCOM\Uninstall\Camera\ASCOMAVTGigE"
 ; TODO: Add subfolders below {app} as needed (e.g. Name: "{app}\MyFolder")
 
 [Files]
-Source: "C:\source\funkyCams\AVTGIGEascom\bin\Debug\ASCOM.AVTGIGE.Camera.dll"; DestDir: "{app}"
+Source: "C:\Users\sandy\Source\Repos\funkyCams\AVTGIGEascom\bin\debug\ASCOM.AVTGIGE.Camera.dll"; DestDir: "{app}"
 ; Require a read-me HTML to appear after installation, maybe driver's Help doc
-Source: "C:\source\funkyCams\AVTGIGEascom\ReadMe.htm"; DestDir: "{app}"; Flags: isreadme
+Source: "C:\Users\sandy\Source\Repos\funkyCams\AVTGIGEascom\ReadMe.htm"; DestDir: "{app}"; Flags: isreadme
 ; TODO: Add other files needed by your driver here (add subfolders above)
 
 

@@ -468,12 +468,7 @@ Public Class frmAVT
 
 
 
-    Private Sub Button10_Click(sender As Object, e As EventArgs) Handles Button10.Click
 
-        FolderBrowserDialog1.ShowDialog()
-        tbPath.Text = FolderBrowserDialog1.SelectedPath
-
-    End Sub
 
 
     Private Sub tbMultiplier_TextChanged(sender As Object, e As EventArgs) Handles tbMultiplier.TextChanged

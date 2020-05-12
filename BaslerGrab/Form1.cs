@@ -21,7 +21,7 @@ namespace BaslerWrapper
         {
             Grabber g = new Grabber();
             g.Open();
-            g.getImage("1000ms",0);
+           // g.getImage("1000ms",0);
             g.close();
 
         }

@@ -173,9 +173,10 @@ Public Class frmMaster
 
             ' m_ManagedImages(m_BitmapSelector) = b
             'copy raw data into m_buffers
-            Dim rawData(b.Width * b.Height * 3) As Byte
+
             Dim BoundsRect = New Rectangle(0, 0, b.Width, b.Height)
             Dim bmpData As System.Drawing.Imaging.BitmapData = b.LockBits(BoundsRect, System.Drawing.Imaging.ImageLockMode.[WriteOnly], b.PixelFormat)
+            Dim rawData(b.Height * bmpData.Stride) As Byte
             Dim ptr As IntPtr = bmpData.Scan0
             'System.Runtime.InteropServices.Marshal.Copy(b.DataPtr, ptr, 0, b.DataSize) 'copy into bitmap
             System.Runtime.InteropServices.Marshal.Copy(ptr, rawData, 0, rawData.Length - 1) 'copy into array
@@ -429,6 +430,13 @@ Public Class frmMaster
         mySettings.minValue = tbLower.Text
         mySettings.darkMultiplier = tbMultiplier.Text
         mySettings.writeSettings()
+
+    End Sub
+
+    Public Sub Button10_Click(sender As Object, e As EventArgs) Handles Button10.Click
+
+        FolderBrowserDialog1.ShowDialog()
+        tbPath.Text = FolderBrowserDialog1.SelectedPath
 
     End Sub
 End Class

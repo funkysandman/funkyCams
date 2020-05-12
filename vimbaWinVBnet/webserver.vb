@@ -32,7 +32,7 @@ Public Class WebServer
     Private myQICam As QCamManagedDriver.QCam
     Private myToupcam As Toupcam
     Private myPointGreycam As IManagedCamera
-    '' Private myBaslerCam As BaslerWrapper.Grabber
+    Private myBaslerCam As BaslerWrapper.Grabber
     Private mySVSVistekCam As SVCamApi.SVCamGrabber
     Private _running As Boolean
     Private myForm As frmAVT
@@ -43,7 +43,7 @@ Public Class WebServer
     Private myCoolsnapForm As frmCoolsnap
     Private myPointGreyForm As frmPointGrey
     Private restart As Boolean = False
-    '  Private myBaslerForm As frmBasler
+    Private myBaslerForm As frmBasler
     Private mySVSVistekForm As frmSVSVistek
     Private mySVSVistekBaumerForm As frmGIGE
     Private myPCOForm As frmPCO
@@ -250,6 +250,21 @@ Public Class WebServer
             LocalPort = port
             mySVSVistekForm = f
             mySVSVistekCam = aCam
+            'loadGigEDarks()
+            LocalTCPListener = New TcpListener(LocalAddress, LocalPort)
+            LocalTCPListener.Start()
+            WebThread = New Thread(AddressOf StartListenSVSVistek)
+            WebThread.Start()
+            f.writeline("starting SVS Vistek web server")
+        Catch ex As Exception
+            f.writeline(ex.Message)
+        End Try
+    End Sub
+    Public Sub StartWebServer(aCam As BaslerWrapper.Grabber, f As Object, port As Integer)
+        Try
+            LocalPort = port
+            myBaslerForm = f
+            myBaslerCam = aCam
             'loadGigEDarks()
             LocalTCPListener = New TcpListener(LocalAddress, LocalPort)
             LocalTCPListener.Start()

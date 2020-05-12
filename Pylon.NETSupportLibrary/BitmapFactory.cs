@@ -24,9 +24,9 @@ namespace PylonC.NETSupportLibrary
         public static bool IsCompatible(Bitmap bitmap, int width, int height, bool color)
         {
             if (bitmap == null
-                || bitmap.Height != height
-                || bitmap.Width != width
-                || bitmap.PixelFormat != GetFormat(color)
+                //|| bitmap.Height != height
+                //|| bitmap.Width != width
+                //|| bitmap.PixelFormat != GetFormat(color)
              )
             {
                 return false;
@@ -53,8 +53,14 @@ namespace PylonC.NETSupportLibrary
         /* Copies the raw image data to the bitmap buffer. */
         public static void UpdateBitmap(Bitmap bitmap, byte[] buffer, int width, int height, bool color)
         {
+            try
+
+            {
+
+           
+
             /* Check if the bitmap can be updated with the image data. */
-            if (!IsCompatible( bitmap, width, height, color))
+            if (!IsCompatible(bitmap, width, height, color))
             {
                 throw new Exception("Cannot update incompatible bitmap.");
             }
@@ -68,7 +74,7 @@ namespace PylonC.NETSupportLibrary
             /* If the widths in bytes are equal, copy in one go. */
             if (imageStride == bmpData.Stride)
             {
-                System.Runtime.InteropServices.Marshal.Copy(buffer, 0, ptrBmp, bmpData.Stride * bitmap.Height );
+                System.Runtime.InteropServices.Marshal.Copy(buffer, 0, ptrBmp, bmpData.Stride * bitmap.Height);
             }
             else /* The widths in bytes are not equal, copy line by line. This can happen if the image width is not divisible by four. */
             {
@@ -79,6 +85,11 @@ namespace PylonC.NETSupportLibrary
             }
             /* Unlock the bits. */
             bitmap.UnlockBits(bmpData);
+        }
+                catch (Exception e)
+            {
+
+            }
         }
     }
 }
