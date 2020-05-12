@@ -28,17 +28,25 @@ Public Class frmScout
     End Sub
 
 
+
     Public Function getLastImage() As Bitmap
-        Dim s As Stopwatch
-        Dim stopWatch As Stopwatch = New Stopwatch()
-        stopWatch.Start()
+        Dim x As New Bitmap(m_pics.width, m_pics.height, System.Drawing.Imaging.PixelFormat.Format8bppIndexed)
+        Dim BoundsRect = New Rectangle(0, 0, m_pics.width, m_pics.height)
+        Dim bmpData As System.Drawing.Imaging.BitmapData = x.LockBits(BoundsRect, System.Drawing.Imaging.ImageLockMode.[WriteOnly], x.PixelFormat)
+        Dim ptr As IntPtr = bmpData.Scan0
+        Dim ncp As System.Drawing.Imaging.ColorPalette = x.Palette
 
-        While running AndAlso stopWatch.ElapsedMilliseconds < 20000
+        For i = 0 To 255
 
-        End While
+            ncp.Entries(i) = System.Drawing.Color.FromArgb(255, i, i, i)
+        Next
+        x.Palette = ncp
+        System.Runtime.InteropServices.Marshal.Copy(m_pics.ImageBytes, 0, ptr, m_pics.dataSize - 1) 'copy into bitmap
 
-        stopWatch.[Stop]()
-        Return b
+
+        x.UnlockBits(bmpData)
+        Return x
+
     End Function
 
 
