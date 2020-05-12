@@ -53,6 +53,7 @@ Public Class frmMaster
         Public Property minValue As Integer
         Public Property maxValue As Integer
         Public Property darkMultiplier As String
+        Public Property darkCutOff As Integer
         Public Sub readSettings()
 
             'try to read settings file
@@ -77,6 +78,7 @@ Public Class frmMaster
                 Me.maxValue = jsonResulttodict.Item("maxValue")
                 Me.minValue = jsonResulttodict.Item("minValue")
                 Me.darkMultiplier = jsonResulttodict.Item("darkMultiplier")
+                Me.darkCutOff = jsonResulttodict.Item("darkCutOff")
             Catch ex As Exception
 
             End Try
@@ -275,7 +277,7 @@ Public Class frmMaster
         tbMultiplier.Text = mySettings.darkMultiplier
         tbLower.Text = mySettings.minValue
         tbUpper.Text = mySettings.maxValue
-
+        tbDarkCutOff.Text = mySettings.darkCutOff
 
     End Sub
 
@@ -301,7 +303,7 @@ Public Class frmMaster
 
 
 
-    Private Sub frmSVSVistek_Closing(sender As Object, e As CancelEventArgs)
+    Private Sub frmSVSVistek_Closing(sender As Object, e As CancelEventArgs) Handles Me.Closing
         On Error Resume Next
 
         'md = Nothing
@@ -430,13 +432,6 @@ Public Class frmMaster
         mySettings.minValue = tbLower.Text
         mySettings.darkMultiplier = tbMultiplier.Text
         mySettings.writeSettings()
-
-    End Sub
-
-    Public Sub Button10_Click(sender As Object, e As EventArgs) Handles Button10.Click
-
-        FolderBrowserDialog1.ShowDialog()
-        tbPath.Text = FolderBrowserDialog1.SelectedPath
 
     End Sub
 End Class
