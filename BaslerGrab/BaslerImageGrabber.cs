@@ -197,8 +197,8 @@ namespace BaslerWrapper
 
 
         {
-
-
+            m_hNode = m_imageProvider.GetNodeFromDevice("ExposureTimeBaseAbs");
+            GenApi.FloatSetValue(m_hNode, 2000f);
             m_hNode = m_imageProvider.GetNodeFromDevice("ExposureTimeAbs");
             GenApi.FloatSetValue(m_hNode, timeValue);
 
