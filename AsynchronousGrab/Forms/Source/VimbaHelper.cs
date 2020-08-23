@@ -732,16 +732,16 @@ namespace AsynchronousGrab
                     break;
                 case VmbFrameStatusType.VmbFrameStatusIncomplete:
                     Console.WriteLine("image incomplete");
-                    myImage = ConvertFrame(frame);
-                    Console.WriteLine("converted frame");
-                    FrameReceivedHandler frameReceivedHandler2 = this.m_FrameReceivedHandler;
-                    Console.WriteLine("setup frameReceiveHandler");
-                    if (null != frameReceivedHandler2 && null != myImage)
-                    {
-                        // Report image to user
-                        frameReceivedHandler2(this, new FrameEventArgs(myImage));
-                        Console.WriteLine("Report image to user");
-                    }
+                    //myImage = ConvertFrame(frame);
+                    //Console.WriteLine("converted frame");
+                    //FrameReceivedHandler frameReceivedHandler2 = this.m_FrameReceivedHandler;
+                    //Console.WriteLine("setup frameReceiveHandler");
+                    //if (null != frameReceivedHandler2 && null != myImage)
+                    //{
+                    //    // Report image to user
+                    //    frameReceivedHandler2(this, new FrameEventArgs(myImage));
+                    //    Console.WriteLine("Report image to user");
+                    //}
                     this.MyCamera.QueueFrame(frame);
                     Console.WriteLine("queue frame");
                     //start a timeout thread    
@@ -752,16 +752,16 @@ namespace AsynchronousGrab
                     case VmbFrameStatusType.VmbFrameStatusTooSmall:
                         Console.WriteLine("image too small");
 
-                    myImage = ConvertFrame(frame);
-                    Console.WriteLine("converted frame");
-                    FrameReceivedHandler frameReceivedHandler3 = this.m_FrameReceivedHandler;
-                    Console.WriteLine("setup frameReceiveHandler");
-                    if (null != frameReceivedHandler3 && null != myImage)
-                    {
-                        // Report image to user
-                        frameReceivedHandler3(this, new FrameEventArgs(myImage));
-                        Console.WriteLine("Report image to user");
-                    }
+                    //myImage = ConvertFrame(frame);
+                    //Console.WriteLine("converted frame");
+                    //FrameReceivedHandler frameReceivedHandler3 = this.m_FrameReceivedHandler;
+                    //Console.WriteLine("setup frameReceiveHandler");
+                    //if (null != frameReceivedHandler3 && null != myImage)
+                    //{
+                    //    // Report image to user
+                    //    frameReceivedHandler3(this, new FrameEventArgs(myImage));
+                    //    Console.WriteLine("Report image to user");
+                    //}
                     //make a new frame...
                     //buffer=new Byte[4177919];
                     //f = new Frame(buffer);

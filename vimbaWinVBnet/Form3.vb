@@ -18,8 +18,10 @@ Public Class Form3
     End Sub
 
     Private Sub Button3_Click(sender As Object, e As EventArgs) Handles Button3.Click
-        'frmBasler.Show()
-        'Me.Hide()
+        Dim f As New frmScout
+        Me.Hide()
+        f.ShowDialog()
+        Me.Close()
     End Sub
 
     Private Sub Button4_Click(sender As Object, e As EventArgs) Handles Button4.Click

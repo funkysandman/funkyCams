@@ -87,12 +87,18 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="AxInterop.FGControlLib">
+      <HintPath>.\AxInterop.FGControlLib.dll</HintPath>
+    </Reference>
     <Reference Include="bgapi2_genicam_dotnet, Version=2.9.18334.18905, Culture=neutral, PublicKeyToken=0551630d1b572f70, processorArchitecture=AMD64">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>BaumerSDKlibs\bgapi2_genicam_dotnet.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.QualityTools.Testing.Fakes, Version=12.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.12.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="PixeLINK.API">
       <HintPath>..\..\..\..\..\..\Program Files (x86)\PixeLINK\dotnet\PixeLINK.API.dll</HintPath>
@@ -102,18 +108,21 @@
     <Reference Include="QCamManagedDriver">
       <HintPath>..\..\..\..\..\..\Program Files\QImaging\SDK\libs\i386\QCamManagedDriver\NETv4.0\QCamManagedDriver.dll</HintPath>
     </Reference>
-    <Reference Include="SpinnakerNETd_v140">
-      <HintPath>..\..\..\..\..\..\Program Files\Point Grey Research\Spinnaker\bin64\vs2015\SpinnakerNETd_v140.dll</HintPath>
+    <Reference Include="SpinnakerNET_v140">
+      <HintPath>..\..\..\..\..\..\..\Program Files\Point Grey Research\Spinnaker\bin64\vs2015\SpinnakerNET_v140.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Deployment" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Net.Http" />
+    <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Web" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xaml" />
     <Reference Include="System.XML" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Xml.Serialization" />
     <Reference Include="TIS.Imaging.ICImagingControl34, Version=3.4.4.2744, Culture=neutral, PublicKeyToken=257805929e8b7928, processorArchitecture=AMD64">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\..\..\Program Files\Common Files\IC Imaging Control 3.4\bin\v4.0.30319\x64\TIS.Imaging.ICImagingControl34.dll</HintPath>
@@ -147,11 +156,27 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include=".vb" />
+    <Compile Include="frmBasler.Designer.vb">
+      <DependentUpon>frmBasler.vb</DependentUpon>
+    </Compile>
+    <Compile Include="frmBasler.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmScout.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="IniFile.vb" />
     <Compile Include="device.vb" />
     <Compile Include="frmIS.designer.vb">
       <DependentUpon>frmIS.vb</DependentUpon>
     </Compile>
     <Compile Include="frmIS.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmMaster.Designer.vb">
+      <DependentUpon>frmMaster.vb</DependentUpon>
+    </Compile>
+    <Compile Include="frmMaster.vb">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="frmPCO.designer.vb">
@@ -160,14 +185,8 @@
     <Compile Include="frmPCO.vb">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="frmPointGrey.Designer.vb">
-      <DependentUpon>frmPointGrey.vb</DependentUpon>
-    </Compile>
     <Compile Include="frmPointGrey.vb">
       <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="frmSVSVistek.Designer.vb">
-      <DependentUpon>frmSVSVistek.vb</DependentUpon>
     </Compile>
     <Compile Include="frmSVSVistek.vb">
       <SubType>Form</SubType>
@@ -185,10 +204,6 @@
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="frmAVT.vb">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="frmAVT.Designer.vb">
-      <DependentUpon>frmAVT.vb</DependentUpon>
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="frmFoculs.Designer.vb">
@@ -249,14 +264,23 @@
     <Compile Include="webserver.vb" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="frmBasler.resx">
+      <DependentUpon>frmBasler.vb</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="frmIS.resx">
       <DependentUpon>frmIS.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmMaster.resx">
+      <DependentUpon>frmMaster.vb</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="frmPCO.resx">
       <DependentUpon>frmPCO.vb</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="frmPointGrey.resx">
       <DependentUpon>frmPointGrey.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmScout.resx">
+      <DependentUpon>frmScout.vb</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="frmSVSVistek.resx">
       <DependentUpon>frmSVSVistek.vb</DependentUpon>
@@ -392,6 +416,15 @@
     <Content Include="BaumerSDKlibs\MathParser_MD_VC120_v3_0.dll" />
     <Content Include="BaumerSDKlibs\NodeMapData_MD_VC120_v3_0.dll" />
     <Content Include="BaumerSDKlibs\XmlParser_MD_VC120_v3_0.dll" />
+    <Content Include="bgapi2_genicam.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="dark_DEV_000F310241C9.raw">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="dark_DEV_000F31025CF4.raw">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="day.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <SubType>Designer</SubType>
@@ -407,6 +440,12 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="libpng16.dll" />
+    <Content Include="log4cpp_MD_VC120_v3_0_baumer.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Log_MD_VC120_v3_0_baumer.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="masterDark.png" />
     <Content Include="masterDarkDBK 33UX178.raw">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -415,6 +454,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="masterSVSDark.raw">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MathParser_MD_VC120_v3_0_baumer.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="night.xml">
@@ -426,6 +468,12 @@
       <SubType>Designer</SubType>
     </Content>
     <Content Include="night_gt2450.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="NodeMapData_MD_VC120_v3_0_baumer.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="pgDark.raw">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="SC2_Cam.dll">
@@ -448,6 +496,9 @@
     <Content Include="toupcam.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="XmlParser_MD_VC120_v3_0_baumer.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <WCFMetadata Include="Service References\" />
@@ -457,6 +508,10 @@
       <Project>{1fb459e7-7c5d-45c3-bf6e-428c9cd191ba}</Project>
       <Name>AsynchronousGrabForms</Name>
     </ProjectReference>
+    <ProjectReference Include="..\BaslerGrab\BaslerImageGrabber.csproj">
+      <Project>{6de4cadd-9d37-48ff-a80c-e56b83720fb0}</Project>
+      <Name>BaslerImageGrabber</Name>
+    </ProjectReference>
     <ProjectReference Include="..\BaumerAPI\BaumerAPI.csproj">
       <Project>{782f80d9-c751-4664-a6be-f6f499bdd581}</Project>
       <Name>BaumerAPI</Name>
@@ -464,6 +519,10 @@
     <ProjectReference Include="..\PVcamHelper\PVcamHelper.csproj">
       <Project>{cff8e983-451b-4bbf-874a-0af38aba86a6}</Project>
       <Name>PVcamHelper</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Pylon.NETSupportLibrary\Pylon.NETSupportLibrary.csproj">
+      <Project>{3eafc9f5-d49f-4f9f-86c8-fbd231b07d2e}</Project>
+      <Name>Pylon.NETSupportLibrary</Name>
     </ProjectReference>
     <ProjectReference Include="..\SVGigE_ExampleVC#.VS2010\GigeApi_.csproj">
       <Project>{b209e79d-9e9e-475e-9300-076e0062dabb}</Project>

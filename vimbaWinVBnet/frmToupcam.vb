@@ -732,7 +732,7 @@ Public Class frmToupcam
         myEncoderParameters = New EncoderParameters(1)
 
         ' Save the bitmap as a JPEG file with quality level 25.
-        myEncoderParameter = New EncoderParameter(myEncoder, CType(85L, Int32))
+        myEncoderParameter = New EncoderParameter(myEncoder, CType(95l, Int32))
         myEncoderParameters.Param(0) = myEncoderParameter
 
 
