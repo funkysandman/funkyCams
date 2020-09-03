@@ -502,6 +502,23 @@ Public Class frmSVSVistek
         ' End If
     End Sub
 
+    Private Sub InitializeComponent()
+        Me.SuspendLayout()
+        '
+        'frmSVSVistek
+        '
+        Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
+        Me.ClientSize = New System.Drawing.Size(422, 525)
+        Me.Name = "frmSVSVistek"
+        Me.ResumeLayout(False)
+        Me.PerformLayout()
+
+    End Sub
+
+    Private Sub frmSVSVistek_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+
+    End Sub
+
     'Private Sub InitializeComponent()
     '    Me.SuspendLayout()
     '    '

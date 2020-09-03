@@ -125,7 +125,8 @@ namespace BaslerWrapper
                     throw new Exception("No devices found.");
                 }
                 m_imageProvider.ImageReadyEvent += new ImageProvider.ImageReadyEventHandler(OnImageReadyEventCallback);
-                m_imageProvider.Open(0);
+            m_imageProvider.GrabErrorEvent += new ImageProvider.GrabErrorEventHandler(GrabErrorEventCallback);
+            m_imageProvider.Open(0);
                 m_hNode = m_imageProvider.GetNodeFromDevice("Width");
                 sizeX = GenApi.IntegerGetValue(m_hNode);
                 m_hNode = m_imageProvider.GetNodeFromDevice("Height");
@@ -138,14 +139,15 @@ namespace BaslerWrapper
                 GenApi.BooleanSetValue(m_hNode, true);
                 m_hNode = m_imageProvider.GetNodeFromDevice("AcquisitionFrameRateAbs");
                 GenApi.FloatSetValue(m_hNode, 0.2f);
+            m_hNode = m_imageProvider.GetNodeFromDevice("GevSCPSPacketSize");
+            GenApi.IntegerSetValue(m_hNode, 1500);
 
+            //m_hNode = m_imageProvider.GetNodeFromDevice("TriggerSource");
+            //GenApi.NodeFromString(m_hNode, "Software");
+            //m_hNode = m_imageProvider.GetNodeFromDevice("ExposureMode");
+            //GenApi.NodeFromString(m_hNode, "TriggerWidth");
 
-                //m_hNode = m_imageProvider.GetNodeFromDevice("TriggerSource");
-                //GenApi.NodeFromString(m_hNode, "Software");
-                //m_hNode = m_imageProvider.GetNodeFromDevice("ExposureMode");
-                //GenApi.NodeFromString(m_hNode, "TriggerWidth");
-
-            }
+        }
             //catch (Exception e)
             //{
             //    // ShowException(e, m_imageProvider.GetLastErrorMessage());
@@ -187,6 +189,8 @@ namespace BaslerWrapper
         }
         public void setGain(Int64 gain)
         {
+
+
             m_hNode = m_imageProvider.GetNodeFromDevice("GainRaw");
             GenApi.IntegerSetValue(m_hNode, gain);
 
@@ -197,8 +201,17 @@ namespace BaslerWrapper
 
 
         {
+            //if timeValue<1000 then
             m_hNode = m_imageProvider.GetNodeFromDevice("ExposureTimeBaseAbs");
-            GenApi.FloatSetValue(m_hNode, 2000f);
+            if (timeValue < 1000000)
+            {
+                GenApi.FloatSetValue(m_hNode, 100f);
+                timeValue = timeValue / 10;
+            }
+            else
+            {
+                GenApi.FloatSetValue(m_hNode, 2000f);
+            }
             m_hNode = m_imageProvider.GetNodeFromDevice("ExposureTimeAbs");
             GenApi.FloatSetValue(m_hNode, timeValue);
 
@@ -295,6 +308,13 @@ namespace BaslerWrapper
          
         }
 
+       private void GrabErrorEventCallback(Exception e, String s)
+        {
+            Debug.WriteLine("grab error");
+            Debug.WriteLine(e.Message);
+            
+        }
+
        private void OnImageReadyEventCallback()
         {
             //if (InvokeRequired)
@@ -349,6 +369,7 @@ namespace BaslerWrapper
 
                     /* The processing of the image is done. Release the image buffer. */
                     m_imageProvider.ReleaseImage();
+                    Console.WriteLine("released image");
                     waitingForImage = false;
                     /* The buffer can be used for the next image grabs. */
                 }

@@ -1095,7 +1095,7 @@ namespace SVCamApi
                                 loadMasterDark();
                                 for (int k = 0; k < imageSizeX * imageSizeY; k++)
                                 {
-                                    if (masterDark[k] < 230)
+                                    if (masterDark[k] < 0)
                                     {
                                         rawImage.imagebytes[k] = (byte)Math.Max(0, rawImage.imagebytes[k] - _darkmultiplier * (masterDark[k]));
                                     }
@@ -1197,22 +1197,31 @@ namespace SVCamApi
 
                                 int pixel1, pixel2;
                                 int dpixel1, dpixel2;
+                                int npixel1,npixel2;
                                 byte byte1, byte2, byte3;
                                 byte dbyte1, dbyte2, dbyte3;
+                                byte nbyte1, nbyte2,nbyte3;
                                 string filename;
 
                                 filename = String.Format("{0}{1:ddMMMyyyy-HHmmss}.raw", "dark_", DateTime.Now);
                                 //if (makeDarks)
                                 //{
-                               //    File.WriteAllBytes(filename, rawImage.imagebytes);
+                                //    File.WriteAllBytes(filename, rawImage.imagebytes);
                                 //}
-                                for (int k = 0; k < imageSizeX*imageSizeY*3/2 - 1; k = k + 3)
+                                for (int k = 0; k < imageSizeX * imageSizeY * 3 / 2 - 1; k = k + 3)
                                 {
                                     //unpack 2 pixels in 3 bytes
                                     byte1 = rawImage.imagebytes[k];
                                     byte2 = rawImage.imagebytes[k + 1];
                                     byte3 = rawImage.imagebytes[k + 2];
-
+                                    nbyte1 = 0; //neighbour byte
+                                    nbyte2 = 0;
+                                    nbyte3 = 0;
+                                    if (k < imageSizeX * imageSizeY * 3 / 2 - 6)
+                                    {       nbyte1 = rawImage.imagebytes[k + 3];
+                                            nbyte2 = rawImage.imagebytes[k + 4];
+                                            nbyte2 = rawImage.imagebytes[k + 5];
+                                    }
 
                                     dbyte1 = masterDark[k];
                                     dbyte2 = masterDark[k + 1];
@@ -1221,7 +1230,8 @@ namespace SVCamApi
 
                                     pixel1 = (byte1)<<4 | (byte2 & 0b0000_1111);
                                     pixel2 = (byte3)<<4 | (byte2 & 0b1111_0000)>>4;
-
+                                    npixel1= (nbyte1)<< 4 | (nbyte2 & 0b0000_1111) >> 4;
+                                    npixel2 = (nbyte3) << 4 | (nbyte2 & 0b1111_0000) >> 4;
 
                                     dpixel1 = (dbyte1) << 4 | (dbyte2 & 0b0000_1111);
                                     dpixel2 = (dbyte3) << 4 | (dbyte2 & 0b1111_0000) >> 4;
@@ -1232,20 +1242,29 @@ namespace SVCamApi
                                     dpixel1 = Convert.ToInt32(Convert.ToDouble(dpixel1) * _darkmultiplier);
 
                                     dpixel2 = Convert.ToInt32(Convert.ToDouble(dpixel2) * _darkmultiplier);
-                                    int pixelCutOff = 220;
+                                    int pixelCutOff = 700;
                                     if (useDarks)
                                     {
 
                                         //pixel1 = Math.Min(pixel1 + 50, 4095);
                                          if (dpixel1 > pixelCutOff) { 
-                                       pixel1 = Math.Max(pixel1 - dpixel1, 0);
+                                       //pixel1 = Math.Max(pixel1 - dpixel1, 0);
+                                       //     if( pixel1==0)
+                                       //     {
+                                                pixel1 = npixel1;
+                                           // }
+                                   
                                           }
                                        // pixel1 = dpixel1;
                                            if (dpixel2 > pixelCutOff)
                                            {
-                                        pixel2 = Math.Max(pixel2 - dpixel2, 0);
-                                     //   pixel2 = dpixel2;
-                                           }
+                                      //  pixel2 = Math.Max(pixel2 - dpixel2, 0);
+                                            //   pixel2 = dpixel2;
+                                       //     if (pixel2 == 0)
+                                       //     {
+                                                pixel2 = npixel2;
+                                       //     }
+                                        }
                                     }
 
 

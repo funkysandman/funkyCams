@@ -16,8 +16,8 @@ Module Module1
         Dim myMS As MemoryStream
         Dim b As Byte()
         'Dim files = directory.GetFiles("*.jpg").Where(f >= f.LastWriteTime >= from_date && f.LastWriteTime <= to_date)
-        Dim filedir As New DirectoryInfo("d:\images")
-        Dim fileList = filedir.GetFiles("*.jpg")
+        Dim filedir As New DirectoryInfo("C:\image_pg\2020-Aug-31")
+        Dim fileList = filedir.GetFiles("*31Aug2020-044302.jpg*")
         Dim queryMatchingFiles = From file In fileList
                                  Where file.LastWriteTime >= from_date And file.LastWriteTime <= to_date
         Dim datetaken As String
@@ -33,7 +33,7 @@ Module Module1
             qe = New queueEntry
             qe.height = c.Height
             qe.width = c.Width
-            qe.cameraID = "notsaved"
+            qe.cameraID = "svs"
             datetaken = Left(fName, (InStr(fName, ".j") - 1))
             datetaken = Right(datetaken, 16)
             Try

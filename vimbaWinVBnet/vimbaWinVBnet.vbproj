@@ -105,6 +105,9 @@
     </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
+    <Reference Include="PylonC.NET, Version=4.1.0.0, Culture=neutral, PublicKeyToken=a77e8471c5919d5a, processorArchitecture=MSIL">
+      <HintPath>..\packages\Basler.PylonC.NET.5.0.5\lib\net20\PylonC.NET.dll</HintPath>
+    </Reference>
     <Reference Include="QCamManagedDriver">
       <HintPath>..\..\..\..\..\..\Program Files\QImaging\SDK\libs\i386\QCamManagedDriver\NETv4.0\QCamManagedDriver.dll</HintPath>
     </Reference>
