@@ -820,9 +820,9 @@ Public Class frmPCO
         End If
 
         'Dim ret As Integer = PCO_OpenDialogCam(hdialog, hdriver, Me.Handle, 0, 0, 0, Me.Right, Me.Top, "Camera Settings")
-
-
-
+        'set temp low
+        errorCode = PCO_SetCoolingSetpointTemperature(hdriver, -32)
+        errorCode = PCO_SetPixelRate(hdriver, 10000000)
 
     End Sub
     Private Sub ReportReceived(ByVal pvcc As pvcam_helper.PVCamCamera, ByVal rm As pvcam_helper.ReportMessage)
@@ -961,7 +961,7 @@ Public Class frmPCO
         Dim BoundsRect = New Rectangle(0, 0, iXres, iYres)
         Dim bmpData As System.Drawing.Imaging.BitmapData = x.LockBits(BoundsRect, System.Drawing.Imaging.ImageLockMode.[WriteOnly], x.PixelFormat)
         Dim ptr As IntPtr = bmpData.Scan0
-        System.Runtime.InteropServices.Marshal.Copy(m_pics.ImageBytes, 0, ptr, iXres * iYres) 'copy into bitmap
+        System.Runtime.InteropServices.Marshal.Copy(m_pics.ImageBytes, 0, ptr, iXres * iYres * 3) 'copy into bitmap
 
 
         x.UnlockBits(bmpData)
@@ -1378,6 +1378,7 @@ Public Class frmPCO
                     b = Me.getLastImage
 
                     b.Save(ms, Me.myImageCodecInfo, Me.myEncoderParameters)
+
                     b.Dispose()
 
                     Dim contents = ms.ToArray()
@@ -1396,13 +1397,37 @@ Public Class frmPCO
                     ms.Close()
 
                 End If
-                If Me.cbSaveImages.Checked = True Then
+                If Me.cbSaveImages.Checked = True And Me.lblDayNight.Text.ToLower = "night" Then
                     System.IO.Directory.CreateDirectory(Path.Combine(Me.tbPath.Text, folderName))
 
 
                     bmBild.Save(filename, Me.myImageCodecInfo, Me.myEncoderParameters)
                     bmBild.Dispose()
+                    'delete all files 24 hrs older underneath path
+                    Try
+                        Dim dtCreated As DateTime
+                        Dim dtToday As DateTime = Today.Date
+                        Dim diObj As DirectoryInfo
+                        Dim ts As TimeSpan
+                        Dim lstDirsToDelete As New List(Of String)
 
+                        For Each sSubDir As String In Directory.GetDirectories(Me.tbPath.Text)
+                            diObj = New DirectoryInfo(sSubDir)
+                            dtCreated = diObj.CreationTime
+
+                            ts = dtToday - dtCreated
+
+                            'Add whatever storing you want here for all folders...
+
+                            If ts.Days >= 1 Then
+                                lstDirsToDelete.Add(sSubDir)
+                                'Store whatever values you want here... like how old the folder is
+                                diObj.Delete(True) 'True for recursive deleting
+                            End If
+                        Next
+                    Catch ex As Exception
+                        'MessageBox.Show(ex.Message, "Error Deleting Folder", MessageBoxButtons.OK, MessageBoxIcon.Error)
+                    End Try
                 End If
 
 
