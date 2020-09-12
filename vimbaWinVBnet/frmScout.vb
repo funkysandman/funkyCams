@@ -343,7 +343,7 @@ Public Class frmScout
 
         Dim filename As String
         Dim folderName = String.Format("{0:yyyy-MMM-dd}", DateTime.Now)
-        filename = String.Format("{0}{1:ddMMMyyyy-HHmmss}.jpg", "imgsvs_", DateTime.Now)
+        filename = String.Format("{0}{1:ddMMMyyyy-HHmmss}.jpg", "imgscout_", DateTime.Now)
         filename = Path.Combine(Me.tbPath.Text, folderName, filename)
 
 

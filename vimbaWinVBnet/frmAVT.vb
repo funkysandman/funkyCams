@@ -463,6 +463,7 @@ Public Class frmAVT
 
         v.OpenCamera(cmbCam.SelectedItem)
         loadProfile(cmbCam.SelectedItem)
+        myCamID = cmbCam.SelectedItem
         lblDayNight.Text = ""
     End Sub
 
