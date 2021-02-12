@@ -1235,7 +1235,7 @@ namespace SVCamApi
 
                                     pixel1 = (byte1)<<4 | (byte2 & 0b0000_1111);
                                     pixel2 = (byte3)<<4 | (byte2 & 0b1111_0000)>>4;
-                                    npixel1= (nbyte1)<< 4 | (nbyte2 & 0b0000_1111) >> 4;
+                                    npixel1= (nbyte1)<< 4 | (nbyte2 & 0b0000_1111);
                                     npixel2 = (nbyte3) << 4 | (nbyte2 & 0b1111_0000) >> 4;
 
                                     dpixel1 = (dbyte1) << 4 | (dbyte2 & 0b0000_1111);
@@ -1247,7 +1247,7 @@ namespace SVCamApi
                                     dpixel1 = Convert.ToInt32(Convert.ToDouble(dpixel1) * _darkmultiplier);
 
                                     dpixel2 = Convert.ToInt32(Convert.ToDouble(dpixel2) * _darkmultiplier);
-                                    int pixelCutOff = 700;
+                                    int pixelCutOff = 600;
                                     if (useDarks)
                                     {
 
@@ -1257,6 +1257,9 @@ namespace SVCamApi
                                        //     if( pixel1==0)
                                        //     {
                                                 pixel1 = npixel1;
+                                            if (npixel1 == 0)
+                                                pixel1 = pixel1;
+
                                            // }
                                    
                                           }
