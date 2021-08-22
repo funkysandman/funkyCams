@@ -320,8 +320,8 @@ namespace PylonC.NETSupportLibrary
 
                 if (Pylon.DeviceFeatureIsWritable(m_hDevice, "GevSCPD"))
                 {
-                    /* ... The device supports the packet size feature. Set a value. */
-                    Pylon.DeviceSetIntegerFeature(m_hDevice, "GevSCPD", 9000);
+                    /* ... The device supports the delay feature. Set a value. */
+                    Pylon.DeviceSetIntegerFeature(m_hDevice, "GevSCPD", 100);
                 }
                 /* The sample does not work in chunk mode. It must be disabled. */
                 if (Pylon.DeviceFeatureIsWritable(m_hDevice, "ChunkModeActive"))

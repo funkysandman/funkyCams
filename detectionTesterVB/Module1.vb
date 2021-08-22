@@ -9,14 +9,14 @@ Module Module1
 
     Sub Main()
         'loop through files and generate qe as well
-        Dim from_date = DateTime.Now.AddHours(-24)
+        Dim from_date = DateTime.Now.AddHours(-17)
         Dim to_date = DateTime.Now.AddHours(0)
         Dim c As Bitmap
         Dim fName As String
         Dim myMS As MemoryStream
         Dim b As Byte()
         'Dim files = directory.GetFiles("*.jpg").Where(f >= f.LastWriteTime >= from_date && f.LastWriteTime <= to_date)
-        Dim filedir As New DirectoryInfo("C:\image_pg\2021-Jan-24")
+        Dim filedir As New DirectoryInfo("C:\image_pg\2021-Aug-08")
         Dim fileList = filedir.GetFiles("*.jpg*")
         Dim queryMatchingFiles = From file In fileList
                                  Where file.LastWriteTime >= from_date And file.LastWriteTime <= to_date
