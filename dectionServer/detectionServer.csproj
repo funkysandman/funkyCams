@@ -1,5 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\packages\SciSharp.TensorFlow.Redist-Windows-GPU.2.3.1\build\netstandard2.0\SciSharp.TensorFlow.Redist-Windows-GPU.props" Condition="Exists('..\packages\SciSharp.TensorFlow.Redist-Windows-GPU.2.3.1\build\netstandard2.0\SciSharp.TensorFlow.Redist-Windows-GPU.props')" />
+  <Import Project="..\packages\MethodBoundaryAspect.Fody.2.0.138\build\MethodBoundaryAspect.Fody.props" Condition="Exists('..\packages\MethodBoundaryAspect.Fody.2.0.138\build\MethodBoundaryAspect.Fody.props')" />
   <Import Project="..\packages\Microsoft.ML.TensorFlow.Redist.0.14.0\build\netstandard2.0\Microsoft.ML.TensorFlow.Redist.props" Condition="Exists('..\packages\Microsoft.ML.TensorFlow.Redist.0.14.0\build\netstandard2.0\Microsoft.ML.TensorFlow.Redist.props')" />
   <Import Project="..\packages\Microsoft.ML.1.3.1\build\netstandard2.0\Microsoft.ML.props" Condition="Exists('..\packages\Microsoft.ML.1.3.1\build\netstandard2.0\Microsoft.ML.props')" />
   <Import Project="..\packages\Microsoft.ML.CpuMath.1.3.1\build\netstandard2.0\Microsoft.ML.CpuMath.props" Condition="Exists('..\packages\Microsoft.ML.CpuMath.1.3.1\build\netstandard2.0\Microsoft.ML.CpuMath.props')" />
@@ -47,8 +49,11 @@
     <Reference Include="Alturos.Yolo, Version=2.6.1.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Alturos.Yolo.2.6.1\lib\net461\Alturos.Yolo.dll</HintPath>
     </Reference>
-    <Reference Include="Google.Protobuf, Version=3.10.0.0, Culture=neutral, PublicKeyToken=a7d26565bac4d604, processorArchitecture=MSIL">
-      <HintPath>..\packages\Google.Protobuf.3.10.0\lib\net45\Google.Protobuf.dll</HintPath>
+    <Reference Include="Google.Protobuf, Version=3.11.4.0, Culture=neutral, PublicKeyToken=a7d26565bac4d604, processorArchitecture=MSIL">
+      <HintPath>..\packages\Google.Protobuf.3.11.4\lib\net45\Google.Protobuf.dll</HintPath>
+    </Reference>
+    <Reference Include="MethodBoundaryAspect, Version=2.0.138.0, Culture=neutral, PublicKeyToken=296379d5065c9d61, processorArchitecture=MSIL">
+      <HintPath>..\packages\MethodBoundaryAspect.Fody.2.0.138\lib\net452\MethodBoundaryAspect.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.ML.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.ML.1.3.1\lib\netstandard2.0\Microsoft.ML.Core.dll</HintPath>
@@ -83,6 +88,12 @@
     <Reference Include="NumSharp.Core, Version=0.20.4.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\packages\NumSharp.0.20.4\lib\netstandard2.0\NumSharp.Core.dll</HintPath>
     </Reference>
+    <Reference Include="NumSharp.Lite, Version=0.1.9.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\NumSharp.Lite.0.1.9\lib\netstandard2.0\NumSharp.Lite.dll</HintPath>
+    </Reference>
+    <Reference Include="Protobuf.Text, Version=0.4.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\Protobuf.Text.0.4.0\lib\netstandard2.0\Protobuf.Text.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Buffers, Version=4.0.2.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Buffers.4.4.0\lib\netstandard2.0\System.Buffers.dll</HintPath>
@@ -112,6 +123,9 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
+    <Reference Include="TensorFlow.NET, Version=0.30.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\TensorFlow.NET.0.30.0\lib\netstandard2.0\TensorFlow.NET.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="dataModel\SkyImage.cs" />
@@ -167,7 +181,11 @@
     <Error Condition="!Exists('..\packages\Microsoft.ML.1.3.1\build\netstandard2.0\Microsoft.ML.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.ML.1.3.1\build\netstandard2.0\Microsoft.ML.targets'))" />
     <Error Condition="!Exists('..\packages\Microsoft.ML.TensorFlow.Redist.0.14.0\build\netstandard2.0\Microsoft.ML.TensorFlow.Redist.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.ML.TensorFlow.Redist.0.14.0\build\netstandard2.0\Microsoft.ML.TensorFlow.Redist.props'))" />
     <Error Condition="!Exists('..\packages\Alturos.Yolo.2.6.1\build\net461\Alturos.Yolo.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Alturos.Yolo.2.6.1\build\net461\Alturos.Yolo.targets'))" />
+    <Error Condition="!Exists('..\packages\Fody.6.0.5\build\Fody.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Fody.6.0.5\build\Fody.targets'))" />
+    <Error Condition="!Exists('..\packages\MethodBoundaryAspect.Fody.2.0.138\build\MethodBoundaryAspect.Fody.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\MethodBoundaryAspect.Fody.2.0.138\build\MethodBoundaryAspect.Fody.props'))" />
+    <Error Condition="!Exists('..\packages\SciSharp.TensorFlow.Redist-Windows-GPU.2.3.1\build\netstandard2.0\SciSharp.TensorFlow.Redist-Windows-GPU.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\SciSharp.TensorFlow.Redist-Windows-GPU.2.3.1\build\netstandard2.0\SciSharp.TensorFlow.Redist-Windows-GPU.props'))" />
   </Target>
   <Import Project="..\packages\Microsoft.ML.1.3.1\build\netstandard2.0\Microsoft.ML.targets" Condition="Exists('..\packages\Microsoft.ML.1.3.1\build\netstandard2.0\Microsoft.ML.targets')" />
   <Import Project="..\packages\Alturos.Yolo.2.6.1\build\net461\Alturos.Yolo.targets" Condition="Exists('..\packages\Alturos.Yolo.2.6.1\build\net461\Alturos.Yolo.targets')" />
+  <Import Project="..\packages\Fody.6.0.5\build\Fody.targets" Condition="Exists('..\packages\Fody.6.0.5\build\Fody.targets')" />
 </Project>

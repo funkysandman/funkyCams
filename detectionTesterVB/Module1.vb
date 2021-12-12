@@ -16,7 +16,7 @@ Module Module1
         Dim myMS As MemoryStream
         Dim b As Byte()
         'Dim files = directory.GetFiles("*.jpg").Where(f >= f.LastWriteTime >= from_date && f.LastWriteTime <= to_date)
-        Dim filedir As New DirectoryInfo("d:\images")
+        Dim filedir As New DirectoryInfo("c:\found")
         Dim fileList = filedir.GetFiles("*.jpg")
         Dim queryMatchingFiles = From file In fileList
                                  Where file.LastWriteTime >= from_date And file.LastWriteTime <= to_date
@@ -33,13 +33,13 @@ Module Module1
             qe = New queueEntry
             qe.height = c.Height
             qe.width = c.Width
-            qe.cameraID = "notsaved"
+            qe.cameraID = "test"
             datetaken = Left(fName, (InStr(fName, ".j") - 1))
             datetaken = Right(datetaken, 16)
             Try
                 qe.dateTaken = DateTime.ParseExact(datetaken, "ddMMMyyyy-HHmmss", Nothing)
             Catch ex As Exception
-                qe.dateTaken = DateTime.Now
+                qe.dateTaken = #8/11/2020 02:10:00 AM# 'DateTime.Now
             End Try
 
             qe.filename = fName

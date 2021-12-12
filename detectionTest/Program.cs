@@ -24,7 +24,7 @@ namespace pushImagesToDB
 
             DateTime from_date = DateTime.Now.AddHours(-189999);
             DateTime to_date = DateTime.Now;
-            var directory = new DirectoryInfo("e:\\meteor_corpus");
+            var directory = new DirectoryInfo("C:\\Users\\sandy\\Desktop\\meteors");
             bool pushToCloud = false;
             bool createYOLO = false;
             byte[] buffer;
