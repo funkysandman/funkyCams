@@ -228,7 +228,7 @@ Public Class frmPointGrey
 
             'image.Save("pgDark.raw")
             'darks
-            Dim pixel, dPixel, newPixel As Long
+            Dim pixel, dPixel, newPixel, neighborPixel As Long
             If myForm.cbUseDarks.Checked And myForm.lblDayNight.Text = "night" Then
                 If myForm.dark Is Nothing Then
                     myForm.dark = System.IO.File.ReadAllBytes("pgdark.raw")
@@ -250,17 +250,21 @@ Public Class frmPointGrey
                 mult = Val(myForm.tbMultiplier.Text)
                 For i = 0 To image.DataSize - 1 Step 2
                     pixel = image.ManagedData(i) + image.ManagedData(i + 1) * 256
-                    dPixel = myForm.dark(i) + myForm.dark(i + 1) * 256
-                    If (dPixel > darkCutOff) Then
-                        pixel = Math.Max(0, pixel - (dPixel * mult))
+                    If i > 6 Then
+                        neighborPixel = image.ManagedData(i - 4) + image.ManagedData(i - 3) * 256
+
+
+                        dPixel = myForm.dark(i) + myForm.dark(i + 1) * 256
+                        If (dPixel > darkCutOff) Then
+                            pixel = neighborPixel
+                        End If
+
                     End If
-
-
 
                     'newPixel = CByte(Math.Max(0, CInt(image.ManagedData(i)) - CInt(myForm.dark(i)) * mult))
 
 
-                    pixel = CInt(pixel * multiplier)
+                    'pixel = CInt(pixel * multiplier)
 
 
                     'value = value * 255 / span
@@ -343,6 +347,7 @@ Public Class frmPointGrey
             'image.ConvertToBitmapSource(PixelFormatEnums.RGB8, ColorProcessingAlgorithm.NEAREST_NEIGHBOR_AVG)
 
             image.Convert(convertedImage, PixelFormatEnums.BGR8, ColorProcessingAlgorithm.DEFAULT)
+
             'mImage = imgProcessor.CreateImage(image.Width, image.Height, "BayerGB16", image.DataPtr, image.Width * image.Height * 2)
 
             ''ULong imageBufferAddress = (ULong)ImageInfo.pImagePtr;

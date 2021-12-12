@@ -46,7 +46,7 @@
   <ItemGroup>
     <Reference Include="PylonC.NET, Version=4.2.0.0, Culture=neutral, PublicKeyToken=a77e8471c5919d5a, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\Program Files\Basler\pylon 6\Development\Assemblies\PylonC.NET\PylonC.NET.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\Program Files\Basler\pylon 6\Development\Assemblies\PylonC.NET\PylonC.NET.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -60,7 +60,7 @@
   <ItemGroup>
     <None Include="app.config" />
     <None Include="packages.config" />
-    <None Include="x64\ProducerGEV.cti">
+    <None Include="ProducerGEV.cti">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
@@ -71,60 +71,66 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="x64\FirmwareUpdate_MD_VC141_v3_1_Basler_pylon.dll">
+    <Content Include="FirmwareUpdate_MD_VC141_v3_1_Basler_pylon.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="x64\GCBase_MD_VC141_v3_1_Basler_pylon.dll">
+    <Content Include="GCBase_MD_VC141_v3_1_Basler_pylon.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="x64\GenApi_MD_VC141_v3_1_Basler_pylon.dll">
+    <Content Include="GenApi_MD_VC141_v3_1_Basler_pylon.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="x64\gxapi_v12.dll">
+    <Content Include="gxapi_v12.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="x64\log4cpp_MD_VC141_v3_1_Basler_pylon.dll">
+    <Content Include="log4cpp_MD_VC141_v3_1_Basler_pylon.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="x64\Log_MD_VC141_v3_1_Basler_pylon.dll">
+    <Content Include="Log_MD_VC141_v3_1_Basler_pylon.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="x64\MathParser_MD_VC141_v3_1_Basler_pylon.dll">
+    <Content Include="MathParser_MD_VC141_v3_1_Basler_pylon.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="x64\NodeMapData_MD_VC141_v3_1_Basler_pylon.dll">
+    <Content Include="NodeMapData_MD_VC141_v3_1_Basler_pylon.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="x64\PylonBase_v6_1.dll">
+    <Content Include="PylonBase_v6_1.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="x64\PylonCamEmu_v6_1_TL.dll">
+    <Content Include="PylonCamEmu_v6_1_TL.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="x64\PylonC_v6_1.dll">
+    <Content Include="PylonC_v6_1.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="x64\PylonFirmwareUpdater.exe">
+    <Content Include="PylonFirmwareUpdater.exe">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="x64\PylonGigE_v6_1_TL.dll">
+    <Content Include="PylonGigE_v6_1_TL.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="x64\PylonGUI_v6_1.dll">
+    <Content Include="PylonGUI_v6_1.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="x64\PylonUtility_v6_1.dll">
+    <Content Include="PylonUtility_v6_1.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="x64\uxapi_v12.dll">
+    <Content Include="uxapi_v12.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="x64\uxtopapi_v6_1.dll">
+    <Content Include="uxtopapi_v6_1.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="x64\XmlParser_MD_VC141_v3_1_Basler_pylon.dll">
+    <Content Include="XmlParser_MD_VC141_v3_1_Basler_pylon.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Connected Services\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="x64\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

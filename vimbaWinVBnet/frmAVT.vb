@@ -54,6 +54,7 @@ Public Class frmAVT
         If Me.cbUseDarks.Checked And lblDayNight.Text = "night" Then
             'd2 = Bitmap.FromFile(Application.StartupPath & "\dark.png")
             Dim pixValue As Int16 = 0
+            Dim npixValue As Int16 = 0
             Dim darkValue As Int16 = 0
             Dim x
             If dark Is Nothing Then
@@ -70,21 +71,22 @@ Public Class frmAVT
                 For i = 0 To 4095
                     lut(i) = Math.Max(0, CInt(i * slope) - arg * slope)
                 Next
-                For x = 0 To dark.Length - 2 Step 2
+                'For x = 0 To dark.Length - 2 Step 2
 
 
-                    darkValue = (dark(x + 1) * 256) + dark(x)
+                '    darkValue = (dark(x + 1) * 256) + dark(x)
 
-                    ' If darkValue > 500 Then
-                    darkValue = lut(darkValue)
+                '    ' If darkValue > 500 Then
+                '    darkValue = lut(darkValue)
 
-                    dark(x + 1) = (darkValue And &HFF00) >> 8
-                    dark(x) = darkValue And &HFF
-                    ' End If
+                '    dark(x + 1) = (darkValue And &HFF00) >> 8
+                '    dark(x) = darkValue And &HFF
+                '    ' End If
 
-                Next
+                'Next
             End If
-
+            Dim darkCutOff As Int16
+            darkCutOff = CInt(tbDarkCutOff.Text)
             Try
 
                 Dim t As TimeSpan
@@ -95,11 +97,18 @@ Public Class frmAVT
                 For x = 0 To dark.Length - 2 Step 2
 
                     pixValue = (f.Buffer(x + 1) * 256) + f.Buffer(x)
+                    If x < dark.Length - 6 Then
+                        npixValue = (f.Buffer(x + 5) * 256) + f.Buffer(x + 4)
+                    End If
+
                     darkValue = (dark(x + 1) * 256) + dark(x)
 
-                    ' If darkValue > 500 Then
+                    If darkValue > darkCutOff Then
 
-                    pixValue = Math.Max(0, pixValue - darkValue)
+                        pixValue = npixValue
+                    End If
+
+                    'pixValue = Math.Max(0, pixValue - darkValue)
                     ' pixValue = darkFunction(pixValue, darkValue, 100)
                     f.Buffer(x + 1) = Int(pixValue / 256)
                     f.Buffer(x) = pixValue And 255
@@ -463,6 +472,7 @@ Public Class frmAVT
 
         v.OpenCamera(cmbCam.SelectedItem)
         loadProfile(cmbCam.SelectedItem)
+        myCamID = cmbCam.SelectedItem
         lblDayNight.Text = ""
     End Sub
 

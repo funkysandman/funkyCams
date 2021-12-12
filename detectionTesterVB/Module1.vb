@@ -9,14 +9,14 @@ Module Module1
 
     Sub Main()
         'loop through files and generate qe as well
-        Dim from_date = DateTime.Now.AddHours(-1969999)
+        Dim from_date = DateTime.Now.AddHours(-24)
         Dim to_date = DateTime.Now.AddHours(0)
         Dim c As Bitmap
         Dim fName As String
         Dim myMS As MemoryStream
         Dim b As Byte()
         'Dim files = directory.GetFiles("*.jpg").Where(f >= f.LastWriteTime >= from_date && f.LastWriteTime <= to_date)
-        Dim filedir As New DirectoryInfo("c:\found")
+        Dim filedir As New DirectoryInfo("d:\images")
         Dim fileList = filedir.GetFiles("*.jpg")
         Dim queryMatchingFiles = From file In fileList
                                  Where file.LastWriteTime >= from_date And file.LastWriteTime <= to_date
@@ -33,7 +33,7 @@ Module Module1
             qe = New queueEntry
             qe.height = c.Height
             qe.width = c.Width
-            qe.cameraID = "test"
+            qe.cameraID = "notsaved"
             datetaken = Left(fName, (InStr(fName, ".j") - 1))
             datetaken = Right(datetaken, 16)
             Try

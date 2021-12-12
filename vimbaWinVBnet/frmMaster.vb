@@ -431,6 +431,7 @@ Public Class frmMaster
         mySettings.maxValue = tbUpper.Text
         mySettings.minValue = tbLower.Text
         mySettings.darkMultiplier = tbMultiplier.Text
+        mySettings.darkCutOff = tbDarkCutOff.Text
         mySettings.writeSettings()
 
     End Sub
