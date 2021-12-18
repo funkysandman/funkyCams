@@ -76,6 +76,7 @@ Public Class Camera
     Private astroUtilities As AstroUtils ' Private variable to hold an AstroUtils object to provide the Range method
     Private TL As TraceLogger ' Private variable to hold the trace logger object (creates a diagnostic log file with information that you specify)
     Friend Shared myCam As ApogeeCam
+    Private _readoutModes = New ArrayList(2)
     '
     ' Constructor - Must be public for COM registration!
     '
@@ -94,7 +95,8 @@ Public Class Camera
         If myCam Is Nothing Then
             myCam = New ApogeeCam()
         End If
-
+        _readoutModes.add("slow")
+        _readoutModes.add("fast")
         TL.LogMessage("Camera", "Completed initialisation")
     End Sub
 
@@ -635,18 +637,19 @@ Public Class Camera
     Public Property ReadoutMode() As Short Implements ICameraV2.ReadoutMode
         Get
             TL.LogMessage("ReadoutMode Get", "Not implemented")
-            Throw New ASCOM.PropertyNotImplementedException("ReadoutMode", False)
+            'Throw New ASCOM.PropertyNotImplementedException("ReadoutMode", False)
         End Get
         Set(value As Short)
             TL.LogMessage("ReadoutMode Set", "Not implemented")
-            Throw New ASCOM.PropertyNotImplementedException("ReadoutMode", True)
+            'Throw New ASCOM.PropertyNotImplementedException("ReadoutMode", True)
         End Set
     End Property
 
     Public ReadOnly Property ReadoutModes() As ArrayList Implements ICameraV2.ReadoutModes
         Get
             TL.LogMessage("ReadoutModes Get", "Not implemented")
-            Throw New ASCOM.PropertyNotImplementedException("ReadoutModes", False)
+            'Throw New ASCOM.PropertyNotImplementedException("ReadoutModes", False)
+            Return _readoutModes
         End Get
     End Property
 

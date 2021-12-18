@@ -10,7 +10,7 @@
         Dim tempImage As Array
         FindDlg.DlgCheckEthernet = False
         FindDlg.DlgCheckUsb = True
-
+        c.
         FindDlg.ShowDialog(True)
 
         If FindDlg.ValidSelection Then
