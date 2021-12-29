@@ -34,6 +34,7 @@ Partial Class Form3
         Me.btnPCO = New System.Windows.Forms.Button()
         Me.Button9 = New System.Windows.Forms.Button()
         Me.btnIS = New System.Windows.Forms.Button()
+        Me.btnIPCam = New System.Windows.Forms.Button()
         Me.SuspendLayout()
         '
         'Button1
@@ -146,11 +147,21 @@ Partial Class Form3
         Me.btnIS.Text = "Imaging Source"
         Me.btnIS.UseVisualStyleBackColor = True
         '
+        'btnIPCam
+        '
+        Me.btnIPCam.Location = New System.Drawing.Point(475, 196)
+        Me.btnIPCam.Name = "btnIPCam"
+        Me.btnIPCam.Size = New System.Drawing.Size(112, 38)
+        Me.btnIPCam.TabIndex = 12
+        Me.btnIPCam.Text = "IP Camera"
+        Me.btnIPCam.UseVisualStyleBackColor = True
+        '
         'Form3
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.ClientSize = New System.Drawing.Size(807, 246)
+        Me.Controls.Add(Me.btnIPCam)
         Me.Controls.Add(Me.btnIS)
         Me.Controls.Add(Me.Button9)
         Me.Controls.Add(Me.btnPCO)
@@ -180,4 +191,5 @@ Partial Class Form3
     Friend WithEvents btnPCO As Button
     Friend WithEvents Button9 As Button
     Friend WithEvents btnIS As Button
+    Friend WithEvents btnIPCam As Button
 End Class

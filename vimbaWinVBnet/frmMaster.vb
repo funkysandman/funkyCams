@@ -12,6 +12,7 @@ Imports SpinnakerNET.GenApi
 Imports System.Runtime.Serialization.Json
 Imports System.Text
 Imports Newtonsoft.Json
+Imports System.Web.Script.Serialization
 
 Public Class frmMaster
     Public night As Boolean = False
@@ -35,6 +36,7 @@ Public Class frmMaster
     Public t_cleanup As Thread
     Public mySettings As CameraSettings
     Public Shared m_pics As RingBitmap
+
     Public Class CameraSettings
 
         Public Property ModelName As String
@@ -54,15 +56,21 @@ Public Class frmMaster
         Public Property maxValue As Integer
         Public Property darkMultiplier As String
         Public Property darkCutOff As Integer
+        Public Property url As String
+        Public Property Rects As New List(Of MyRectangle)
+
         Public Sub readSettings()
 
             'try to read settings file
             Dim filename As String = "profile_" & Me.ModelName & ".json"
             Dim settingsJSON As String
+            Dim r As MyRectangle
             Try
 
                 settingsJSON = File.ReadAllText(filename)
                 Dim jsonResulttodict = JsonConvert.DeserializeObject(Of Dictionary(Of String, Object))(settingsJSON)
+                Dim jss As New JavaScriptSerializer()
+
                 Me.ModelName = jsonResulttodict.Item("ModelName")
                 Me.ImagePath = jsonResulttodict.Item("ImagePath")
                 Me.DayExposure = jsonResulttodict.Item("DayExposure")
@@ -79,6 +87,19 @@ Public Class frmMaster
                 Me.minValue = jsonResulttodict.Item("minValue")
                 Me.darkMultiplier = jsonResulttodict.Item("darkMultiplier")
                 Me.darkCutOff = jsonResulttodict.Item("darkCutOff")
+                Me.url = jsonResulttodict.Item("url")
+                Dim rectJS As Object = jsonResulttodict.Item("Rects")
+                Me.Rects = New List(Of MyRectangle)
+                For Each item In rectJS
+                    r = New MyRectangle()
+                    r.x = item("_x").value
+                    r.y = item("_y").value
+                    r.width = item("_width").value
+                    r.height = item("_height").value
+                    Rects.Add(r)
+                Next
+
+
             Catch ex As Exception
 
             End Try
@@ -278,6 +299,8 @@ Public Class frmMaster
         tbLower.Text = mySettings.minValue
         tbUpper.Text = mySettings.maxValue
         tbDarkCutOff.Text = mySettings.darkCutOff
+        tbURL.Text = mySettings.url
+
 
     End Sub
 
@@ -324,7 +347,7 @@ Public Class frmMaster
         encoders = ImageCodecInfo.GetImageEncoders()
 
         j = 0
-        While j < encoders.Length
+        While j <encoders.Length
             If encoders(j).MimeType = mimeType Then
                 Return encoders(j)
             End If
@@ -343,7 +366,7 @@ Public Class frmMaster
             If myDetectionQueue.Count > 0 Then
                 aQE = myDetectionQueue.Dequeue()
 
-                Functions.CallAzureMeteorDetection(aQE)
+                CallAzureMeteorDetection(aQE)
 
 
                 aQE = Nothing
@@ -358,7 +381,7 @@ Public Class frmMaster
 
 
         '        Dim apiURL As String = "https://azuremeteordetect20181212113628.azurewebsites.net/api/detection?code=zi3Lrr58mJB3GTut0lktSLIzb08E1dLkHXAbX6s07bd46IoZmm1vqQ==&file=" + file
-        Dim apiURL As String = "http://192.168.1.192:7071/api/detection"
+        Dim apiURL As String = "http://192.168.1.199:7071/api/detection"
         Dim myUriBuilder As New UriBuilder(apiURL)
 
 
@@ -369,6 +392,18 @@ Public Class frmMaster
         query("cameraID") = qe.cameraID
         query("width") = qe.width
         query("height") = qe.height
+
+        If mySettings.Rects.Count > 0 Then
+            'add rectangles
+            query("rectangles") = mySettings.Rects.Count
+            For i = 0 To mySettings.Rects.Count - 1
+                query("r_" + Trim(Str(i)) + "_x") = mySettings.Rects(i).x
+                query("r_" + Trim(Str(i)) + "_y") = mySettings.Rects(i).y
+                query("r_" + Trim(Str(i)) + "_w") = mySettings.Rects(i).width
+                query("r_" + Trim(Str(i)) + "_h") = mySettings.Rects(i).height
+            Next
+        End If
+
         myUriBuilder.Query = query.ToString
 
 
@@ -432,7 +467,26 @@ Public Class frmMaster
         mySettings.minValue = tbLower.Text
         mySettings.darkMultiplier = tbMultiplier.Text
         mySettings.darkCutOff = tbDarkCutOff.Text
+        mySettings.url = tbURL.Text
+
         mySettings.writeSettings()
+
+    End Sub
+
+    Private Sub Button1_Click(sender As Object, e As EventArgs) Handles Button1.Click
+        Dim f As New frmExclude
+        Dim result
+
+        f.Rects = mySettings.Rects
+        result = f.ShowDialog()
+        If result = DialogResult.OK Then
+            mySettings.Rects = f.Rects
+        End If
+
+    End Sub
+
+    Private Sub Button3_Click(sender As Object, e As EventArgs)
+        'test detection
 
     End Sub
 End Class
