@@ -768,6 +768,7 @@ Public Class frmIS
         'IcImagingControl1.VideoFormat = "RGB24 (3072x2048)"
         Dim newPixelValue As UInt16
         Dim dPixelValue As UInt16
+        Dim neigborPixelValue As UInt16
         Dim multiplier
 
         multiplier = Val(tbMultiplier.Text)
@@ -780,18 +781,29 @@ Public Class frmIS
             For x = 0 To iWidth - 1
                 For y = 0 To iHeight - 1
                     pixelValue = ReadY16(iBuffer, y, x)
-                    dPixelValue = dark(y * iBuffer.PixelPerLine + x)
-                    If dPixelValue / multiplier > 60000 Then
-                        newPixelValue = Math.Max(0, CInt(pixelValue) - CInt(dPixelValue))
-                        WriteY16(iBuffer, y, x, newPixelValue)
+                    If x = iWidth - 1 Then
+                        neigborPixelValue = ReadY16(iBuffer, y, x - 1)
+                    Else
+                        neigborPixelValue = ReadY16(iBuffer, y, x + 2)
                     End If
+
+                    dPixelValue = dark(y * iBuffer.PixelPerLine + x)
+                    ' If dPixelValue / multiplier Then
+                    If dPixelValue > 12000 Then
+                        newPixelValue = neigborPixelValue
+                    Else
+                        newPixelValue = pixelValue
+                    End If
+                    ' newPixelValue = Math.Max(0, CInt(pixelValue) - CInt(dPixelValue)) Then
+                    WriteY16(iBuffer, y, x, newPixelValue)
+                    ' End If
 
 
                 Next
             Next
-
+            Debug.WriteLine("subtracted dark")
         End If
-        Debug.WriteLine("subtracted dark")
+
         'Dim ffi As TIS.Imaging.FrameFilterInfo = CType(lstFrameFilters.SelectedItem, TIS.Imaging.FrameFilterInfo)
         'Dim newFrameFilter As TIS.Imaging.FrameFilter = IcImagingControl1.FrameFilterInfos
 
@@ -869,7 +881,7 @@ Public Class frmIS
             ms.Close()
 
         End If
-        If cbSaveImages.Checked = True Then
+        If cbSaveImages.Checked = True And lblDayNight.Text = "night" Then
             System.IO.Directory.CreateDirectory(Path.Combine(tbPath.Text, folderName))
             Dim x As Bitmap
             x = getLastImage()
@@ -912,7 +924,7 @@ Public Class frmIS
 
     Private Sub Button2_Click(sender As Object, e As EventArgs) Handles Button2.Click
         'make 10 darks and average them
-
+        MsgBox("cover lens")
         'setup camera for darks
         Dim AbsValItf As TIS.Imaging.VCDAbsoluteValueProperty
 
@@ -974,7 +986,7 @@ Public Class frmIS
         Next
         fStream.Close()
         bWriter.Close()
-
+        MsgBox("done")
     End Sub
 
     Private Sub tbMultiplier_TextChanged(sender As Object, e As EventArgs) Handles tbMultiplier.TextChanged

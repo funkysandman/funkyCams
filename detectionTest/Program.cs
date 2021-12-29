@@ -25,7 +25,7 @@ namespace pushImagesToDB
             DateTime from_date = DateTime.Now.AddHours(-189999);
             DateTime to_date = DateTime.Now;
             var directory = new DirectoryInfo("e:\\meteor_corpus");
-            bool pushToCloud = false;
+            bool pushToCloud = true;
             bool createYOLO = false;
             byte[] buffer;
 
@@ -46,7 +46,28 @@ namespace pushImagesToDB
                     b.Dispose();
                     buffer = File.ReadAllBytes(afile.FullName);
                     si.camera = "see filename";
-                    si.date = DateTime.Now;
+                    //try to get date from filename
+                    //83img_-06Oct2019-200721.jpg
+                    if (afile.Name.Length >= 20)
+                    {
+                        DateTime aDate;
+                        String datestr = afile.Name.Substring(afile.Name.Length - 20, 20);
+                        datestr = datestr.Replace(".jpg", "");
+                        try
+                        {
+                            aDate = DateTime.ParseExact(datestr, "ddMMMyyyy-HHmmss", null);
+                            si.date = aDate;
+                        }
+                        catch
+                        {
+                            si.date = DateTime.MinValue;
+                        }
+                       
+                    }
+                    else
+                    {
+                        si.date = DateTime.MinValue;
+                    }
                     si.filename = file;
                     //si.skyImageId = DateTime.Now.Second;
                     int skyObjectId = 0;
@@ -112,7 +133,7 @@ namespace pushImagesToDB
 
 
                             }
-                           // si.detectedObjects.Add(newObject);
+                            si.detectedObjects.Add(newObject);
 
 
                         }
@@ -125,7 +146,7 @@ namespace pushImagesToDB
                         ServicePointManager.Expect100Continue = true;
 
                         System.Net.ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12;
-                        var httpWebRequest = (HttpWebRequest)WebRequest.Create("http://localhost:58611/api/SkyImages");
+                        var httpWebRequest = (HttpWebRequest)WebRequest.Create("http://192.168.1.199:3333/api/SkyImages");
 
                         httpWebRequest.ContentType = "application/json";
                         httpWebRequest.Method = "POST";

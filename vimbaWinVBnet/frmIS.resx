@@ -132,8 +132,8 @@
   <data name="IcImagingControl1.DeviceState" xml:space="preserve">
     <value>&lt;device_state libver="3.4" filemajor="1" fileminor="0"&gt;
     &lt;device name="DBK 33UX178" base_name="DBK 33UX178" unique_name="DBK 33UX178 48710122"&gt;
-        &lt;videoformat&gt;Y16 (3072x2048)&lt;/videoformat&gt;
-        &lt;fps&gt;2.&lt;/fps&gt;
+        &lt;videoformat&gt;YUY2 (3072x2048)&lt;/videoformat&gt;
+        &lt;fps&gt;30.000030000030001531&lt;/fps&gt;
         &lt;fliph&gt;0&lt;/fliph&gt;
         &lt;vcdpropertyitems&gt;
             &lt;item guid="{8E972004-3B94-4AA4-A899-65F6A1432713}" name="Startup Behavior" /&gt;
@@ -170,10 +170,10 @@
                     &lt;itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E03}" value="64" /&gt;
                 &lt;/element&gt;
                 &lt;element guid="{6519038A-1AD8-4E91-9021-66D64090CC85}" name="White Balance Blue"&gt;
-                    &lt;itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E03}" value="140" /&gt;
+                    &lt;itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E03}" value="117" /&gt;
                 &lt;/element&gt;
                 &lt;element guid="{6519038B-1AD8-4E91-9021-66D64090CC85}" name="White Balance Red"&gt;
-                    &lt;itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E03}" value="115" /&gt;
+                    &lt;itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E03}" value="94" /&gt;
                 &lt;/element&gt;
                 &lt;element guid="{AB98F78D-18A6-4EB2-A556-C11010EC9DF7}" name="WhiteBalance Mode"&gt;
                     &lt;itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E06}" value="0" /&gt;
@@ -184,7 +184,7 @@
                     &lt;itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E04}" value="0" /&gt;
                 &lt;/element&gt;
                 &lt;element guid="{B57D3000-0AC6-4819-A609-272A33140ACA}" name="Value"&gt;
-                    &lt;itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E08}" value="32." /&gt;
+                    &lt;itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E08}" value="26.8999999999999985789145284798" /&gt;
                 &lt;/element&gt;
             &lt;/item&gt;
             &lt;item guid="{90D5702E-E43B-4366-AAEB-7A7A10B448B4}" name="Exposure"&gt;
@@ -192,7 +192,7 @@
                     &lt;itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E04}" value="0" /&gt;
                 &lt;/element&gt;
                 &lt;element guid="{B57D3000-0AC6-4819-A609-272A33140ACA}" name="Value"&gt;
-                    &lt;itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E08}" value="8." /&gt;
+                    &lt;itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E08}" value="1.666699908673763275146484375e-02" /&gt;
                 &lt;/element&gt;
                 &lt;element guid="{65190390-1AD8-4E91-9021-66D64090CC85}" name="Auto"&gt;
                     &lt;itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E04}" value="1" /&gt;
@@ -247,7 +247,7 @@
                     &lt;itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E08}" value="0.5" /&gt;
                 &lt;/element&gt;
                 &lt;element guid="{D1451FED-C2D8-42CE-910B-2CB566836A77}" name="Global Brightness Factor"&gt;
-                    &lt;itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E08}" value="0.189999997615814208984375" /&gt;
+                    &lt;itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E08}" value="0." /&gt;
                 &lt;/element&gt;
             &lt;/item&gt;
             &lt;item guid="{2CED6FD6-AB4D-4C74-904C-D682E53B9CC5}" name="Partial scan"&gt;

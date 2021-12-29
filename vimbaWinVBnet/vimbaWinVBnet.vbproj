@@ -312,6 +312,10 @@
     </AdditionalFiles>
     <None Include="device.dat">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="device2.dat">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="masterDarkSVS4021CSGE_12.raw">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -340,6 +344,7 @@
     </AdditionalFiles>
     <AdditionalFiles Include="BaumerSDKlibs\bgapi2_genicam_dotnet.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
     </AdditionalFiles>
     <AdditionalFiles Include="BaumerSDKlibs\bgapi2_img.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

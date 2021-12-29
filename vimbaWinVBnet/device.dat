@@ -1,7 +1,7 @@
 <device_state libver="3.4" filemajor="1" fileminor="0">
     <device name="DBK 33UX178" base_name="DBK 33UX178" unique_name="DBK 33UX178 48710122">
         <videoformat>Y16 (3072x2048)</videoformat>
-        <fps>1.</fps>
+        <fps>2.</fps>
         <fliph>0</fliph>
         <vcdpropertyitems>
             <item guid="{8E972004-3B94-4AA4-A899-65F6A1432713}" name="Startup Behavior" />
@@ -17,7 +17,7 @@
             </item>
             <item guid="{284C0E09-010B-45BF-8291-09D90A459B28}" name="Saturation">
                 <element guid="{B57D3000-0AC6-4819-A609-272A33140ACA}" name="Value">
-                    <itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E08}" value="105" />
+                    <itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E08}" value="125." />
                 </element>
             </item>
             <item guid="{284C0E0A-010B-45BF-8291-09D90A459B28}" name="Sharpness">
@@ -27,7 +27,7 @@
             </item>
             <item guid="{284C0E0B-010B-45BF-8291-09D90A459B28}" name="Gamma">
                 <element guid="{B57D3000-0AC6-4819-A609-272A33140ACA}" name="Value">
-                    <itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E08}" value=".98" />
+                    <itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E08}" value="0.979999999999999982236431605997" />
                 </element>
             </item>
             <item guid="{284C0E0D-010B-45BF-8291-09D90A459B28}" name="WhiteBalance">
@@ -38,10 +38,10 @@
                     <itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E03}" value="64" />
                 </element>
                 <element guid="{6519038A-1AD8-4E91-9021-66D64090CC85}" name="White Balance Blue">
-                    <itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E03}" value="140" />
+                    <itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E03}" value="117" />
                 </element>
                 <element guid="{6519038B-1AD8-4E91-9021-66D64090CC85}" name="White Balance Red">
-                    <itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E03}" value="115" />
+                    <itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E03}" value="94" />
                 </element>
                 <element guid="{AB98F78D-18A6-4EB2-A556-C11010EC9DF7}" name="WhiteBalance Mode">
                     <itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E06}" value="0" />
@@ -52,7 +52,7 @@
                     <itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E04}" value="0" />
                 </element>
                 <element guid="{B57D3000-0AC6-4819-A609-272A33140ACA}" name="Value">
-                    <itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E08}" value="0." />
+                    <itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E08}" value="32." />
                 </element>
             </item>
             <item guid="{90D5702E-E43B-4366-AAEB-7A7A10B448B4}" name="Exposure">
@@ -60,7 +60,7 @@
                     <itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E04}" value="0" />
                 </element>
                 <element guid="{B57D3000-0AC6-4819-A609-272A33140ACA}" name="Value">
-                    <itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E08}" value="3.33000003593042492866516113281e-04" />
+                    <itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E08}" value="5." />
                 </element>
                 <element guid="{65190390-1AD8-4E91-9021-66D64090CC85}" name="Auto">
                     <itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E04}" value="1" />
@@ -105,8 +105,17 @@
                 </element>
             </item>
             <item guid="{3D505AC4-1A28-428B-83E5-85AA8EB441C1}" name="Tone Mapping">
+                <element guid="{B57D3001-0AC6-4819-A609-272A33140ACA}" name="Auto">
+                    <itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E04}" value="1" />
+                </element>
                 <element guid="{B57D3000-0AC6-4819-A609-272A33140ACA}" name="Enable">
                     <itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E04}" value="1" />
+                </element>
+                <element guid="{BD2F432A-02C1-4F32-9AEB-687CA117D2E7}" name="Intensity">
+                    <itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E08}" value="0.5" />
+                </element>
+                <element guid="{D1451FED-C2D8-42CE-910B-2CB566836A77}" name="Global Brightness Factor">
+                    <itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E08}" value="0." />
                 </element>
             </item>
             <item guid="{2CED6FD6-AB4D-4C74-904C-D682E53B9CC5}" name="Partial scan">
