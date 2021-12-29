@@ -129,10 +129,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\AsynchronousGrab\Forms\Build\VS2010\AsynchronousGrabForms.csproj">
-      <Project>{1fb459e7-7c5d-45c3-bf6e-428c9cd191ba}</Project>
-      <Name>AsynchronousGrabForms</Name>
-    </ProjectReference>
     <ProjectReference Include="..\AVTGIGEascom\AVTGIGEascom.vbproj">
       <Project>{71bb4da7-4092-416d-89fe-97cd15207371}</Project>
       <Name>AVTGIGEascom</Name>

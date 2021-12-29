@@ -169,7 +169,7 @@ Public Class frmFoculs
     '            b8.Save(ms, System.Drawing.Imaging.ImageFormat.Bmp)
 
     '            Dim contents = ms.ToArray()
-    '            Functions.CallAzureMeteorDetection(contents, filename)
+    '            CallAzureMeteorDetection(contents, filename)
     '            ms.Close()
     '        End If
 
@@ -433,7 +433,7 @@ Public Class frmFoculs
             If myDetectionQueue.Count > 0 Then
                 aQE = myDetectionQueue.Dequeue()
 
-                Functions.CallAzureMeteorDetection(aQE)
+                CallAzureMeteorDetection(aQE)
 
 
                 aQE = Nothing

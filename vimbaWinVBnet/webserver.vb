@@ -32,7 +32,7 @@ Public Class WebServer
     Private myQICam As QCamManagedDriver.QCam
     Private myToupcam As Toupcam
     Private myPointGreycam As IManagedCamera
-    '' Private myBaslerCam As BaslerWrapper.Grabber
+    Private myBaslerCam As BaslerWrapper.Grabber
     Private mySVSVistekCam As SVCamApi.SVCamGrabber
     Private _running As Boolean
     Private myForm As frmAVT
@@ -43,7 +43,7 @@ Public Class WebServer
     Private myCoolsnapForm As frmCoolsnap
     Private myPointGreyForm As frmPointGrey
     Private restart As Boolean = False
-    '  Private myBaslerForm As frmBasler
+    Private myBaslerForm As frmScout
     Private mySVSVistekForm As frmSVSVistek
     Private mySVSVistekBaumerForm As frmGIGE
     Private myPCOForm As frmPCO
@@ -260,6 +260,21 @@ Public Class WebServer
             f.writeline(ex.Message)
         End Try
     End Sub
+    Public Sub StartWebServer(aCam As BaslerWrapper.Grabber, f As Object, port As Integer)
+        Try
+            LocalPort = port
+            myBaslerForm = f
+            myBaslerCam = aCam
+            'loadGigEDarks()
+            LocalTCPListener = New TcpListener(LocalAddress, LocalPort)
+            LocalTCPListener.Start()
+            WebThread = New Thread(AddressOf StartListenScout)
+            WebThread.Start()
+            f.writeline("starting SVS Vistek web server")
+        Catch ex As Exception
+            f.writeline(ex.Message)
+        End Try
+    End Sub
     'Public Sub StartWebServer(aCam As CCamera, f As frmAVT, port As Integer)
     '    Try
     '        LocalPort = port
@@ -362,7 +377,7 @@ Public Class WebServer
             'myEncoderParameters = New EncoderParameters(1)
 
             '' Save the bitmap as a JPEG file with quality level 25.
-            'myEncoderParameter = New EncoderParameter(myEncoder, CType(85L, Int32))
+            'myEncoderParameter = New EncoderParameter(myEncoder, CType(95l, Int32))
             'myEncoderParameters.Param(0) = myEncoderParameter
         Catch ex As Exception
             f.writeline(ex.Message)
@@ -371,13 +386,13 @@ Public Class WebServer
 
     'Here is where we check our XML file and see what MIME types are defined and handle the accordingly.
     Private Sub loadGigEDarks()
-        Dim fs As FileStream
-        fs = New FileStream(Application.StartupPath & "\darkGigE.drk", FileMode.Open)
+        'Dim fs As FileStream
+        'fs = New FileStream(Application.StartupPath & "\darkGigE.drk", FileMode.Open)
 
-        '
-        rawDark = New Byte(2457656) {}
-        fs.Read(rawDark, 0, rawDark.Length - 1)
-        fs.Close()
+        ''
+        'rawDark = New Byte(2457656) {}
+        'fs.Read(rawDark, 0, rawDark.Length - 1)
+        'fs.Close()
     End Sub
     Private Sub loadFirewireEDarks()
         Dim fs As FileStream
@@ -508,7 +523,236 @@ Public Class WebServer
 
 
     End Sub
+    Private Sub StartListenScout()
+        Dim iStartPos As Integer
 
+        Dim sErrorMessage As String
+
+        Dim sWebserverRoot = LocalVirtualRoot
+
+        Dim sPhysicalFilePath As String = ""
+        Dim sFormattedMessage As String = ""
+
+        running = True
+        Do While running
+            'accept new socket connection
+            LocalTCPListener.Start()
+
+            Dim mySocket As Socket = LocalTCPListener.AcceptSocket
+            If mySocket.Connected Then
+                Dim bReceive() As Byte = New [Byte](1024) {}
+                Dim i As Integer = mySocket.Receive(bReceive, bReceive.Length, 0)
+                Dim sBuffer As String = Encoding.ASCII.GetString(bReceive)
+                'find the GET request.
+
+                If sBuffer.Contains("GET") And sBuffer.Contains("HTTP") Then
+
+
+                    iStartPos = sBuffer.IndexOf("HTTP", 1)
+                    Dim sHttpVersion = sBuffer.Substring(iStartPos, 8)
+                    'sRequest = sBuffer.Substring(0, iStartPos - 1)
+                    'sRequest.Replace("\\", "/")
+                    'If (sRequest.IndexOf(".") < 1) And (Not (sRequest.EndsWith("/"))) Then
+                    '    sRequest = sRequest & "/"
+                    'End If
+                    ''get the file name
+                    'iStartPos = sRequest.LastIndexOf("/") + 1
+                    'sRequestedFile = sRequest.Substring(iStartPos)
+                    'If InStr(sRequest, "?") <> 0 Then
+                    '    iStartPos = sRequest.IndexOf("?") + 1
+                    '    sQueryString = sRequest.Substring(iStartPos)
+                    '    sRequestedFile = Replace(sRequestedFile, "?" & sQueryString, "")
+                    'End If
+                    ''get the directory
+                    'sDirName = sRequest.Substring(sRequest.IndexOf("/"), sRequest.LastIndexOf("/") - 3)
+                    ''identify the physical directory.
+                    'If (sDirName = "/") Then
+                    '    sLocalDir = sWebserverRoot
+                    'Else
+                    '    sLocalDir = GetLocalPath(sWebserverRoot, sDirName)
+                    'End If
+                    ''if the directory isn't there then display error.
+                    'If sLocalDir.Length = 0 Then
+                    '    sErrorMessage = "Error!! Requested Directory does not exists"
+                    '    SendHeader(sHttpVersion, "", sErrorMessage.Length, " 404 Not Found", mySocket)
+                    '    SendToBrowser(sErrorMessage, mySocket)
+                    '    mySocket.Close()
+                    'End If
+
+                    'If sRequestedFile.Length = 0 Then
+                    '    sRequestedFile = GetTheDefaultFileName(sLocalDir)
+                    '    If sRequestedFile = "" Then
+                    '        sErrorMessage = "Error!! No Default File Name Specified"
+                    '        SendHeader(sHttpVersion, "", sErrorMessage.Length, " 404 Not Found", mySocket)
+                    '        SendToBrowser(sErrorMessage, mySocket)
+                    '        mySocket.Close()
+                    '        Return
+                    '    End If
+                    'End If
+
+                    'Dim sMimeType As String = GetMimeType(sRequestedFile)
+                    'sPhysicalFilePath = sLocalDir & sRequestedFile
+                    'While Not File.Exists(sPhysicalFilePath) And InStr(sPhysicalFilePath, "image.jpg") > 0 'wait for file to show up
+                    'End While
+
+
+
+                    'If Not File.Exists(sPhysicalFilePath) Then
+                    '    sErrorMessage = "404 Error! File Does Not Exists..."
+                    '    SendHeader(sHttpVersion, "", sErrorMessage.Length, " 404 Not Found", mySocket)
+                    '    SendToBrowser(sErrorMessage, mySocket)
+                    'Else
+
+                    Try
+                        'grab image from cam
+                        Dim f As Frame
+                        Dim b As Bitmap
+                        'make sure camera still connected
+
+
+
+                        b = myBaslerForm.getLastImage
+
+
+
+
+                        'darks
+
+                        'If useDarks Then
+                        '    'd2 = Bitmap.FromFile(Application.StartupPath & "\dark.png")
+
+
+                        '    '' 'Freeze the image in memory
+                        '    '' raw = b.LockBits(New Rectangle(0, 0,
+                        '    '' b.Width, b.Height),
+                        '    '' System.Drawing.Imaging.ImageLockMode.ReadOnly,
+                        '    ''b.PixelFormat)
+                        '    '' Dim size As Integer = raw.Height * raw.Stride
+
+                        '    '' Dim rawImage() As Byte = New Byte(size - 1) {}
+                        '    '' 'Copy the image into the byte()
+                        '    '' System.Runtime.InteropServices.Marshal.Copy(raw.Scan0, rawImage, 0, size)
+
+
+
+                        '    '' Dim raw2 As System.Drawing.Imaging.BitmapData = Nothing
+
+
+                        '    '' 'Freeze the image in memory
+                        '    '' raw2 = d2.LockBits(New Rectangle(0, 0,
+                        '    '' d2.Width, d2.Height),
+                        '    '' System.Drawing.Imaging.ImageLockMode.ReadOnly,
+                        '    ''d2.PixelFormat)
+                        '    '' size = raw2.Height * raw2.Stride
+
+                        '    '' Dim rawImage2() As Byte = New Byte(size - 1) {}
+                        '    '' 'Copy the image into the byte()
+                        '    '' System.Runtime.InteropServices.Marshal.Copy(raw2.Scan0, rawImage2, 0, size)
+
+                        '    '' If Not raw2 Is Nothing Then
+                        '    ''     'Unfreeze the memory for the image
+                        '    ''     d2.UnlockBits(raw2)
+                        '    '' End If
+                        '    Dim multiplier
+                        '    multiplier = Val(myForm.tbMultiplier.Text)
+                        '    Dim imageValue
+                        '    Dim darkValue
+                        '    Dim newvalue
+                        '    For i = 0 To f.BufferSize - 1 Step 2
+                        '        imageValue = f.Buffer(i + 1) * 256 + f.Buffer(i)
+                        '        darkValue = rawDark(i + 1) * 256 + rawDark(i)
+                        '        If darkValue * multiplier > imageValue Then
+
+                        '            f.Buffer(i) = 0
+                        '            f.Buffer(i + 1) = 0
+                        '        Else
+                        '            newvalue = imageValue - darkValue * multiplier
+                        '            f.Buffer(i) = newvalue And &HFF
+                        '            f.Buffer(i + 1) = (newvalue And &HFF00) >> 8
+
+                        '        End If
+
+                        '    Next
+
+                        '    ''System.Runtime.InteropServices.Marshal.Copy(rawImage, 0, raw.Scan0, size)
+
+                        '    ' '' Unlock the bits.
+                        '    ' '' bmp.UnlockBits(bmpData)
+
+                        '    ''If Not raw Is Nothing Then
+                        '    ''    'Unfreeze the memory for the image
+                        '    ''    b.UnlockBits(raw)
+                        '    ''End If
+                        '    b = New Bitmap(f.Width, f.Height, PixelFormat.Format24bppRgb)
+                        '    f.Fill(b)
+
+                        'Else
+                        '    b = New Bitmap(f.Width, f.Height, PixelFormat.Format24bppRgb)
+                        '    f.Fill(b)
+
+                        'End If
+
+                        'imageInUse = imageInUse + 1
+                        Dim iTotBytes As Integer = 0
+                        Dim sResponse As String = ""
+                        'Dim fs As New FileStream(sPhysicalFilePath, FileMode.Open, FileAccess.Read, FileShare.Read)
+                        '
+                        Dim myImageCodecInfo As ImageCodecInfo
+                        Dim myEncoder As System.Drawing.Imaging.Encoder
+                        Dim myEncoderParameter As EncoderParameter
+                        Dim myEncoderParameters As EncoderParameters
+
+                        ' Create a Bitmap object based on a BMP file.
+
+
+                        ' Get an ImageCodecInfo object that represents the JPEG codec.
+                        myImageCodecInfo = GetEncoderInfo("image/jpeg")
+
+                        ' Create an Encoder object based on the GUID
+                        ' for the Quality parameter category.
+                        myEncoder = System.Drawing.Imaging.Encoder.Quality
+
+                        ' Create an EncoderParameters object.
+                        ' An EncoderParameters object has an array of EncoderParameter
+                        ' objects. In this case, there is only one
+                        ' EncoderParameter object in the array.
+                        myEncoderParameters = New EncoderParameters(1)
+
+                        ' Save the bitmap as a JPEG file with quality level 25.
+                        myEncoderParameter = New EncoderParameter(myEncoder, CType(95L, Int32))
+                        myEncoderParameters.Param(0) = myEncoderParameter
+                        ' myBitmap.Save("Shapes025.jpg", myImageCodecInfo, myEncoderParameters)
+
+
+                        '
+                        Dim ms As New MemoryStream()
+                        '  Dim ms2 As New MemoryStream()
+                        b.Save(ms, myImageCodecInfo, myEncoderParameters)
+                        ' d2.Save(ms2, Imaging.ImageFormat.Bmp)
+                        ' myForm.PictureBox1.Image = b
+
+                        SendHeader(sHttpVersion, "image/jpeg", ms.Length, " 200 OK", mySocket)
+                        SendToBrowser(ms.ToArray(), mySocket)
+                        ms.Close()
+
+                    Catch ex As Exception
+
+                        imageInUse = imageInUse - 1
+                        sErrorMessage = "404 Error! File Does Not Exists..."
+                        SendHeader(sHttpVersion, "", sErrorMessage.Length, " 404 Not Found", mySocket)
+                        SendToBrowser(sErrorMessage, mySocket)
+                    End Try
+                End If
+
+                ' End If
+                mySocket.Close()
+                mySocket = Nothing
+                LocalTCPListener.Stop()
+
+            End If
+        Loop
+
+    End Sub
     Private Sub StartListenGigE()
         Dim iStartPos As Integer
 
@@ -705,7 +949,7 @@ Public Class WebServer
                         myEncoderParameters = New EncoderParameters(1)
 
                         ' Save the bitmap as a JPEG file with quality level 25.
-                        myEncoderParameter = New EncoderParameter(myEncoder, CType(85L, Int32))
+                        myEncoderParameter = New EncoderParameter(myEncoder, CType(95L, Int32))
                         myEncoderParameters.Param(0) = myEncoderParameter
                         ' myBitmap.Save("Shapes025.jpg", myImageCodecInfo, myEncoderParameters)
 
@@ -739,6 +983,7 @@ Public Class WebServer
         Loop
 
     End Sub
+
     'Private Sub StartListenBasler()
     '    Dim iStartPos As Integer
 

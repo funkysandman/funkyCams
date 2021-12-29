@@ -329,7 +329,7 @@ Public Class frmSVSVistek
             tbExposureTime.Text = tbDayTimeExp.Text
 
             lblDayNight.Text = "day"
-
+            mySVCam.useDarks = False
 
         End If
         If LCase(Me.lblDayNight.Text) = "day" Then
@@ -362,7 +362,7 @@ Public Class frmSVSVistek
 
 
 
-    Private Sub Button2_Click(sender As Object, e As EventArgs)
+    Private Sub Button2_Click(sender As Object, e As EventArgs) Handles Button2.Click
 
         mySVCam.setParams(Val(Me.tbExposureTime.Text), Val(Me.tbNightAgain.Text))
 
@@ -377,7 +377,7 @@ Public Class frmSVSVistek
 
     End Sub
 
-    Private Sub cbUseDarks_CheckedChanged(sender As Object, e As EventArgs)
+    Private Sub cbUseDarks_CheckedChanged(sender As Object, e As EventArgs) Handles cbUseDarks.CheckedChanged
         If cbUseDarks.Checked Then
             mySVCam.useDarks = True
         Else
@@ -456,7 +456,12 @@ Public Class frmSVSVistek
         If mySVCam Is Nothing Then Exit Sub
         If Not mySVCam.acqThreadIsRuning Then Exit Sub
 
-        'mySVCam.stopAcquisitionThread()
+        'halt camera and wait for it to stop
+        While (mySVCam.current_selected_cam.isGrabbing)
+            Application.DoEvents()
+        End While
+        ' mySVCam.stopAcquisitionThread()
+
 
         If lblDayNight.Text = "night" Then
 
@@ -488,13 +493,19 @@ Public Class frmSVSVistek
             mySVCam.prepareCameraForTimed(mySVCam.current_selected_cam)
             mySVCam.startAcquisitionThread(AddressOf Me.received_frame)
         End If
-        'start stream
+        'start Stream
         'If Me.cbUseTrigger.Checked Then
 
         '    mySVCam.startAcquisitionTriggerWidthThread(AddressOf Me.received_frame)
         'Else
         '    mySVCam.startAcquisitionThread(AddressOf Me.received_frame)
-        'End If
+        ' End If
+    End Sub
+
+
+
+    Private Sub frmSVSVistek_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+
     End Sub
 
     'Private Sub InitializeComponent()

@@ -49,7 +49,7 @@ namespace PylonC.NETSupportLibrary
         protected bool m_open = false;                     /* Indicates that the device is open and ready to grab.*/
         protected bool m_grabOnce = false;                 /* Use for single frame mode. */
         protected bool m_removed = false;                  /* Indicates that the device has been removed from the PC. */
-        protected Thread m_grabThread;                     /* Thread for grabbing the images. */
+        public Thread m_grabThread;                     /* Thread for grabbing the images. */
         protected Object m_lockObject;                     /* Lock object used for thread synchronization. */
         protected Dictionary<PYLON_STREAMBUFFER_HANDLE, PylonBuffer<Byte>> m_buffers; /* Holds handles and buffers used for grabbing. */
         protected List<GrabResult> m_grabbedBuffers; /* List of grab results already grabbed. */
@@ -318,12 +318,38 @@ namespace PylonC.NETSupportLibrary
                     Pylon.DeviceSetIntegerFeature(m_hDevice, "GevSCPSPacketSize", 1500);
                 }
 
+                if (Pylon.DeviceFeatureIsWritable(m_hDevice, "GevSCPD"))
+                {
+                    /* ... The device supports the delay feature. Set a value. */
+                    Pylon.DeviceSetIntegerFeature(m_hDevice, "GevSCPD", 100);
+                }
                 /* The sample does not work in chunk mode. It must be disabled. */
                 if (Pylon.DeviceFeatureIsWritable(m_hDevice, "ChunkModeActive"))
                 {
                     /* Disable the chunk mode. */
                     Pylon.DeviceSetBooleanFeature(m_hDevice, "ChunkModeActive", false);
                 }
+                if (Pylon.DeviceFeatureIsWritable(m_hDevice, "GammaEnable"))
+                {
+                    /* Disable the chunk mode. */
+                    Pylon.DeviceSetBooleanFeature(m_hDevice, "GammaEnable", true);
+                }
+                if (Pylon.DeviceFeatureIsWritable(m_hDevice, "Gamma"))
+                {
+                    /* ... The device supports the packet size feature. Set a value. */
+                    Pylon.DeviceSetFloatFeature(m_hDevice, "Gamma", 0.7);
+                }
+                //remove gain limit
+               // Pylon.DeviceFeatureFromString(m_hDevice, "RemoveParameterLimitSelector", "Gain");
+                // Remove the limits of the selected parameter
+                Pylon.DeviceSetBooleanFeature(m_hDevice, "RemoveLimits", true);
+
+
+                //if (Pylon.DeviceFeatureIsWritable(m_hDevice, "ExposureTimeBaseAbs"))
+                //{
+                //    /* ... The device supports the packet size feature. Set a value. */
+                //    Pylon.DeviceSetFloatFeature(m_hDevice, "ExposureTimeBaseAbs", 5000.0);
+                //}
 
                 /* Disable acquisition start trigger if available. */
                 if (Pylon.DeviceFeatureIsAvailable(m_hDevice, "EnumEntry_TriggerSelector_AcquisitionStart"))
@@ -389,6 +415,8 @@ namespace PylonC.NETSupportLibrary
         /* Prepares everything for grabbing. */
         protected void SetupGrab()
         {
+
+            Console.WriteLine("setupGrab");
             /* Clear the grab result queue. This is not done when cleaning up to still be able to provide the
              images, e.g. in single frame mode.*/
             lock (m_lockObject) /* Lock the grab result queue to avoid that two threads modify the same data. */
@@ -408,7 +436,7 @@ namespace PylonC.NETSupportLibrary
                 images continuously. */
                 Pylon.DeviceFeatureFromString(m_hDevice, "AcquisitionMode", "Continuous");
             }
-
+            Console.WriteLine("continuous mode");
             /* Clear the grab buffers to assure proper operation (because they may
              still be filled if the last grab has thrown an exception). */
             foreach (KeyValuePair<PYLON_STREAMBUFFER_HANDLE, PylonBuffer<Byte>> pair in m_buffers)
@@ -416,22 +444,23 @@ namespace PylonC.NETSupportLibrary
                 pair.Value.Dispose();
             }
             m_buffers.Clear();
+            Console.WriteLine("cleared buffers");
 
             /* Determine the required size of the grab buffer. */
             uint payloadSize = checked((uint)Pylon.DeviceGetIntegerFeature(m_hDevice, "PayloadSize"));
-
+            Console.WriteLine("calculated payloadsize");
             /* We must tell the stream grabber the number and size of the m_buffers
                 we are using. */
             /* .. We will not use more than NUM_m_buffers for grabbing. */
             Pylon.StreamGrabberSetMaxNumBuffer(m_hGrabber, m_numberOfBuffersUsed);
-
+            Console.WriteLine("number of buffers sent");
             /* .. We will not use m_buffers bigger than payloadSize bytes. */
             Pylon.StreamGrabberSetMaxBufferSize(m_hGrabber, payloadSize);
-
+            Console.WriteLine("payloadsize set");
             /*  Allocate the resources required for grabbing. After this, critical parameters
                 that impact the payload size must not be changed until FinishGrab() is called. */
             Pylon.StreamGrabberPrepareGrab(m_hGrabber);
-
+            Console.WriteLine("cleared buffers");
             /* Before using the m_buffers for grabbing, they must be registered at
                the stream grabber. For each buffer registered, a buffer handle
                is returned. After registering, these handles are used instead of the
@@ -444,7 +473,7 @@ namespace PylonC.NETSupportLibrary
                 PYLON_STREAMBUFFER_HANDLE handle = Pylon.StreamGrabberRegisterBuffer(m_hGrabber, ref buffer);
                 m_buffers.Add(handle, buffer);
             }
-
+            Console.WriteLine("added buffers");
             /* Feed the m_buffers into the stream grabber's input queue. For each buffer, the API
                allows passing in an integer as additional context information. This integer
                will be returned unchanged when the grab is finished. In our example, we use the index of the
@@ -453,16 +482,17 @@ namespace PylonC.NETSupportLibrary
             {
                 Pylon.StreamGrabberQueueBuffer(m_hGrabber, pair.Key, 0);
             }
-
+            Console.WriteLine("queued buffers");
             /* The stream grabber is now prepared. As soon the camera starts acquiring images,
                the image data will be grabbed into the provided m_buffers.  */
 
             /* Set the handle of the image converter invalid to assure proper operation (because it may
              still be valid if the last grab has thrown an exception). */
             m_hConverter.SetInvalid();
-
+            Console.WriteLine("converter setInvalid");
             /* Let the camera acquire images. */
             Pylon.DeviceExecuteCommandFeature(m_hDevice, "AcquisitionStart");
+            Console.WriteLine("acquisition started");
         }
 
         /* This method is executed using the grab thread and is responsible for grabbing, possible conversion of the image
@@ -479,7 +509,7 @@ namespace PylonC.NETSupportLibrary
                 while (m_grabThreadRun) /* Is set to false when stopping to end the grab thread. */
                 {
                     /* Wait for the next buffer to be filled. Wait up to 15000 ms. */
-                    Debug.WriteLine("waiting...");
+                    Console.WriteLine("waiting...");
                     if (!Pylon.WaitObjectWait(m_hWait, 15000))
                     {
                         lock (m_lockObject)
@@ -490,11 +520,19 @@ namespace PylonC.NETSupportLibrary
                                    if the programmed exposure time is longer than the grab timeout. */
                                // throw new Exception("A grab timeout occurred.");
                             }
-                            m_grabThreadRun = false; //something went wrong, get out
+                            Console.WriteLine("A grab timeout occurred");
+                            //  m_grabThreadRun = false; //something went wrong, get out
+                            //SetupGrab();
+                            //try kick starting it...
+                            //
                             continue;
                         }
                     }
+                    else
+                    {
+                        Console.WriteLine("signaled");
 
+                    }
                     PylonGrabResult_t grabResult; /* Stores the result of a grab operation. */
                     /* Since the wait operation was successful, the result of at least one grab
                        operation is available. Retrieve it. */
@@ -503,17 +541,20 @@ namespace PylonC.NETSupportLibrary
                         /* Oops. No grab result available? We should never have reached this point.
                            Since the wait operation above returned without a timeout, a grab result
                            should be available. */
-                       // throw new Exception("Failed to retrieve a grab result.");
+                        // throw new Exception("Failed to retrieve a grab result.");
+                        Console.WriteLine("failed to retrieve a grab result");
                     }
 
                     /* Check to see if the image was grabbed successfully. */
                     if (grabResult.Status == EPylonGrabStatus.Grabbed)
                     {
                         /* Add result to the ready list. */
+                        Console.WriteLine("EnqueueTakenImage");
                         EnqueueTakenImage(grabResult);
 
                         /* Notify that an image has been added to the output queue. The receiver of the event can use GetCurrentImage() to acquire and process the image
                          and ReleaseImage() to remove the image from the queue and return it to the stream grabber.*/
+                        Console.WriteLine("OnImageReadyEvent");
                         OnImageReadyEvent();
 
                         /* Exit here for single frame mode. */
@@ -522,8 +563,19 @@ namespace PylonC.NETSupportLibrary
                             m_grabThreadRun = false;
                             break;
                         }
-                    } else if (grabResult.Status == EPylonGrabStatus.Failed)
+                    }
+                    else 
+                    if (grabResult.Status == EPylonGrabStatus.Failed)
                     {
+
+
+                        Console.WriteLine("grab-failed grab");
+                        Console.WriteLine(grabResult.Status);
+                       // EnqueueTakenImage(grabResult);
+                       // OnImageReadyEvent();
+                        Pylon.StreamGrabberQueueBuffer(m_hGrabber, grabResult.hBuffer, 0);
+
+
                         /*
                             Grabbing an image can fail if the used network hardware, i.e. network adapter,
                             switch or Ethernet cable, experiences performance problems.
@@ -533,7 +585,7 @@ namespace PylonC.NETSupportLibrary
                             If this did not resolve the problem, check if the recommended hardware is used.
                             Aggressive power saving settings for the CPU can also cause the image grab to fail.
                         */
-                      //  throw new Exception(string.Format("A grab failure occurred. See the method ImageProvider::Grab for more information. The error code is {0:X08}.", grabResult.ErrorCode));
+                       // throw new Exception(string.Format("A grab failure occurred. See the method ImageProvider::Grab for more information. The error code is {0:X08}.", grabResult.ErrorCode));
                     }
                 }
 
@@ -614,6 +666,7 @@ namespace PylonC.NETSupportLibrary
                     m_convertedBuffers.Add(grabResult.hBuffer, convertedBuffer);
                 }
                 /* Add the image data. */
+                Console.WriteLine("add imageData");
                 newGrabResultInternal.ImageData = new Image(grabResult.SizeX, grabResult.SizeY, convertedBuffer.Array, m_converterOutputFormatIsColor);
             }
             lock (m_lockObject) /* Lock the grab result queue to avoid that two threads modify the same data. */

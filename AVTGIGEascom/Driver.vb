@@ -112,7 +112,7 @@ Public Class Camera
         v = New VimbaHelper
         v.Startup()
 
-        SetupDialog(v.v)
+        'SetupDialog(v.v)
         If gigeCamID = "" Then
             connectedState = False
         Else
@@ -366,7 +366,7 @@ Public Class Camera
         ' Clean up the tracelogger and util objects
 
         '  v.Shutdown()
-        MsgBox("shutdown vimba")
+        'MsgBox("shutdown vimba")
         TL.Enabled = False
         TL.Dispose()
         TL = Nothing

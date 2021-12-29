@@ -18,8 +18,10 @@ Public Class Form3
     End Sub
 
     Private Sub Button3_Click(sender As Object, e As EventArgs) Handles Button3.Click
-        'frmBasler.Show()
-        'Me.Hide()
+        Dim f As New frmScout
+        Me.Hide()
+        f.ShowDialog()
+        Me.Close()
     End Sub
 
     Private Sub Button4_Click(sender As Object, e As EventArgs) Handles Button4.Click
@@ -92,6 +94,13 @@ Public Class Form3
 
     Private Sub btnIS_Click(sender As Object, e As EventArgs) Handles btnIS.Click
         Dim f As New frmIS
+        Me.Hide()
+        f.ShowDialog()
+        Me.Close()
+    End Sub
+
+    Private Sub btnIPCam_Click(sender As Object, e As EventArgs) Handles btnIPCam.Click
+        Dim f As New frmIPCam
         Me.Hide()
         f.ShowDialog()
         Me.Close()

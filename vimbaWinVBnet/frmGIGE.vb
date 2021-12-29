@@ -326,7 +326,7 @@ Public Class frmGIGE
         While (meteorCheckRunning)
             If myDetectionQueue.Count > 0 Then
                 aQE = myDetectionQueue.Dequeue()
-                Functions.CallAzureMeteorDetection(aQE)
+                CallAzureMeteorDetection(aQE)
 
                 aQE = Nothing
 
@@ -382,7 +382,7 @@ Public Class frmGIGE
         myEncoderParameters = New EncoderParameters(1)
 
         ' Save the bitmap as a JPEG file with quality level 25.
-        myEncoderParameter = New EncoderParameter(myEncoder, CType(85L, Int32))
+        myEncoderParameter = New EncoderParameter(myEncoder, CType(95l, Int32))
         myEncoderParameters.Param(0) = myEncoderParameter
         ' md.LoadModel("c:\tmp\frozen_inference_graph_orig.pb", "c:\tmp\mscoco_label_map.pbtxt")
 

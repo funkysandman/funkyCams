@@ -62,6 +62,7 @@ Public Class SetupDialogForm
             ComboBox2.Items.Add(sp)
         Next
 
+        cboBinning.SelectedIndex = 0
 
     End Sub
 

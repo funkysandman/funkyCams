@@ -260,7 +260,7 @@ Public Class frmToupcam
                     myDetectionQueue.Enqueue(qe)
                 End If
                 'myDetectionQueue.Enqueue(New queueEntry(contents,))
-                'Functions.CallAzureMeteorDetection(contents, Path.GetFileName(filename))
+                'CallAzureMeteorDetection(contents, Path.GetFileName(filename))
                 ms.Close()
             Else
                 ' md.examine(bm)
@@ -569,7 +569,7 @@ Public Class frmToupcam
     '            myDetectionQueue.Enqueue(qe)
     '        End If
     '        'myDetectionQueue.Enqueue(New queueEntry(contents,))
-    '        'Functions.CallAzureMeteorDetection(contents, Path.GetFileName(filename))
+    '        'CallAzureMeteorDetection(contents, Path.GetFileName(filename))
     '        ms.Close()
     '    Else
     '        ' md.examine(bm)
@@ -583,7 +583,7 @@ Public Class frmToupcam
         While (meteorCheckRunning)
             If myDetectionQueue.Count > 0 Then
                 aQE = myDetectionQueue.Dequeue()
-                Functions.CallAzureMeteorDetection(aQE)
+                CallAzureMeteorDetection(aQE)
 
                 aQE = Nothing
 
@@ -732,7 +732,7 @@ Public Class frmToupcam
         myEncoderParameters = New EncoderParameters(1)
 
         ' Save the bitmap as a JPEG file with quality level 25.
-        myEncoderParameter = New EncoderParameter(myEncoder, CType(85L, Int32))
+        myEncoderParameter = New EncoderParameter(myEncoder, CType(95l, Int32))
         myEncoderParameters.Param(0) = myEncoderParameter
 
 
