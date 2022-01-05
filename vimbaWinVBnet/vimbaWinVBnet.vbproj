@@ -180,9 +180,6 @@
     </Compile>
     <Compile Include="IniFile.vb" />
     <Compile Include="device.vb" />
-    <Compile Include="frmIS.designer.vb">
-      <DependentUpon>frmIS.vb</DependentUpon>
-    </Compile>
     <Compile Include="frmIS.vb">
       <SubType>Form</SubType>
     </Compile>

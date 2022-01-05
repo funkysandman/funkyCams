@@ -34,14 +34,14 @@
                 <element guid="{B57D3001-0AC6-4819-A609-272A33140ACA}" name="Auto">
                     <itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E04}" value="0" />
                 </element>
-                <element guid="{8407E480-175A-498C-8171-08BD987CC1AC}" name="White Balance Green">
-                    <itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E03}" value="64" />
+                <element guid="{8407E480-175A-498C-8171-08BD987CC1AC}" name="White Balance Green"> 'red
+                    <itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E03}" value="94" />
                 </element>
                 <element guid="{6519038A-1AD8-4E91-9021-66D64090CC85}" name="White Balance Blue">
-                    <itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E03}" value="117" />
+                    <itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E03}" value="140" />
                 </element>
                 <element guid="{6519038B-1AD8-4E91-9021-66D64090CC85}" name="White Balance Red">
-                    <itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E03}" value="94" />
+                    <itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E03}" value="115" /> 'green
                 </element>
                 <element guid="{AB98F78D-18A6-4EB2-A556-C11010EC9DF7}" name="WhiteBalance Mode">
                     <itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E06}" value="0" />
