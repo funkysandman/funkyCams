@@ -117,16 +117,153 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <metadata name="Timer1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-    <value>312, 17</value>
-  </metadata>
-  <metadata name="Timer2.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-    <value>415, 17</value>
-  </metadata>
-  <metadata name="Timer3.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-    <value>518, 17</value>
-  </metadata>
-  <metadata name="TimerAcquistionRate.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-    <value>17, 60</value>
-  </metadata>
+  <data name="IcImagingControl1.DeviceState" xml:space="preserve">
+    <value>&lt;device_state libver="3.4" filemajor="1" fileminor="0"&gt;
+    &lt;device name="DBK 33UX178" base_name="DBK 33UX178" unique_name="DBK 33UX178 48710122"&gt;
+        &lt;videoformat&gt;Y16 (3072x2048)&lt;/videoformat&gt;
+        &lt;fps&gt;40.&lt;/fps&gt;
+        &lt;fliph&gt;0&lt;/fliph&gt;
+        &lt;vcdpropertyitems&gt;
+            &lt;item guid="{8E972004-3B94-4AA4-A899-65F6A1432713}" name="Startup Behavior" /&gt;
+            &lt;item guid="{284C0E06-010B-45BF-8291-09D90A459B28}" name="Brightness"&gt;
+                &lt;element guid="{B57D3000-0AC6-4819-A609-272A33140ACA}" name="Value"&gt;
+                    &lt;itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E03}" value="240" /&gt;
+                &lt;/element&gt;
+            &lt;/item&gt;
+            &lt;item guid="{284C0E08-010B-45BF-8291-09D90A459B28}" name="Hue"&gt;
+                &lt;element guid="{B57D3000-0AC6-4819-A609-272A33140ACA}" name="Value"&gt;
+                    &lt;itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E03}" value="0" /&gt;
+                &lt;/element&gt;
+            &lt;/item&gt;
+            &lt;item guid="{284C0E09-010B-45BF-8291-09D90A459B28}" name="Saturation"&gt;
+                &lt;element guid="{B57D3000-0AC6-4819-A609-272A33140ACA}" name="Value"&gt;
+                    &lt;itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E08}" value="125." /&gt;
+                &lt;/element&gt;
+            &lt;/item&gt;
+            &lt;item guid="{284C0E0A-010B-45BF-8291-09D90A459B28}" name="Sharpness"&gt;
+                &lt;element guid="{B57D3000-0AC6-4819-A609-272A33140ACA}" name="Value"&gt;
+                    &lt;itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E03}" value="0" /&gt;
+                &lt;/element&gt;
+            &lt;/item&gt;
+            &lt;item guid="{284C0E0B-010B-45BF-8291-09D90A459B28}" name="Gamma"&gt;
+                &lt;element guid="{B57D3000-0AC6-4819-A609-272A33140ACA}" name="Value"&gt;
+                    &lt;itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E08}" value="0.979999999999999982236431605997" /&gt;
+                &lt;/element&gt;
+            &lt;/item&gt;
+            &lt;item guid="{284C0E0D-010B-45BF-8291-09D90A459B28}" name="WhiteBalance"&gt;
+                &lt;element guid="{B57D3001-0AC6-4819-A609-272A33140ACA}" name="Auto"&gt;
+                    &lt;itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E04}" value="0" /&gt;
+                &lt;/element&gt;
+                &lt;element guid="{8407E480-175A-498C-8171-08BD987CC1AC}" name="White Balance Green"&gt;
+                    &lt;itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E03}" value="64" /&gt;
+                &lt;/element&gt;
+                &lt;element guid="{6519038A-1AD8-4E91-9021-66D64090CC85}" name="White Balance Blue"&gt;
+                    &lt;itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E03}" value="140" /&gt;
+                &lt;/element&gt;
+                &lt;element guid="{6519038B-1AD8-4E91-9021-66D64090CC85}" name="White Balance Red"&gt;
+                    &lt;itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E03}" value="115" /&gt;
+                &lt;/element&gt;
+                &lt;element guid="{AB98F78D-18A6-4EB2-A556-C11010EC9DF7}" name="WhiteBalance Mode"&gt;
+                    &lt;itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E06}" value="0" /&gt;
+                &lt;/element&gt;
+            &lt;/item&gt;
+            &lt;item guid="{284C0E0F-010B-45BF-8291-09D90A459B28}" name="Gain"&gt;
+                &lt;element guid="{B57D3001-0AC6-4819-A609-272A33140ACA}" name="Auto"&gt;
+                    &lt;itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E04}" value="0" /&gt;
+                &lt;/element&gt;
+                &lt;element guid="{B57D3000-0AC6-4819-A609-272A33140ACA}" name="Value"&gt;
+                    &lt;itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E08}" value="0." /&gt;
+                &lt;/element&gt;
+            &lt;/item&gt;
+            &lt;item guid="{90D5702E-E43B-4366-AAEB-7A7A10B448B4}" name="Exposure"&gt;
+                &lt;element guid="{B57D3001-0AC6-4819-A609-272A33140ACA}" name="Auto"&gt;
+                    &lt;itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E04}" value="0" /&gt;
+                &lt;/element&gt;
+                &lt;element guid="{B57D3000-0AC6-4819-A609-272A33140ACA}" name="Value"&gt;
+                    &lt;itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E08}" value="5." /&gt;
+                &lt;/element&gt;
+                &lt;element guid="{65190390-1AD8-4E91-9021-66D64090CC85}" name="Auto"&gt;
+                    &lt;itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E04}" value="1" /&gt;
+                &lt;/element&gt;
+                &lt;element guid="{6519038C-1AD8-4E91-9021-66D64090CC85}" name="Auto Reference"&gt;
+                    &lt;itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E03}" value="128" /&gt;
+                &lt;/element&gt;
+            &lt;/item&gt;
+            &lt;item guid="{90D57031-E43B-4366-AAEB-7A7A10B448B4}" name="Trigger"&gt;
+                &lt;element guid="{B57D3000-0AC6-4819-A609-272A33140ACA}" name="Enable"&gt;
+                    &lt;itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E04}" value="0" /&gt;
+                &lt;/element&gt;
+            &lt;/item&gt;
+            &lt;item guid="{C3C9944A-E6F6-4E25-A0BE-53C066AB65D8}" name="Denoise"&gt;
+                &lt;element guid="{B57D3000-0AC6-4819-A609-272A33140ACA}" name="Value"&gt;
+                    &lt;itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E03}" value="0" /&gt;
+                &lt;/element&gt;
+            &lt;/item&gt;
+            &lt;item guid="{E33B9C58-0BF8-442D-8035-B4ABD7AF44AA}" name="Flip Horizontal"&gt;
+                &lt;element guid="{B57D3000-0AC6-4819-A609-272A33140ACA}" name="Enable"&gt;
+                    &lt;itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E04}" value="0" /&gt;
+                &lt;/element&gt;
+            &lt;/item&gt;
+            &lt;item guid="{86D89D69-9880-4618-9BF6-DED5E8383449}" name="GPIO"&gt;
+                &lt;element guid="{7D006621-761D-4B88-9C5F-8B906857A501}" name="GP Out"&gt;
+                    &lt;itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E03}" value="0" /&gt;
+                &lt;/element&gt;
+            &lt;/item&gt;
+            &lt;item guid="{4F95A06D-9C15-407B-96AB-CF3FED047BA4}" name="Binning factor"&gt;
+                &lt;element guid="{B57D3000-0AC6-4819-A609-272A33140ACA}" name="Value"&gt;
+                    &lt;itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E06}" value="1" /&gt;
+                &lt;/element&gt;
+            &lt;/item&gt;
+            &lt;item guid="{A3E64DA6-736A-489B-8425-04BD2B4AC57A}" name="IMX178 LLP Gain"&gt;
+                &lt;element guid="{B57D3000-0AC6-4819-A609-272A33140ACA}" name="Enabled"&gt;
+                    &lt;itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E04}" value="1" /&gt;
+                &lt;/element&gt;
+            &lt;/item&gt;
+            &lt;item guid="{546541AD-C815-4D82-AFA9-9D59AF9F399E}" name="Highlight Reduction"&gt;
+                &lt;element guid="{B57D3000-0AC6-4819-A609-272A33140ACA}" name="Enable"&gt;
+                    &lt;itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E04}" value="1" /&gt;
+                &lt;/element&gt;
+            &lt;/item&gt;
+            &lt;item guid="{3D505AC4-1A28-428B-83E5-85AA8EB441C1}" name="Tone Mapping"&gt;
+                &lt;element guid="{B57D3001-0AC6-4819-A609-272A33140ACA}" name="Auto"&gt;
+                    &lt;itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E04}" value="1" /&gt;
+                &lt;/element&gt;
+                &lt;element guid="{B57D3000-0AC6-4819-A609-272A33140ACA}" name="Enable"&gt;
+                    &lt;itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E04}" value="1" /&gt;
+                &lt;/element&gt;
+                &lt;element guid="{BD2F432A-02C1-4F32-9AEB-687CA117D2E7}" name="Intensity"&gt;
+                    &lt;itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E08}" value="0.5" /&gt;
+                &lt;/element&gt;
+                &lt;element guid="{D1451FED-C2D8-42CE-910B-2CB566836A77}" name="Global Brightness Factor"&gt;
+                    &lt;itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E08}" value="0." /&gt;
+                &lt;/element&gt;
+            &lt;/item&gt;
+            &lt;item guid="{2CED6FD6-AB4D-4C74-904C-D682E53B9CC5}" name="Partial scan"&gt;
+                &lt;element guid="{36EAA683-3321-44BE-9D73-E1FD4C3FDB87}" name="Auto-center"&gt;
+                    &lt;itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E04}" value="1" /&gt;
+                &lt;/element&gt;
+            &lt;/item&gt;
+            &lt;item guid="{DC320EDE-DF2E-4A90-B926-71417C71C57C}" name="Strobe"&gt;
+                &lt;element guid="{B57D3000-0AC6-4819-A609-272A33140ACA}" name="Enable"&gt;
+                    &lt;itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E04}" value="0" /&gt;
+                &lt;/element&gt;
+            &lt;/item&gt;
+            &lt;item guid="{7F7E24E3-7162-42EF-BF5D-99A359CB32F2}" name="Color Matrix"&gt;
+                &lt;element guid="{B57D3000-0AC6-4819-A609-272A33140ACA}" name="Enabled"&gt;
+                    &lt;itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E04}" value="0" /&gt;
+                &lt;/element&gt;
+            &lt;/item&gt;
+            &lt;item guid="{124922E5-81C7-4587-867D-7BA16AF79079}" name="Auto Functions ROI"&gt;
+                &lt;element guid="{B57D3000-0AC6-4819-A609-272A33140ACA}" name="Enabled"&gt;
+                    &lt;itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E04}" value="0" /&gt;
+                &lt;/element&gt;
+                &lt;element guid="{93D840ED-B7B8-45FE-91E2-18E68C41AFC3}" name="Preset"&gt;
+                    &lt;itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E06}" value="2" /&gt;
+                &lt;/element&gt;
+            &lt;/item&gt;
+        &lt;/vcdpropertyitems&gt;
+    &lt;/device&gt;
+&lt;/device_state&gt;
+</value>
+  </data>
 </root>

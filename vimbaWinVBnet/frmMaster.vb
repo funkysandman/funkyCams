@@ -41,7 +41,7 @@ Public Class frmMaster
 
         Public Property ModelName As String
         Public Property port As Integer
-        Public Property DayExposure As Integer
+        Public Property DayExposure As Double
         Public Property NightExposure As Integer
 
         Public Property DayGain As Integer
@@ -211,7 +211,11 @@ Public Class frmMaster
 
 
         End Sub
+        Public Sub FillNextBitmap(b As Byte())
+            SwitchBitmap()
+            m_buffers(m_BitmapSelector) = b
 
+        End Sub
         Private Sub SwitchBitmap()
             m_BitmapSelector += 1
 
@@ -456,7 +460,7 @@ Public Class frmMaster
         mySettings.DayGain = tbDayGain.Text
         mySettings.port = tbPort.Text
         mySettings.ImagePath = tbPath.Text
-        mySettings.DayExposure = tbDayTimeExp.Text
+        mySettings.DayExposure = Val(tbDayTimeExp.Text)
         mySettings.NightExposure = tbNightExp.Text
         mySettings.morningHour = cboDay.SelectedItem
         mySettings.eveningHour = cboNight.SelectedItem
@@ -489,4 +493,5 @@ Public Class frmMaster
         'test detection
 
     End Sub
+
 End Class
