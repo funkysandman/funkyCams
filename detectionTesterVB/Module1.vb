@@ -46,11 +46,11 @@ Module Module1
             qe.img = b
             Dim r As New Rectangle
             Dim recs As New List(Of Rectangle)
-            r.X = 953
-            r.Y = 1712
-            r.Width = 1768
-            r.Height = 321
-            recs.Add(r)
+            'r.X = 953
+            'r.Y = 1712
+            'r.Width = 1768
+            'r.Height = 321
+            'recs.Add(r)
             qe.rectangles = recs
             CallAzureMeteorDetection(qe)
 

@@ -388,7 +388,7 @@ Public Class frmMaster
         Dim query As NameValueCollection = Web.HttpUtility.ParseQueryString(String.Empty)
 
         query("file") = qe.filename
-        query("dateTaken") = qe.dateTaken.ToString("MM/dd/yyyy hh:mm tt")
+        query("dateTaken") = qe.dateTaken.ToString("MM/dd/yyyy hh:mm:ss tt")
         query("cameraID") = qe.cameraID
         query("width") = qe.width
         query("height") = qe.height
