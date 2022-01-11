@@ -186,7 +186,7 @@ Public Class frmIS
         IcImagingControl1.Update()
 
 
-        IcImagingControl1.Sink = New FrameQueueSink(AddressOf gotBuffer, MediaSubtypes.Y16, 5)
+        IcImagingControl1.Sink = New FrameQueueSink(AddressOf gotBuffer, MediaSubtypes.Y16, 1)
         ' VCDProp = TIS.Imaging.VCDHelpers.VCDSimpleModule.GetSimplePropertyContainer(IcImagingControl1.VCDPropertyItems)
     End Sub
     Private Function gotBuffer(arg As IFrameQueueBuffer) As FrameQueuedResult
@@ -385,9 +385,9 @@ Public Class frmIS
                 'MessageBox.Show(ex.Message, "Error Deleting Folder", MessageBoxButtons.OK, MessageBoxIcon.Error)
             End Try
         End If
-
-
-
+        Dim mySink As FrameQueueSink
+        mySink = IcImagingControl1.Sink
+        mySink.AllocAndQueueBuffers(1)
     End Function
 
 
