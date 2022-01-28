@@ -78,6 +78,8 @@ Public Class Camera
     Private capturing As Boolean = False
     Public myCam As Object
     Public WithEvents FG As FGControlLib.FGControlCtrl
+    Private t As Threading.Thread
+    Private cameraThread As Threading.Thread
     '
     ' Constructor - Must be public for COM registration!
     '
@@ -91,13 +93,33 @@ Public Class Camera
         connectedState = False ' Initialise connected to false
         utilities = New Util() ' Initialise util object
         astroUtilities = New AstroUtils 'Initialise new astro utiliites object
-
+        cameraThread = New Threading.Thread(AddressOf newCamera)
+        cameraThread.Start()
+        Threading.Thread.Sleep(5000)
         'TODO: Implement your additional construction here
+
+
+        TL.LogMessage("Camera", "Completed initialisation")
+    End Sub
+
+    Private Sub newCamera()
         FG = New FGControlLib.FGControlCtrl
         Dim cams As String()
         'cams = FG.GetCameraList()
         FG.Camera = 0
+        FG.PixelFormat = 0
+        FG.PixelFormat = 1
+        FG.PixelFormat = 2
+        FG.PixelFormat = 3
+        FG.PixelFormat = 4
+        FG.PixelFormat = 5
+        FG.PixelFormat = 6
+        FG.PixelFormat = 7
+        FG.PixelFormat = 8
+        FG.PixelFormat = 9
         FG.PixelFormat = 11 ' bin 2
+
+
         FG.Flip = 1
         FG.BytePerPacket = 1000
         ' FG.bin
@@ -117,9 +139,7 @@ Public Class Camera
         ccdWidth = FG.SizeX
         FG.SnowNoiseRemove = 1
         '  FG.SnowNoiseRemoveThreshold = 100
-
-
-        TL.LogMessage("Camera", "Completed initialisation")
+        'FG.Acquisition = 1
     End Sub
 
     '
@@ -310,7 +330,7 @@ Public Class Camera
             End If
         End Get
         Set(value As Short)
-            TL.LogMessage("BinX Set", value.ToString())
+            'TL.LogMessage("BinX Set", value.ToString())
             If value = 2 Then
                 FG.PixelFormat = 11
                 FG.BytePerPacket = 1000
@@ -476,11 +496,11 @@ Public Class Camera
             Throw New ASCOM.PropertyNotImplementedException("ExposureResolution", False)
         End Get
     End Property
-    Public Property ExposureTime() As Long
+    Public Property ExposureTime() As Single
         Get
             Return m_exposureTime
         End Get
-        Set(value As Long)
+        Set(value As Single)
             Try
                 m_exposureTime = value 'stored as seconds
                 FG.SetExposureTimeString(CStr(value) & "s")
@@ -738,10 +758,11 @@ Public Class Camera
         End Set
     End Property
     Public Sub ImageReceived(ts As Integer) Handles FG.ImageReceivedExt
-        If Not capturing Then
-            FG.Acquisition = 0
-            Exit Sub
-        End If
+        'If Not capturing Then
+        '    FG.Acquisition = 0
+        '    Debug.Print("leaving imageReceived")
+        '    Exit Sub
+        'End If
         'ts
         'FG.Acquisition = 0
         Debug.Print("got image " & CStr(ts))
@@ -753,7 +774,7 @@ Public Class Camera
         d = FG.GetBitPerPixel()
         w = FG.SizeX
         h = FG.SizeY
-
+        Debug.Print(w, h)
         ' FileNumber = FreeFile()
 
         If (d = 8) Then
@@ -773,6 +794,7 @@ Public Class Camera
         cameraImageArray = ConvertFrameToImageAray(byteArr, w, h, d)
         cameraImageReady = True
         capturing = False
+        FG.Acquisition = 0
     End Sub
     Private Shared Function ConvertFrameToImageAray(ByVal frame As Byte(), w As Integer, h As Integer, d As Integer) As Object
         Dim imgArr As Integer(,)
@@ -851,13 +873,20 @@ Public Class Camera
 
     End Function
     Public Sub StartExposure(Duration As Double, Light As Boolean) Implements ICameraV2.StartExposure
-        If capturing Then Exit Sub
+
+        t = New Threading.Thread(AddressOf StartExposureThread)
+        t.Start(parameter:=Duration)
+        TL.LogMessage("StartExposure", Duration.ToString() + " " + Light.ToString())
+
+    End Sub
+    Private Sub StartExposureThread(Duration As Double)
+        'If capturing Then Exit Sub
         If (Duration < 0.0) Then Throw New InvalidValueException("StartExposure", Duration.ToString(), "0.0 upwards")
         'If (cameraNumX > ccdWidth) Then Throw New InvalidValueException("StartExposure", cameraNumX.ToString(), ccdWidth.ToString())
         'If (cameraNumY > ccdHeight) Then Throw New InvalidValueException("StartExposure", cameraNumY.ToString(), ccdHeight.ToString())
         'If (cameraStartX > ccdWidth) Then Throw New InvalidValueException("StartExposure", cameraStartX.ToString(), ccdWidth.ToString())
         'If (cameraStartY > ccdHeight) Then Throw New InvalidValueException("StartExposure", cameraStartY.ToString(), ccdHeight.ToString())
-
+        cameraImageReady = False
         cameraLastExposureDuration = Duration
         exposureStart = DateTime.Now
         'get single frame
@@ -865,15 +894,14 @@ Public Class Camera
         ExposureTime = Duration
 
         FG.Acquisition = 1
-        ' FG.OneShot()
+
         capturing = True
         Debug.Print("start exposure")
         '
 
-        TL.LogMessage("StartExposure", Duration.ToString() + " " + Light.ToString())
+        TL.LogMessage("StartExposure", Duration.ToString())
 
     End Sub
-
     Public Property StartX() As Integer Implements ICameraV2.StartX
         Get
             TL.LogMessage("StartX Get", cameraStartX.ToString())
