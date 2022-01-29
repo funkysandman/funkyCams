@@ -243,12 +243,12 @@ Public Class Camera
 
 #Region "ICamera Implementation"
 
-    Private Const ccdWidth As Integer = 2048 '2048 ' Constants to define the ccd pixel dimenstions
-    Private Const ccdHeight As Integer = 2048 '2048
-    Private Const pixelSize As Double = 7.4 ' Constant for the pixel physical dimension
+    'Private Const ccdWidth As Integer = 2184 '2048 ' Constants to define the ccd pixel dimenstions
+    'Private Const ccdHeight As Integer = 1472 '2048
+    'rivate Const pixelSize As Double = 6.8 ' Constant for the pixel physical dimension
 
-    Private cameraNumX As Integer = ccdWidth ' Initialise variables to hold values required for functionality tested by Conform
-    Private cameraNumY As Integer = ccdHeight
+    Private cameraNumX As Integer = 0 ' Initialise variables to hold values required for functionality tested by Conform
+    Private cameraNumY As Integer = 0
     Private cameraStartX As Integer = 0
     Private cameraStartY As Integer = 0
     Private exposureStart As DateTime = DateTime.MinValue
@@ -284,7 +284,7 @@ Public Class Camera
         Set(value As Short)
             TL.LogMessage("BinX Set", value.ToString())
             myCam.c.RoiBinningH = value
-            myCam.c.RoiPixelsH = ccdWidth / value
+            myCam.c.RoiPixelsH = myCam.ccdWidth / value
             Debug.Print("roiPixelsH " & myCam.c.RoiPixelsH)
 
         End Set
@@ -299,7 +299,7 @@ Public Class Camera
         Set(value As Short)
             TL.LogMessage("BinY Set", value.ToString())
             myCam.c.RoiBinningV = value
-            myCam.c.RoiPixelsV = ccdHeight / value
+            myCam.c.RoiPixelsV = myCam.ccdHeight / value
 
 
         End Set
@@ -411,7 +411,7 @@ Public Class Camera
         Get
             TL.LogMessage("ExposureMax Get", "Not implemented")
             'Throw New ASCOM.PropertyNotImplementedException("ExposureMax", False)
-            Return myCam.c.MaxExposure
+            'Return 1000000000 'myCam.c.MaxExposure
         End Get
     End Property
 
@@ -483,7 +483,7 @@ Public Class Camera
     Public ReadOnly Property HasShutter() As Boolean Implements ICameraV2.HasShutter
         Get
             TL.LogMessage("HasShutter Get", False.ToString())
-            Return False
+            Return True
         End Get
     End Property
 
@@ -673,23 +673,25 @@ Public Class Camera
             myCam.c.CoolerSetPoint = value
         End Set
     End Property
-    Private Sub Expose(Duration As Double)
-        myCam.Expose(Duration)
+    Private Sub Expose(params As Object)
+        Dim Duration = params(0)
+        Dim Light = params(1)
+        myCam.Expose(Duration, Light)
         Debug.Print("exposure finished")
         ' If myCam.c.ImagingStatus = APOGEELib.Apn_Status.Apn_Status_ImageReady Then
         Debug.Print(myCam.c.ImagingStatus)
         cameraImageArray = ConvertFrameToImageArray(myCam.imageData, myCam.c.RoiPixelsH, myCam.c.RoiPixelsV)
-            Debug.Print("converted image")
-            ' End If
-            cameraImageReady = True
+        Debug.Print("converted image")
+        ' End If
+        cameraImageReady = True
     End Sub
     Public Sub StartExposure(Duration As Double, Light As Boolean) Implements ICameraV2.StartExposure
         cameraImageReady = False
         If (Duration < 0.0) Then Throw New InvalidValueException("StartExposure", Duration.ToString(), "0.0 upwards")
-        If (cameraNumX > ccdWidth) Then Throw New InvalidValueException("StartExposure", cameraNumX.ToString(), ccdWidth.ToString())
-        If (cameraNumY > ccdHeight) Then Throw New InvalidValueException("StartExposure", cameraNumY.ToString(), ccdHeight.ToString())
-        If (cameraStartX > ccdWidth) Then Throw New InvalidValueException("StartExposure", cameraStartX.ToString(), ccdWidth.ToString())
-        If (cameraStartY > ccdHeight) Then Throw New InvalidValueException("StartExposure", cameraStartY.ToString(), ccdHeight.ToString())
+        If (cameraNumX > myCam.ccdWidth) Then Throw New InvalidValueException("StartExposure", cameraNumX.ToString(), myCam.ccdWidth.ToString())
+        If (cameraNumY > myCam.ccdHeight) Then Throw New InvalidValueException("StartExposure", cameraNumY.ToString(), myCam.ccdHeight.ToString())
+        If (cameraStartX > myCam.ccdWidth) Then Throw New InvalidValueException("StartExposure", cameraStartX.ToString(), myCam.ccdWidth.ToString())
+        If (cameraStartY > myCam.ccdHeight) Then Throw New InvalidValueException("StartExposure", cameraStartY.ToString(), myCam.ccdHeight.ToString())
 
 
         cameraLastExposureDuration = Duration
@@ -697,8 +699,9 @@ Public Class Camera
 
         'startAltaExposure(Duration)
         Dim t = New Threading.Thread(AddressOf Expose)
+        Dim Parameters = New Object() {Duration, Light}
 
-        t.Start(parameter:=Duration)
+        t.Start(parameter:=Parameters)
 
 
 
