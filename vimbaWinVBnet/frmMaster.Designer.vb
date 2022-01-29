@@ -1,9 +1,9 @@
-﻿<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()> _
+﻿<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()>
 Partial Class frmMaster
     Inherits System.Windows.Forms.Form
 
     'Form overrides dispose to clean up the component list.
-    <System.Diagnostics.DebuggerNonUserCode()> _
+    <System.Diagnostics.DebuggerNonUserCode()>
     Protected Overrides Sub Dispose(ByVal disposing As Boolean)
         Try
             If disposing AndAlso components IsNot Nothing Then
@@ -20,7 +20,7 @@ Partial Class frmMaster
     'NOTE: The following procedure is required by the Windows Form Designer
     'It can be modified using the Windows Form Designer.  
     'Do not modify it using the code editor.
-    <System.Diagnostics.DebuggerStepThrough()> _
+    <System.Diagnostics.DebuggerStepThrough()>
     Private Sub InitializeComponent()
         Me.components = New System.ComponentModel.Container()
         Me.Timer2 = New System.Windows.Forms.Timer(Me.components)
@@ -69,6 +69,10 @@ Partial Class frmMaster
         Me.btnSave = New System.Windows.Forms.Button()
         Me.tbDarkCutOff = New System.Windows.Forms.TextBox()
         Me.Label5 = New System.Windows.Forms.Label()
+        Me.tbURL = New System.Windows.Forms.TextBox()
+        Me.lblURL = New System.Windows.Forms.Label()
+        Me.Image_timer = New System.Windows.Forms.Timer(Me.components)
+        Me.Button1 = New System.Windows.Forms.Button()
         CType(Me.PictureBox1, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
         '
@@ -281,7 +285,7 @@ Partial Class frmMaster
         Me.PictureBox1.Location = New System.Drawing.Point(15, 24)
         Me.PictureBox1.Name = "PictureBox1"
         Me.PictureBox1.Size = New System.Drawing.Size(142, 116)
-        Me.PictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage
+        Me.PictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage
         Me.PictureBox1.TabIndex = 122
         Me.PictureBox1.TabStop = False
         '
@@ -456,11 +460,45 @@ Partial Class frmMaster
         Me.Label5.TabIndex = 154
         Me.Label5.Text = "hot pixel cut off"
         '
+        'tbURL
+        '
+        Me.tbURL.Location = New System.Drawing.Point(178, 13)
+        Me.tbURL.Name = "tbURL"
+        Me.tbURL.Size = New System.Drawing.Size(239, 20)
+        Me.tbURL.TabIndex = 155
+        Me.tbURL.Visible = False
+        '
+        'lblURL
+        '
+        Me.lblURL.AutoSize = True
+        Me.lblURL.Location = New System.Drawing.Point(100, 15)
+        Me.lblURL.Name = "lblURL"
+        Me.lblURL.Size = New System.Drawing.Size(72, 13)
+        Me.lblURL.TabIndex = 156
+        Me.lblURL.Text = "IP camera url:"
+        Me.lblURL.Visible = False
+        '
+        'Image_timer
+        '
+        Me.Image_timer.Interval = 5000
+        '
+        'Button1
+        '
+        Me.Button1.Location = New System.Drawing.Point(294, 148)
+        Me.Button1.Name = "Button1"
+        Me.Button1.Size = New System.Drawing.Size(98, 35)
+        Me.Button1.TabIndex = 157
+        Me.Button1.Text = "define exclusion"
+        Me.Button1.UseVisualStyleBackColor = True
+        '
         'frmMaster
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.ClientSize = New System.Drawing.Size(422, 525)
+        Me.Controls.Add(Me.Button1)
+        Me.Controls.Add(Me.lblURL)
+        Me.Controls.Add(Me.tbURL)
         Me.Controls.Add(Me.Label5)
         Me.Controls.Add(Me.tbDarkCutOff)
         Me.Controls.Add(Me.btnSave)
@@ -557,4 +595,8 @@ Partial Class frmMaster
     Friend WithEvents btnSave As Button
     Friend WithEvents tbDarkCutOff As TextBox
     Friend WithEvents Label5 As Label
+    Friend WithEvents tbURL As TextBox
+    Friend WithEvents lblURL As Label
+    Friend WithEvents Image_timer As Timer
+    Friend WithEvents Button1 As Button
 End Class

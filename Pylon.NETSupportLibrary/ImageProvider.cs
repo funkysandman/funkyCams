@@ -49,7 +49,7 @@ namespace PylonC.NETSupportLibrary
         protected bool m_open = false;                     /* Indicates that the device is open and ready to grab.*/
         protected bool m_grabOnce = false;                 /* Use for single frame mode. */
         protected bool m_removed = false;                  /* Indicates that the device has been removed from the PC. */
-        protected Thread m_grabThread;                     /* Thread for grabbing the images. */
+        public Thread m_grabThread;                     /* Thread for grabbing the images. */
         protected Object m_lockObject;                     /* Lock object used for thread synchronization. */
         protected Dictionary<PYLON_STREAMBUFFER_HANDLE, PylonBuffer<Byte>> m_buffers; /* Holds handles and buffers used for grabbing. */
         protected List<GrabResult> m_grabbedBuffers; /* List of grab results already grabbed. */
@@ -320,8 +320,8 @@ namespace PylonC.NETSupportLibrary
 
                 if (Pylon.DeviceFeatureIsWritable(m_hDevice, "GevSCPD"))
                 {
-                    /* ... The device supports the packet size feature. Set a value. */
-                    Pylon.DeviceSetIntegerFeature(m_hDevice, "GevSCPD", 9000);
+                    /* ... The device supports the delay feature. Set a value. */
+                    Pylon.DeviceSetIntegerFeature(m_hDevice, "GevSCPD", 100);
                 }
                 /* The sample does not work in chunk mode. It must be disabled. */
                 if (Pylon.DeviceFeatureIsWritable(m_hDevice, "ChunkModeActive"))

@@ -556,7 +556,7 @@ Public Class frmPCO
             If myDetectionQueue.Count > 0 Then
                 aQE = myDetectionQueue.Dequeue()
 
-                Functions.CallAzureMeteorDetection(aQE)
+                CallAzureMeteorDetection(aQE)
 
 
                 aQE = Nothing

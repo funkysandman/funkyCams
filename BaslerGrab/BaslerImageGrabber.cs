@@ -99,7 +99,7 @@ namespace BaslerWrapper
     {
         private NODEMAP_HANDLE hNodeMap;
         private NODE_HANDLE m_hNode = new NODE_HANDLE();
-        private PylonC.NETSupportLibrary.ImageProvider m_imageProvider = new PylonC.NETSupportLibrary.ImageProvider(); /* Create one image provider. */
+        public PylonC.NETSupportLibrary.ImageProvider m_imageProvider = new PylonC.NETSupportLibrary.ImageProvider(); /* Create one image provider. */
         private Bitmap m_bitmap = null; /* The bitmap is used for displaying the image. */
         private Boolean waitingForImage = true;
         protected Thread m_grabThread;

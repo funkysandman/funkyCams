@@ -10,17 +10,27 @@ Public Module Functions
         Dim myUriBuilder As New UriBuilder(apiURL)
 
 
-            Dim query As NameValueCollection = Web.HttpUtility.ParseQueryString(String.Empty)
+        Dim query As NameValueCollection = Web.HttpUtility.ParseQueryString(String.Empty)
 
-            query("file") = qe.filename
-            query("dateTaken") = qe.dateTaken.ToString("MM/dd/yyyy hh:mm:ss tt")
-            query("cameraID") = qe.cameraID
-            query("width") = qe.width
-            query("height") = qe.height
-            myUriBuilder.Query = query.ToString
+        query("file") = qe.filename
+        query("dateTaken") = qe.dateTaken.ToString("MM/dd/yyyy hh:mm:ss tt")
+        query("cameraID") = qe.cameraID
+        query("width") = qe.width
+        query("height") = qe.height
 
+        If qe.rectangles.Count > 0 Then
+            'add rectangles
+            query("rectangles") = qe.rectangles.Count
+            For i = 0 To qe.rectangles.Count - 1
+                query("r_" + Trim(Str(i)) + "_x") = qe.rectangles(i).X
+                query("r_" + Trim(Str(i)) + "_y") = qe.rectangles(i).Y
+                query("r_" + Trim(Str(i)) + "_w") = qe.rectangles(i).Width
+                query("r_" + Trim(Str(i)) + "_h") = qe.rectangles(i).Height
+            Next
+        End If
+        myUriBuilder.Query = query.ToString
 
-            Dim client As New HttpClient()
+        Dim client As New HttpClient()
 
             Dim byteContent = New ByteArrayContent(qe.img)
             Try

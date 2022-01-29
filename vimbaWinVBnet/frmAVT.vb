@@ -198,7 +198,7 @@ Public Class frmAVT
                 myDetectionQueue.Enqueue(qe)
             End If
             'myDetectionQueue.Enqueue(New queueEntry(contents,))
-            'Functions.CallAzureMeteorDetection(contents, Path.GetFileName(filename))
+            'CallAzureMeteorDetection(contents, Path.GetFileName(filename))
             ms.Close()
         Else
             ' md.examine(bm)

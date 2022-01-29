@@ -29,7 +29,7 @@ Public Class frmScout
 
 
 
-    Public Function getLastImage() As Bitmap
+    Public Overloads Function getLastImage() As Bitmap
         Dim x As New Bitmap(m_pics.width, m_pics.height, System.Drawing.Imaging.PixelFormat.Format8bppIndexed)
         Dim BoundsRect = New Rectangle(0, 0, m_pics.width, m_pics.height)
         Dim bmpData As System.Drawing.Imaging.BitmapData = x.LockBits(BoundsRect, System.Drawing.Imaging.ImageLockMode.[WriteOnly], x.PixelFormat)
@@ -144,7 +144,8 @@ Public Class frmScout
         Button2.Enabled = True
     End Sub
 
-    Private Sub CheckBox1_CheckedChanged(sender As Object, e As EventArgs) Handles cbUseDarks.CheckedChanged
+
+    Private Sub cbUseDarks_CheckedChanged(sender As Object, e As EventArgs) Handles cbUseDarks.CheckedChanged
         If Not myWebServer Is Nothing Then
             If cbUseDarks.Checked Then
                 myWebServer.useDarks = True
@@ -226,8 +227,9 @@ Public Class frmScout
         'stop stream
         If myBaslerImageGrabber Is Nothing Then Exit Sub
 
+        Dim isRunning As Boolean = False
 
-        'mySVCam.stopAcquisitionThread()
+        isRunning = myBaslerImageGrabber.m_imageProvider.m_grabThread.IsAlive
 
         If lblDayNight.Text = "night" Then
 
@@ -243,21 +245,31 @@ Public Class frmScout
             'End If
             'End If
             'if the camera is running...stop exposing
-            myBaslerImageGrabber.stopAcquisition()
+
+            If isRunning Then
+                myBaslerImageGrabber.stopAcquisition()
+            End If
 
             myBaslerImageGrabber.setParams(Val(Me.tbExposureTime.Text), Val(Me.tbNightAgain.Text))
 
-            myBaslerImageGrabber.startAcquisition(AddressOf Me.received_frame)
+            If isRunning Then
+                myBaslerImageGrabber.startAcquisition(AddressOf Me.received_frame)
+            End If
+
         Else
-            'day mode
-            tbGain.Text = tbDayGain.Text
+                'day mode
+                tbGain.Text = tbDayGain.Text
             tbExposureTime.Text = tbDayTimeExp.Text
 
-            myBaslerImageGrabber.stopAcquisition()
+            If isRunning Then
+                myBaslerImageGrabber.stopAcquisition()
+            End If
 
             myBaslerImageGrabber.setParams(Val(Me.tbExposureTime.Text), Val(Me.tbDayGain.Text))
 
-            myBaslerImageGrabber.startAcquisition(AddressOf Me.received_frame)
+            If isRunning Then
+                myBaslerImageGrabber.startAcquisition(AddressOf Me.received_frame)
+            End If
         End If
         'start stream
         'If Me.cbUseTrigger.Checked Then
@@ -401,4 +413,19 @@ Public Class frmScout
         myBaslerImageGrabber.close()
 
     End Sub
+
+    'Private Sub InitializeComponent()
+    '    Me.SuspendLayout()
+    '    '
+    '    'frmScout
+    '    '
+    '    Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
+    '    Me.ClientSize = New System.Drawing.Size(422, 525)
+    '    Me.Name = "frmScout"
+    '    Me.ResumeLayout(False)
+    '    Me.PerformLayout()
+
+    'End Sub
+
+
 End Class

@@ -332,14 +332,12 @@ Public Class frmSVSVistek
             mySVCam.useDarks = False
 
         End If
+        If LCase(Me.lblDayNight.Text) = "day" Then
+            mySVCam.setParams(Val(Me.tbExposureTime.Text), Val(Me.tbDayGain.Text))
+        Else
+            mySVCam.setParams(Val(Me.tbExposureTime.Text), Val(Me.tbNightAgain.Text))
 
-        ' If LCase(Me.lblDayNight.Text) = "day" Then
-        '     mySVCam.setParams(Val(Me.tbExposureTime.Text), Val(Me.tbDayGain.Text))
-        ' Else
-        'default to night
-        mySVCam.setParams(Val(tbNightExp.Text), Val(Me.tbNightAgain.Text))
-
-        'End If
+        End If
 
         mySVCam._darkmultiplier = Val(Me.tbMultiplier.Text)
         mySVCam.m_saveLocal = True
@@ -479,21 +477,21 @@ Public Class frmSVSVistek
             End If
             'End If
             'if the camera is running...stop exposing
-            'mySVCam.stopAcquisitionThread()
+            mySVCam.stopAcquisitionThread()
 
-            'mySVCam.setParams(Val(Me.tbExposureTime.Text), Val(Me.tbNightAgain.Text))
-            'mySVCam.prepareCameraForTimed(mySVCam.current_selected_cam)
-            'mySVCam.startAcquisitionThread(AddressOf Me.received_frame)
+            mySVCam.setParams(Val(Me.tbExposureTime.Text), Val(Me.tbNightAgain.Text))
+            mySVCam.prepareCameraForTimed(mySVCam.current_selected_cam)
+            mySVCam.startAcquisitionThread(AddressOf Me.received_frame)
         Else
             'day mode
             tbGain.Text = tbDayGain.Text
             tbExposureTime.Text = tbDayTimeExp.Text
 
-            'mySVCam.stopAcquisitionThread()
+            mySVCam.stopAcquisitionThread()
 
-            'mySVCam.setParams(Val(Me.tbExposureTime.Text), Val(Me.tbDayGain.Text))
-            'mySVCam.prepareCameraForTimed(mySVCam.current_selected_cam)
-            'mySVCam.startAcquisitionThread(AddressOf Me.received_frame)
+            mySVCam.setParams(Val(Me.tbExposureTime.Text), Val(Me.tbDayGain.Text))
+            mySVCam.prepareCameraForTimed(mySVCam.current_selected_cam)
+            mySVCam.startAcquisitionThread(AddressOf Me.received_frame)
         End If
         'start Stream
         'If Me.cbUseTrigger.Checked Then
@@ -504,18 +502,7 @@ Public Class frmSVSVistek
         ' End If
     End Sub
 
-    Private Sub InitializeComponent()
-        Me.SuspendLayout()
-        '
-        'frmSVSVistek
-        '
-        Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
-        Me.ClientSize = New System.Drawing.Size(422, 525)
-        Me.Name = "frmSVSVistek"
-        Me.ResumeLayout(False)
-        Me.PerformLayout()
 
-    End Sub
 
     Private Sub frmSVSVistek_Load(sender As Object, e As EventArgs) Handles MyBase.Load
 

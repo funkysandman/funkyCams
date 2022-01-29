@@ -5,5 +5,6 @@
     Public dateTaken As DateTime
     Public width As Int16
     Public height As Int16
+    Public rectangles As Rectangle()
 End Class
 

@@ -98,4 +98,11 @@ Public Class Form3
         f.ShowDialog()
         Me.Close()
     End Sub
+
+    Private Sub btnIPCam_Click(sender As Object, e As EventArgs) Handles btnIPCam.Click
+        Dim f As New frmIPCam
+        Me.Hide()
+        f.ShowDialog()
+        Me.Close()
+    End Sub
 End Class

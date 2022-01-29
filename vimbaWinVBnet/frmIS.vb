@@ -1,72 +1,58 @@
-﻿Imports System
+﻿
 Imports System.IO
-Imports System.Drawing
-Imports System.Drawing.Imaging
-Imports System.Collections
+
 Imports System.ComponentModel
-Imports System.Windows.Forms
-Imports System.Data
+Imports System.Drawing.Imaging
 Imports System.Runtime.InteropServices
 Imports System.Threading
-Imports System.Net.Http
-Imports System.Collections.Specialized
-Imports vimbaWinVBnet.vimbaWinVBnet
+
 Imports TIS.Imaging
 Public Class frmIS
-    Dim myDetectionQueue As New Queue(Of queueEntry)
+    Inherits frmMaster
+
     Private VCDProp As TIS.Imaging.VCDHelpers.VCDSimpleProperty
-
-    Private mhCamera As IntPtr
-    Private mDisplayPanel As myPanel
-    Private mIsMono As Boolean
-    Private mDisplayBitmap As Bitmap
-    'Private mFrameCallback As QCamM_AsyncCallback
-    'Private mFrame1 As QCamM_Frame
-    ' Private mFrame2 As QCamM_Frame
-    'Private mRgbFrame As QCamM_Frame
-    ' Private mSettings As QCamM_SettingsEx
-    Private myWebServer As WebServer
-    Private checkBox1 As CheckBox
-    Private tbExposure As TrackBar
-    Private lblExposureVal As Label
-    Private panel1 As Panel
-    Private gbAcquisition As GroupBox
-    Private gbExposure As GroupBox
-    Private gbGain As GroupBox
-    Private lblGainVal As Label
-    Private running As Boolean
-    Private gbInfo As GroupBox
-    Private lblCameraModel As Label
-    Private bmp As Bitmap
-    Private imageBytes As Byte()
-    Private bmp2 As Bitmap
-    Private lblSerNum As Label
-    Private frames As Integer
-    Private startTime As DateTime
-    Private gotFrameTime As DateTime
-    Private dark() As UShort
-    Private t As Thread
-    Private t_imaging As Thread
-    Private h_camera As Integer
+    'Private WithEvents IcImagingControl1 As New TIS.Imaging.ICImagingControl
+    'Private mhCamera As IntPtr
+    'Private mDisplayPanel As myPanel
+    'Private mIsMono As Boolean
+    'Private mDisplayBitmap As Bitmap
 
 
-    Private night As Boolean = False
-    ' Private md As New ObjectDetection.TFDetector()
-    Private myImageCodecInfo As ImageCodecInfo
-    Private myEncoder As System.Drawing.Imaging.Encoder
-    Private myEncoderParameter As EncoderParameter
-    Private myEncoderParameters As EncoderParameters
-    Private meteorCheckRunning As Boolean = False
+    'Private checkBox1 As CheckBox
+    'Private tbExposure As TrackBar
+    'Private lblExposureVal As Label
+    'Private panel1 As Panel
+    'Private gbAcquisition As GroupBox
+    'Private gbExposure As GroupBox
+    'Private gbGain As GroupBox
+    'Private lblGainVal As Label
+
+    'Private gbInfo As GroupBox
+    'Private lblCameraModel As Label
+    'Private bmp As Bitmap
+    'Private imageBytes As Byte()
+    'Private bmp2 As Bitmap
+    'Private lblSerNum As Label
+
+    'Private t As Thread
+    'Private t_imaging As Thread
+    'Private h_camera As Integer
+
+
+
+
     Private m_camRunning As Boolean = False
     Private m_grabbing As Boolean = False
-    Private rawImage As Byte()
+    'Private rawImage As Byte()
 
-    Shared m_pics As RingBitmap
-    Private m_grabbedframe As Boolean
-    Private m_grabbedframe_err As Integer = 0
+    Dim fh As FrameHandlerSink
+    'Private m_grabbedframe As Boolean
+    'Private m_grabbedframe_err As Integer = 0
 
     Private m_syncLock As Object = New Object   '// Sync object protecting the following member data
     Public Shared iWidth As Integer
+    Friend WithEvents IcImagingControl1 As ICImagingControl
+
     Public Shared iHeight As Integer
 
 
@@ -76,158 +62,6 @@ Public Class frmIS
     '//
 
 
-    Public Class RingBitmap
-
-        Private m_Size As Integer = 0
-
-        Private m_Bitmaps As Bitmap()
-
-        Private m_BitmapSelector As Integer = 0
-
-        Private m_buffers()() As Byte
-        Public Sub New(s As Integer)
-
-            m_Size = s
-            m_Bitmaps = New Bitmap(m_Size - 1) {}
-            ReDim m_buffers(m_Size - 1)
-        End Sub
-        Public ReadOnly Property Image As Image
-            Get
-                Debug.Print("getting bitmap " & m_BitmapSelector)
-                Return m_Bitmaps(m_BitmapSelector)
-            End Get
-        End Property
-        Public ReadOnly Property ImageBytes As Byte()
-            Get
-                Debug.Print("getting bitmap " & m_BitmapSelector)
-                'copy raw data to byte array
-
-
-                Return m_buffers(m_BitmapSelector)
-            End Get
-        End Property
-
-        Public Sub FillNextBitmap(b As Byte())
-            SwitchBitmap()
-            m_buffers(m_BitmapSelector) = b
-
-        End Sub
-        'Public Sub FillNextBitmap(frame As UShort())
-
-        '    ' switch to Bitmap object which Is currently Not in use by GUI
-        '    SwitchBitmap()
-        '    Debug.Print("fillnextbitmap bitmapselector: " & m_BitmapSelector)
-        '    Try
-
-        '        If (m_Bitmaps(m_BitmapSelector) Is Nothing) Then
-        '            Debug.Print("making new bitmap")
-        '            m_Bitmaps(m_BitmapSelector) = New Bitmap(iXres, iYres, PixelFormat.Format24bppRgb)
-        '            Dim ncp As System.Drawing.Imaging.ColorPalette = m_Bitmaps(m_BitmapSelector).Palette
-        '            For j As Integer = 0 To 255
-        '                ncp.Entries(j) = System.Drawing.Color.FromArgb(255, j, j, j)
-        '            Next
-        '            m_Bitmaps(m_BitmapSelector).Palette = ncp
-        '        End If
-
-
-        '    Catch
-        '    End Try
-
-        '    Try
-        '        'copy frame into bitmap
-        '        Dim rawData(frame.bufferSize) As Byte
-
-
-
-        '        Marshal.Copy(frame.pBuffer, rawData, 0, frame.bufferSize)
-
-        '        m_buffers(m_BitmapSelector) = rawData
-
-        '        Dim BoundsRect = New Rectangle(0, 0, frame.width, frame.height)
-        '        Dim bmpData As System.Drawing.Imaging.BitmapData = m_Bitmaps(m_BitmapSelector).LockBits(BoundsRect, System.Drawing.Imaging.ImageLockMode.[WriteOnly], m_Bitmaps(m_BitmapSelector).PixelFormat)
-
-        '        Dim ptr As IntPtr = bmpData.Scan0
-
-        '        Dim bytes As Integer = frame.bufferSize
-        '        For i = 1 To 100
-        '            Debug.Print(rawData(i))
-        '        Next
-
-
-        '        Marshal.Copy(rawData, 0, ptr, bytes)
-        '        m_Bitmaps(m_BitmapSelector).UnlockBits(bmpData)
-        '        m_Bitmaps(m_BitmapSelector).RotateFlip(RotateFlipType.Rotate180FlipNone)
-
-        '    Catch
-
-        '        Console.WriteLine("error during frame fill")
-        '    End Try
-
-
-        'End Sub
-        Private Sub SwitchBitmap()
-            m_BitmapSelector += 1
-
-            If m_Size = m_BitmapSelector Then
-                m_BitmapSelector = 0
-            End If
-        End Sub
-    End Class
-    Private Sub StopStream()
-        'QCam.QCamM_Abort(mhCamera)
-        'QCam.QCamM_SetStreaming(mhCamera, 0)
-    End Sub
-
-    Private Sub StartStream()
-        'QCam.QCamM_Abort(mhCamera)
-        'QCam.QCamM_SetStreaming(mhCamera, 0)
-        'QCam.QCamM_SetStreaming(mhCamera, 1)
-        'QueueFrame(1)
-        'QueueFrame(2)
-    End Sub
-
-    Private Function QueueFrame(ByVal frameNum As UInteger) As Boolean
-        'Dim err As QCamM_Err
-
-        'If frameNum = 1 Then
-        '    err = QCam.QCamM_QueueFrame(Me.mhCamera, mFrame1, mFrameCallback, CUInt(QCamM_qcCallbackFlags.qcCallbackDone), IntPtr.Zero, frameNum)
-        'ElseIf frameNum = 2 Then
-        '    err = QCam.QCamM_QueueFrame(Me.mhCamera, mFrame2, mFrameCallback, CUInt(QCamM_qcCallbackFlags.qcCallbackDone), IntPtr.Zero, frameNum)
-        'Else
-
-        '    Return False
-        'End If
-
-        'If err = QCamM_Err.qerrSuccess Then
-        '    Return True
-        'Else
-        '    Debug.Print("err is:" & err)
-        '    Return False
-        'End If
-    End Function
-    Private Function OpenCamera() As Boolean
-        'mCamList = New QCamM_CamListItem(9) {}
-        'Dim listLen As UInteger = 10
-        'QCam.QCamM_ListCameras(mCamList, listLen)
-
-        'If (listLen > 0) AndAlso (mCamList(0).isOpen = 0) Then
-
-        '    If QCam.QCamM_OpenCamera(mCamList(0).cameraId, mhCamera) <> QCamM_Err.qerrSuccess Then
-        '        Return False
-        '    End If
-
-        '    Return True
-        'Else
-        '    If (listLen > 0) And (mCamList(0).isOpen = 1) Then
-        '        Debug.Print("camera already open")
-        '        Return True 'already open
-
-        '    Else
-        '        'msgbox("no camera")
-        '    End If
-        'End If
-
-    End Function
     Private Function ToUInt16(ByVal s As Int16) As UInt16
         If (s And &H8000) = 0 Then
             Return CType(s, UInt16)
@@ -290,178 +124,49 @@ Public Class frmIS
     End Sub
 
 
-    Public Sub processDetection()
-        Dim aQE As queueEntry
-        While (meteorCheckRunning)
-            If myDetectionQueue.Count > 0 Then
-                aQE = myDetectionQueue.Dequeue()
-
-                Functions.CallAzureMeteorDetection(aQE)
 
 
-                aQE = Nothing
-
-            End If
-            ' Console.WriteLine("in the queue:{0}", myDetectionQueue.Count)
-            Thread.Sleep(100)
-        End While
-
-    End Sub
-    Public Async Function CallAzureMeteorDetection(qe As queueEntry) As Task
 
 
-        '        Dim apiURL As String = "https://azuremeteordetect20181212113628.azurewebsites.net/api/detection?code=zi3Lrr58mJB3GTut0lktSLIzb08E1dLkHXAbX6s07bd46IoZmm1vqQ==&file=" + file
-        Dim apiURL As String = "http://192.168.1.199:7071/api/detection"
-        Dim myUriBuilder As New UriBuilder(apiURL)
 
 
-        Dim query As NameValueCollection = Web.HttpUtility.ParseQueryString(String.Empty)
 
-        query("file") = qe.filename
-        query("dateTaken") = qe.dateTaken.ToString("MM/dd/yyyy hh:mm tt")
-        query("cameraID") = qe.cameraID
-        query("width") = qe.width
-        query("height") = qe.height
-        myUriBuilder.Query = query.ToString
-
-
-        Dim client As New HttpClient()
-
-        Dim byteContent = New ByteArrayContent(qe.img)
-        Try
-
-
-            Dim response = client.PostAsync(myUriBuilder.ToString, byteContent)
-            Dim responseString = response.Result
-            byteContent = Nothing
-
-        Catch ex As Exception
-            Console.WriteLine("calling meteor detection:" & ex.Message)
-        End Try
-    End Function
-
-
-    'Public Sub GrabFrame()
-    '    Dim width, height As UInteger
-    '    Dim err As QCamM_Err = QCamM_Err.qerrSuccess
-    '    Dim sizeInBytes As UInteger = 0
-    '    QCam.QCamM_GetInfo(mhCamera, QCamM_Info.qinfImageSize, sizeInBytes)
-    '    err = QCam.QCamM_GrabFrame(mhCamera, mFrame1)
-    '    width = mFrame1.width
-    '    height = mFrame1.height
-    '    Dim bmp As Bitmap = Nothing
-
-    '    If mIsMono Then
-    '        bmp = New Bitmap(CInt(width), CInt(height), CInt(width), PixelFormat.Format8bppIndexed, mFrame1.pBuffer)
-    '        Dim pt As ColorPalette = bmp.Palette
-
-    '        For i As Integer = 0 To pt.Entries.Length - 1
-    '            pt.Entries(i) = Color.FromArgb(i, i, i)
-    '        Next
-
-    '        bmp.Palette = pt
-    '    Else
-    '        QCamImgfnc.QCamM_BayerToRgb(QCamM_qcBayerInterp.qcBayerInterpFast, mFrame1, mRgbFrame)
-    '        bmp = New Bitmap(CInt(width), CInt(height), CInt(width) * 3, PixelFormat.Format24bppRgb, mRgbFrame.pBuffer)
-    '    End If
-
-    '    mDisplayBitmap = bmp
-    '    PictureBox1.Image = bmp
-
-    '    Try
-
-    '        Using fs As FileStream = New FileStream("image.raw", FileMode.Create)
-    '            Dim bw As BinaryWriter = New System.IO.BinaryWriter(fs)
-
-    '            For i As Integer = 0 To mFrame1.size - 1 Step 1
-    '                ' bw.Write(Marshal.ReadByte(mFrame1.pBuffer, i + 1))
-    '                bw.Write(Marshal.ReadByte(mFrame1.pBuffer, i))
-    '            Next
-
-    '            bw.Close()
-    '        End Using
-
-    '    Catch e As Exception
-    '        MessageBox.Show("Unable to save the image data: " & e.Message)
-    '    End Try
-    'End Sub
-
-    'Private Sub Button7_Click(sender As Object, e As EventArgs) Handles Button7.Click
-    '    myCam.ExposureTime = Val(tbExposureTime.Text) / 1000 ' expecting ms
-    '    ' myCam.ReadCameraParams()
-
-    '    If Not myCam.AcqSetup(pvcam_helper.PVCamCamera.AcqTypes.ACQ_TYPE_CONTINUOUS) Then
-    '        Return
-    '    End If
-
-    '    If myCam.ReadoutTime <> 0 Then
-    '    Else
-    '    End If
-    '    ' myCam.ReadCameraParams()
-    '    myCam.FramesToGet = myCam.RUN_UNTIL_STOPPED
-    '    If Not myCam.StartContinuousAcquisition() Then
-    '        Return
-    '    End If
-    '    ''use settings
-    '    'Dim err As QCamM_Err
-    '    'm_camRunning = True
-
-    '    'QCam.QCamM_SetParam(mSettings, QCamM_Param.qprmGain, CUInt((tbGain.Text)))
-
-
-    '    'QCam.QCamM_SetParam(mSettings, QCamM_Param.qprmExposure, tbExposureTime.Text)
-    '    'err = QCam.QCamM_SendSettingsToCam(mhCamera, mSettings)
-
-    '    'If lblDayNight.Text = "night" Then
-    '    '    StartStream()
-    '    'Else
-    '    '    TimerAcquistionRate.Enabled = True
-    '    'End If
-
-    '    Button7.Enabled = False
-    '    Button8.Enabled = True
-
-    '    startTime = Now
-    '    meteorCheckRunning = True
-    '    Timer2.Enabled = True
-    '    t = New Thread(AddressOf processDetection)
-    '    t.Start()
-    'End Sub
-
-    Private Sub Button8_Click(sender As Object, e As EventArgs) Handles Button8.Click
+    Private Sub btnStop_Click(sender As Object, e As EventArgs) Handles btnStop.Click
         m_camRunning = False
         ' rc = Api.SetStreamState(h_camera, StreamState.Stop)
-        TimerAcquistionRate.Enabled = False
+        'TimerAcquistionRate.Enabled = False
         't.Abort()
         IcImagingControl1.LiveStop()
         meteorCheckRunning = False
-        Button7.Enabled = True
-        Button8.Enabled = False
+        btnStart.Enabled = True
+        btnStop.Enabled = False
     End Sub
 
     Private Sub frmIS_Load(sender As Object, e As EventArgs) Handles Me.Load
+
+        Me.cmbCam.Visible = False
+        Me.cbUseTrigger.Visible = False
+        initIS()
+
+        'setup camera
         getCameraReady()
-        myImageCodecInfo = GetEncoderInfo("image/jpeg")
 
-        ' Create an Encoder object based on the GUID
-        ' for the Quality parameter category.
-        myEncoder = System.Drawing.Imaging.Encoder.Quality
-
-        ' Create an EncoderParameters object.
-        ' An EncoderParameters object has an array of EncoderParameter
-        ' objects. In this case, there is only one
-        ' EncoderParameter object in the array.
-        myEncoderParameters = New EncoderParameters(1)
-
-        ' Save the bitmap as a JPEG file with quality level 25.
-        myEncoderParameter = New EncoderParameter(myEncoder, CType(99L, Int32))
+        tbPort.Text = "8199"
+        tbPath.Text = "e:\image_scout"
+        tbDayTimeExp.Text = "500"
+        tbNightExp.Text = "5000000"
+        tbDayGain.Text = "0"
+        tbNightAgain.Text = "32"
+        MyBase.Form_Load(sender, e)
+        loadProfile("IS")
+        myEncoderParameter = New EncoderParameter(myEncoder, CType(95L, Int32)) 'overriding to bring image size down a little
         myEncoderParameters.Param(0) = myEncoderParameter
-        ' md.LoadModel("c:\tmp\frozen_inference_graph_orig.pb", "c:\tmp\mscoco_label_map.pbtxt")
     End Sub
 
 
     Private Sub getCameraReady()
         'try to open camera
+        initIS()
 
         If Not IcImagingControl1.DeviceValid() Then
             IcImagingControl1.ShowDeviceSettingsDialog()
@@ -473,48 +178,224 @@ Public Class frmIS
             End If
         End If
 
-        IcImagingControl1.DeviceFrameFilters.Clear()
-        IcImagingControl1.LoadDeviceStateFromFile("device.dat", False)
+        ' IcImagingControl1.DeviceFrameFilters.Clear()
+        'IcImagingControl1.LoadDeviceStateFromFile("device.dat", False)
+        'IcImagingControl1.VideoFormat = "RGB32 (3072x2048)"
         IcImagingControl1.DeviceFrameRate = 0.2
-        Dim fh As FrameHandlerSink
+        IcImagingControl1.DeviceFlipHorizontal = False
+        IcImagingControl1.Update()
 
-        fh = IcImagingControl1.Sink
 
-        fh.SnapMode = False
-        VCDProp = TIS.Imaging.VCDHelpers.VCDSimpleModule.GetSimplePropertyContainer(IcImagingControl1.VCDPropertyItems)
+        IcImagingControl1.Sink = New FrameQueueSink(AddressOf gotBuffer, MediaSubtypes.Y16, 1)
+        ' VCDProp = TIS.Imaging.VCDHelpers.VCDSimpleModule.GetSimplePropertyContainer(IcImagingControl1.VCDPropertyItems)
     End Sub
+    Private Function gotBuffer(arg As IFrameQueueBuffer) As FrameQueuedResult
+        'image is here...
+
+        Debug.Print("image arrived")
+        If m_pics Is Nothing Then
+            m_pics = New RingBitmap(5)
+        End If
+        Dim img() As Byte
+        Dim iBuffer As ImageBuffer
+        Dim pixelValue As UShort
+        Dim darkBuffer() As UShort
 
 
 
+        'TIS.Imaging.FrameSnapSink snapsink = IcImagingControl1.Sink as TIS.Imaging.FrameSnapSink;
+
+        'Dim snapsink As TIS.Imaging.FrameHandlerSink
+        'snapsink = IcImagingControl1.Sink
+        'Dim frm As TIS.Imaging.IFrameQueueBuffer
+        'snapsink.SnapImage()
+        iWidth = arg.FrameType.Width
+        iHeight = arg.FrameType.Height
+
+        ReDim img(arg.ActualDataSize)
+        'IcImagingControl1.VideoFormat = "Y16 (3072x2048)"
+
+        'copy image buffer into byte array
+        Marshal.Copy(arg.GetIntPtr, img, 0, arg.ActualDataSize)
 
 
-    Private Sub Timer3_Tick(sender As Object, e As EventArgs) Handles Timer3.Tick
-        Dim seconds As Integer
 
-        seconds = DateDiff(DateInterval.Second, startTime, Now)
-        txtFps.Text = frames / seconds
-    End Sub
-    Private Shared Function GetEncoderInfo(ByVal mimeType As String) As ImageCodecInfo
-        Dim j As Integer
-        Dim encoders() As ImageCodecInfo
-        encoders = ImageCodecInfo.GetImageEncoders()
+        File.WriteAllBytes("ISraw.raw", img)
 
-        j = 0
-        While j < encoders.Length
-            If encoders(j).MimeType = mimeType Then
-                Return encoders(j)
+        'IcImagingControl1.LiveSuspend()
+        'IcImagingControl1.VideoFormat = "RGB24 (3072x2048)"
+        Dim newPixelValue As UInt16
+        Dim dPixelValue As UInt16
+        Dim neigborPixelValue As UInt16
+        Dim multiplier
+
+        multiplier = Val(tbMultiplier.Text)
+        'subtract dark here while in 16bit gray mode
+        If cbUseDarks.Checked And lblDayNight.Text = "night" Then
+            If dark Is Nothing Then
+                loadMasterDark()
             End If
-            j += 1
-        End While
-        Return Nothing
+            'go through image buffer
+            For x = 0 To iWidth - 1
+                For y = 0 To iHeight - 1
+                    pixelValue = ReadY16(iBuffer, y, x)
+                    If x = iWidth - 1 Then
+                        neigborPixelValue = ReadY16(iBuffer, y, x - 1)
+                    Else
+                        neigborPixelValue = ReadY16(iBuffer, y, x + 2)
+                    End If
 
-    End Function 'GetEncoderInfo
+                    dPixelValue = dark(y * iBuffer.PixelPerLine + x)
+                    ' If dPixelValue / multiplier Then
+                    If dPixelValue > 12000 Then
+                        newPixelValue = neigborPixelValue
+                    Else
+                        newPixelValue = pixelValue
+                    End If
+                    ' newPixelValue = Math.Max(0, CInt(pixelValue) - CInt(dPixelValue)) Then
+                    WriteY16(iBuffer, y, x, newPixelValue)
+                    ' End If
+
+
+                Next
+            Next
+            Debug.WriteLine("subtracted dark")
+        End If
+
+        'Dim ffi As TIS.Imaging.FrameFilterInfo = CType(lstFrameFilters.SelectedItem, TIS.Imaging.FrameFilterInfo)
+        'Dim newFrameFilter As TIS.Imaging.FrameFilter = IcImagingControl1.FrameFilterInfos
+
+
+        'debayer to rgb24
+        Dim mTransformImage As BGAPI2.Image = Nothing
+        Dim mImage As BGAPI2.Image = Nothing
+        ' Dim buff As BGAPI2.Buffer = New BGAPI2.Buffer()
+        Dim imgProcessor As New BGAPI2.ImageProcessor()
+
+        If (imgProcessor.NodeList.GetNodePresent("DemosaicingMethod")) Then
+
+            imgProcessor.NodeList("DemosaicingMethod").Value = "Baumer5x5"
+
+
+        End If
+
+        Dim outImage(iWidth * iHeight * 3) As Byte
+        mImage = imgProcessor.CreateImage(iWidth, iHeight, "BayerBG16", arg.GetIntPtr, arg.ActualDataSize)
+        'mImage = imgProcessor.CreateImage(iWidth, iHeight, "BGR8", e.ImageBuffer.GetImageDataPtr, e.ImageBuffer.ActualDataSize)
+
+
+        mTransformImage = imgProcessor.CreateTransformedImage(mImage, "BayerBG8")
 
 
 
-    Private Sub Button5_Click(sender As Object, e As EventArgs) Handles Button5.Click
-        Button5.Enabled = False
-        Button6.Enabled = True
+
+
+
+        mTransformImage = imgProcessor.CreateTransformedImage(mTransformImage, "RGB8")
+
+
+
+        Marshal.Copy(mTransformImage.Buffer, outImage, 0, iWidth * iHeight * 3 - 1)
+
+        ' Array.Reverse(outImage)
+
+        ' Marshal.Copy(e.ImageBuffer.GetImageDataPtr, img, 0, e.ImageBuffer.ActualDataSize)
+        'Dim reverseImage(iWidth * iHeight * 3) As Byte
+        'Dim p1, p2, p3 As Byte
+        'Dim rIndex As Integer
+        'For i = 0 To iWidth * iHeight * 3 - 1 Step 3
+        '    p1 = outImage(i)
+        '    p2 = outImage(i + 1)
+        '    p3 = outImage(i + 2)
+        '    rIndex = (iWidth * iHeight * 3 - 3) - i
+        '    reverseImage(rIndex) = p1
+        '    reverseImage(rIndex + 1) = p2
+        '    reverseImage(rIndex + 2) = p3
+
+        'Next
+
+
+
+        m_pics.FillNextBitmap(outImage)
+
+        Dim filename As String
+
+        Dim folderName = String.Format("{0:yyyy-MMM-dd}", DateTime.Now)
+        filename = String.Format("{0}{1:ddMMMyyyy-HHmmss}.jpg", "imgIS_", DateTime.Now)
+        filename = Path.Combine(tbPath.Text, folderName, filename)
+
+
+
+        If cbMeteors.Checked And lblDayNight.Text.ToLower = "night" Then
+            ' md.examine(bm, filename)
+            'call azure service
+            Dim ms As New MemoryStream()
+            ' convertedImage.ConvertToWriteAbleBitmap()
+            Dim b As Bitmap
+            b = getLastImage()
+
+            b.Save(ms, myImageCodecInfo, myEncoderParameters)
+            b.Dispose()
+
+            Dim contents = ms.ToArray()
+            Dim qe As New queueEntry
+            qe.img = contents
+            qe.filename = Path.GetFileName(filename)
+            qe.dateTaken = Now
+            qe.cameraID = "Imaging Source"
+            qe.width = arg.FrameType.Width
+            qe.height = arg.FrameType.Height
+            If myDetectionQueue.Count < 10 Then
+                myDetectionQueue.Enqueue(qe)
+
+            End If
+
+            ms.Close()
+
+        End If
+        If cbSaveImages.Checked = True And lblDayNight.Text = "night" Then
+            System.IO.Directory.CreateDirectory(Path.Combine(tbPath.Text, folderName))
+            Dim x As Bitmap
+            x = getLastImage()
+
+            x.Save(filename, myImageCodecInfo, myEncoderParameters)
+            x.Dispose()
+            Try
+                Dim dtCreated As DateTime
+                Dim dtToday As DateTime = Today.Date
+                Dim diObj As DirectoryInfo
+                Dim ts As TimeSpan
+                Dim lstDirsToDelete As New List(Of String)
+
+                For Each sSubDir As String In Directory.GetDirectories(Me.tbPath.Text)
+                    diObj = New DirectoryInfo(sSubDir)
+                    dtCreated = diObj.CreationTime
+
+                    ts = dtToday - dtCreated
+
+                    'Add whatever storing you want here for all folders...
+
+                    If ts.Days >= 1 Then
+                        lstDirsToDelete.Add(sSubDir)
+                        'Store whatever values you want here... like how old the folder is
+                        diObj.Delete(True) 'True for recursive deleting
+                    End If
+                Next
+            Catch ex As Exception
+                'MessageBox.Show(ex.Message, "Error Deleting Folder", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            End Try
+        End If
+        Dim mySink As FrameQueueSink
+        mySink = IcImagingControl1.Sink
+        mySink.AllocAndQueueBuffers(1)
+    End Function
+
+
+
+
+    Private Sub btnStartWeb_Click(sender As Object, e As EventArgs) Handles btnStartWeb.Click
+        btnStartWeb.Enabled = False
+        btnStopWeb.Enabled = True
         myWebServer = WebServer.getWebServer
 
         myWebServer.StartWebServer(Me, Val(Me.tbPort.Text))
@@ -522,7 +403,7 @@ Public Class frmIS
         myWebServer.VirtualRoot = "c:\web\"
     End Sub
 
-    Public Function getLastImage() As Bitmap
+    Public Overloads Function getLastImage() As Bitmap
         Dim stopWatch As Stopwatch = New Stopwatch()
         stopWatch.Start()
 
@@ -557,15 +438,15 @@ Public Class frmIS
 
 
     End Function
-    Private Sub Button6_Click(sender As Object, e As EventArgs) Handles Button6.Click
-        Button5.Enabled = True
-        Button6.Enabled = False
+    Private Sub btnStopWeb_Click(sender As Object, e As EventArgs) Handles btnStopWeb.Click
+        btnStartWeb.Enabled = True
+        btnStopWeb.Enabled = False
         myWebServer.StopWebServer()
     End Sub
 
 
 
-    Private Sub Timer1_Tick(sender As Object, e As EventArgs) Handles Timer1.Tick
+    Private Sub TimerDayNight_Tick(sender As Object, e As EventArgs) Handles TimerDayNight.Tick
 
         Try
 
@@ -642,7 +523,7 @@ Public Class frmIS
                                                                         TIS.Imaging.VCDIDs.VCDElement_Value + ":" +
                                                                      TIS.Imaging.VCDIDs.VCDInterface_AbsoluteValue)
             AbsValItf.Value = 125
-            IcImagingControl1.DeviceFrameRate = 1
+            IcImagingControl1.DeviceFrameRate = 0.2
             IcImagingControl1.ImageRingBufferSize = 1
 
             IcImagingControl1.Update()
@@ -678,7 +559,7 @@ Public Class frmIS
 
 
 
-    Private Sub Button7_Click(sender As Object, e As EventArgs) Handles Button7.Click
+    Private Sub btnStart_Click(sender As Object, e As EventArgs) Handles btnStart.Click
         'use settings
         'IcImagingControl1.ImageRingBufferSize = 1
         m_camRunning = True
@@ -709,8 +590,8 @@ Public Class frmIS
                                                                     TIS.Imaging.VCDIDs.VCDElement_Value + ":" +
                                                                  TIS.Imaging.VCDIDs.VCDInterface_AbsoluteValue)
         AbsValItf.Value = 125
-        IcImagingControl1.DeviceFrameRate = 1
-        IcImagingControl1.ImageRingBufferSize = 1
+        IcImagingControl1.DeviceFrameRate = 0.2
+        ' IcImagingControl1.ImageRingBufferSize = 1
 
         IcImagingControl1.Update()
         'Dim fh As FrameHandlerSink
@@ -728,8 +609,8 @@ Public Class frmIS
 
         ' IcImagingControl1.
 
-        Button7.Enabled = False
-        Button8.Enabled = True
+        btnStart.Enabled = False
+        btnStop.Enabled = True
 
         startTime = Now
         meteorCheckRunning = True
@@ -753,14 +634,23 @@ Public Class frmIS
         Dim darkBuffer() As UShort
 
         iBuffer = IcImagingControl1.ImageActiveBuffer
+
+        'TIS.Imaging.FrameSnapSink snapsink = IcImagingControl1.Sink as TIS.Imaging.FrameSnapSink;
+
+        Dim snapsink As TIS.Imaging.FrameHandlerSink
+        snapsink = IcImagingControl1.Sink
+        Dim frm As TIS.Imaging.IFrameQueueBuffer
+        'snapsink.SnapImage()
         iWidth = e.ImageBuffer.Size.Width
         iHeight = e.ImageBuffer.Size.Height
 
         ReDim img(e.ImageBuffer.ActualDataSize)
-        ' IcImagingControl1.VideoFormat = "Y16 (3072x2048)"
+        'IcImagingControl1.VideoFormat = "Y16 (3072x2048)"
 
         'copy image buffer into byte array
         Marshal.Copy(e.ImageBuffer.GetImageDataPtr, img, 0, e.ImageBuffer.ActualDataSize)
+
+
 
         File.WriteAllBytes("ISraw.raw", img)
 
@@ -768,6 +658,7 @@ Public Class frmIS
         'IcImagingControl1.VideoFormat = "RGB24 (3072x2048)"
         Dim newPixelValue As UInt16
         Dim dPixelValue As UInt16
+        Dim neigborPixelValue As UInt16
         Dim multiplier
 
         multiplier = Val(tbMultiplier.Text)
@@ -780,18 +671,29 @@ Public Class frmIS
             For x = 0 To iWidth - 1
                 For y = 0 To iHeight - 1
                     pixelValue = ReadY16(iBuffer, y, x)
-                    dPixelValue = dark(y * iBuffer.PixelPerLine + x)
-                    If dPixelValue / multiplier > 60000 Then
-                        newPixelValue = Math.Max(0, CInt(pixelValue) - CInt(dPixelValue))
-                        WriteY16(iBuffer, y, x, newPixelValue)
+                    If x = iWidth - 1 Then
+                        neigborPixelValue = ReadY16(iBuffer, y, x - 1)
+                    Else
+                        neigborPixelValue = ReadY16(iBuffer, y, x + 2)
                     End If
+
+                    dPixelValue = dark(y * iBuffer.PixelPerLine + x)
+                    ' If dPixelValue / multiplier Then
+                    If dPixelValue > 12000 Then
+                        newPixelValue = neigborPixelValue
+                    Else
+                        newPixelValue = pixelValue
+                    End If
+                    ' newPixelValue = Math.Max(0, CInt(pixelValue) - CInt(dPixelValue)) Then
+                    WriteY16(iBuffer, y, x, newPixelValue)
+                    ' End If
 
 
                 Next
             Next
-
+            Debug.WriteLine("subtracted dark")
         End If
-        Debug.WriteLine("subtracted dark")
+
         'Dim ffi As TIS.Imaging.FrameFilterInfo = CType(lstFrameFilters.SelectedItem, TIS.Imaging.FrameFilterInfo)
         'Dim newFrameFilter As TIS.Imaging.FrameFilter = IcImagingControl1.FrameFilterInfos
 
@@ -811,6 +713,8 @@ Public Class frmIS
 
         Dim outImage(iWidth * iHeight * 3) As Byte
         mImage = imgProcessor.CreateImage(iWidth, iHeight, "BayerBG16", e.ImageBuffer.GetImageDataPtr, e.ImageBuffer.ActualDataSize)
+        'mImage = imgProcessor.CreateImage(iWidth, iHeight, "BGR8", e.ImageBuffer.GetImageDataPtr, e.ImageBuffer.ActualDataSize)
+
 
         mTransformImage = imgProcessor.CreateTransformedImage(mImage, "BayerBG8")
 
@@ -823,16 +727,28 @@ Public Class frmIS
 
 
 
-        Marshal.Copy(mTransformImage.Buffer, outImage, 0, iWidth * iHeight * 3 - 1)
+        Marshal.Copy(mImage.Buffer, outImage, 0, iWidth * iHeight * 3 - 1)
 
-
+        ' Array.Reverse(outImage)
 
         ' Marshal.Copy(e.ImageBuffer.GetImageDataPtr, img, 0, e.ImageBuffer.ActualDataSize)
+        Dim reverseImage(iWidth * iHeight * 3) As Byte
+        Dim p1, p2, p3 As Byte
+        Dim rIndex As Integer
+        For i = 0 To iWidth * iHeight * 3 - 1 Step 3
+            p1 = outImage(i)
+            p2 = outImage(i + 1)
+            p3 = outImage(i + 2)
+            rIndex = (iWidth * iHeight * 3 - 3) - i
+            reverseImage(rIndex) = p1
+            reverseImage(rIndex + 1) = p2
+            reverseImage(rIndex + 2) = p3
+
+        Next
 
 
 
-
-        m_pics.FillNextBitmap(outImage)
+        m_pics.FillNextBitmap(reverseImage)
 
         Dim filename As String
 
@@ -869,7 +785,7 @@ Public Class frmIS
             ms.Close()
 
         End If
-        If cbSaveImages.Checked = True Then
+        If cbSaveImages.Checked = True And lblDayNight.Text = "night" Then
             System.IO.Directory.CreateDirectory(Path.Combine(tbPath.Text, folderName))
             Dim x As Bitmap
             x = getLastImage()
@@ -906,13 +822,11 @@ Public Class frmIS
 
     End Sub
 
-    Private Sub IcImagingControl1_Load(sender As Object, e As EventArgs) Handles IcImagingControl1.Load
 
-    End Sub
 
     Private Sub Button2_Click(sender As Object, e As EventArgs) Handles Button2.Click
         'make 10 darks and average them
-
+        MsgBox("cover lens")
         'setup camera for darks
         Dim AbsValItf As TIS.Imaging.VCDAbsoluteValueProperty
 
@@ -974,18 +888,46 @@ Public Class frmIS
         Next
         fStream.Close()
         bWriter.Close()
-
+        MsgBox("done")
     End Sub
 
-    Private Sub tbMultiplier_TextChanged(sender As Object, e As EventArgs) Handles tbMultiplier.TextChanged
-        loadMasterDark()
+    Private Sub tbMultiplier_TextChanged(sender As Object, e As EventArgs)
+        '      loadMasterDark()
     End Sub
 
-    Private Sub Timer2_Tick(sender As Object, e As EventArgs) Handles Timer2.Tick
+    Private Sub initIS()
+        Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(frmIS))
+        Me.IcImagingControl1 = New TIS.Imaging.ICImagingControl()
+        'CType(Me.IcImagingControl1, System.ComponentModel.ISupportInitialize).BeginInit()
+        ' Me.SuspendLayout()
+        '
+        'IcImagingControl1
+        ''
+        'Me.IcImagingControl1.BackColor = System.Drawing.Color.White
+        'Me.IcImagingControl1.DeviceListChangedExecutionMode = TIS.Imaging.EventExecutionMode.Invoke
+        'Me.IcImagingControl1.DeviceLostExecutionMode = TIS.Imaging.EventExecutionMode.AsyncInvoke
+        Me.IcImagingControl1.DeviceState = "<device_state libver=""3.5"" filemajor=""1"" fileminor=""0"">" & vbLf & "    <device name=""DBK 33UX178"" base_name=""DBK 33UX178"" unique_name=""DBK 33UX178 48710122"">" & vbLf & "        <videoformat>Y16 (3072x2048)</videoformat>" & vbLf & "        <fps>1.</fps>" & vbLf & "        <fliph>0</fliph>" & vbLf & "        <vcdpropertyitems>" & vbLf & "            <item guid=""{8E972004-3B94-4AA4-A899-65F6A1432713}"" name=""Startup Behavior"" />" & vbLf & "            <item guid=""{284C0E06-010B-45BF-8291-09D90A459B28}"" name=""Brightness"">" & vbLf & "                <element guid=""{B57D3000-0AC6-4819-A609-272A33140ACA}"" name=""Value"">" & vbLf & "                    <itf guid=""{99B44940-BFE1-4083-ADA1-BE703F4B8E03}"" value=""240"" />" & vbLf & "                </element>" & vbLf & "            </item>" & vbLf & "            <item guid=""{284C0E08-010B-45BF-8291-09D90A459B28}"" name=""Hue"">" & vbLf & "                <element guid=""{B57D3000-0AC6-4819-A609-272A33140ACA}"" name=""Value"">" & vbLf & "                    <itf guid=""{99B44940-BFE1-4083-ADA1-BE703F4B8E03}"" value=""0"" />" & vbLf & "                </element>" & vbLf & "            </item>" & vbLf & "            <item guid=""{284C0E09-010B-45BF-8291-09D90A459B28}"" name=""Saturation"">" & vbLf & "                <element guid=""{B57D3000-0AC6-4819-A609-272A33140ACA}"" name=""Value"">" & vbLf & "                    <itf guid=""{99B44940-BFE1-4083-ADA1-BE703F4B8E08}"" value=""125."" />" & vbLf & "                </element>" & vbLf & "            </item>" & vbLf & "            <item guid=""{284C0E0A-010B-45BF-8291-09D90A459B28}"" name=""Sharpness"">" & vbLf & "                <element guid=""{B57D3000-0AC6-4819-A609-272A33140ACA}"" name=""Value"">" & vbLf & "                    <itf guid=""{99B44940-BFE1-4083-ADA1-BE703F4B8E03}"" value=""0"" />" & vbLf & "                </element>" & vbLf & "            </item>" & vbLf & "            <item guid=""{284C0E0B-010B-45BF-8291-09D90A459B28}"" name=""Gamma"">" & vbLf & "                <element guid=""{B57D3000-0AC6-4819-A609-272A33140ACA}"" name=""Value"">" & vbLf & "                    <itf guid=""{99B44940-BFE1-4083-ADA1-BE703F4B8E08}"" value=""0.979999999999999982236431605997"" />" & vbLf & "                </element>" & vbLf & "            </item>" & vbLf & "            <item guid=""{284C0E0D-010B-45BF-8291-09D90A459B28}"" name=""WhiteBalance"">" & vbLf & "                <element guid=""{B57D3001-0AC6-4819-A609-272A33140ACA}"" name=""Auto"">" & vbLf & "                    <itf guid=""{99B44940-BFE1-4083-ADA1-BE703F4B8E04}"" value=""0"" />" & vbLf & "                </element>" & vbLf & "                <element guid=""{8407E480-175A-498C-8171-08BD987CC1AC}"" name=""White Balance Green"">" & vbLf & "                    <itf guid=""{99B44940-BFE1-4083-ADA1-BE703F4B8E03}"" value=""94"" />" & vbLf & "                </element>" & vbLf & "                <element guid=""{6519038A-1AD8-4E91-9021-66D64090CC85}"" name=""White Balance Blue"">" & vbLf & "                    <itf guid=""{99B44940-BFE1-4083-ADA1-BE703F4B8E03}"" value=""140"" />" & vbLf & "                </element>" & vbLf & "                <element guid=""{6519038B-1AD8-4E91-9021-66D64090CC85}"" name=""White Balance Red"">" & vbLf & "                    <itf guid=""{99B44940-BFE1-4083-ADA1-BE703F4B8E03}"" value=""115"" />" & vbLf & "                </element>" & vbLf & "                <element guid=""{AB98F78D-18A6-4EB2-A556-C11010EC9DF7}"" name=""WhiteBalance Mode"">" & vbLf & "                    <itf guid=""{99B44940-BFE1-4083-ADA1-BE703F4B8E06}"" value=""0"" />" & vbLf & "                </element>" & vbLf & "            </item>" & vbLf & "            <item guid=""{284C0E0F-010B-45BF-8291-09D90A459B28}"" name=""Gain"">" & vbLf & "                <element guid=""{B57D3001-0AC6-4819-A609-272A33140ACA}"" name=""Auto"">" & vbLf & "                    <itf guid=""{99B44940-BFE1-4083-ADA1-BE703F4B8E04}"" value=""0"" />" & vbLf & "                </element>" & vbLf & "                <element guid=""{B57D3000-0AC6-4819-A609-272A33140ACA}"" name=""Value"">" & vbLf & "                    <itf guid=""{99B44940-BFE1-4083-ADA1-BE703F4B8E08}"" value=""32."" />" & vbLf & "                </element>" & vbLf & "            </item>" & vbLf & "            <item guid=""{90D5702E-E43B-4366-AAEB-7A7A10B448B4}"" name=""Exposure"">" & vbLf & "                <element guid=""{B57D3001-0AC6-4819-A609-272A33140ACA}"" name=""Auto"">" & vbLf & "                    <itf guid=""{99B44940-BFE1-4083-ADA1-BE703F4B8E04}"" value=""0"" />" & vbLf & "                </element>" & vbLf & "                <element guid=""{B57D3000-0AC6-4819-A609-272A33140ACA}"" name=""Value"">" & vbLf & "                    <itf guid=""{99B44940-BFE1-4083-ADA1-BE703F4B8E08}"" value=""5."" />" & vbLf & "                </element>" & vbLf & "                <element guid=""{65190390-1AD8-4E91-9021-66D64090CC85}"" name=""Auto"">" & vbLf & "                    <itf guid=""{99B44940-BFE1-4083-ADA1-BE703F4B8E04}"" value=""1"" />" & vbLf & "                </element>" & vbLf & "                <element guid=""{6519038C-1AD8-4E91-9021-66D64090CC85}"" name=""Auto Reference"">" & vbLf & "                    <itf guid=""{99B44940-BFE1-4083-ADA1-BE703F4B8E03}"" value=""128"" />" & vbLf & "                </element>" & vbLf & "            </item>" & vbLf & "            <item guid=""{90D57031-E43B-4366-AAEB-7A7A10B448B4}"" name=""Trigger"">" & vbLf & "                <element guid=""{B57D3000-0AC6-4819-A609-272A33140ACA}"" name=""Enable"">" & vbLf & "                    <itf guid=""{99B44940-BFE1-4083-ADA1-BE703F4B8E04}"" value=""0"" />" & vbLf & "                </element>" & vbLf & "            </item>" & vbLf & "            <item guid=""{C3C9944A-E6F6-4E25-A0BE-53C066AB65D8}"" name=""Denoise"">" & vbLf & "                <element guid=""{B57D3000-0AC6-4819-A609-272A33140ACA}"" name=""Value"">" & vbLf & "                    <itf guid=""{99B44940-BFE1-4083-ADA1-BE703F4B8E03}"" value=""0"" />" & vbLf & "                </element>" & vbLf & "            </item>" & vbLf & "            <item guid=""{E33B9C58-0BF8-442D-8035-B4ABD7AF44AA}"" name=""Flip Horizontal"">" & vbLf & "                <element guid=""{B57D3000-0AC6-4819-A609-272A33140ACA}"" name=""Enable"">" & vbLf & "                    <itf guid=""{99B44940-BFE1-4083-ADA1-BE703F4B8E04}"" value=""1"" />" & vbLf & "                </element>" & vbLf & "            </item>" & vbLf & "            <item guid=""{86D89D69-9880-4618-9BF6-DED5E8383449}"" name=""GPIO"">" & vbLf & "                <element guid=""{7D006621-761D-4B88-9C5F-8B906857A501}"" name=""GP Out"">" & vbLf & "                    <itf guid=""{99B44940-BFE1-4083-ADA1-BE703F4B8E03}"" value=""0"" />" & vbLf & "                </element>" & vbLf & "            </item>" & vbLf & "            <item guid=""{4F95A06D-9C15-407B-96AB-CF3FED047BA4}"" name=""Binning factor"">" & vbLf & "                <element guid=""{B57D3000-0AC6-4819-A609-272A33140ACA}"" name=""Value"">" & vbLf & "                    <itf guid=""{99B44940-BFE1-4083-ADA1-BE703F4B8E06}"" value=""1"" />" & vbLf & "                </element>" & vbLf & "            </item>" & vbLf & "            <item guid=""{A3E64DA6-736A-489B-8425-04BD2B4AC57A}"" name=""IMX178 LLP Gain"">" & vbLf & "                <element guid=""{B57D3000-0AC6-4819-A609-272A33140ACA}"" name=""Enabled"">" & vbLf & "                    <itf guid=""{99B44940-BFE1-4083-ADA1-BE703F4B8E04}"" value=""1"" />" & vbLf & "                </element>" & vbLf & "            </item>" & vbLf & "            <item guid=""{546541AD-C815-4D82-AFA9-9D59AF9F399E}"" name=""Highlight Reduction"">" & vbLf & "                <element guid=""{B57D3000-0AC6-4819-A609-272A33140ACA}"" name=""Enable"">" & vbLf & "                    <itf guid=""{99B44940-BFE1-4083-ADA1-BE703F4B8E04}"" value=""1"" />" & vbLf & "                </element>" & vbLf & "            </item>" & vbLf & "            <item guid=""{3D505AC4-1A28-428B-83E5-85AA8EB441C1}"" name=""Tone Mapping"">" & vbLf & "                <element guid=""{B57D3001-0AC6-4819-A609-272A33140ACA}"" name=""Auto"">" & vbLf & "                    <itf guid=""{99B44940-BFE1-4083-ADA1-BE703F4B8E04}"" value=""1"" />" & vbLf & "                </element>" & vbLf & "                <element guid=""{B57D3000-0AC6-4819-A609-272A33140ACA}"" name=""Enable"">" & vbLf & "                    <itf guid=""{99B44940-BFE1-4083-ADA1-BE703F4B8E04}"" value=""1"" />" & vbLf & "                </element>" & vbLf & "                <element guid=""{BD2F432A-02C1-4F32-9AEB-687CA117D2E7}"" name=""Intensity"">" & vbLf & "                    <itf guid=""{99B44940-BFE1-4083-ADA1-BE703F4B8E08}"" value=""0.5"" />" & vbLf & "                </element>" & vbLf & "                <element guid=""{D1451FED-C2D8-42CE-910B-2CB566836A77}"" name=""Global Brightness Factor"">" & vbLf & "                    <itf guid=""{99B44940-BFE1-4083-ADA1-BE703F4B8E08}"" value=""0."" />" & vbLf & "                </element>" & vbLf & "            </item>" & vbLf & "            <item guid=""{2CED6FD6-AB4D-4C74-904C-D682E53B9CC5}"" name=""Partial scan"">" & vbLf & "                <element guid=""{36EAA683-3321-44BE-9D73-E1FD4C3FDB87}"" name=""Auto-center"">" & vbLf & "                    <itf guid=""{99B44940-BFE1-4083-ADA1-BE703F4B8E04}"" value=""1"" />" & vbLf & "                </element>" & vbLf & "            </item>" & vbLf & "            <item guid=""{DC320EDE-DF2E-4A90-B926-71417C71C57C}"" name=""Strobe"">" & vbLf & "                <element guid=""{B57D3000-0AC6-4819-A609-272A33140ACA}"" name=""Enable"">" & vbLf & "                    <itf guid=""{99B44940-BFE1-4083-ADA1-BE703F4B8E04}"" value=""0"" />" & vbLf & "                </element>" & vbLf & "            </item>" & vbLf & "            <item guid=""{7F7E24E3-7162-42EF-BF5D-99A359CB32F2}"" name=""Color Matrix"">" & vbLf & "                <element guid=""{B57D3000-0AC6-4819-A609-272A33140ACA}"" name=""Enabled"">" & vbLf & "                    <itf guid=""{99B44940-BFE1-4083-ADA1-BE703F4B8E04}"" value=""0"" />" & vbLf & "                </element>" & vbLf & "            </item>" & vbLf & "            <item guid=""{124922E5-81C7-4587-867D-7BA16AF79079}"" name=""Auto Functions ROI"">" & vbLf & "                <element guid=""{B57D3000-0AC6-4819-A609-272A33140ACA}"" name=""Enabled"">" & vbLf & "                    <itf guid=""{99B44940-BFE1-4083-ADA1-BE703F4B8E04}"" value=""0"" />" & vbLf & "                </element>" & vbLf & "                <element guid=""{93D840ED-B7B8-45FE-91E2-18E68C41AFC3}"" name=""Preset"">" & vbLf & "                    <itf guid=""{99B44940-BFE1-4083-ADA1-BE703F4B8E06}"" value=""2"" />" & vbLf & "                </element>" & vbLf & "            </item>" & vbLf & "        </vcdpropertyitems>" & vbLf & "    </device>" & vbLf & "</device_state>" & vbLf
+        'Me.IcImagingControl1.ImageAvailableExecutionMode = TIS.Imaging.EventExecutionMode.MultiThreaded
+        'Me.IcImagingControl1.LiveDisplayPosition = New System.Drawing.Point(0, 0)
+        'Me.IcImagingControl1.Location = New System.Drawing.Point(10, 148)
+        'Me.IcImagingControl1.Name = "IcImagingControl1"
+        'Me.IcImagingControl1.Size = New System.Drawing.Size(150, 150)
+        'Me.IcImagingControl1.TabIndex = 158
+        'Me.IcImagingControl1.Update()
+
+        '
+        'frmIS
+        '
+        'Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
+        'Me.ClientSize = New System.Drawing.Size(422, 525)
+        'Me.Controls.Add(Me.IcImagingControl1)
+        'Me.Name = "frmIS"
+        ' Me.Controls.SetChildIndex(Me.IcImagingControl1, 0)
+        'CType(Me.IcImagingControl1, System.ComponentModel.ISupportInitialize).EndInit()
+        'Me.ResumeLayout(False)
+        'Me.PerformLayout()
 
     End Sub
-
-
 
 
 End Class
