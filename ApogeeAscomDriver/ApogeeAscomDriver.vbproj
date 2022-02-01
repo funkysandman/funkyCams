@@ -151,6 +151,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="ApogeeAlta Setup.exe" />
     <Content Include="ASCOM.png" />
     <Content Include="Apogee Ascom Setup.iss" />
     <Content Include="ReadMe.htm">
