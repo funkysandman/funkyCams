@@ -570,13 +570,22 @@ Public Class Camera
 
     Public ReadOnly Property MaxBinX() As Short Implements ICameraV2.MaxBinX
         Get
-            Return myCam.c.MaxBinningH
+            Try
+                Return myCam.c.MaxBinningH
+            Catch
+                Return 8
+            End Try
+
         End Get
     End Property
 
     Public ReadOnly Property MaxBinY() As Short Implements ICameraV2.MaxBinY
         Get
-            Return myCam.c.MaxBinningV
+            Try
+                Return myCam.c.MaxBinningV
+            Catch
+                Return 8
+            End Try
         End Get
     End Property
     Public Property NumX() As Integer Implements ICameraV2.NumX
