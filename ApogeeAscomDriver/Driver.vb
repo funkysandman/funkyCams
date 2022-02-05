@@ -77,10 +77,14 @@ Public Class Camera
     Private TL As TraceLogger ' Private variable to hold the trace logger object (creates a diagnostic log file with information that you specify)
     Friend Shared myCam As ApogeeCam
     Private _readoutModes = New ArrayList(2)
+    Private t As Threading.Thread
     '
     ' Constructor - Must be public for COM registration!
     '
     Public Sub New()
+        initCamera()
+    End Sub
+    Private Sub initCamera()
         Debug.Print("enter new constructor of driver")
         ReadProfile() ' Read device configuration from the ASCOM Profile store
         TL = New TraceLogger("", "Apogee")
@@ -92,13 +96,13 @@ Public Class Camera
         astroUtilities = New AstroUtils 'Initialise new astro utiliites object
 
         'TODO: Implement your additional construction here
-        If myCam Is Nothing Then
-            myCam = New ApogeeCam()
-        End If
+
         _readoutModes.add("slow")
         _readoutModes.add("fast")
         TL.LogMessage("Camera", "Completed initialisation")
+
     End Sub
+
 
     '
     ' PUBLIC COM INTERFACE ICameraV2 IMPLEMENTATION
@@ -175,8 +179,11 @@ Public Class Camera
             End If
 
             If value Then
-                connectedState = True
+
                 TL.LogMessage("Connected Set", "Connecting to port " + comPort)
+
+                myCam = New ApogeeCam()
+                    connectedState = True
 
             Else
                 connectedState = False
@@ -231,8 +238,9 @@ Public Class Camera
     Public Sub Dispose() Implements ICameraV2.Dispose
         ' Clean up the tracelogger and util objects
         TL.Enabled = False
-        TL.Dispose()
-        TL = Nothing
+        connectedState = False
+        'TL.Dispose()
+        'TL = Nothing
         utilities.Dispose()
         utilities = Nothing
         astroUtilities.Dispose()
@@ -307,25 +315,34 @@ Public Class Camera
 
     Public ReadOnly Property CCDTemperature() As Double Implements ICameraV2.CCDTemperature
         Get
-            Return myCam.c.TempCCD
+            If IsConnected Then
+                Return myCam.c.TempCCD
+            End If
         End Get
     End Property
 
     Public ReadOnly Property CameraState() As CameraStates Implements ICameraV2.CameraState
         Get
-            Return myCam.c.CameraMode
+            If IsConnected Then
+                Return myCam.c.CameraMode
+            End If
+
         End Get
     End Property
 
     Public ReadOnly Property CameraXSize() As Integer Implements ICameraV2.CameraXSize
         Get
-            Return myCam.c.ImagingColumns
+            If IsConnected Then
+                Return myCam.c.ImagingColumns
+            End If
         End Get
     End Property
 
     Public ReadOnly Property CameraYSize() As Integer Implements ICameraV2.CameraYSize
         Get
-            Return myCam.c.ImagingRows
+            If IsConnected Then
+                Return myCam.c.ImagingRows
+            End If
         End Get
     End Property
 
@@ -382,12 +399,18 @@ Public Class Camera
         Get
             TL.LogMessage("CoolerOn Get", "Not implemented")
             'Throw New ASCOM.PropertyNotImplementedException("CoolerOn", False)
-            Return myCam.c.CoolerEnable
+            If IsConnected Then
+                Return myCam.c.CoolerEnable
+            End If
+
         End Get
         Set(value As Boolean)
             TL.LogMessage("CoolerOn Set", "Not implemented")
             'Throw New ASCOM.PropertyNotImplementedException("CoolerOn", True)
-            myCam.c.CoolerEnable = value
+            If IsConnected Then
+                myCam.c.CoolerEnable = value
+            End If
+
         End Set
     End Property
 
@@ -395,14 +418,17 @@ Public Class Camera
         Get
             TL.LogMessage("AbortExposure Get", "Not implemented")
             'Throw New ASCOM.PropertyNotImplementedException("CoolerPower", False)
-            Return myCam.c.CoolerDrive
+            If IsConnected Then
+                Return myCam.c.CoolerDrive
+            End If
+
         End Get
     End Property
 
     Public ReadOnly Property ElectronsPerADU() As Double Implements ICameraV2.ElectronsPerADU
         Get
             TL.LogMessage("ElectronsPerADU Get", "Not implemented")
-            Throw New ASCOM.PropertyNotImplementedException("ElectronsPerADU", False)
+            'Throw New ASCOM.PropertyNotImplementedException("ElectronsPerADU", False)
 
         End Get
     End Property
@@ -411,22 +437,32 @@ Public Class Camera
         Get
             TL.LogMessage("ExposureMax Get", "Not implemented")
             'Throw New ASCOM.PropertyNotImplementedException("ExposureMax", False)
-            'Return 1000000000 'myCam.c.MaxExposure
+            If IsConnected Then
+                If Not myCam.c Is Nothing Then
+                    Return myCam.c.MaxExposure
+                End If
+            End If
         End Get
     End Property
 
     Public ReadOnly Property ExposureMin() As Double Implements ICameraV2.ExposureMin
         Get
             TL.LogMessage("ExposureMin Get", "Not implemented")
-            'Throw New ASCOM.PropertyNotImplementedException("ExposureMin", False)
-            Return myCam.c.MinExposure
+            'Throw New ASCOM.PropertyNotImplementedException("ExposureMax", False)
+            If IsConnected Then
+
+                If Not myCam.c Is Nothing Then
+                    Return myCam.c.MinExposure
+                End If
+            End If
+
         End Get
     End Property
 
     Public ReadOnly Property ExposureResolution() As Double Implements ICameraV2.ExposureResolution
         Get
             TL.LogMessage("ExposureResolution Get", "Not implemented")
-            Throw New ASCOM.PropertyNotImplementedException("ExposureResolution", False)
+            'Throw New ASCOM.PropertyNotImplementedException("ExposureResolution", False)
         End Get
     End Property
 
@@ -444,39 +480,39 @@ Public Class Camera
     Public ReadOnly Property FullWellCapacity() As Double Implements ICameraV2.FullWellCapacity
         Get
             TL.LogMessage("FullWellCapacity Get", "Not implemented")
-            Throw New ASCOM.PropertyNotImplementedException("FullWellCapacity", False)
+            'Throw New ASCOM.PropertyNotImplementedException("FullWellCapacity", False)
         End Get
     End Property
 
     Public Property Gain() As Short Implements ICameraV2.Gain
         Get
             TL.LogMessage("Gain Get", "Not implemented")
-            Throw New ASCOM.PropertyNotImplementedException("Gain", False)
+            'Throw New ASCOM.PropertyNotImplementedException("Gain", False)
         End Get
         Set(value As Short)
             TL.LogMessage("Gain Set", "Not implemented")
-            Throw New ASCOM.PropertyNotImplementedException("Gain", True)
+            'Throw New ASCOM.PropertyNotImplementedException("Gain", True)
         End Set
     End Property
 
     Public ReadOnly Property GainMax() As Short Implements ICameraV2.GainMax
         Get
             TL.LogMessage("GainMax Get", "Not implemented")
-            Throw New ASCOM.PropertyNotImplementedException("GainMax", False)
+            ' Throw New ASCOM.PropertyNotImplementedException("GainMax", False)
         End Get
     End Property
 
     Public ReadOnly Property GainMin() As Short Implements ICameraV2.GainMin
         Get
             TL.LogMessage("GainMin Get", "Not implemented")
-            Throw New ASCOM.PropertyNotImplementedException("GainMin", False)
+            ' Throw New ASCOM.PropertyNotImplementedException("GainMin", False)
         End Get
     End Property
 
     Public ReadOnly Property Gains() As ArrayList Implements ICameraV2.Gains
         Get
             TL.LogMessage("Gains Get", "Not implemented")
-            Throw New ASCOM.PropertyNotImplementedException("Gains", False)
+            'Throw New ASCOM.PropertyNotImplementedException("Gains", False)
         End Get
     End Property
 
@@ -490,7 +526,10 @@ Public Class Camera
     Public ReadOnly Property HeatSinkTemperature() As Double Implements ICameraV2.HeatSinkTemperature
         Get
             TL.LogMessage("HeatSinkTemperature Get", "Not implemented")
-            Return myCam.c.TempHeatsink
+            If IsConnected Then
+                Return myCam.c.TempHeatsink
+            End If
+
         End Get
     End Property
 
@@ -534,7 +573,7 @@ Public Class Camera
     Public ReadOnly Property IsPulseGuiding() As Boolean Implements ICameraV2.IsPulseGuiding
         Get
             TL.LogMessage("IsPulseGuiding Get", "Not implemented")
-            Throw New ASCOM.PropertyNotImplementedException("IsPulseGuiding", False)
+            ' Throw New ASCOM.PropertyNotImplementedException("IsPulseGuiding", False)
         End Get
     End Property
 
@@ -571,7 +610,10 @@ Public Class Camera
     Public ReadOnly Property MaxBinX() As Short Implements ICameraV2.MaxBinX
         Get
             Try
-                Return myCam.c.MaxBinningH
+                If IsConnected Then
+                    Return myCam.c.MaxBinningH
+                End If
+
             Catch
                 Return 8
             End Try
@@ -582,7 +624,9 @@ Public Class Camera
     Public ReadOnly Property MaxBinY() As Short Implements ICameraV2.MaxBinY
         Get
             Try
-                Return myCam.c.MaxBinningV
+                If IsConnected Then
+                    Return myCam.c.MaxBinningV
+                End If
             Catch
                 Return 8
             End Try
@@ -640,7 +684,7 @@ Public Class Camera
 
     Public Sub PulseGuide(Direction As GuideDirections, Duration As Integer) Implements ICameraV2.PulseGuide
         TL.LogMessage("PulseGuide", "Not implemented - " & Direction.ToString)
-        Throw New ASCOM.MethodNotImplementedException("Direction")
+        ' Throw New ASCOM.MethodNotImplementedException("Direction")
     End Sub
 
     Public Property ReadoutMode() As Short Implements ICameraV2.ReadoutMode
@@ -707,12 +751,12 @@ Public Class Camera
         exposureStart = DateTime.Now
 
         'startAltaExposure(Duration)
-        Dim t = New Threading.Thread(AddressOf Expose)
+        t = New Threading.Thread(AddressOf Expose)
         Dim Parameters = New Object() {Duration, Light}
 
         t.Start(parameter:=Parameters)
 
-
+        'Expose(Parameters)
 
         TL.LogMessage("StartExposure", Duration.ToString() + " " + Light.ToString())
 
@@ -851,8 +895,8 @@ Public Class Camera
     End Sub
 
     Protected Overrides Sub Finalize()
-        myCam.c.Close()
-        MyBase.Finalize()
+        ' myCam.c.Close()
+        '  MyBase.Finalize()
     End Sub
 
 #End Region

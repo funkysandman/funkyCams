@@ -67,10 +67,8 @@
 
     End Sub
 
-
-
-
-
-
-
+    Protected Overrides Sub Finalize()
+        Debug.WriteLine("finalize")
+        'MyBase.Finalize()
+    End Sub
 End Class
