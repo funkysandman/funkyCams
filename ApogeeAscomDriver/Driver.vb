@@ -734,7 +734,10 @@ Public Class Camera
         Debug.Print("exposure finished")
         ' If myCam.c.ImagingStatus = APOGEELib.Apn_Status.Apn_Status_ImageReady Then
         Debug.Print(myCam.c.ImagingStatus)
-        cameraImageArray = ConvertFrameToImageArray(myCam.imageData, myCam.c.RoiPixelsH, myCam.c.RoiPixelsV)
+        If Not myCam.imageData Is Nothing Then
+            cameraImageArray = ConvertFrameToImageArray(myCam.imageData, myCam.c.RoiPixelsH, myCam.c.RoiPixelsV)
+        End If
+
         Debug.Print("converted image")
         ' End If
         cameraImageReady = True
