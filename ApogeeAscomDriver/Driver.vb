@@ -183,7 +183,7 @@ Public Class Camera
                 TL.LogMessage("Connected Set", "Connecting to port " + comPort)
 
                 myCam = New ApogeeCam()
-                    connectedState = True
+                connectedState = True
 
             Else
                 connectedState = False
@@ -349,7 +349,7 @@ Public Class Camera
     Public ReadOnly Property CanAbortExposure() As Boolean Implements ICameraV2.CanAbortExposure
         Get
             TL.LogMessage("CanAbortExposure Get", False.ToString())
-            Return False
+            Return True
         End Get
     End Property
 
@@ -730,6 +730,7 @@ Public Class Camera
         Dim Duration = params(0)
         Dim Light = params(1)
         myCam.Expose(Duration, Light)
+        Debug.Print(myCam.c.ImagingStatus)
         Debug.Print("exposure finished")
         ' If myCam.c.ImagingStatus = APOGEELib.Apn_Status.Apn_Status_ImageReady Then
         Debug.Print(myCam.c.ImagingStatus)
@@ -811,6 +812,7 @@ Public Class Camera
     End Property
 
     Public Sub StopExposure() Implements ICameraV2.StopExposure
+        Debug.Print("stopping exposure")
         myCam.c.StopExposure(False)
         Debug.Print("stopped exposure")
     End Sub
