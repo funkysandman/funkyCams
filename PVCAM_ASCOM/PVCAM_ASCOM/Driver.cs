@@ -205,6 +205,7 @@ namespace ASCOM.Photometrics
                     }
                 }
                 var test = 0;
+                cameraImageReady = true; //either way image is finished
             }
             if (evtType.NotifEvent == pvcam_helper.CameraNotifications.CAMERA_REFRESH_DONE)
             {
@@ -490,6 +491,7 @@ namespace ASCOM.Photometrics
             get
             {
                 //retreive current temperature
+                //return 0; //issues returning temp
                 if (!myCam.isRunning())
                     myCam.GetCurrentTemprature();
                 //
@@ -616,7 +618,7 @@ namespace ASCOM.Photometrics
             get
             {
                 tl.LogMessage("ElectronsPerADU Get Get", "Not implemented");
-                Debug.WriteLine("ElectronsPerADU", false);
+                //Debug.WriteLine("ElectronsPerADU", false);
                 return 0;
             }
         }
@@ -626,7 +628,7 @@ namespace ASCOM.Photometrics
             get
             {
                 tl.LogMessage("ExposureMax Get Get", "Not implemented");
-                Debug.WriteLine("ExposureMax", false);
+                //Debug.WriteLine("ExposureMax", false);
                 return 0;
             }
         }
@@ -636,7 +638,7 @@ namespace ASCOM.Photometrics
             get
             {
                 tl.LogMessage("ExposureMin Get", "Not implemented");
-                Debug.WriteLine("ExposureMin", false);
+                //Debug.WriteLine("ExposureMin", false);
                 return 0;
             }
         }
@@ -681,13 +683,13 @@ namespace ASCOM.Photometrics
             get
             {
                 tl.LogMessage("Gain Get", "Not implemented");
-                Debug.WriteLine("Gain", false);
+                //Debug.WriteLine("Gain", false);
                 return myCam.GainStateIndex;
             }
             set
             {
                 tl.LogMessage("Gain Set", "Not implemented");
-                Debug.WriteLine("Gain", true);
+                //Debug.WriteLine("Gain", true);
 
             }
         }
@@ -923,13 +925,13 @@ namespace ASCOM.Photometrics
             get
             {
                 tl.LogMessage("ReadoutMode Get", "Not implemented");
-                Debug.WriteLine("ReadoutMode", false);
+                //Debug.WriteLine("ReadoutMode", false);
                 return 0;
             }
             set
             {
                 tl.LogMessage("ReadoutMode Set", "Not implemented");
-                Debug.WriteLine("ReadoutMode", true);
+                //Debug.WriteLine("ReadoutMode", true);
             }
         }
 
@@ -958,7 +960,7 @@ namespace ASCOM.Photometrics
             get
             {
                 tl.LogMessage("SensorType Get", "Not implemented");
-                Debug.WriteLine("SensorType", false);
+               // Debug.WriteLine("SensorType", false);
                 return SensorType.Monochrome;
             }
         }
@@ -1005,6 +1007,7 @@ namespace ASCOM.Photometrics
             // System.Threading.Thread.Sleep((int)Duration * 1000);  // Sleep for the duration to simulate exposure 
             if (!myCam.AcqSetup(pvcam_helper.PVCamCamera.AcqTypes.ACQ_TYPE_SINGLE))
             {
+                Debug.WriteLine("acqSetup failed");
                 return;
             }
             //setup binning
@@ -1015,6 +1018,7 @@ namespace ASCOM.Photometrics
             //if acqusition setup succeeded, start the acquisition
             if (!myCam.StartSeqAcq())
             {
+                Debug.WriteLine("StartSeqAcq failed");
                 return;
             }
 

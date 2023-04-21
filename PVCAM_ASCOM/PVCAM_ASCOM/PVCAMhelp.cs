@@ -9,6 +9,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.IO;
+using System.Diagnostics;
 
 namespace pvcam_helper
 {
@@ -989,25 +990,37 @@ namespace pvcam_helper
         {
             Int16 status;
             UInt32 byte_cnt;
+            UInt32 timeoutCounter = 0;
+            UInt32 timeoutLimit = 0;
             Boolean isMultiROI = (CurrentROICount > 1) || (IsCentroidEnabled);
             UInt16 roiCount = IsCentroidEnabled ? (CentroidInfo.CurrentCount) : ((UInt16)CurrentROICount);
 
+            timeoutLimit = m_exposureTime / 10 + 2000;
             status = (Int16)PvTypes.ReadoutStatuses.READOUT_FAILED;
-
+            
             //wait for image acquisition to be completed with polling, every 10ms check
             //whether the frame has arrived
             while (!m_abortAcquisition
                     && PVCAM.pl_exp_check_status(m_hCam, out status, out byte_cnt)
                     && status != (Int16)PvTypes.ReadoutStatuses.READOUT_COMPLETE
-                    && status != (Int16)PvTypes.ReadoutStatuses.READOUT_FAILED)
+                    && status != (Int16)PvTypes.ReadoutStatuses.READOUT_FAILED
+                    && timeoutCounter<timeoutLimit)
             {
+                Debug.WriteLine(status);
                 Thread.Sleep(10);
+                timeoutCounter=timeoutCounter+1;
 
             }
-
+            if (timeoutCounter>= timeoutLimit)
+            {
+                Debug.WriteLine("timedout waiting for readout -continue anyway");
+            }
+            Debug.Write("timeoutCounter:");
+            Debug.WriteLine(timeoutCounter);
             if (m_abortAcquisition)
             {
                 m_acqRunning = false;
+                Debug.WriteLine("aborted");
                 return;
             }
 
@@ -1015,7 +1028,7 @@ namespace pvcam_helper
             {
                 ReportMsg(this, new ReportMessage("Single acquisition readout failed", MsgTypes.MSG_ERROR));
             }
-            else if (status == (Int16)PvTypes.ReadoutStatuses.READOUT_COMPLETE)
+            else if (status == (Int16)PvTypes.ReadoutStatuses.READOUT_COMPLETE || timeoutCounter>= timeoutLimit)
             {
                 ReportMsg(this, new ReportMessage("Readout completed", MsgTypes.MSG_STATUS));
 
@@ -1087,6 +1100,7 @@ namespace pvcam_helper
                             {
                                 ReportMsg(this, new ReportMessage("Failed to recompose frame", MsgTypes.MSG_ERROR));
                                 m_acqRunning = false;
+                                Debug.WriteLine("Failed to recompose frame");
                                 return;
                             }
                             else
@@ -1105,6 +1119,7 @@ namespace pvcam_helper
                         Marshal.FreeHGlobal(ptr_md_Frame);
                         ptr_md_Frame = IntPtr.Zero;
                         CamNotif(this, new ReportEvent(CameraNotifications.ACQ_SINGLE_FAILED));
+                        Debug.WriteLine("Failed to decode metadata structure");
                         return;
                     }
 
@@ -1152,7 +1167,7 @@ namespace pvcam_helper
                 }
             }
 
-
+            Debug.WriteLine("finished with singleAcquisition");
         }
 
         //start continuous acquisition
@@ -3883,6 +3898,7 @@ namespace pvcam_helper
         {
             Message = msg;
             TypeToReport = tp;
+            Debug.WriteLine(msg);
         }
         private string MessageToReport;
         public string Message
