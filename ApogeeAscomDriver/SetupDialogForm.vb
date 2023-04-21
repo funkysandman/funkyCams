@@ -10,6 +10,11 @@ Public Class SetupDialogForm
         ' Persist new values of user settings to the ASCOM profile
         Camera.comPort = ComboBoxComPort.SelectedItem ' Update the state variables with results from the dialogue
         Camera.traceState = chkTrace.Checked
+        Camera.useROI = cbUseROI.Checked
+        Camera.xStart = tbXstart.Text
+        Camera.xWidth = tbXwidth.Text
+        Camera.yStart = tbYstart.Text
+        Camera.yHeight = tbYheight.Text
         Me.DialogResult = System.Windows.Forms.DialogResult.OK
         Me.Close()
     End Sub
@@ -38,6 +43,14 @@ Public Class SetupDialogForm
     End Sub
 
     Private Sub InitUI()
+        If Camera.useROI Then
+            cbUseROI.Checked = True
+            tbXstart.Text = Camera.xStart
+            tbXwidth.Text = Camera.xWidth
+            tbYstart.Text = Camera.yStart
+            tbYheight.Text = Camera.yHeight
+        End If
+
         chkTrace.Checked = Camera.traceState
         ' set the list of com ports to those that are currently available
         ComboBoxComPort.Items.Clear()

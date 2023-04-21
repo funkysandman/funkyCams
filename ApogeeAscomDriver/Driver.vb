@@ -71,6 +71,19 @@ Public Class Camera
     Friend Shared comPort As String ' Variables to hold the currrent device configuration
     Friend Shared traceState As Boolean
 
+
+
+    Friend Shared xStartProfileName As String = "ROIxStart" '
+    Friend Shared yStartProfileName As String = "ROIyStart" '
+    Friend Shared xWidthProfileName As String = "ROIxWidth" '
+    Friend Shared yHeightProfileName As String = "ROIyHeight" '
+    Friend Shared useROIProfileName As String = "useROI" '
+    Friend Shared useROI As Boolean = False
+    Friend Shared xStart As Integer = "0" '
+    Friend Shared xWidth As Integer = "4096" '
+    Friend Shared yStart As Integer = "0" '
+    Friend Shared yHeight As Integer = "4096" '
+
     Private connectedState As Boolean ' Private variable to hold the connected state
     Private utilities As Util ' Private variable to hold an ASCOM Utilities object
     Private astroUtilities As AstroUtils ' Private variable to hold an AstroUtils object to provide the Range method
@@ -184,6 +197,15 @@ Public Class Camera
 
                 myCam = New ApogeeCam()
                 connectedState = True
+                If useROI Then
+                    myCam.c.RoiStartX = Camera.xStart
+                    myCam.c.RoiStartY = Camera.yStart
+                    myCam.c.RoiPixelsH = Camera.xWidth
+                    myCam.c.RoiPixelsV = Camera.yHeight
+                End If
+
+
+
 
             Else
                 connectedState = False
@@ -288,6 +310,7 @@ Public Class Camera
         Get
             TL.LogMessage("BinX Get", "1")
             Return myCam.c.RoiBinningH
+
         End Get
         Set(value As Short)
             TL.LogMessage("BinX Set", value.ToString())
@@ -884,6 +907,12 @@ Public Class Camera
             driverProfile.DeviceType = "Camera"
             traceState = Convert.ToBoolean(driverProfile.GetValue(driverID, traceStateProfileName, String.Empty, traceStateDefault))
             comPort = driverProfile.GetValue(driverID, comPortProfileName, String.Empty, comPortDefault)
+            xStart = driverProfile.GetValue(driverID, xStartProfileName, String.Empty, 0)
+            xWidth = driverProfile.GetValue(driverID, xWidthProfileName, String.Empty, 4096)
+            yStart = driverProfile.GetValue(driverID, yStartProfileName, String.Empty, 0)
+            yHeight = driverProfile.GetValue(driverID, yHeightProfileName, String.Empty, 4096)
+            useROI = Convert.ToBoolean(driverProfile.GetValue(driverID, useROIProfileName, String.Empty, "False"))
+
         End Using
     End Sub
 
@@ -892,9 +921,17 @@ Public Class Camera
     ''' </summary>
     Friend Sub WriteProfile()
         Using driverProfile As New Profile()
+
             driverProfile.DeviceType = "Camera"
             driverProfile.WriteValue(driverID, traceStateProfileName, traceState.ToString())
             driverProfile.WriteValue(driverID, comPortProfileName, comPort.ToString())
+            driverProfile.WriteValue(driverID, xStartProfileName, xStart.ToString())
+            driverProfile.WriteValue(driverID, xWidthProfileName, xWidth.ToString())
+            driverProfile.WriteValue(driverID, yStartProfileName, yStart.ToString())
+            driverProfile.WriteValue(driverID, yHeightProfileName, yHeight.ToString())
+            driverProfile.WriteValue(driverID, useROIProfileName, useROI.ToString())
+
+
         End Using
 
     End Sub
