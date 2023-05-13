@@ -3,8 +3,10 @@ Imports System.Runtime.InteropServices
 Imports ASCOM.Utilities
 Imports ASCOM.Apogee
 
-<ComVisible(False)> _
+<ComVisible(False)>
 Public Class SetupDialogForm
+
+    Public c As APOGEELib.Camera2
 
     Private Sub OK_Button_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles OK_Button.Click ' OK button event handler
         ' Persist new values of user settings to the ASCOM profile
@@ -50,7 +52,15 @@ Public Class SetupDialogForm
             tbYstart.Text = Camera.yStart
             tbYheight.Text = Camera.yHeight
         End If
-
+        If c IsNot Nothing Then
+            'get gain
+            Dim g As Integer
+            Dim o As Integer
+            c.GetAdGain(g, 1, 1)
+            c.GetAdOffset(o, 1, 1)
+            tbGain1.Text = g
+            tbOffset1.Text = o
+        End If
         chkTrace.Checked = Camera.traceState
         ' set the list of com ports to those that are currently available
         ComboBoxComPort.Items.Clear()
@@ -61,4 +71,50 @@ Public Class SetupDialogForm
         End If
     End Sub
 
+    Private Sub btnTemp_Click(sender As Object, e As EventArgs) Handles btnTemp.Click
+        If c IsNot Nothing Then
+            c.ShowTempDialog()
+
+        End If
+    End Sub
+
+    Private Sub btnIO_Click(sender As Object, e As EventArgs) Handles btnIO.Click
+        If c IsNot Nothing Then
+            c.ShowIoDialog()
+
+        End If
+    End Sub
+
+    Private Sub btnLED_Click(sender As Object, e As EventArgs) Handles btnLED.Click
+        If c IsNot Nothing Then
+            c.ShowLedDialog()
+
+        End If
+    End Sub
+
+    Private Sub btnSetGain1_Click(sender As Object, e As EventArgs) Handles btnSetGain1.Click
+        If c IsNot Nothing Then
+            Try
+                c.SetAdGain(tbGain1.Text, 1, 1)
+                MsgBox("gain set")
+            Catch ex As Exception
+                MsgBox("cannot set gain")
+            End Try
+
+
+        End If
+    End Sub
+
+    Private Sub btnSetOffset1_Click(sender As Object, e As EventArgs) Handles btnSetOffset1.Click
+        If c IsNot Nothing Then
+            Try
+                c.SetAdOffset(tbOffset1.Text, 1, 1)
+                MsgBox("offset set")
+            Catch ex As Exception
+                MsgBox("could not set gain")
+            End Try
+
+
+        End If
+    End Sub
 End Class

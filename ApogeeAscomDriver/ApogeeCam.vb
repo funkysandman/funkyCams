@@ -8,6 +8,8 @@
     Sub New()
         FindDlg = New APOGEELib.CamDiscover()
         c = New APOGEELib.Camera2
+
+
         Debug.Print("new camera")
         Dim tempImage As Array
         FindDlg.DlgCheckEthernet = False
@@ -20,10 +22,10 @@
             c.Init(FindDlg.SelectedInterface, FindDlg.SelectedCamIdOne, FindDlg.SelectedCamIdTwo, 0)
             c.ResetSystem()
             c.ImageCount = 0
-            c.RoiBinningH = 1
-            c.RoiBinningV = 1
-            c.RoiStartX = 0
-            c.RoiStartY = 0
+            'c.RoiBinningH = 1
+            'c.RoiBinningV = 1
+            'c.RoiStartX = 0
+            'c.RoiStartY = 0
             ccdWidth = c.RoiPixelsH
             ccdHeight = c.RoiPixelsV
             Debug.WriteLine(c.ImagingStatus)

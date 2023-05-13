@@ -1,9 +1,9 @@
-<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()> _
+<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()>
 Partial Class SetupDialogForm
     Inherits System.Windows.Forms.Form
 
     'Form overrides dispose to clean up the component list.
-    <System.Diagnostics.DebuggerNonUserCode()> _
+    <System.Diagnostics.DebuggerNonUserCode()>
     Protected Overrides Sub Dispose(ByVal disposing As Boolean)
         Try
             If disposing AndAlso components IsNot Nothing Then
@@ -20,7 +20,7 @@ Partial Class SetupDialogForm
     'NOTE: The following procedure is required by the Windows Form Designer
     'It can be modified using the Windows Form Designer.  
     'Do not modify it using the code editor.
-    <System.Diagnostics.DebuggerStepThrough()> _
+    <System.Diagnostics.DebuggerStepThrough()>
     Private Sub InitializeComponent()
         Me.TableLayoutPanel1 = New System.Windows.Forms.TableLayoutPanel()
         Me.OK_Button = New System.Windows.Forms.Button()
@@ -39,6 +39,15 @@ Partial Class SetupDialogForm
         Me.Label5 = New System.Windows.Forms.Label()
         Me.Panel1 = New System.Windows.Forms.Panel()
         Me.cbUseROI = New System.Windows.Forms.CheckBox()
+        Me.btnTemp = New System.Windows.Forms.Button()
+        Me.btnIO = New System.Windows.Forms.Button()
+        Me.btnLED = New System.Windows.Forms.Button()
+        Me.tbGain1 = New System.Windows.Forms.TextBox()
+        Me.tbOffset1 = New System.Windows.Forms.TextBox()
+        Me.btnSetGain1 = New System.Windows.Forms.Button()
+        Me.btnSetOffset1 = New System.Windows.Forms.Button()
+        Me.Label6 = New System.Windows.Forms.Label()
+        Me.Label7 = New System.Windows.Forms.Label()
         Me.TableLayoutPanel1.SuspendLayout()
         CType(Me.PictureBox1, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.Panel1.SuspendLayout()
@@ -52,7 +61,7 @@ Partial Class SetupDialogForm
         Me.TableLayoutPanel1.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50.0!))
         Me.TableLayoutPanel1.Controls.Add(Me.OK_Button, 0, 0)
         Me.TableLayoutPanel1.Controls.Add(Me.Cancel_Button, 1, 0)
-        Me.TableLayoutPanel1.Location = New System.Drawing.Point(314, 298)
+        Me.TableLayoutPanel1.Location = New System.Drawing.Point(314, 347)
         Me.TableLayoutPanel1.Name = "TableLayoutPanel1"
         Me.TableLayoutPanel1.RowCount = 1
         Me.TableLayoutPanel1.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50.0!))
@@ -210,13 +219,99 @@ Partial Class SetupDialogForm
         Me.cbUseROI.Text = "use subframe (ROI)"
         Me.cbUseROI.UseVisualStyleBackColor = True
         '
+        'btnTemp
+        '
+        Me.btnTemp.Location = New System.Drawing.Point(46, 251)
+        Me.btnTemp.Name = "btnTemp"
+        Me.btnTemp.Size = New System.Drawing.Size(94, 32)
+        Me.btnTemp.TabIndex = 20
+        Me.btnTemp.Text = "Temp control"
+        Me.btnTemp.UseVisualStyleBackColor = True
+        '
+        'btnIO
+        '
+        Me.btnIO.Location = New System.Drawing.Point(46, 289)
+        Me.btnIO.Name = "btnIO"
+        Me.btnIO.Size = New System.Drawing.Size(94, 32)
+        Me.btnIO.TabIndex = 21
+        Me.btnIO.Text = "IO Control"
+        Me.btnIO.UseVisualStyleBackColor = True
+        '
+        'btnLED
+        '
+        Me.btnLED.Location = New System.Drawing.Point(46, 327)
+        Me.btnLED.Name = "btnLED"
+        Me.btnLED.Size = New System.Drawing.Size(94, 32)
+        Me.btnLED.TabIndex = 22
+        Me.btnLED.Text = "LED control"
+        Me.btnLED.UseVisualStyleBackColor = True
+        '
+        'tbGain1
+        '
+        Me.tbGain1.Location = New System.Drawing.Point(317, 251)
+        Me.tbGain1.Name = "tbGain1"
+        Me.tbGain1.Size = New System.Drawing.Size(81, 20)
+        Me.tbGain1.TabIndex = 23
+        '
+        'tbOffset1
+        '
+        Me.tbOffset1.Location = New System.Drawing.Point(317, 289)
+        Me.tbOffset1.Name = "tbOffset1"
+        Me.tbOffset1.Size = New System.Drawing.Size(81, 20)
+        Me.tbOffset1.TabIndex = 24
+        '
+        'btnSetGain1
+        '
+        Me.btnSetGain1.Location = New System.Drawing.Point(404, 251)
+        Me.btnSetGain1.Name = "btnSetGain1"
+        Me.btnSetGain1.Size = New System.Drawing.Size(53, 20)
+        Me.btnSetGain1.TabIndex = 25
+        Me.btnSetGain1.Text = "Set"
+        Me.btnSetGain1.UseVisualStyleBackColor = True
+        '
+        'btnSetOffset1
+        '
+        Me.btnSetOffset1.Location = New System.Drawing.Point(404, 289)
+        Me.btnSetOffset1.Name = "btnSetOffset1"
+        Me.btnSetOffset1.Size = New System.Drawing.Size(53, 20)
+        Me.btnSetOffset1.TabIndex = 26
+        Me.btnSetOffset1.Text = "Set"
+        Me.btnSetOffset1.UseVisualStyleBackColor = True
+        '
+        'Label6
+        '
+        Me.Label6.AutoSize = True
+        Me.Label6.Location = New System.Drawing.Point(271, 251)
+        Me.Label6.Name = "Label6"
+        Me.Label6.Size = New System.Drawing.Size(29, 13)
+        Me.Label6.TabIndex = 27
+        Me.Label6.Text = "Gain"
+        '
+        'Label7
+        '
+        Me.Label7.AutoSize = True
+        Me.Label7.Location = New System.Drawing.Point(271, 289)
+        Me.Label7.Name = "Label7"
+        Me.Label7.Size = New System.Drawing.Size(35, 13)
+        Me.Label7.TabIndex = 28
+        Me.Label7.Text = "Offset"
+        '
         'SetupDialogForm
         '
         Me.AcceptButton = Me.OK_Button
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.CancelButton = Me.Cancel_Button
-        Me.ClientSize = New System.Drawing.Size(472, 339)
+        Me.ClientSize = New System.Drawing.Size(472, 388)
+        Me.Controls.Add(Me.Label7)
+        Me.Controls.Add(Me.Label6)
+        Me.Controls.Add(Me.btnSetOffset1)
+        Me.Controls.Add(Me.btnSetGain1)
+        Me.Controls.Add(Me.tbOffset1)
+        Me.Controls.Add(Me.tbGain1)
+        Me.Controls.Add(Me.btnLED)
+        Me.Controls.Add(Me.btnIO)
+        Me.Controls.Add(Me.btnTemp)
         Me.Controls.Add(Me.cbUseROI)
         Me.Controls.Add(Me.Panel1)
         Me.Controls.Add(Me.ComboBoxComPort)
@@ -256,4 +351,13 @@ Partial Class SetupDialogForm
     Friend WithEvents Label5 As Label
     Friend WithEvents Panel1 As Panel
     Friend WithEvents cbUseROI As CheckBox
+    Friend WithEvents btnTemp As Button
+    Friend WithEvents btnIO As Button
+    Friend WithEvents btnLED As Button
+    Friend WithEvents tbGain1 As TextBox
+    Friend WithEvents tbOffset1 As TextBox
+    Friend WithEvents btnSetGain1 As Button
+    Friend WithEvents btnSetOffset1 As Button
+    Friend WithEvents Label6 As Label
+    Friend WithEvents Label7 As Label
 End Class
