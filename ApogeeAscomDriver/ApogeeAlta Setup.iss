@@ -5,8 +5,8 @@
 [Setup]
 AppID={{c7b4639c-094b-4964-a1bd-495f47e83996}
 AppName=ASCOM ApogeeAlta Camera Driver
-AppVerName=ASCOM ApogeeAlta Camera Driver 1.0
-AppVersion=1.0
+AppVerName=ASCOM ApogeeAlta Camera Driver 1.1
+AppVersion=1.1
 AppPublisher=Sandy MacPherson <funkysandman@gmail.com>
 AppPublisherURL=mailto:funkysandman@gmail.com
 AppSupportURL=http://tech.groups.yahoo.com/group/ASCOM-Talk/
