@@ -34,9 +34,9 @@ Name: "{cf}\ASCOM\Uninstall\Camera\ApogeeAlta"
 ; TODO: Add subfolders below {app} as needed (e.g. Name: "{app}\MyFolder")
 
 [Files]
-Source: "C:\Users\sandy\Source\Repos\funkyCams\ApogeeAscomDriver\bin\Debug\ASCOM.Apogee.Camera.dll"; DestDir: "{app}"
+Source: "C:\Users\funky\source\repos\funkysandman\funkyCams\ApogeeAscomDriver\bin\Debug\ASCOM.Apogee.Camera.dll"; DestDir: "{app}"
 ; Require a read-me HTML to appear after installation, maybe driver's Help doc
-Source: "C:\Users\sandy\Source\Repos\funkyCams\ApogeeAscomDriver\ReadMe.htm"; DestDir: "{app}"; Flags: isreadme
+Source: "C:\Users\funky\source\repos\funkysandman\funkyCams\ApogeeAscomDriver\ReadMe.htm"; DestDir: "{app}"; Flags: isreadme
 ; TODO: Add other files needed by your driver here (add subfolders above)
 
 
