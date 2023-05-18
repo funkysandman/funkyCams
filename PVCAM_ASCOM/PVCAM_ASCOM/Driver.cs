@@ -37,8 +37,8 @@ using ASCOM.Astrometry;
 using ASCOM.Astrometry.AstroUtils;
 using ASCOM.Utilities;
 using ASCOM.DeviceInterface;
-using System.Globalization;
 using System.Collections;
+using System.Globalization;
 
 namespace ASCOM.Photometrics
 {
@@ -577,7 +577,7 @@ namespace ASCOM.Photometrics
             get
             {
                 tl.LogMessage("CanSetCCDTemperature Get", false.ToString());
-                return false;
+                return true;
             }
         }
 
@@ -901,7 +901,7 @@ namespace ASCOM.Photometrics
             get
             {
                 tl.LogMessage("PixelSizeX Get", pixelSize.ToString());
-                return (double)(myCam.PixelSize) / 1000;
+                return (double)(myCam.PixelSize/1000.0) ;
             }
         }
 
@@ -910,7 +910,7 @@ namespace ASCOM.Photometrics
             get
             {
                 tl.LogMessage("PixelSizeY Get", pixelSize.ToString());
-                return (double)(myCam.PixelSize) / 1000;
+                return (double)(myCam.PixelSize/1000.0) ;
             }
         }
 
@@ -971,11 +971,14 @@ namespace ASCOM.Photometrics
             {
                 tl.LogMessage("SetCCDTemperature Get", "Not implemented");
                 Debug.WriteLine("SetCCDTemperature", false);
-                return myCam.CurrentTemperature;
+                return myCam.CurrentSetpoint/100;
             }
             set
             {
-                tl.LogMessage("SetCCDTemperature Set", "Not implemented");
+                //tl.LogMessage("SetCCDTemperature Set", "Not implemented");
+                var newTemp = value;
+                myCam.SetTemperatureSetpoint((Int16)newTemp);
+               
                 Debug.WriteLine("SetCCDTemperature", true);
             }
         }

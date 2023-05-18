@@ -468,7 +468,7 @@ namespace pvcam_helper
 
         Int16 m_xSize;
         Int16 m_ySize;
-        Int16 m_pixelSize;
+        Int16 m_pixelSize =4540;
         public static Int16 NrOfCameras;
 
         //ROI 
@@ -3010,14 +3010,19 @@ namespace pvcam_helper
         public void SetTemperatureSetpoint(Int16 setPoint)
         {
             //Check if value is in range
-            if (setPoint < m_tempSetpointMin || setPoint > m_tempSetpointMax)
+            setPoint = (short)(setPoint * 100);
+            if (setPoint< m_tempSetpointMin )
             {
-                ReportMsg(this, new ReportMessage("Setpoint is out of range, Can not set", MsgTypes.MSG_ERROR));
-                return;
+                setPoint = m_tempSetpointMin;
             }
-            IntPtr unmngSetpoint;
+            if (setPoint> m_tempSetpointMax)
+            {
+                setPoint = m_tempSetpointMax;
+            }
+                IntPtr unmngSetpoint;
             unmngSetpoint = Marshal.AllocHGlobal(sizeof(Int16));
-            Marshal.WriteInt16(unmngSetpoint, setPoint);
+            m_tempSetpoint = (short)(setPoint);
+            Marshal.WriteInt16(unmngSetpoint, (Int16)m_tempSetpoint);
 
             if (!PVCAM.pl_set_param(m_hCam, PvTypes.PARAM_TEMP_SETPOINT, unmngSetpoint))
             {
@@ -3025,10 +3030,32 @@ namespace pvcam_helper
             }
             else
             {
+                m_tempSetpoint = setPoint;
                 ReportMsg(this, new ReportMessage(String.Format("Temperature setpoint Changed to  {0:0.00}", setPoint / 100.0), MsgTypes.MSG_STATUS));
             }
             Marshal.FreeHGlobal(unmngSetpoint);
             unmngSetpoint = IntPtr.Zero;
+        }
+
+        public Int16 GetTemperatureSetpoint()
+        {
+            
+            IntPtr unmngSetpoint;
+            unmngSetpoint = Marshal.AllocHGlobal(sizeof(Int16));
+           
+
+            if (!PVCAM.pl_set_param(m_hCam, PvTypes.PARAM_TEMP_SETPOINT, unmngSetpoint))
+            {
+                ReportMsg(this, new ReportMessage("getting temperature setpoint has failed", MsgTypes.MSG_ERROR));
+            }
+            else
+            {
+                ReportMsg(this, new ReportMessage(String.Format("Temperature setpoint is {0:0.00}", m_tempSetpoint / 100.0), MsgTypes.MSG_STATUS));
+            }
+            Marshal.ReadInt16(unmngSetpoint, m_tempSetpoint);
+            Marshal.FreeHGlobal(unmngSetpoint);
+            unmngSetpoint = IntPtr.Zero;
+            return m_tempSetpoint;
         }
 
         //Get Clocking mode as list of strings from Clocking mode Name/Value pair list.
