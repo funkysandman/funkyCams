@@ -3010,7 +3010,7 @@ namespace pvcam_helper
         public void SetTemperatureSetpoint(Int16 setPoint)
         {
             //Check if value is in range
-            setPoint = (short)(setPoint * 100);
+            //setPoint = (short)(setPoint * 100);
             if (setPoint< m_tempSetpointMin )
             {
                 setPoint = m_tempSetpointMin;

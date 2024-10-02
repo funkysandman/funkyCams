@@ -126,7 +126,6 @@ namespace ASCOM.Photometrics
             //myCam.ReadCameraParams();
             ccdWidth = myCam.XSize;
             ccdHeight = myCam.YSize;
-
             myCam.SetClockingMode("Alternate Normal");
             myCam.SetClearMode("Pre-Exposure");
             myCam.SetClearCycles(4);
@@ -137,7 +136,7 @@ namespace ASCOM.Photometrics
             myCam.SetGainState(2);//gain state 3 - highest gain
             myCam.FramesToGet = 1;
             myCam.SetExposureTime(1);
-            myCam.SetADCoffset(40); //this value was found to best for zeroing the bias frame
+            //myCam.SetADCoffset(40); //this value was found to best for zeroing the bias frame
 
             readoutModes.Add("Live");
             readoutModes.Add("Normal");
@@ -949,7 +948,7 @@ namespace ASCOM.Photometrics
         {
             get
             {
-                tl.LogMessage("SensorName Get", "Not implemented");
+                
                 Debug.WriteLine("SensorName", false);
                 return "ICX694";
             }
@@ -959,7 +958,7 @@ namespace ASCOM.Photometrics
         {
             get
             {
-                tl.LogMessage("SensorType Get", "Not implemented");
+
                // Debug.WriteLine("SensorType", false);
                 return SensorType.Monochrome;
             }
@@ -969,17 +968,17 @@ namespace ASCOM.Photometrics
         {
             get
             {
-                tl.LogMessage("SetCCDTemperature Get", "Not implemented");
+
                 Debug.WriteLine("SetCCDTemperature", false);
                 return myCam.CurrentSetpoint/100;
             }
             set
             {
                 //tl.LogMessage("SetCCDTemperature Set", "Not implemented");
-                var newTemp = value;
-                myCam.SetTemperatureSetpoint((Int16)newTemp);
+                double newTemp = value;
+                myCam.SetTemperatureSetpoint((short)(newTemp * 100));
                
-                Debug.WriteLine("SetCCDTemperature", true);
+                Debug.WriteLine($"SetCCDTemperature {value}", true);
             }
         }
 
