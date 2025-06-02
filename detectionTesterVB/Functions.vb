@@ -18,16 +18,24 @@ Public Module Functions
         query("width") = qe.width
         query("height") = qe.height
 
-        If qe.rectangles.Count > 0 Then
+        query("file") = qe.filename
+        query("dateTaken") = qe.dateTaken.ToString("MM/dd/yyyy hh:mm:ss tt")
+        query("cameraID") = qe.cameraID
+        query("width") = qe.width
+        query("height") = qe.height
+
+        If Rects.Count > 0 Then
             'add rectangles
-            query("rectangles") = qe.rectangles.Count
-            For i = 0 To qe.rectangles.Count - 1
-                query("r_" + Trim(Str(i)) + "_x") = qe.rectangles(i).X
-                query("r_" + Trim(Str(i)) + "_y") = qe.rectangles(i).Y
-                query("r_" + Trim(Str(i)) + "_w") = qe.rectangles(i).Width
-                query("r_" + Trim(Str(i)) + "_h") = qe.rectangles(i).Height
+            query("rectangles") = Rects.Count
+            For i = 0 To Rects.Count - 1
+                query("r_" + Trim(Str(i)) + "_x") = Rects(i).x
+                query("r_" + Trim(Str(i)) + "_y") = Rects(i).y
+                query("r_" + Trim(Str(i)) + "_w") = Rects(i).width
+                query("r_" + Trim(Str(i)) + "_h") = Rects(i).height
             Next
         End If
+
+        myUriBuilder.Query = query.ToString
         myUriBuilder.Query = query.ToString
 
         Dim client As New HttpClient()

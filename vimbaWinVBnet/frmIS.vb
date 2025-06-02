@@ -726,6 +726,21 @@ Public Class frmIS
 
     End Sub
 
+    Private Sub InitializeComponent()
+        Me.SuspendLayout()
+        '
+        'frmIS
+        '
+        Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
+        Me.ClientSize = New System.Drawing.Size(422, 525)
+        Me.Name = "frmIS"
+        Me.ResumeLayout(False)
+        Me.PerformLayout()
 
+    End Sub
+
+    Private Sub frmIS_Load_1(sender As Object, e As EventArgs) Handles MyBase.Load
+
+    End Sub
 End Class
 

@@ -11,7 +11,7 @@ Imports vimbaWinVBnet.vimbaWinVBnet
 Public Class frmSVSVistek
     Inherits frmMaster
 
-    Private mySVCam As SVCamApi.SVCamGrabber
+    Private mySVCamGrabber As SVCamApi.SVCamGrabber
     'Private killing As Boolean = False
     'Private b As Bitmap
     'Private running As Boolean
@@ -29,7 +29,7 @@ Public Class frmSVSVistek
 
 
     Private Sub createCam()
-        mySVCam = New SVCamApi.SVCamGrabber
+        mySVCamGrabber = New SVCamApi.SVCamGrabber
 
     End Sub
 
@@ -190,10 +190,10 @@ Public Class frmSVSVistek
 
         cboNight.SelectedIndex = 1
         cboDay.SelectedIndex = 1
-        While mySVCam Is Nothing
+        While mySVCamGrabber Is Nothing
             Thread.Sleep(1)
         End While
-        For Each c In mySVCam.getCameraList()
+        For Each c In mySVCamGrabber.getCameraList()
             cmbCam.Items.Add(c.devInfo.displayName)
         Next
 
@@ -219,7 +219,7 @@ Public Class frmSVSVistek
         btnStartWeb.Enabled = False
         myWebServer = WebServer.getWebServer
 
-        myWebServer.StartWebServer(mySVCam, Me, Val(Me.tbPort.Text))
+        myWebServer.StartWebServer(mySVCamGrabber, Me, Val(Me.tbPort.Text))
 
     End Sub
 
@@ -241,13 +241,15 @@ Public Class frmSVSVistek
 
     Private Sub TimerDayNight_Tick(sender As Object, e As EventArgs) Handles TimerDayNight.Tick
         Try
-
+            Debug.Print("day/night tick")
             TimerDayNight.Enabled = False
 
-            mySVCam.upper = Val(tbUpper.Text)
-            mySVCam.lower = Val(tbLower.Text)
+            mySVCamGrabber.upper = Val(tbUpper.Text)
+            mySVCamGrabber.lower = Val(tbLower.Text)
 
-            Me.tbLost.Text = mySVCam.current_selected_cam.framesLost
+            If Not mySVCamGrabber.current_selected_cam Is Nothing Then
+                Me.tbLost.Text = mySVCamGrabber.current_selected_cam.framesLost
+            End If
 
 
             Dim currentMode As Boolean
@@ -284,7 +286,7 @@ Public Class frmSVSVistek
 
         Catch ex As Exception
 
-
+            Me.Label10.Text = ex.Message
 
         End Try
         TimerDayNight.Enabled = True
@@ -302,8 +304,8 @@ Public Class frmSVSVistek
         gotFrameTime = Now 'reset time
 
         TimerFPS.Enabled = True
-        mySVCam.upper = Val(tbUpper.Text)
-        mySVCam.lower = Val(tbLower.Text)
+        mySVCamGrabber.upper = Val(tbUpper.Text)
+        mySVCamGrabber.lower = Val(tbLower.Text)
 
         If Now.Hour >= cboNight.SelectedItem Or Now.Hour <= cboDay.SelectedItem Then
             night = True
@@ -317,9 +319,9 @@ Public Class frmSVSVistek
             'night mode
             ' If Not myWebServer Is Nothing Then
             If cbUseDarks.Checked Then
-                mySVCam.useDarks = True
+                mySVCamGrabber.useDarks = True
             Else
-                mySVCam.useDarks = False
+                mySVCamGrabber.useDarks = False
             End If
             'End If
 
@@ -329,29 +331,29 @@ Public Class frmSVSVistek
             tbExposureTime.Text = tbDayTimeExp.Text
 
             lblDayNight.Text = "day"
-            mySVCam.useDarks = False
+            mySVCamGrabber.useDarks = False
 
         End If
         If LCase(Me.lblDayNight.Text) = "day" Then
-            mySVCam.setParams(Val(Me.tbExposureTime.Text), Val(Me.tbDayGain.Text))
+            mySVCamGrabber.setParams(Val(Me.tbExposureTime.Text), Val(Me.tbDayGain.Text))
         Else
-            mySVCam.setParams(Val(Me.tbExposureTime.Text), Val(Me.tbNightAgain.Text))
+            mySVCamGrabber.setParams(Val(Me.tbExposureTime.Text), Val(Me.tbNightAgain.Text))
 
         End If
 
-        mySVCam._darkmultiplier = Val(Me.tbMultiplier.Text)
-        mySVCam.m_saveLocal = True
+        mySVCamGrabber._darkmultiplier = Val(Me.tbMultiplier.Text)
+        mySVCamGrabber.m_saveLocal = True
         If Me.cbUseTrigger.Checked Then
-            mySVCam.prepareCameraForTriggerWidth(mySVCam.current_selected_cam)
+            mySVCamGrabber.prepareCameraForTriggerWidth(mySVCamGrabber.current_selected_cam)
         Else
 
-            mySVCam.prepareCameraForTimed(mySVCam.current_selected_cam)
+            mySVCamGrabber.prepareCameraForTimed(mySVCamGrabber.current_selected_cam)
         End If
         If Me.cbUseTrigger.Checked Then
 
-            mySVCam.startAcquisitionTriggerWidthThread(AddressOf Me.received_frame)
+            mySVCamGrabber.startAcquisitionTriggerWidthThread(AddressOf Me.received_frame)
         Else
-            mySVCam.startAcquisitionThread(AddressOf Me.received_frame)
+            mySVCamGrabber.startAcquisitionThread(AddressOf Me.received_frame)
         End If
 
         meteorCheckRunning = True
@@ -364,14 +366,14 @@ Public Class frmSVSVistek
 
     Private Sub Button2_Click(sender As Object, e As EventArgs) Handles Button2.Click
 
-        mySVCam.setParams(Val(Me.tbExposureTime.Text), Val(Me.tbNightAgain.Text))
+        mySVCamGrabber.setParams(Val(Me.tbExposureTime.Text), Val(Me.tbNightAgain.Text))
 
 
         MsgBox("cover lens")
         If cbUseTrigger.Checked Then
-            mySVCam.startAcquisitionThreadTriggerWidthForDarks(AddressOf Me.received_frame)
+            mySVCamGrabber.startAcquisitionThreadTriggerWidthForDarks(AddressOf Me.received_frame)
         Else
-            mySVCam.startAcquisitionThreadForDarks(AddressOf Me.received_frame)
+            mySVCamGrabber.startAcquisitionThreadForDarks(AddressOf Me.received_frame)
         End If
 
 
@@ -379,9 +381,9 @@ Public Class frmSVSVistek
 
     Private Sub cbUseDarks_CheckedChanged(sender As Object, e As EventArgs) Handles cbUseDarks.CheckedChanged
         If cbUseDarks.Checked Then
-            mySVCam.useDarks = True
+            mySVCamGrabber.useDarks = True
         Else
-            mySVCam.useDarks = False
+            mySVCamGrabber.useDarks = False
         End If
     End Sub
 
@@ -398,10 +400,10 @@ Public Class frmSVSVistek
             gotFrameTime = Now
 
             killing = True
-            mySVCam.killCapture()
+            mySVCamGrabber.killCapture()
 
             'restart
-            mySVCam.startAcquisitionThread(AddressOf Me.received_frame)
+            mySVCamGrabber.startAcquisitionThread(AddressOf Me.received_frame)
         End If
         killing = False
     End Sub
@@ -410,7 +412,7 @@ Public Class frmSVSVistek
         '   myVistekImageGrabber.stopStreamingFF()
         btnStop.Enabled = False
         btnStart.Enabled = True
-        mySVCam.stopAcquisitionThread()
+        mySVCamGrabber.stopAcquisitionThread()
         TimerFPS.Enabled = False
         Timer2.Enabled = False
 
@@ -419,9 +421,9 @@ Public Class frmSVSVistek
     Private Sub frmSVSVistek_Closing(sender As Object, e As CancelEventArgs) Handles Me.Closing
         On Error Resume Next
 
-        mySVCam.stopAcquisitionThread()
-        mySVCam.closeCamera()
-        mySVCam = Nothing
+        mySVCamGrabber.stopAcquisitionThread()
+        mySVCamGrabber.closeCamera()
+        mySVCamGrabber = Nothing
         'md = Nothing
         If Not myWebServer Is Nothing Then
             myWebServer.StopWebServer()
@@ -434,8 +436,8 @@ Public Class frmSVSVistek
 
 
     Private Sub cmbCam_SelectedIndexChanged(sender As Object, e As EventArgs) Handles cmbCam.SelectedIndexChanged
-        mySVCam.openCamera(cmbCam.SelectedIndex)
-        loadProfile(mySVCam.current_selected_cam.devInfo.model)
+        mySVCamGrabber.openCamera(cmbCam.SelectedIndex)
+        loadProfile(mySVCamGrabber.current_selected_cam.devInfo.model)
 
     End Sub
 
@@ -453,16 +455,42 @@ Public Class frmSVSVistek
 
     Private Overloads Sub lblDayNight_TextChanged(sender As Object, e As EventArgs) Handles lblDayNight.TextChanged
         'stop stream
-        If mySVCam Is Nothing Then Exit Sub
-        If Not mySVCam.acqThreadIsRuning Then Exit Sub
 
-        'halt camera and wait for it to stop
-        While (mySVCam.current_selected_cam.isGrabbing)
+        Debug.Print("day to night / night to day")
+        If mySVCamGrabber Is Nothing Then Exit Sub
+        If Not mySVCamGrabber.acqThreadIsRuning Then Exit Sub
+        mySVCamGrabber.stopAcquisitionThread()
+        'wait for thread to stop
+        While (mySVCamGrabber.acqThreadIsRuning)
             Application.DoEvents()
         End While
-        ' mySVCam.stopAcquisitionThread()
 
 
+
+
+
+        'halt camera and wait for it to stop
+        'mySVCam.stopAcquisitionThread()
+        'While (mySVCam.current_selected_cam.isGrabbing)
+        '    Application.DoEvents()
+        'End While
+        Dim webserverWasrunning As Boolean
+        webserverWasrunning = False
+        If Not myWebServer Is Nothing Then
+
+            If myWebServer.running Then
+                webserverWasrunning = True
+
+
+                myWebServer.StopWebServer()
+
+            End If
+        End If
+
+        'wait 15 seconds 
+        Thread.Sleep(15000)
+
+        Application.DoEvents()
         If lblDayNight.Text = "night" Then
 
             tbExposureTime.Text = tbNightExp.Text
@@ -471,27 +499,44 @@ Public Class frmSVSVistek
             'night mode
             ' If Not myWebServer Is Nothing Then
             If cbUseDarks.Checked Then
-                mySVCam.useDarks = True
+                mySVCamGrabber.useDarks = True
             Else
-                mySVCam.useDarks = False
+                mySVCamGrabber.useDarks = False
             End If
             'End If
             'if the camera is running...stop exposing
-            mySVCam.stopAcquisitionThread()
 
-            mySVCam.setParams(Val(Me.tbExposureTime.Text), Val(Me.tbNightAgain.Text))
-            mySVCam.prepareCameraForTimed(mySVCam.current_selected_cam)
-            mySVCam.startAcquisitionThread(AddressOf Me.received_frame)
+            '
+            'stop webserver if it running
+
+
+
+
+
+            ' mySVCamGrabber.setParams(Val(Me.tbExposureTime.Text), Val(Me.tbNightAgain.Text))
+
+
+
         Else
-            'day mode
+            '        'day mode
             tbGain.Text = tbDayGain.Text
             tbExposureTime.Text = tbDayTimeExp.Text
 
-            mySVCam.stopAcquisitionThread()
 
-            mySVCam.setParams(Val(Me.tbExposureTime.Text), Val(Me.tbDayGain.Text))
-            mySVCam.prepareCameraForTimed(mySVCam.current_selected_cam)
-            mySVCam.startAcquisitionThread(AddressOf Me.received_frame)
+
+
+
+        End If
+
+        mySVCamGrabber.current_selected_cam.closeConnection()
+        mySVCamGrabber.current_selected_cam.openConnection()
+
+        mySVCamGrabber.setParams(Val(Me.tbExposureTime.Text), Val(Me.tbGain.Text))
+        mySVCamGrabber.prepareCameraForTimed(mySVCamGrabber.current_selected_cam)
+        mySVCamGrabber.startAcquisitionThread(AddressOf Me.received_frame)
+        If webserverWasrunning Then
+
+            myWebServer.StartWebServer(mySVCamGrabber, Me, Val(Me.tbPort.Text))
         End If
         'start Stream
         'If Me.cbUseTrigger.Checked Then
@@ -500,13 +545,28 @@ Public Class frmSVSVistek
         'Else
         '    mySVCam.startAcquisitionThread(AddressOf Me.received_frame)
         ' End If
+        ' mySVCam.startAcquisitionThread(AddressOf Me.received_frame)
     End Sub
 
+    Private Sub InitializeComponent()
+        Me.SuspendLayout()
+        '
+        'frmSVSVistek
+        '
+        Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
+        Me.ClientSize = New System.Drawing.Size(422, 525)
+        Me.Name = "frmSVSVistek"
+        Me.ResumeLayout(False)
+        Me.PerformLayout()
 
+    End Sub
 
     Private Sub frmSVSVistek_Load(sender As Object, e As EventArgs) Handles MyBase.Load
 
     End Sub
+
+
+
 
     'Private Sub InitializeComponent()
     '    Me.SuspendLayout()

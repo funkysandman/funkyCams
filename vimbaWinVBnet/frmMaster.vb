@@ -368,12 +368,19 @@ Public Class frmMaster
         Dim aQE As queueEntry
         While (meteorCheckRunning)
             If myDetectionQueue.Count > 0 Then
-                aQE = myDetectionQueue.Dequeue()
+                Try
+                    aQE = myDetectionQueue.Dequeue()
+                    If Not aQE Is Nothing Then
 
-                CallAzureMeteorDetection(aQE)
+                        CallAzureMeteorDetection(aQE)
 
+                    End If
 
-                aQE = Nothing
+                    aQE = Nothing
+                Catch
+
+                End Try
+
 
             End If
             'Console.WriteLine("in the queue:{0}", myDetectionQueue.Count)
