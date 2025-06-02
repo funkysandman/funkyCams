@@ -94,26 +94,11 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>BaumerSDKlibs\bgapi2_genicam_dotnet.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.QualityTools.Testing.Fakes, Version=12.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-    </Reference>
     <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.12.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
-    <Reference Include="PixeLINK.API">
-      <HintPath>..\..\..\..\..\..\Program Files (x86)\PixeLINK\dotnet\PixeLINK.API.dll</HintPath>
-    </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
-    <Reference Include="PylonC.NET, Version=4.1.0.0, Culture=neutral, PublicKeyToken=a77e8471c5919d5a, processorArchitecture=MSIL">
-      <HintPath>..\packages\Basler.PylonC.NET.5.0.5\lib\net20\PylonC.NET.dll</HintPath>
-    </Reference>
-    <Reference Include="QCamManagedDriver">
-      <HintPath>..\..\..\..\..\..\Program Files\QImaging\SDK\libs\i386\QCamManagedDriver\NETv4.0\QCamManagedDriver.dll</HintPath>
-    </Reference>
-    <Reference Include="SpinnakerNET_v140">
-      <HintPath>..\..\..\..\..\..\..\Program Files\Point Grey Research\Spinnaker\bin64\vs2015\SpinnakerNET_v140.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Deployment" />
@@ -127,10 +112,9 @@
     <Reference Include="System.XML" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Xml.Serialization" />
-    <Reference Include="TIS.Imaging.ICImagingControl35, Version=3.5.6.4008, Culture=neutral, PublicKeyToken=257805929e8b7928, processorArchitecture=AMD64" />
-    <Reference Include="VimbaNET, Version=1.7.0.24184, Culture=neutral, PublicKeyToken=96b729f24f119b9a, processorArchitecture=x86">
+    <Reference Include="TIS.Imaging.ICImagingControl35, Version=3.5.7.4039, Culture=neutral, PublicKeyToken=257805929e8b7928, processorArchitecture=x86">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\Program Files\Allied Vision\Vimba_2.1\VimbaNET\Bin\Win64\VimbaNET.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\The Imaging Source Europe GmbH\IC Imaging Control 3.5 .NET Library\bin\x64\TIS.Imaging.ICImagingControl35.dll</HintPath>
     </Reference>
     <Reference Include="WindowsBase" />
   </ItemGroup>
@@ -157,28 +141,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include=".vb" />
-    <Compile Include="Form1.Designer.vb">
-      <DependentUpon>Form1.vb</DependentUpon>
-    </Compile>
-    <Compile Include="Form1.vb">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="frmBasler.Designer.vb">
-      <DependentUpon>frmBasler.vb</DependentUpon>
-    </Compile>
-    <Compile Include="frmBasler.vb">
-      <SubType>Form</SubType>
-    </Compile>
     <Compile Include="frmExclude.Designer.vb">
       <DependentUpon>frmExclude.vb</DependentUpon>
     </Compile>
     <Compile Include="frmExclude.vb">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="frmIPcam.vb">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="frmScout.vb">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="IniFile.vb" />
@@ -190,60 +156,6 @@
       <DependentUpon>frmMaster.vb</DependentUpon>
     </Compile>
     <Compile Include="frmMaster.vb">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="frmPCO.designer.vb">
-      <DependentUpon>frmPCO.vb</DependentUpon>
-    </Compile>
-    <Compile Include="frmPCO.vb">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="frmPointGrey.vb">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="frmSVSVistek.vb">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="frmToupcam.Designer.vb">
-      <DependentUpon>frmToupcam.vb</DependentUpon>
-    </Compile>
-    <Compile Include="frmToupcam.vb">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="frmAVTastro.Designer.vb">
-      <DependentUpon>frmAVTastro.vb</DependentUpon>
-    </Compile>
-    <Compile Include="frmAVTastro.vb">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="frmAVT.vb">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="frmFoculs.Designer.vb">
-      <DependentUpon>frmFoculs.vb</DependentUpon>
-    </Compile>
-    <Compile Include="frmFoculs.vb">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="frmGIGE.Designer.vb">
-      <DependentUpon>frmGIGE.vb</DependentUpon>
-    </Compile>
-    <Compile Include="frmGIGE.vb">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="frmCoolsnap.Designer.vb">
-      <DependentUpon>frmCoolsnap.vb</DependentUpon>
-    </Compile>
-    <Compile Include="frmCoolsnap.vb">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="frmQ.Designer.vb">
-      <DependentUpon>frmQ.vb</DependentUpon>
-    </Compile>
-    <Compile Include="frmQ.vb">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="frmQimaging.vb">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Form3.Designer.vb">
@@ -274,66 +186,17 @@
     <Compile Include="program.vb" />
     <Compile Include="queueEntry.vb" />
     <Compile Include="MyRectangle.vb" />
-    <Compile Include="Toupcam.vb" />
     <Compile Include="webserver.vb" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Form1.resx">
-      <DependentUpon>Form1.vb</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="frmBasler.resx">
-      <DependentUpon>frmBasler.vb</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="frmExclude.resx">
       <DependentUpon>frmExclude.vb</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="frmIPcam.resx">
-      <DependentUpon>frmIPcam.vb</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="frmIS.resx">
       <DependentUpon>frmIS.vb</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="frmMaster.resx">
       <DependentUpon>frmMaster.vb</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="frmPCO.resx">
-      <DependentUpon>frmPCO.vb</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="frmPointGrey.resx">
-      <DependentUpon>frmPointGrey.vb</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="frmScout.resx">
-      <DependentUpon>frmScout.vb</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="frmSVSVistek.resx">
-      <DependentUpon>frmSVSVistek.vb</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="frmToupcam.resx">
-      <DependentUpon>frmToupcam.vb</DependentUpon>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="frmAVTastro.resx">
-      <DependentUpon>frmAVTastro.vb</DependentUpon>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="frmAVT.resx">
-      <DependentUpon>frmAVT.vb</DependentUpon>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="frmFoculs.resx">
-      <DependentUpon>frmFoculs.vb</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="frmGIGE.resx">
-      <DependentUpon>frmGIGE.vb</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="frmCoolsnap.resx">
-      <DependentUpon>frmCoolsnap.vb</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="frmQ.resx">
-      <DependentUpon>frmQ.vb</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="frmQimaging.resx">
-      <DependentUpon>frmQimaging.vb</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Form3.resx">
       <DependentUpon>Form3.vb</DependentUpon>
@@ -530,51 +393,6 @@
   </ItemGroup>
   <ItemGroup>
     <WCFMetadata Include="Service References\" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\AsynchronousGrab\Forms\Build\VS2010\AsynchronousGrabForms.csproj">
-      <Project>{1fb459e7-7c5d-45c3-bf6e-428c9cd191ba}</Project>
-      <Name>AsynchronousGrabForms</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\BaslerGrab\BaslerImageGrabber.csproj">
-      <Project>{6de4cadd-9d37-48ff-a80c-e56b83720fb0}</Project>
-      <Name>BaslerImageGrabber</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\BaumerAPI\BaumerAPI.csproj">
-      <Project>{782f80d9-c751-4664-a6be-f6f499bdd581}</Project>
-      <Name>BaumerAPI</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\PVcamHelper\PVcamHelper.csproj">
-      <Project>{cff8e983-451b-4bbf-874a-0af38aba86a6}</Project>
-      <Name>PVcamHelper</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Pylon.NETSupportLibrary\Pylon.NETSupportLibrary.csproj">
-      <Project>{3eafc9f5-d49f-4f9f-86c8-fbd231b07d2e}</Project>
-      <Name>Pylon.NETSupportLibrary</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\SVGigE_ExampleVC#.VS2010\GigeApi_.csproj">
-      <Project>{b209e79d-9e9e-475e-9300-076e0062dabb}</Project>
-      <Name>GigeApi_</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <COMReference Include="AxFGControlLib">
-      <Guid>{C77A0016-5D29-4D3A-86A6-C8AFE470E1B2}</Guid>
-      <VersionMajor>1</VersionMajor>
-      <VersionMinor>0</VersionMinor>
-      <Lcid>0</Lcid>
-      <WrapperTool>aximp</WrapperTool>
-      <Isolated>False</Isolated>
-    </COMReference>
-    <COMReference Include="FGControlLib">
-      <Guid>{C77A0016-5D29-4D3A-86A6-C8AFE470E1B2}</Guid>
-      <VersionMajor>1</VersionMajor>
-      <VersionMinor>0</VersionMinor>
-      <Lcid>0</Lcid>
-      <WrapperTool>tlbimp</WrapperTool>
-      <Isolated>False</Isolated>
-      <EmbedInteropTypes>True</EmbedInteropTypes>
-    </COMReference>
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.7.2">

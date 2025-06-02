@@ -172,25 +172,7 @@ Public Class frmMaster
                 Return m_dataSize
             End Get
         End Property
-        Public Sub FillNextBitmap(b As SpinnakerNET.IManagedImage)
-            SwitchBitmap()
 
-            ' m_ManagedImages(m_BitmapSelector) = b
-            'copy raw data into m_buffers
-            Dim rawData(b.DataSize) As Byte
-            ' Dim BoundsRect = New Rectangle(0, 0, b.Width, b.Height)
-            ' Dim bmpData As System.Drawing.Imaging.BitmapData = m_Bitmaps(m_BitmapSelector).LockBits(BoundsRect, System.Drawing.Imaging.ImageLockMode.[WriteOnly], m_Bitmaps(m_BitmapSelector).PixelFormat)
-            'Dim ptr As IntPtr = bmpData.Scan0
-            'System.Runtime.InteropServices.Marshal.Copy(b.DataPtr, ptr, 0, b.DataSize) 'copy into bitmap
-            'System.Runtime.InteropServices.Marshal.Copy(b.ManagedData, 0, rawData, b.DataSize) 'copy into array
-
-            m_buffers(m_BitmapSelector) = b.ManagedData
-            m_width = b.Width
-            m_height = b.Height
-            m_dataSize = b.DataSize
-
-
-        End Sub
         Public Sub FillNextBitmap(b As Bitmap)
             SwitchBitmap()
 
