@@ -5,14 +5,14 @@
 [Setup]
 AppID={{c7b4639c-094b-4964-a1bd-495f47e83996}
 AppName=ASCOM ApogeeAlta Camera Driver
-AppVerName=ASCOM ApogeeAlta Camera Driver 1.0
-AppVersion=1.0
+AppVerName=ASCOM ApogeeAlta Camera Driver 1.1
+AppVersion=1.1
 AppPublisher=Sandy MacPherson <funkysandman@gmail.com>
 AppPublisherURL=mailto:funkysandman@gmail.com
 AppSupportURL=http://tech.groups.yahoo.com/group/ASCOM-Talk/
 AppUpdatesURL=http://ascom-standards.org/
-VersionInfoVersion=1.0.0
-MinVersion=0,5.0.2195sp4
+VersionInfoVersion=1.1.0
+;MinVersion=0,5.0.2195sp4
 DefaultDirName="{cf}\ASCOM\Camera"
 DisableDirPage=yes
 DisableProgramGroupPage=yes
@@ -34,9 +34,9 @@ Name: "{cf}\ASCOM\Uninstall\Camera\ApogeeAlta"
 ; TODO: Add subfolders below {app} as needed (e.g. Name: "{app}\MyFolder")
 
 [Files]
-Source: "C:\Users\sandy\Source\Repos\funkyCams\ApogeeAscomDriver\bin\Release\ASCOM.Apogee.Camera.dll"; DestDir: "{app}"
+Source: "C:\Users\funky\source\repos\funkysandman\funkyCams\ApogeeAscomDriver\bin\Debug\ASCOM.Apogee.Camera.dll"; DestDir: "{app}"
 ; Require a read-me HTML to appear after installation, maybe driver's Help doc
-Source: "C:\Users\sandy\Source\Repos\funkyCams\ApogeeAscomDriver\ReadMe.htm"; DestDir: "{app}"; Flags: isreadme
+Source: "C:\Users\funky\source\repos\funkysandman\funkyCams\ApogeeAscomDriver\ReadMe.htm"; DestDir: "{app}"; Flags: isreadme
 ; TODO: Add other files needed by your driver here (add subfolders above)
 
 

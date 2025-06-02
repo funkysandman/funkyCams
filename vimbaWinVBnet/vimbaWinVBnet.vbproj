@@ -127,10 +127,7 @@
     <Reference Include="System.XML" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Xml.Serialization" />
-    <Reference Include="TIS.Imaging.ICImagingControl34, Version=3.4.4.2744, Culture=neutral, PublicKeyToken=257805929e8b7928, processorArchitecture=AMD64">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\Program Files\Common Files\IC Imaging Control 3.4\bin\v4.0.30319\x64\TIS.Imaging.ICImagingControl34.dll</HintPath>
-    </Reference>
+    <Reference Include="TIS.Imaging.ICImagingControl35, Version=3.5.6.4008, Culture=neutral, PublicKeyToken=257805929e8b7928, processorArchitecture=AMD64" />
     <Reference Include="VimbaNET, Version=1.7.0.24184, Culture=neutral, PublicKeyToken=96b729f24f119b9a, processorArchitecture=x86">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\Program Files\Allied Vision\Vimba_2.1\VimbaNET\Bin\Win64\VimbaNET.dll</HintPath>
@@ -160,6 +157,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include=".vb" />
+    <Compile Include="Form1.Designer.vb">
+      <DependentUpon>Form1.vb</DependentUpon>
+    </Compile>
+    <Compile Include="Form1.vb">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="frmBasler.Designer.vb">
       <DependentUpon>frmBasler.vb</DependentUpon>
     </Compile>
@@ -275,6 +278,9 @@
     <Compile Include="webserver.vb" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Form1.resx">
+      <DependentUpon>Form1.vb</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="frmBasler.resx">
       <DependentUpon>frmBasler.vb</DependentUpon>
     </EmbeddedResource>
