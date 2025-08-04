@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28307.1259
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36327.8 d17.14
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "vimbaWinVBnet", "vimbaWinVBnet\vimbaWinVBnet.vbproj", "{42B2FBF8-9644-4638-8EE8-62DC98B22787}"
 EndProject
@@ -71,6 +71,8 @@ EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "ApogeeAscomTester", "ApogeeAscomTester\ApogeeAscomTester.vbproj", "{B7BB358D-ED93-4C91-B1B2-3F236CDDDBD8}"
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "apogeeCamTest", "apogeeCamTest\apogeeCamTest.vbproj", "{5C12D7EE-D77A-47C1-8A05-00FA76B2DEC7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ATIK_ascom", "..\..\ATIK_ascom\ATIK_ascom.csproj", "{C708E487-E3A9-4073-A545-294B88674225}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -682,6 +684,30 @@ Global
 		{5C12D7EE-D77A-47C1-8A05-00FA76B2DEC7}.RelWithDebInfo|x64.Build.0 = Release|Any CPU
 		{5C12D7EE-D77A-47C1-8A05-00FA76B2DEC7}.RelWithDebInfo|x86.ActiveCfg = Release|Any CPU
 		{5C12D7EE-D77A-47C1-8A05-00FA76B2DEC7}.RelWithDebInfo|x86.Build.0 = Release|Any CPU
+		{C708E487-E3A9-4073-A545-294B88674225}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C708E487-E3A9-4073-A545-294B88674225}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C708E487-E3A9-4073-A545-294B88674225}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{C708E487-E3A9-4073-A545-294B88674225}.Debug|x64.Build.0 = Debug|Any CPU
+		{C708E487-E3A9-4073-A545-294B88674225}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{C708E487-E3A9-4073-A545-294B88674225}.Debug|x86.Build.0 = Debug|Any CPU
+		{C708E487-E3A9-4073-A545-294B88674225}.MinSizeRel|Any CPU.ActiveCfg = Release|Any CPU
+		{C708E487-E3A9-4073-A545-294B88674225}.MinSizeRel|Any CPU.Build.0 = Release|Any CPU
+		{C708E487-E3A9-4073-A545-294B88674225}.MinSizeRel|x64.ActiveCfg = Release|Any CPU
+		{C708E487-E3A9-4073-A545-294B88674225}.MinSizeRel|x64.Build.0 = Release|Any CPU
+		{C708E487-E3A9-4073-A545-294B88674225}.MinSizeRel|x86.ActiveCfg = Release|Any CPU
+		{C708E487-E3A9-4073-A545-294B88674225}.MinSizeRel|x86.Build.0 = Release|Any CPU
+		{C708E487-E3A9-4073-A545-294B88674225}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C708E487-E3A9-4073-A545-294B88674225}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C708E487-E3A9-4073-A545-294B88674225}.Release|x64.ActiveCfg = Release|Any CPU
+		{C708E487-E3A9-4073-A545-294B88674225}.Release|x64.Build.0 = Release|Any CPU
+		{C708E487-E3A9-4073-A545-294B88674225}.Release|x86.ActiveCfg = Release|Any CPU
+		{C708E487-E3A9-4073-A545-294B88674225}.Release|x86.Build.0 = Release|Any CPU
+		{C708E487-E3A9-4073-A545-294B88674225}.RelWithDebInfo|Any CPU.ActiveCfg = Debug|Any CPU
+		{C708E487-E3A9-4073-A545-294B88674225}.RelWithDebInfo|Any CPU.Build.0 = Debug|Any CPU
+		{C708E487-E3A9-4073-A545-294B88674225}.RelWithDebInfo|x64.ActiveCfg = Debug|Any CPU
+		{C708E487-E3A9-4073-A545-294B88674225}.RelWithDebInfo|x64.Build.0 = Debug|Any CPU
+		{C708E487-E3A9-4073-A545-294B88674225}.RelWithDebInfo|x86.ActiveCfg = Debug|Any CPU
+		{C708E487-E3A9-4073-A545-294B88674225}.RelWithDebInfo|x86.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
