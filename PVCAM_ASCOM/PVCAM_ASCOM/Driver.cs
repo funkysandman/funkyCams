@@ -136,7 +136,7 @@ namespace ASCOM.Photometrics
             myCam.SetGainState(2);//gain state 3 - highest gain
             myCam.FramesToGet = 1;
             myCam.SetExposureTime(1);
-            //myCam.SetADCoffset(40); //this value was found to best for zeroing the bias frame
+            myCam.SetADCoffset(40); //40 was found to best for zeroing the bias frame
 
             readoutModes.Add("Live");
             readoutModes.Add("Normal");
