@@ -2185,7 +2185,8 @@ namespace SVCamApi
         }
         public void startAcquisitionTriggerWidthThread(FrameReceivedHandler frh)
         {
-
+            IntPtr phFeature = IntPtr.Zero;
+            SVcamApi._SVCamFeaturInf info = new SVcamApi._SVCamFeaturInf();
             try
             {
                 SVcamApi.SVSCamApiReturn ret;
@@ -2203,7 +2204,27 @@ namespace SVCamApi
                 }
 
                 current_selected_cam.acquisitionStart(1, frh);
+                //prime camera?
+                ret = SVSCam.myApi.SVS_FeatureGetByName(current_selected_cam.hRemoteDevice, "TriggerSoftware", ref phFeature);
+                ret = SVSCam.myApi.SVS_FeatureCommandExecute(current_selected_cam.hRemoteDevice, phFeature, 1000);
 
+                //
+
+                //flip activation to opposite
+                ret = SVSCam.myApi.SVS_FeatureGetByName(current_selected_cam.hRemoteDevice, "TriggerActivation", ref phFeature);
+                ret = SVSCam.myApi.SVS_FeatureGetInfo(current_selected_cam.hRemoteDevice, phFeature, ref info.SVFeaturInf);
+
+                if (info.SVFeaturInf.enumSelectedIndex == 0)
+                {
+                    var falling = 4;
+                    ret = SVSCam.myApi.SVS_FeatureSetValueInt64Enum(current_selected_cam.hRemoteDevice, phFeature, falling);//falling edge
+
+                }
+                else
+                {
+                    var rising = 6;
+                    ret = SVSCam.myApi.SVS_FeatureSetValueInt64Enum(current_selected_cam.hRemoteDevice, phFeature, rising);//rising edge
+                }
                 acqThreadIsRuning = true;
                 acqThread = new Thread(new ThreadStart(acqTHreadTriggerWidth));
                 acqThread.Start();
@@ -2411,13 +2432,24 @@ namespace SVCamApi
             //Application.DoEvents();
             //ret = SVSCam.myApi.SVS_FeatureGetByName(cam.hRemoteDevice, "PayloadSize", ref phFeature);
             //cam.getFeatureValue(phFeature, ref info);
+            ret = SVSCam.myApi.SVS_FeatureGetByName(cam.hRemoteDevice, "TriggerMode", ref phFeature);
+            ret = SVSCam.myApi.SVS_FeatureGetInfo(cam.hRemoteDevice, phFeature, ref info.SVFeaturInf);
+            ret = SVSCam.myApi.SVS_FeatureSetValueInt64Enum(cam.hRemoteDevice, phFeature, 1);//On
+            phFeature = IntPtr.Zero;
+            //turn trigger source
+            ret = SVSCam.myApi.SVS_FeatureGetByName(cam.hRemoteDevice, "TriggerSource", ref phFeature);
+            ret = SVSCam.myApi.SVS_FeatureGetInfo(cam.hRemoteDevice, phFeature, ref info.SVFeaturInf);
+            var choice = 4;
+            ret = SVSCam.myApi.SVS_FeatureSetValueInt64Enum(cam.hRemoteDevice, phFeature, choice);//Software
+           // ret = SVSCam.myApi.SVS_FeatureSetValueString(cam.hRemoteDevice, phFeature, "Software");
+            phFeature = IntPtr.Zero;
 
             ret = SVSCam.myApi.SVS_FeatureGetByName(cam.hRemoteDevice, "TriggerActivation", ref phFeature);
             Console.WriteLine(ret);
             ret = SVSCam.myApi.SVS_FeatureGetInfo(cam.hRemoteDevice, phFeature, ref info.SVFeaturInf);
-
-            //ret =SVSCam.myApi.SVS_FeatureSetValueString(cam.hRemoteDevice,phFeature, "Rising Edge");
-            ret = SVSCam.myApi.SVS_FeatureSetValueInt64Enum(cam.hRemoteDevice, phFeature, 0);//rising edge
+            choice = 4;//rising edge
+            //ret =SVSCam.myApi.SVS_FeatureSetValueString(cam.hRemoteDevice,phFeature, "RisingEdge");
+            ret = SVSCam.myApi.SVS_FeatureSetValueInt64Enum(cam.hRemoteDevice, phFeature, choice);//rising edge
             Console.WriteLine(ret);
             //set packet delay
             ret = SVSCam.myApi.SVS_FeatureGetByName(cam.hRemoteDevice, "GevSCPD", ref phFeature);
@@ -2429,15 +2461,8 @@ namespace SVCamApi
             ret = SVSCam.myApi.SVS_FeatureSetValueInt64Enum(cam.hRemoteDevice, phFeature, 1);//triggerWidth
             phFeature = IntPtr.Zero;
             //turn trigger mode on
-            ret = SVSCam.myApi.SVS_FeatureGetByName(cam.hRemoteDevice, "TriggerMode", ref phFeature);
-            ret = SVSCam.myApi.SVS_FeatureGetInfo(cam.hRemoteDevice, phFeature, ref info.SVFeaturInf);
-            ret = SVSCam.myApi.SVS_FeatureSetValueInt64Enum(cam.hRemoteDevice, phFeature, 1);//On
-            phFeature = IntPtr.Zero;
-            //turn trigger source
-            ret = SVSCam.myApi.SVS_FeatureGetByName(cam.hRemoteDevice, "TriggerSource", ref phFeature);
-            ret = SVSCam.myApi.SVS_FeatureGetInfo(cam.hRemoteDevice, phFeature, ref info.SVFeaturInf);
-            ret = SVSCam.myApi.SVS_FeatureSetValueInt64Enum(cam.hRemoteDevice, phFeature, 1);//Line1
-            phFeature = IntPtr.Zero;
+
+
 
             // ret = SVSCam.myApi.SVS_FeatureGetByName(cam.hRemoteDevice, "PayloadSize", ref phFeature);
             // ret = SVSCam.myApi.SVS_FeatureGetInfo(cam.hRemoteDevice, phFeature, ref info.SVFeaturInf);
@@ -2819,24 +2844,32 @@ namespace SVCamApi
             SVCamApi.SVcamApi.SVSCamApiReturn ret;
             IntPtr phFeature = IntPtr.Zero;
             //cam.getFeatureValue(hFeature, hInfo);
-           
+            SVcamApi._SVCamFeaturInf info = new SVcamApi._SVCamFeaturInf();
+            ret = SVSCam.myApi.SVS_FeatureGetByName(cam.hRemoteDevice, "TriggerSoftware", ref phFeature);
+            ret = SVSCam.myApi.SVS_FeatureCommandExecute(cam.hRemoteDevice, phFeature,1000);
+
             //
+
+
+            Thread.Sleep(cam.duration / 1000);
+
+            //flip activation to opposite
             ret = SVSCam.myApi.SVS_FeatureGetByName(cam.hRemoteDevice, "TriggerActivation", ref phFeature);
-            ret = SVSCam.myApi.SVS_FeatureSetValueInt64Enum(cam.hRemoteDevice, phFeature, 1);//falling edge
-            if (ret == SVcamApi.SVSCamApiReturn.SV_ERROR_SUCCESS)
+            ret = SVSCam.myApi.SVS_FeatureGetInfo(cam.hRemoteDevice, phFeature, ref info.SVFeaturInf);
+
+            if (info.SVFeaturInf.enumSelectedIndex==0)
             {
-                Console.WriteLine("falling edge");
+                var falling = 4;
+                ret = SVSCam.myApi.SVS_FeatureSetValueInt64Enum(cam.hRemoteDevice, phFeature, falling);//falling edge
+
             }
             else
             {
-                Console.WriteLine(ret);
+                var rising = 6;
+                ret = SVSCam.myApi.SVS_FeatureSetValueInt64Enum(cam.hRemoteDevice, phFeature, rising);//rising edge
             }
 
-            Thread.Sleep(cam.duration / 1000);
-            //trigger off
-            ret = SVSCam.myApi.SVS_FeatureSetValueInt64Enum(cam.hRemoteDevice, phFeature, 0);//rising edge
-            if (ret == SVcamApi.SVSCamApiReturn.SV_ERROR_SUCCESS)
-                Console.WriteLine("rising edge");
+
         }
         public void acqTHreadTriggerWidth()
         {

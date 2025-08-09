@@ -41,7 +41,7 @@ Public Class WebServer
     Private myFWform As frmFoculs
     Private myQIform As frmQ
     Private myToupForm As frmToupcam
-    Private myISForm As frmIS
+    ' Private myISForm As frmIS
     Private myCoolsnapForm As frmCoolsnap
     Private myPointGreyForm As frmPointGrey
     Private restart As Boolean = False
@@ -187,21 +187,21 @@ Public Class WebServer
             f.writeline(ex.Message)
         End Try
     End Sub
-    Public Sub StartWebServer(f As frmIS, port As Integer)
-        Try
-            LocalPort = port
-            myISform = f
+    'Public Sub StartWebServer(f As frmIS, port As Integer)
+    '    Try
+    '        LocalPort = port
+    '        myISform = f
 
-            'loadGigEDarks()
-            LocalTCPListener = New TcpListener(LocalAddress, LocalPort)
-            LocalTCPListener.Start()
-            WebThread = New Thread(AddressOf StartListenIS)
-            WebThread.Start()
+    '        'loadGigEDarks()
+    '        LocalTCPListener = New TcpListener(LocalAddress, LocalPort)
+    '        LocalTCPListener.Start()
+    '        WebThread = New Thread(AddressOf StartListenIS)
+    '        WebThread.Start()
 
-        Catch ex As Exception
+    '    Catch ex As Exception
 
-        End Try
-    End Sub
+    '    End Try
+    'End Sub
     Public Sub StartWebServer(f As frmPCO, port As Integer)
         Try
             LocalPort = port
@@ -2421,7 +2421,7 @@ Public Class WebServer
 
                         'End If
                         'mySVSVistekCam.useDarks = Me.useDarks
-                        b = myISForm.getLastImage()
+                        ' b = myISForm.getLastImage()
                         ' mySVSVistekForm.writeline("acquired last SVS Vistek image")
 
 
