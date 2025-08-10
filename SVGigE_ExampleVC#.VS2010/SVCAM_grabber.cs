@@ -1,17 +1,20 @@
-﻿using System;
+﻿using BGAPI2;
+using GigEApi;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics.Eventing.Reader;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Windows.Forms;
-using System.Runtime.InteropServices;
-using System.Threading;
-using System.IO;
 using System.Drawing.Imaging;
-
-using GigEApi;
+using System.IO;
+using System.Linq;
+using System.Runtime.InteropServices;
+using System.Runtime.InteropServices.ComTypes;
+using System.Text;
+using System.Threading;
+using System.Windows.Forms;
+using Image = System.Drawing.Image;
 
 namespace SVCamApi
 {
@@ -257,11 +260,16 @@ namespace SVCamApi
             SVcamApi myApi = null;
             public IntPtr hRemoteDevice = IntPtr.Zero;
             public IntPtr hDevice = IntPtr.Zero;
+            IntPtr hBuffer = IntPtr.Zero;
             public SVcamApi._SV_DEVICE_INFO devInfo;
             public bool is_opened = false;
             public SVcamApi._SVCamFeaturInf info;
             // Streaming
             public IntPtr hStream = IntPtr.Zero;
+            public IntPtr phTriggerActivationFeature = IntPtr.Zero;
+            public IntPtr phTriggerSoftwareFeature = IntPtr.Zero;
+            public int previous_trigger_action = 4;
+
             uint dsBufcount = 0;
             bool isStreaming = false;
             // public byte[] buff = null;
@@ -275,6 +283,7 @@ namespace SVCamApi
             public SVcamApi._SV_BUFFER_INFO bufferInfoDest = new SVcamApi._SV_BUFFER_INFO();
             public SVcamApi._SV_BUFFER_INFO bufferInfosrc = new SVcamApi._SV_BUFFER_INFO();
             private SVcamApi.SVSCamApiReturn ret;
+            private IntPtr pPrivate;
 
             public Camera(SVcamApi._SV_DEVICE_INFO _devinfo, SVcamApi _myApi)
 
@@ -530,17 +539,25 @@ namespace SVCamApi
             {
                 return myApi.SVS_SVStreamClose(hStream);
             }
+            public SVcamApi.SVSCamApiReturn PrepareBuffer()
+            {
 
+                myApi.SVS_StreamFlushQueue(hStream, SVcamApi.SV_ACQ_QUEUE_TYPE_LIST.SV_ACQ_QUEUE_ALL_TO_INPUT);
+                ret = myApi.SVS_StreamQueueBuffer(hStream, hBuffer);
+
+                Console.WriteLine("prepare buffer :{0}", ret);
+                return ret;
+            }
             public bool grab()
             {
                 unsafe
                 {
                     IntPtr hFeature = IntPtr.Zero;
                     SVcamApi.SVSCamApiReturn ret = SVcamApi.SVSCamApiReturn.SV_ERROR_SUCCESS;
-                    IntPtr hBuffer = IntPtr.Zero;
+                    
                     IntPtr Imagptr2 = IntPtr.Zero;
                     //good time to check temperature
-
+                    
                     //temp = 0;
                     // myApi.Gige_Camera_getSensorTemperature(hCamera, ref temp);
                     IntPtr phFeature = IntPtr.Zero; ;
@@ -551,7 +568,7 @@ namespace SVCamApi
                     Console.WriteLine("about to streamWaitForNewBuffer");
                     //
                     ret = SVcamApi.SVSCamApiReturn.SV_ERROR_NOT_INITIALIZED;
-                    uint timeout = (uint)this.duration + 10000;
+                    uint timeout = 5000;// wait no more than 5000 ms
 
                     //while (ret!= SVcamApi.SVSCamApiReturn.SV_ERROR_SUCCESS)
                     //{ 
@@ -613,7 +630,7 @@ namespace SVCamApi
                     bufferInfoDest.iImageId = bufferInfosrc.iImageId;
                     bufferInfoDest.iTimeStamp = bufferInfosrc.iTimeStamp;
                     //Queues a particular buffer for acquisition.
-                    myApi.SVS_StreamQueueBuffer(hStream, hBuffer);
+                    PrepareBuffer();
                     return true;
                 }
             }
@@ -721,7 +738,7 @@ namespace SVCamApi
 
                 }
 
-                myApi.SVS_StreamFlushQueue(hStream, SVcamApi.SV_ACQ_QUEUE_TYPE_LIST.SV_ACQ_QUEUE_ALL_TO_INPUT);
+                //myApi.SVS_StreamFlushQueue(hStream, SVcamApi.SV_ACQ_QUEUE_TYPE_LIST.SV_ACQ_QUEUE_ALL_TO_INPUT);
                 ret = myApi.SVS_StreamAcquisitionStart(hStream, SVcamApi.SV_ACQ_START_FLAGS_LIST.SV_ACQ_START_FLAGS_DEFAULT, SVcamApi.DefineConstants.INFINIT);
 
                 if (SVcamApi.SVSCamApiReturn.SV_ERROR_SUCCESS != ret)
@@ -2204,27 +2221,27 @@ namespace SVCamApi
                 }
 
                 current_selected_cam.acquisitionStart(1, frh);
-                //prime camera?
-                ret = SVSCam.myApi.SVS_FeatureGetByName(current_selected_cam.hRemoteDevice, "TriggerSoftware", ref phFeature);
-                ret = SVSCam.myApi.SVS_FeatureCommandExecute(current_selected_cam.hRemoteDevice, phFeature, 1000);
+                ////prime camera?
+                //ret = SVSCam.myApi.SVS_FeatureGetByName(current_selected_cam.hRemoteDevice, "TriggerSoftware", ref phFeature);
+                //ret = SVSCam.myApi.SVS_FeatureCommandExecute(current_selected_cam.hRemoteDevice, phFeature, 1000);
 
-                //
+                ////
 
-                //flip activation to opposite
-                ret = SVSCam.myApi.SVS_FeatureGetByName(current_selected_cam.hRemoteDevice, "TriggerActivation", ref phFeature);
-                ret = SVSCam.myApi.SVS_FeatureGetInfo(current_selected_cam.hRemoteDevice, phFeature, ref info.SVFeaturInf);
+                ////flip activation to opposite
+                //ret = SVSCam.myApi.SVS_FeatureGetByName(current_selected_cam.hRemoteDevice, "TriggerActivation", ref phFeature);
+                //ret = SVSCam.myApi.SVS_FeatureGetInfo(current_selected_cam.hRemoteDevice, phFeature, ref info.SVFeaturInf);
 
-                if (info.SVFeaturInf.enumSelectedIndex == 0)
-                {
-                    var falling = 4;
-                    ret = SVSCam.myApi.SVS_FeatureSetValueInt64Enum(current_selected_cam.hRemoteDevice, phFeature, falling);//falling edge
+                //if (info.SVFeaturInf.enumSelectedIndex == 0)
+                //{
+                //    var falling = 4;
+                //    ret = SVSCam.myApi.SVS_FeatureSetValueInt64Enum(current_selected_cam.hRemoteDevice, phFeature, falling);//falling edge
 
-                }
-                else
-                {
-                    var rising = 6;
-                    ret = SVSCam.myApi.SVS_FeatureSetValueInt64Enum(current_selected_cam.hRemoteDevice, phFeature, rising);//rising edge
-                }
+                //}
+                //else
+                //{
+                //    var rising = 6;
+                //    ret = SVSCam.myApi.SVS_FeatureSetValueInt64Enum(current_selected_cam.hRemoteDevice, phFeature, rising);//rising edge
+                //}
                 acqThreadIsRuning = true;
                 acqThread = new Thread(new ThreadStart(acqTHreadTriggerWidth));
                 acqThread.Start();
@@ -2268,7 +2285,8 @@ namespace SVCamApi
         }
         public void startAcquisitionThreadTriggerWidthForDarks(FrameReceivedHandler frh)
         {
-
+            IntPtr phFeature = IntPtr.Zero;
+            SVcamApi._SVCamFeaturInf info = new SVcamApi._SVCamFeaturInf();
             try
             {
                 SVcamApi.SVSCamApiReturn ret;
@@ -2286,7 +2304,27 @@ namespace SVCamApi
                 }
 
                 current_selected_cam.acquisitionStart(1, frh);
+                ////prime camera?
+                //ret = SVSCam.myApi.SVS_FeatureGetByName(current_selected_cam.hRemoteDevice, "TriggerSoftware", ref phFeature);
+                //ret = SVSCam.myApi.SVS_FeatureCommandExecute(current_selected_cam.hRemoteDevice, phFeature, 1000);
 
+                ////
+
+                ////flip activation to opposite
+                //ret = SVSCam.myApi.SVS_FeatureGetByName(current_selected_cam.hRemoteDevice, "TriggerActivation", ref phFeature);
+                //ret = SVSCam.myApi.SVS_FeatureGetInfo(current_selected_cam.hRemoteDevice, phFeature, ref info.SVFeaturInf);
+
+                //if (info.SVFeaturInf.enumSelectedIndex == 0)
+                //{
+                //    var falling = 4;
+                //    ret = SVSCam.myApi.SVS_FeatureSetValueInt64Enum(current_selected_cam.hRemoteDevice, phFeature, falling);//falling edge
+
+                //}
+                //else
+                //{
+                //    var rising = 6;
+                //    ret = SVSCam.myApi.SVS_FeatureSetValueInt64Enum(current_selected_cam.hRemoteDevice, phFeature, rising);//rising edge
+                //}
                 acqThreadIsRuning = true;
                 acqThread = new Thread(new ThreadStart(acqTHreadTriggerWidthdarks));
                 acqThread.Start();
@@ -2296,6 +2334,7 @@ namespace SVCamApi
                 acqThreadIsRuning = false;
                 Console.WriteLine("problem starting acquisition Thread");
             }
+
         }
 
         public void killCapture()
@@ -2312,40 +2351,18 @@ namespace SVCamApi
         }
         public void stopAcquisitionThread()
         {
-
-
-
-
             Console.WriteLine("stopping acquisition");
             acqThreadIsRuning = false;
-            while (acqThread.ThreadState == ThreadState.Running)
-            { Application.DoEvents(); }
+
+            // Wait for thread to finish from a different thread
+            if (acqThread != null && acqThread.IsAlive)
+            {
+                acqThread.Join(); // No Application.DoEvents() — no blocking inside same thread
+            }
             Console.WriteLine("stopped acquisition thread");
-            //current_selected_cam.acquisitionStop();
-            //current_selected_cam.StreamingChannelClose();
-            //acqThread.Abort();
-
-            //if (current_selected_cam.bufferInfoDest.pImagePtr != IntPtr.Zero)
-            //{
-            //    Marshal.FreeHGlobal(current_selected_cam.bufferInfoDest.pImagePtr);
-            //    current_selected_cam.bufferInfoDest.pImagePtr = IntPtr.Zero;
-            //}
-            //if (current_selected_cam.bufferInfoDest.pImagePtr != IntPtr.Zero)
-            //{
-            //    Marshal.FreeHGlobal(current_selected_cam.bufferInfoDest.pImagePtr);
-            //    current_selected_cam.bufferInfoDest.pImagePtr = IntPtr.Zero;
-            //}
-
-
-
-
-
-
-
-
-
-
         }
+
+
         public void startAcquisitionThread_darks()
         {
             current_selected_cam.is_opened = true;
@@ -2454,7 +2471,7 @@ namespace SVCamApi
             //set packet delay
             ret = SVSCam.myApi.SVS_FeatureGetByName(cam.hRemoteDevice, "GevSCPD", ref phFeature);
             ret = SVSCam.myApi.SVS_FeatureGetInfo(cam.hRemoteDevice, phFeature, ref info.SVFeaturInf);
-            ret = SVSCam.myApi.SVS_FeatureSetValueInt64(cam.hRemoteDevice, phFeature, 1000);//packet delay
+            ret = SVSCam.myApi.SVS_FeatureSetValueInt64(cam.hRemoteDevice, phFeature, 50000);//packet delay
             //turn on triggerwidth
             ret = SVSCam.myApi.SVS_FeatureGetByName(cam.hRemoteDevice, "ExposureMode", ref phFeature);
             ret = SVSCam.myApi.SVS_FeatureGetInfo(cam.hRemoteDevice, phFeature, ref info.SVFeaturInf);
@@ -2542,9 +2559,9 @@ namespace SVCamApi
                 ret = SVSCam.myApi.SVS_FeatureSetValueFloat(cam.hRemoteDevice, phFeature, Math.Min((float)999220 / cam.duration, (float)2));
             }
             //set packet delay
-            //ret = SVSCam.myApi.SVS_FeatureGetByName(cam.hRemoteDevice, "GevSCPD", ref phFeature);
-            //ret = SVSCam.myApi.SVS_FeatureGetInfo(cam.hRemoteDevice, phFeature, ref info.SVFeaturInf);
-            //ret = SVSCam.myApi.SVS_FeatureSetValueInt64(cam.hRemoteDevice, phFeature, 5000000);//packet delay
+            ret = SVSCam.myApi.SVS_FeatureGetByName(cam.hRemoteDevice, "GevSCPD", ref phFeature);
+            ret = SVSCam.myApi.SVS_FeatureGetInfo(cam.hRemoteDevice, phFeature, ref info.SVFeaturInf);
+            ret = SVSCam.myApi.SVS_FeatureSetValueInt64(cam.hRemoteDevice, phFeature, 500);//packet delay
             //turn on triggerwidth
             ret = SVSCam.myApi.SVS_FeatureGetByName(cam.hRemoteDevice, "ExposureMode", ref phFeature);
             ret = SVSCam.myApi.SVS_FeatureGetInfo(cam.hRemoteDevice, phFeature, ref info.SVFeaturInf);
@@ -2681,11 +2698,20 @@ namespace SVCamApi
         {
 
             //Bitmap[] darks = new Bitmap[10];
-            Camera cam = this.current_selected_cam;
+            SVcamApi._SVCamFeaturInf info = new SVcamApi._SVCamFeaturInf();
+            IntPtr phFeature = IntPtr.Zero;
+            Camera cam = current_selected_cam;
+            SVCamApi.SVcamApi.SVSCamApiReturn ret;
+            ret = SVSCam.myApi.SVS_FeatureGetByName(cam.hRemoteDevice, "TriggerSoftware", ref cam.phTriggerSoftwareFeature);
+            ret = SVSCam.myApi.SVS_FeatureGetByName(cam.hRemoteDevice, "TriggerActivation", ref cam.phTriggerActivationFeature);
+            ret = SVSCam.myApi.SVS_FeatureGetInfo(cam.hRemoteDevice, cam.phTriggerActivationFeature, ref info.SVFeaturInf);
             int numDarks = 10;
-
+            if (info.SVFeaturInf.enumSelectedIndex == 0)
+            { cam.previous_trigger_action = 6; }
+            else
+            { cam.previous_trigger_action = 4; }
             int pDestLength = 0;
-            prepareCameraForTriggerWidth(cam);
+
             for (int d = 0; d < numDarks; d++)
             {
                 //take pic
@@ -2845,57 +2871,68 @@ namespace SVCamApi
             IntPtr phFeature = IntPtr.Zero;
             //cam.getFeatureValue(hFeature, hInfo);
             SVcamApi._SVCamFeaturInf info = new SVcamApi._SVCamFeaturInf();
-            ret = SVSCam.myApi.SVS_FeatureGetByName(cam.hRemoteDevice, "TriggerSoftware", ref phFeature);
-            ret = SVSCam.myApi.SVS_FeatureCommandExecute(cam.hRemoteDevice, phFeature,1000);
+
+            ret = SVSCam.myApi.SVS_FeatureCommandExecute(cam.hRemoteDevice, cam.phTriggerSoftwareFeature, 1000);
 
             //
+            Console.WriteLine("software trigger fired");
 
-
-            Thread.Sleep(cam.duration / 1000);
-
+            //Thread.Sleep(cam.duration / 1000);
+            Thread.Sleep(6000);
             //flip activation to opposite
-            ret = SVSCam.myApi.SVS_FeatureGetByName(cam.hRemoteDevice, "TriggerActivation", ref phFeature);
-            ret = SVSCam.myApi.SVS_FeatureGetInfo(cam.hRemoteDevice, phFeature, ref info.SVFeaturInf);
 
-            if (info.SVFeaturInf.enumSelectedIndex==0)
+            if (cam.previous_trigger_action == 6)
             {
                 var falling = 4;
-                ret = SVSCam.myApi.SVS_FeatureSetValueInt64Enum(cam.hRemoteDevice, phFeature, falling);//falling edge
-
+                ret = SVSCam.myApi.SVS_FeatureSetValueInt64Enum(cam.hRemoteDevice, cam.phTriggerActivationFeature, falling);//falling edge
+                cam.previous_trigger_action = 4;
             }
             else
             {
                 var rising = 6;
-                ret = SVSCam.myApi.SVS_FeatureSetValueInt64Enum(cam.hRemoteDevice, phFeature, rising);//rising edge
+                ret = SVSCam.myApi.SVS_FeatureSetValueInt64Enum(cam.hRemoteDevice, cam.phTriggerActivationFeature, rising);//rising edge
+                cam.previous_trigger_action = 6;
             }
-
+            Console.WriteLine("triggerActivation switched:{0}",ret);
 
         }
         public void acqTHreadTriggerWidth()
         {
             Console.WriteLine("starting acqThread trigger width");
 
-
+            SVcamApi._SVCamFeaturInf info = new SVcamApi._SVCamFeaturInf();
             IntPtr phFeature = IntPtr.Zero;
             Camera cam = current_selected_cam;
             SVCamApi.SVcamApi.SVSCamApiReturn ret;
-            
+            ret = SVSCam.myApi.SVS_FeatureGetByName(cam.hRemoteDevice, "TriggerSoftware", ref cam.phTriggerSoftwareFeature);
+            ret = SVSCam.myApi.SVS_FeatureGetByName(cam.hRemoteDevice, "TriggerActivation", ref cam.phTriggerActivationFeature);
+            ret = SVSCam.myApi.SVS_FeatureGetInfo(cam.hRemoteDevice, cam.phTriggerActivationFeature, ref info.SVFeaturInf);
+
+            if (info.SVFeaturInf.enumSelectedIndex == 0)
+                 { cam.previous_trigger_action = 6; }
+            else
+             { cam.previous_trigger_action = 4; }
+
             while (acqThreadIsRuning)
-            {
-                //trigger on
-                expose(cam);
-                if (!cam.grab())
                 {
-                    stopAcquisitionThread();
-                    Console.WriteLine("stopped acquisition");
+                    //trigger on
+                    expose(cam);
 
-                    startAcquisitionThread(m_frh);
-                    Console.WriteLine("called start acquisition");
-                    return;
+                    if (!cam.grab())
+                    {
+                        //stopAcquisitionThread();
+                        //Console.WriteLine("stopped acquisition");
 
-                }
-                else
-                {
+                        //startAcquisitionThread(m_frh);
+                        //Console.WriteLine("called start acquisition");
+                        //return;
+
+                        Console.WriteLine("grab failed");
+                        //acqThreadIsRuning = false;  // signal stop
+                        //break;  // exit loop immediately
+                        //cam.PrepareBuffer();
+                    }
+
                     Console.WriteLine("inside while loop");
 
                     // Check if a RGB image( Bayer buffer format) arrived
@@ -2924,10 +2961,10 @@ namespace SVCamApi
                     cam.addnewImageData2(cam.bufferInfoDest, isImgRGB);
                     cam.isrgb = isImgRGB;
                     //
+
+
+
                 }
-
-
-            }
             Console.WriteLine("acqThreadIsRuning no more");
             //try to restart camera
             //current_selected_cam.is_opened = false;
