@@ -162,6 +162,10 @@ namespace ATIKCAM
         [DllImport(DLLPath)]
         public static extern int ArtemisCameraState(IntPtr handle);
 
+        
+        [DllImport(DLLPath)]
+        public static extern int ArtemisGetFan(IntPtr handle);
+
         [DllImport(DLLPath)]
         public static extern float ArtemisExposureTimeRemaining(IntPtr handle);
 

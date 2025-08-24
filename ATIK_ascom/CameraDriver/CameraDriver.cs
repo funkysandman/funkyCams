@@ -41,7 +41,7 @@ namespace ASCOM.ATIKVS.Camera
     [ProgId("ASCOM.ATIKVS.Camera")]
     [ServedClassName("ASCOM Camera Driver for ATIKVS")] // Driver description that appears in the Chooser, customise as required
     [ClassInterface(ClassInterfaceType.None)]
-    public class Camera : ReferenceCountedObjectBase, ICameraV4, IDisposable
+    public class Camera :  ICameraV4, IDisposable
     {
         internal static string DriverProgId; // ASCOM DeviceID (COM ProgID) for this driver, the value is retrieved from the ServedClassName attribute in the class initialiser.
         internal static string DriverDescription; // The value is retrieved from the ServedClassName attribute in the class initialiser.
@@ -1505,6 +1505,21 @@ namespace ASCOM.ATIKVS.Camera
                     throw;
                 }
             }
+            set
+            {
+                try
+                {
+                    CheckConnected("ImageReady");
+                    bool imageReady = CameraHardware.ImageReady = value;
+                    LogMessage("ImageReady", imageReady.ToString());
+                   
+                }
+                catch (Exception ex)
+                {
+                    LogMessage("ImageReady", $"Threw an exception: \r\n{ex}");
+                    throw;
+                }
+            }
         }
 
         /// <summary>
@@ -2073,6 +2088,7 @@ namespace ASCOM.ATIKVS.Camera
         /// <param name="light"><c>true</c> for light frame, <c>false</c> for dark frame (ignored if no shutter)</param>
         public void StartExposure(double duration, bool light)
         {
+            CameraHardware.ImageReady = false;
             Task.Run(() => CameraHardware.StartExposure(duration, light));
            // CameraHardware.StartExposure(duration, light);
         }
