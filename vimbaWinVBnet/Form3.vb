@@ -92,12 +92,12 @@ Public Class Form3
         'Me.Close()
     End Sub
 
-    Private Sub btnIS_Click(sender As Object, e As EventArgs) Handles btnIS.Click
-        Dim f As New frmIS
-        Me.Hide()
-        f.ShowDialog()
-        Me.Close()
-    End Sub
+    'Private Sub btnIS_Click(sender As Object, e As EventArgs) Handles btnIS.Click
+    '    Dim f As New frmIS
+    '    Me.Hide()
+    '    f.ShowDialog()
+    '    Me.Close()
+    'End Sub
 
     Private Sub btnIPCam_Click(sender As Object, e As EventArgs) Handles btnIPCam.Click
         Dim f As New frmIPCam
