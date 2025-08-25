@@ -17,6 +17,9 @@ Public Class SetupDialogForm
         Camera.xWidth = tbXwidth.Text
         Camera.yStart = tbYstart.Text
         Camera.yHeight = tbYheight.Text
+        Camera.adOffset = tbOffset1.Text
+        Camera.analogGain = tbGain1.Text
+
         Me.DialogResult = System.Windows.Forms.DialogResult.OK
         Me.Close()
     End Sub
@@ -52,15 +55,9 @@ Public Class SetupDialogForm
             tbYstart.Text = Camera.yStart
             tbYheight.Text = Camera.yHeight
         End If
-        If c IsNot Nothing Then
-            'get gain
-            Dim g As Integer
-            Dim o As Integer
-            c.GetAdGain(g, 1, 1)
-            c.GetAdOffset(o, 1, 1)
-            tbGain1.Text = g
-            tbOffset1.Text = o
-        End If
+        tbGain1.Text = Camera.analogGain
+        tbOffset1.Text = Camera.adOffset
+
         chkTrace.Checked = Camera.traceState
         ' set the list of com ports to those that are currently available
         ComboBoxComPort.Items.Clear()
