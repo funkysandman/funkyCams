@@ -59,6 +59,9 @@ Public Class frmMaster
         Public Property url As String
         Public Property Rects As New List(Of MyRectangle)
 
+        Public Property fanOn As Boolean
+
+
         Public Sub readSettings()
 
             'try to read settings file
@@ -88,6 +91,7 @@ Public Class frmMaster
                 Me.darkMultiplier = jsonResulttodict.Item("darkMultiplier")
                 Me.darkCutOff = jsonResulttodict.Item("darkCutOff")
                 Me.url = jsonResulttodict.Item("url")
+                Me.fanOn = jsonResulttodict.Item("fanOn")
                 Dim rectJS As Object = jsonResulttodict.Item("Rects")
                 Me.Rects = New List(Of MyRectangle)
                 For Each item In rectJS
@@ -304,7 +308,7 @@ Public Class frmMaster
         tbUpper.Text = mySettings.maxValue
         tbDarkCutOff.Text = mySettings.darkCutOff
         tbURL.Text = mySettings.url
-
+        cbFan.Checked = mySettings.fanOn
 
     End Sub
 
@@ -368,8 +372,8 @@ Public Class frmMaster
         Dim aQE As queueEntry
         While (meteorCheckRunning)
             If myDetectionQueue.Count > 0 Then
-                Try
-                    aQE = myDetectionQueue.Dequeue()
+                'Try
+                aQE = myDetectionQueue.Dequeue()
                     If Not aQE Is Nothing Then
 
                         CallAzureMeteorDetection(aQE)
@@ -377,9 +381,9 @@ Public Class frmMaster
                     End If
 
                     aQE = Nothing
-                Catch
+                'Catch
 
-                End Try
+                'End Try
 
 
             End If
@@ -421,16 +425,18 @@ Public Class frmMaster
         Dim client As New HttpClient()
 
         Dim byteContent = New ByteArrayContent(qe.img)
-        Try
+        'Try
 
 
-            Dim response = client.PostAsync(myUriBuilder.ToString, byteContent)
-            Dim responseString = response.Result
-            byteContent = Nothing
+        'Dim response = client.PostAsync(myUriBuilder.ToString, byteContent)
+        Dim response = Await client.PostAsync(myUriBuilder.ToString(), byteContent)
+        Dim responseString = Await response.Content.ReadAsStringAsync()
 
-        Catch ex As Exception
-            Console.WriteLine("calling meteor detection:" & ex.Message)
-        End Try
+        'Dim responseString = response.Result
+        byteContent = Nothing
+        'Catch ex As Exception
+        '    Console.WriteLine("calling meteor detection:" & ex.Message)
+        'End Try
     End Function
 
 
@@ -479,7 +485,7 @@ Public Class frmMaster
         mySettings.darkMultiplier = tbMultiplier.Text
         mySettings.darkCutOff = tbDarkCutOff.Text
         mySettings.url = tbURL.Text
-
+        mySettings.fanOn = cbFan.Checked
         mySettings.writeSettings()
 
     End Sub

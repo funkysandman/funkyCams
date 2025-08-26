@@ -414,8 +414,40 @@ namespace SVCamApi
                 }
                 return ret;
             }
+            public void fanOn(Boolean b)
+            {
+                SVcamApi.SVSCamApiReturn ret = SVcamApi.SVSCamApiReturn.SV_ERROR_SUCCESS;
+                IntPtr hFeature = IntPtr.Zero;
+                ret = myApi.SVS_FeatureGetByName(hRemoteDevice, SVcamApi.CameraFeature.LineInverter, ref hFeature);
+                if (ret == SVcamApi.SVSCamApiReturn.SV_ERROR_SUCCESS)
+                {
+                    ret = myApi.SVS_FeatureSetValueBool(hRemoteDevice, hFeature, b);
 
 
+                }
+
+            }
+            public int GetTemperature()
+            {
+                SVcamApi.SVSCamApiReturn ret = SVcamApi.SVSCamApiReturn.SV_ERROR_SUCCESS;
+
+                IntPtr hFeature = IntPtr.Zero;
+                long temp = 0;
+
+                int pValue = 0;
+                //retrieve the temperature
+                Console.WriteLine("about to get feature temperature");
+                ret = myApi.SVS_FeatureGetByName(hRemoteDevice, SVcamApi.CameraFeature.Temperature, ref hFeature);
+                if (ret == SVcamApi.SVSCamApiReturn.SV_ERROR_SUCCESS)
+                {
+                    ret = myApi.SVS_FeatureGetValueInt64(hRemoteDevice, hFeature, ref temp);
+
+
+                }
+
+
+                return (int)temp;
+            }
             public SVcamApi.SVSCamApiReturn closeConnection()
             {
                 Console.WriteLine("closing connection - optimistic");
@@ -2048,6 +2080,11 @@ namespace SVCamApi
 
         }
 
+        public int getTemperature()
+        {
+
+            return current_selected_cam.GetTemperature();
+        }
         public void closeCamera()
         {
             current_selected_cam.closeConnection();
@@ -2060,6 +2097,12 @@ namespace SVCamApi
 
         }
 
+
+        public void fanOn(bool b)
+        {
+            current_selected_cam.fanOn(b);
+
+        }
         //    if (current_selected_cam.is_opened)
         //    {
         //        start_UpdateViewTree(current_selected_cam);
@@ -2877,8 +2920,8 @@ namespace SVCamApi
             //
             Console.WriteLine("software trigger fired");
 
-            //Thread.Sleep(cam.duration / 1000);
-            Thread.Sleep(6000);
+            Thread.Sleep(cam.duration / 1000);
+
             //flip activation to opposite
 
             if (cam.previous_trigger_action == 6)
