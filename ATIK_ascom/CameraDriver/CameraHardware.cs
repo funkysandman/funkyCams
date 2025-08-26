@@ -27,6 +27,7 @@ using System.Linq;
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Runtime.InteropServices.ComTypes;
 using System.Runtime.Remoting.Contexts;
 using System.Security.Cryptography;
 using System.Text;
@@ -108,7 +109,8 @@ namespace ASCOM.ATIKVS.Camera
                     }
                 }
                 // assume camera is at index 0 for now
-                handle = AtikPInvoke.ArtemisConnect(cam_index);
+                handle = AtikPInvoke.ArtemisConnect(0);
+
                 if (handle.ToInt32() != 0)
                 {
 
@@ -654,7 +656,7 @@ namespace ASCOM.ATIKVS.Camera
             get
             {
                 LogMessage("CanAbortExposure Get", false.ToString());
-                return false;
+                return true;
             }
         }
 
@@ -742,7 +744,7 @@ namespace ASCOM.ATIKVS.Camera
             get
             {
                 LogMessage("CanStopExposure Get", false.ToString());
-                return false;
+                return true;
             }
         }
 
@@ -1005,6 +1007,10 @@ namespace ASCOM.ATIKVS.Camera
             {
                 LogMessage("ImageReady Get", cameraImageReady.ToString());
                 return cameraImageReady;
+            }
+            set
+            {
+                cameraImageReady = value;
             }
         }
 
@@ -1358,7 +1364,7 @@ namespace ASCOM.ATIKVS.Camera
         static internal void StartExposure(double Duration, bool Light)
         {
             cameraImageReady = false;
-
+            int ret = -1;
             if (Duration < 0.0) throw new InvalidValueException("StartExposure", Duration.ToString(), "0.0 upwards");
             if (cameraNumX > ccdWidth) throw new InvalidValueException("StartExposure", cameraNumX.ToString(), ccdWidth.ToString());
             if (cameraNumY > ccdHeight) throw new InvalidValueException("StartExposure", cameraNumY.ToString(), ccdHeight.ToString());
@@ -1366,59 +1372,72 @@ namespace ASCOM.ATIKVS.Camera
             if (cameraStartY > ccdHeight) throw new InvalidValueException("StartExposure", cameraStartY.ToString(), ccdHeight.ToString());
             if (CameraHardware.handle.ToInt32() != 0)
             {
-                if (AtikPInvoke.ArtemisStartExposure(handle, (float)Duration) == (int)ArtemisError.OK)
+                ret = AtikPInvoke.ArtemisStartExposure(handle, (float)Duration);
+                if ( ret == (int)ArtemisError.OK)
                 {
 
-                    while (!AtikPInvoke.ArtemisImageReady(handle))
+                    bool finished = AtikPInvoke.ArtemisImageReady(handle);
+                    while (!finished)
                     {
                         //if (stopProcessing)
                         //{
                         //    stopProcessing = false;
                         //    return;
                         //}
-
+                        finished = AtikPInvoke.ArtemisImageReady(handle);
                         Thread.Sleep(100);
                     }
 
                     int x = 0, y = 0, w = 0, h = 0, binX = 0, binY = 0;
-                    AtikPInvoke.ArtemisGetImageData(handle, ref x, ref y,
+                    ret = AtikPInvoke.ArtemisGetImageData(handle, ref x, ref y,
                                                             ref w, ref h,
                                                             ref binX, ref binY);
-
+                    
 
                     // Create memory to copy pixels into
                     ushort[] pixels = new ushort[w * h];
 
-                   
 
-                    var intPtr = AtikPInvoke.ArtemisImageBuffer(handle);
-                    unsafe
+                    if (ret == 0)
                     {
-                        var ptr = (ushort*)intPtr;
-                        for (var i = 0; i < w * h; ++i)
+
+                        var intPtr = AtikPInvoke.ArtemisImageBuffer(handle);
+                        unsafe
                         {
-                            pixels[i] = *ptr++;
+                            var ptr = (ushort*)intPtr;
+                            for (var i = 0; i < w * h; ++i)
+                            {
+                                pixels[i] = *ptr++;
+                            }
                         }
                     }
 
-                   
+                    else
+                    {
+                      
+                        for (var i = 0; i < w * h; ++i)
+                        {
+                            pixels[i] = 0;
+                        }
+                        
+                    }
 
-                    //bitmapSource = BitmapSource.Create(w, h, 96d, 96d, PixelFormats.Gray16, null, pixels, (w * 16 + 7) / 8);
+                        //bitmapSource = BitmapSource.Create(w, h, 96d, 96d, PixelFormats.Gray16, null, pixels, (w * 16 + 7) / 8);
 
-                    //var bitmap = new FormatConvertedBitmap();
-                    //bitmap.BeginInit();
-                    //bitmap.Source = bitmapSource.Clone();
-                    //bitmap.DestinationFormat = PixelFormats.Bgra32;
-                    //bitmap.EndInit();
+                        //var bitmap = new FormatConvertedBitmap();
+                        //bitmap.BeginInit();
+                        //bitmap.Source = bitmapSource.Clone();
+                        //bitmap.DestinationFormat = PixelFormats.Bgra32;
+                        //bitmap.EndInit();
 
-                    //image = new Bitmap(bitmap.PixelWidth, bitmap.PixelHeight, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-                    //BitmapData data = image.LockBits(new Rectangle(Point.Empty, image.Size), ImageLockMode.WriteOnly, image.PixelFormat);
-                    //bitmap.CopyPixels(System.Windows.Int32Rect.Empty, data.Scan0, data.Height * data.Stride, data.Stride);
-                    //image.UnlockBits(data);
+                        //image = new Bitmap(bitmap.PixelWidth, bitmap.PixelHeight, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+                        //BitmapData data = image.LockBits(new Rectangle(Point.Empty, image.Size), ImageLockMode.WriteOnly, image.PixelFormat);
+                        //bitmap.CopyPixels(System.Windows.Int32Rect.Empty, data.Scan0, data.Height * data.Stride, data.Stride);
+                        //image.UnlockBits(data);
 
-                    //// this allows us to access the image to save it on the ui thread
-                    //bitmapSource.Freeze();
-                    cameraImageArray = new int[w, h];
+                        //// this allows us to access the image to save it on the ui thread
+                        //bitmapSource.Freeze();
+                        cameraImageArray = new int[w, h];
                     //int n = 0;
                     for (int yy = 0; yy < h; yy++)
                     {

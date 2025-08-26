@@ -78,11 +78,15 @@ Public Class Camera
     Friend Shared xWidthProfileName As String = "ROIxWidth" '
     Friend Shared yHeightProfileName As String = "ROIyHeight" '
     Friend Shared useROIProfileName As String = "useROI" '
+    Friend Shared analogGainProfileName As String = "gain" '
+    Friend Shared adOffsetProfileName As String = "offset" '
     Friend Shared useROI As Boolean = False
     Friend Shared xStart As Integer = "0" '
     Friend Shared xWidth As Integer = "4096" '
     Friend Shared yStart As Integer = "0" '
     Friend Shared yHeight As Integer = "4096" '
+    Friend Shared analogGain As Integer = "-1" '
+    Friend Shared adOffset As Integer = "-1" '
 
     Private connectedState As Boolean ' Private variable to hold the connected state
     Private utilities As Util ' Private variable to hold an ASCOM Utilities object
@@ -207,6 +211,27 @@ Public Class Camera
                     myCam.ccdWidth = Camera.xWidth
                     myCam.ccdHeight = Camera.yHeight
                 End If
+                'retrieve gain
+                Dim innerCam As APOGEELib.Camera2
+                Dim g As Integer
+                Dim o As Integer
+
+                innerCam = myCam.c
+                Try
+                    innerCam.SetAdGain(Camera.analogGain, 1, 1)
+                Catch ex As Exception
+
+                End Try
+                Try
+                    innerCam.SetAdOffset(Camera.adOffset, 1, 1)
+                Catch ex As Exception
+
+                End Try
+
+                'set gain
+
+                'set offset
+
 
 
 
@@ -513,7 +538,7 @@ Public Class Camera
 
     Public Property Gain() As Short Implements ICameraV2.Gain
         Get
-            TL.LogMessage("Gain Get", "Not implemented")
+
             Dim g As Short
             If IsConnected Then
                 myCam.c.GetAdGain(g, 1, 1)
@@ -522,10 +547,10 @@ Public Class Camera
             Return -1
         End Get
         Set(value As Short)
-            TL.LogMessage("Gain Set", "Not implemented")
-            'If IsConnected Then
-            '    myCam.c.SetAdGain(value, 1, 1)
-            'End If
+
+            If IsConnected Then
+                myCam.c.SetAdGain(value, 1, 1)
+            End If
         End Set
     End Property
 
@@ -554,7 +579,7 @@ Public Class Camera
         Get
             TL.LogMessage("HasShutter Get", False.ToString())
             If IsConnected Then
-                'Return myCam.c.SetA
+                Return myCam.c.ExternalShutter()
             End If
         End Get
     End Property
@@ -924,7 +949,8 @@ Public Class Camera
             xWidth = driverProfile.GetValue(driverID, xWidthProfileName, String.Empty, 4096)
             yStart = driverProfile.GetValue(driverID, yStartProfileName, String.Empty, 0)
             yHeight = driverProfile.GetValue(driverID, yHeightProfileName, String.Empty, 4096)
-            useROI = Convert.ToBoolean(driverProfile.GetValue(driverID, useROIProfileName, String.Empty, "False"))
+            adOffset = driverProfile.GetValue(driverID, adOffsetProfileName, String.Empty, -1)
+            analogGain = driverProfile.GetValue(driverID, analogGainProfileName, String.Empty, -1)
 
         End Using
     End Sub
@@ -945,8 +971,8 @@ Public Class Camera
             driverProfile.WriteValue(driverID, yStartProfileName, yStart.ToString())
             driverProfile.WriteValue(driverID, yHeightProfileName, yHeight.ToString())
             driverProfile.WriteValue(driverID, useROIProfileName, useROI.ToString())
-
-
+            driverProfile.WriteValue(driverID, adOffsetProfileName, adOffset.ToString())
+            driverProfile.WriteValue(driverID, analogGainProfileName, analogGain.ToString())
         End Using
 
     End Sub
