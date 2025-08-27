@@ -280,9 +280,18 @@ Public Class frmSVSVistek
             End If
             'End If
 
+            'fetch temperature
 
-
+            txtTemp.Text = mySVCamGrabber.getTemperature()
             ' End If
+
+
+            If cbFan.Checked Then
+                mySVCamGrabber.FanOn(True)
+            Else
+                mySVCamGrabber.FanOn(False)
+            End If
+
 
         Catch ex As Exception
 
@@ -460,6 +469,7 @@ Public Class frmSVSVistek
         If mySVCamGrabber Is Nothing Then Exit Sub
         If Not mySVCamGrabber.acqThreadIsRuning Then Exit Sub
         mySVCamGrabber.stopAcquisitionThread()
+
         'wait for thread to stop
         While (mySVCamGrabber.acqThreadIsRuning)
             Application.DoEvents()
@@ -548,37 +558,9 @@ Public Class frmSVSVistek
         ' mySVCam.startAcquisitionThread(AddressOf Me.received_frame)
     End Sub
 
-    Private Sub InitializeComponent()
-        Me.SuspendLayout()
-        '
-        'frmSVSVistek
-        '
-        Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
-        Me.ClientSize = New System.Drawing.Size(422, 525)
-        Me.Name = "frmSVSVistek"
-        Me.ResumeLayout(False)
-        Me.PerformLayout()
-
-    End Sub
-
-    Private Sub frmSVSVistek_Load(sender As Object, e As EventArgs) Handles MyBase.Load
-
-    End Sub
 
 
 
 
-    'Private Sub InitializeComponent()
-    '    Me.SuspendLayout()
-    '    '
-    '    'frmSVSVistek
-    '    '
-    '    Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
-    '    Me.ClientSize = New System.Drawing.Size(422, 525)
-    '    Me.Name = "frmSVSVistek"
-    '    Me.ResumeLayout(False)
-    '    Me.PerformLayout()
-
-    'End Sub
 
 End Class

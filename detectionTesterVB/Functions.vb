@@ -36,22 +36,27 @@ Public Module Functions
         End If
 
         myUriBuilder.Query = query.ToString
-        myUriBuilder.Query = query.ToString
 
-        Dim client As New HttpClient()
 
-            Dim byteContent = New ByteArrayContent(qe.img)
-            Try
-            Console.WriteLine("file: " & qe.filename)
+        Dim handler As New HttpClientHandler()
+        handler.UseProxy = False
+        Dim client As New HttpClient(handler)
 
-            Dim response = client.PostAsync(myUriBuilder.ToString, byteContent)
-                Dim responseString = response.Result
-                byteContent = Nothing
+        Dim byteContent = New ByteArrayContent(qe.img)
 
-            Catch ex As Exception
-                Console.WriteLine("calling meteor detection:" & ex.Message)
-            End Try
-        End Function
+        Try
+            Dim response = client.PostAsync(myUriBuilder.ToString(), byteContent).Result
+            Dim responseString = response.Content.ReadAsStringAsync().Result
+        Catch ex As AggregateException
+            For Each inner In ex.InnerExceptions
+                Console.WriteLine(inner.Message)
+                Console.WriteLine(inner.StackTrace)
+            Next
+        Catch ex As Exception
+            Console.WriteLine(ex.Message)
+            Console.WriteLine(ex.StackTrace)
+        End Try
+    End Function
     End Module
 
 
