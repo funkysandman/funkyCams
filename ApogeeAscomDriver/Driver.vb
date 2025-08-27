@@ -56,6 +56,7 @@ Public Class Camera
     ' throw the appropriate ASCOM exception.
     '
     Implements ICameraV2
+    Implements ICameraV3
 
     '
     ' Driver ID and descriptive string that shows in the Chooser
@@ -93,8 +94,11 @@ Public Class Camera
     Private astroUtilities As AstroUtils ' Private variable to hold an AstroUtils object to provide the Range method
     Private TL As TraceLogger ' Private variable to hold the trace logger object (creates a diagnostic log file with information that you specify)
     Friend Shared myCam As ApogeeCam
+    Friend Shared innerCam As APOGEELib.Camera2
     Private _readoutModes = New ArrayList(2)
     Private t As Threading.Thread
+    Private platform As Integer
+
     '
     ' Constructor - Must be public for COM registration!
     '
@@ -113,16 +117,17 @@ Public Class Camera
         astroUtilities = New AstroUtils 'Initialise new astro utiliites object
 
         'TODO: Implement your additional construction here
-
-        _readoutModes.add("slow")
-        _readoutModes.add("fast")
+        myCam = New ApogeeCam
+        'get readout modes
+        _readoutModes.add("normal")
+        _readoutModes.add("speedy")
         TL.LogMessage("Camera", "Completed initialisation")
 
     End Sub
 
 
     '
-    ' PUBLIC COM INTERFACE ICameraV2 IMPLEMENTATION
+    ' PUBLIC COM INTERFACE ICameraV3 IMPLEMENTATION
     '
 
 #Region "Common properties and methods"
@@ -132,7 +137,7 @@ Public Class Camera
     ''' the new settings are saved, otherwise the old values are reloaded.
     ''' THIS IS THE ONLY PLACE WHERE SHOWING USER INTERFACE IS ALLOWED!
     ''' </summary>
-    Public Sub SetupDialog() Implements ICameraV2.SetupDialog
+    Public Sub SetupDialog() Implements ICameraV3.SetupDialog, ICameraV2.SetupDialog
         ' consider only showing the setup dialog if not connected
         ' or call a different dialog if connected
         'If IsConnected Then
@@ -140,27 +145,37 @@ Public Class Camera
         'End If
 
         Using F As SetupDialogForm = New SetupDialogForm()
+            Connected = True
             If IsConnected Then F.c = ApogeeCam.c
 
             Dim result As System.Windows.Forms.DialogResult = F.ShowDialog()
             If result = DialogResult.OK Then
                 WriteProfile() ' Persist device configuration values to the ASCOM Profile store
             End If
+            Connected = False
         End Using
     End Sub
 
-    Public ReadOnly Property SupportedActions() As ArrayList Implements ICameraV2.SupportedActions
+    Public ReadOnly Property SupportedActions() As ArrayList Implements ICameraV3.SupportedActions, ICameraV2.SupportedActions
         Get
-            TL.LogMessage("SupportedActions Get", "Returning empty arraylist")
-            Return New ArrayList()
+            Dim actions As New ArrayList()
+            actions.Add("ShowSetupDialog")
+            actions.Add("SetOffset")
+            actions.Add("GetOffset")
+            Return actions
         End Get
     End Property
 
-    Public Function Action(ByVal ActionName As String, ByVal ActionParameters As String) As String Implements ICameraV2.Action
-        Throw New ActionNotImplementedException("Action " & ActionName & " is not supported by this driver")
-    End Function
 
-    Public Sub CommandBlind(ByVal Command As String, Optional ByVal Raw As Boolean = False) Implements ICameraV2.CommandBlind
+    Public Function Action(ActionName As String, ActionParameters As String) As String Implements ICameraV3.Action, ICameraV2.Action
+        If ActionName.Equals("ShowSetupDialog", StringComparison.OrdinalIgnoreCase) Then
+            SetupDialog() ' Call your existing SetupDialog
+            Return "OK"
+        End If
+
+        Throw New ActionNotImplementedException(ActionName)
+    End Function
+    Public Sub CommandBlind(ByVal Command As String, Optional ByVal Raw As Boolean = False) Implements ICameraV3.CommandBlind, ICameraV2.CommandBlind
         CheckConnected("CommandBlind")
         ' Call CommandString and return as soon as it finishes
         Me.CommandString(Command, Raw)
@@ -169,7 +184,7 @@ Public Class Camera
     End Sub
 
     Public Function CommandBool(ByVal Command As String, Optional ByVal Raw As Boolean = False) As Boolean _
-        Implements ICameraV2.CommandBool
+        Implements ICameraV3.CommandBool, ICameraV2.CommandBool
         CheckConnected("CommandBool")
         Dim ret As String = CommandString(Command, Raw)
         ' TODO decode the return string and return true or false
@@ -178,7 +193,7 @@ Public Class Camera
     End Function
 
     Public Function CommandString(ByVal Command As String, Optional ByVal Raw As Boolean = False) As String _
-        Implements ICameraV2.CommandString
+        Implements ICameraV3.CommandString, ICameraV2.CommandString
         CheckConnected("CommandString")
         ' it's a good idea to put all the low level communication with the device here,
         ' then all communication calls this function
@@ -186,7 +201,7 @@ Public Class Camera
         Throw New MethodNotImplementedException("CommandString")
     End Function
 
-    Public Property Connected() As Boolean Implements ICameraV2.Connected
+    Public Property Connected() As Boolean Implements ICameraV3.Connected, ICameraV2.Connected
         Get
             TL.LogMessage("Connected Get", IsConnected.ToString())
             Return IsConnected
@@ -201,8 +216,9 @@ Public Class Camera
 
                 TL.LogMessage("Connected Set", "Connecting to port " + comPort)
 
-                myCam = New ApogeeCam()
+
                 connectedState = True
+
                 If useROI Then
                     myCam.c.RoiStartX = Camera.xStart
                     myCam.c.RoiStartY = Camera.yStart
@@ -218,21 +234,35 @@ Public Class Camera
 
                 innerCam = myCam.c
                 Try
-                    innerCam.SetAdGain(Camera.analogGain, 1, 1)
+                    If Camera.analogGain > -1 Then
+                        innerCam.SetAdGain(Camera.analogGain, 1, 0)
+                    End If
                 Catch ex As Exception
 
                 End Try
                 Try
-                    innerCam.SetAdOffset(Camera.adOffset, 1, 1)
+                    If Camera.adOffset > -1 Then
+                        innerCam.SetAdOffset(Camera.adOffset, 1, 0)
+                    End If
                 Catch ex As Exception
 
                 End Try
 
-                'set gain
-
-                'set offset
-
-
+                'get platform
+                platform = innerCam.PlatformType
+                Dim platformName As String
+                platformName = "unknown"
+                Select Case platform
+                    Case 0
+                        platformName = "unknown"
+                    Case 1
+                        platformName = "Alta U/E"
+                    Case 2
+                        platformName = "Ascent"
+                    Case 3
+                        platformName = "Alta F"
+                End Select
+                driverDescription = "Apogee Camera " & platformName
 
 
 
@@ -244,7 +274,7 @@ Public Class Camera
         End Set
     End Property
 
-    Public ReadOnly Property Description As String Implements ICameraV2.Description
+    Public ReadOnly Property Description As String Implements ICameraV3.Description, ICameraV2.Description
         Get
             ' this pattern seems to be needed to allow a public property to return a private field
             Dim d As String = driverDescription
@@ -253,7 +283,7 @@ Public Class Camera
         End Get
     End Property
 
-    Public ReadOnly Property DriverInfo As String Implements ICameraV2.DriverInfo
+    Public ReadOnly Property DriverInfo As String Implements ICameraV3.DriverInfo, ICameraV2.DriverInfo
         Get
             Dim m_version As Version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version
             ' TODO customise this driver description
@@ -263,7 +293,7 @@ Public Class Camera
         End Get
     End Property
 
-    Public ReadOnly Property DriverVersion() As String Implements ICameraV2.DriverVersion
+    Public ReadOnly Property DriverVersion() As String Implements ICameraV3.DriverVersion, ICameraV2.DriverVersion
         Get
             ' Get our own assembly and report its version number
             TL.LogMessage("DriverVersion Get", Reflection.Assembly.GetExecutingAssembly.GetName.Version.ToString(2))
@@ -271,22 +301,22 @@ Public Class Camera
         End Get
     End Property
 
-    Public ReadOnly Property InterfaceVersion() As Short Implements ICameraV2.InterfaceVersion
+    Public ReadOnly Property InterfaceVersion() As Short Implements ICameraV3.InterfaceVersion, ICameraV2.InterfaceVersion
         Get
-            TL.LogMessage("InterfaceVersion Get", "2")
-            Return 2
+            TL.LogMessage("InterfaceVersion Get", "3")
+            Return 3
         End Get
     End Property
 
-    Public ReadOnly Property Name As String Implements ICameraV2.Name
+    Public ReadOnly Property Name As String Implements ICameraV3.Name, ICameraV2.Name
         Get
-            Dim s_name As String = "Short driver name - please customise"
+            Dim s_name As String = "Funkysandman's Apogee Ascom Driver"
             TL.LogMessage("Name Get", s_name)
             Return s_name
         End Get
     End Property
 
-    Public Sub Dispose() Implements ICameraV2.Dispose
+    Public Sub Dispose() Implements ICameraV3.Dispose, ICameraV2.Dispose
         ' Clean up the tracelogger and util objects
         TL.Enabled = False
         connectedState = False
@@ -316,26 +346,26 @@ Public Class Camera
     Private cameraImageArray As Integer(,)
     Private cameraImageArrayVariant As Object(,)
 
-    Public Sub AbortExposure() Implements ICameraV2.AbortExposure
+    Public Sub AbortExposure() Implements ICameraV3.AbortExposure, ICameraV2.AbortExposure
         TL.LogMessage("AbortExposure", "Not implemented")
         myCam.c.StopExposure(False)
     End Sub
 
-    Public ReadOnly Property BayerOffsetX() As Short Implements ICameraV2.BayerOffsetX
+    Public ReadOnly Property BayerOffsetX() As Short Implements ICameraV3.BayerOffsetX, ICameraV2.BayerOffsetX
         Get
             TL.LogMessage("BayerOffsetX Get", "Not implemented")
             ' Throw New PropertyNotImplementedException("BayerOffsetX", False)
         End Get
     End Property
 
-    Public ReadOnly Property BayerOffsetY() As Short Implements ICameraV2.BayerOffsetY
+    Public ReadOnly Property BayerOffsetY() As Short Implements ICameraV3.BayerOffsetY, ICameraV2.BayerOffsetY
         Get
             TL.LogMessage("BayerOffsetY Get", "Not implemented")
             ' Throw New ASCOM.PropertyNotImplementedException("BayerOffsetY", False)
         End Get
     End Property
 
-    Public Property BinX() As Short Implements ICameraV2.BinX
+    Public Property BinX() As Short Implements ICameraV3.BinX, ICameraV2.BinX
         Get
             TL.LogMessage("BinX Get", "1")
             Return myCam.c.RoiBinningH
@@ -351,7 +381,7 @@ Public Class Camera
 
     End Property
 
-    Public Property BinY() As Short Implements ICameraV2.BinY
+    Public Property BinY() As Short Implements ICameraV3.BinY, ICameraV2.BinY
         Get
             TL.LogMessage("BinY Get", "1")
             Return myCam.c.RoiBinningV
@@ -365,7 +395,7 @@ Public Class Camera
         End Set
     End Property
 
-    Public ReadOnly Property CCDTemperature() As Double Implements ICameraV2.CCDTemperature
+    Public ReadOnly Property CCDTemperature() As Double Implements ICameraV3.CCDTemperature, ICameraV2.CCDTemperature
         Get
             If IsConnected Then
                 Return myCam.c.TempCCD
@@ -373,7 +403,7 @@ Public Class Camera
         End Get
     End Property
 
-    Public ReadOnly Property CameraState() As CameraStates Implements ICameraV2.CameraState
+    Public ReadOnly Property CameraState() As CameraStates Implements ICameraV3.CameraState, ICameraV2.CameraState
         Get
             If IsConnected Then
                 Return myCam.c.CameraMode
@@ -382,7 +412,7 @@ Public Class Camera
         End Get
     End Property
 
-    Public ReadOnly Property CameraXSize() As Integer Implements ICameraV2.CameraXSize
+    Public ReadOnly Property CameraXSize() As Integer Implements ICameraV3.CameraXSize, ICameraV2.CameraXSize
         Get
             If IsConnected Then
                 Return myCam.c.ImagingColumns
@@ -390,7 +420,7 @@ Public Class Camera
         End Get
     End Property
 
-    Public ReadOnly Property CameraYSize() As Integer Implements ICameraV2.CameraYSize
+    Public ReadOnly Property CameraYSize() As Integer Implements ICameraV3.CameraYSize, ICameraV2.CameraYSize
         Get
             If IsConnected Then
                 Return myCam.c.ImagingRows
@@ -398,56 +428,56 @@ Public Class Camera
         End Get
     End Property
 
-    Public ReadOnly Property CanAbortExposure() As Boolean Implements ICameraV2.CanAbortExposure
+    Public ReadOnly Property CanAbortExposure() As Boolean Implements ICameraV3.CanAbortExposure, ICameraV2.CanAbortExposure
         Get
             TL.LogMessage("CanAbortExposure Get", False.ToString())
             Return True
         End Get
     End Property
 
-    Public ReadOnly Property CanAsymmetricBin() As Boolean Implements ICameraV2.CanAsymmetricBin
+    Public ReadOnly Property CanAsymmetricBin() As Boolean Implements ICameraV3.CanAsymmetricBin, ICameraV2.CanAsymmetricBin
         Get
             TL.LogMessage("CanAsymmetricBin Get", False.ToString())
             Return False
         End Get
     End Property
 
-    Public ReadOnly Property CanFastReadout() As Boolean Implements ICameraV2.CanFastReadout
+    Public ReadOnly Property CanFastReadout() As Boolean Implements ICameraV3.CanFastReadout, ICameraV2.CanFastReadout
         Get
             TL.LogMessage("CanFastReadout Get", False.ToString())
-            Return False
+            Return True
         End Get
     End Property
 
-    Public ReadOnly Property CanGetCoolerPower() As Boolean Implements ICameraV2.CanGetCoolerPower
+    Public ReadOnly Property CanGetCoolerPower() As Boolean Implements ICameraV3.CanGetCoolerPower, ICameraV2.CanGetCoolerPower
         Get
             TL.LogMessage("CanGetCoolerPower Get", False.ToString())
             Return True
         End Get
     End Property
 
-    Public ReadOnly Property CanPulseGuide() As Boolean Implements ICameraV2.CanPulseGuide
+    Public ReadOnly Property CanPulseGuide() As Boolean Implements ICameraV3.CanPulseGuide, ICameraV2.CanPulseGuide
         Get
             TL.LogMessage("CanPulseGuide Get", False.ToString())
             Return False
         End Get
     End Property
 
-    Public ReadOnly Property CanSetCCDTemperature() As Boolean Implements ICameraV2.CanSetCCDTemperature
+    Public ReadOnly Property CanSetCCDTemperature() As Boolean Implements ICameraV3.CanSetCCDTemperature, ICameraV2.CanSetCCDTemperature
         Get
             TL.LogMessage("CanSetCCDTemperature Get", False.ToString())
             Return True
         End Get
     End Property
 
-    Public ReadOnly Property CanStopExposure() As Boolean Implements ICameraV2.CanStopExposure
+    Public ReadOnly Property CanStopExposure() As Boolean Implements ICameraV3.CanStopExposure, ICameraV2.CanStopExposure
         Get
             TL.LogMessage("CanStopExposure Get", False.ToString())
             Return True
         End Get
     End Property
 
-    Public Property CoolerOn() As Boolean Implements ICameraV2.CoolerOn
+    Public Property CoolerOn() As Boolean Implements ICameraV3.CoolerOn, ICameraV2.CoolerOn
         Get
             TL.LogMessage("CoolerOn Get", "Not implemented")
             'Throw New ASCOM.PropertyNotImplementedException("CoolerOn", False)
@@ -466,7 +496,7 @@ Public Class Camera
         End Set
     End Property
 
-    Public ReadOnly Property CoolerPower() As Double Implements ICameraV2.CoolerPower
+    Public ReadOnly Property CoolerPower() As Double Implements ICameraV3.CoolerPower, ICameraV2.CoolerPower
         Get
             TL.LogMessage("AbortExposure Get", "Not implemented")
             'Throw New ASCOM.PropertyNotImplementedException("CoolerPower", False)
@@ -477,7 +507,7 @@ Public Class Camera
         End Get
     End Property
 
-    Public ReadOnly Property ElectronsPerADU() As Double Implements ICameraV2.ElectronsPerADU
+    Public ReadOnly Property ElectronsPerADU() As Double Implements ICameraV3.ElectronsPerADU, ICameraV2.ElectronsPerADU
         Get
             TL.LogMessage("ElectronsPerADU Get", "Not implemented")
             'Throw New ASCOM.PropertyNotImplementedException("ElectronsPerADU", False)
@@ -485,7 +515,7 @@ Public Class Camera
         End Get
     End Property
 
-    Public ReadOnly Property ExposureMax() As Double Implements ICameraV2.ExposureMax
+    Public ReadOnly Property ExposureMax() As Double Implements ICameraV3.ExposureMax, ICameraV2.ExposureMax
         Get
             TL.LogMessage("ExposureMax Get", "Not implemented")
             'Throw New ASCOM.PropertyNotImplementedException("ExposureMax", False)
@@ -497,7 +527,7 @@ Public Class Camera
         End Get
     End Property
 
-    Public ReadOnly Property ExposureMin() As Double Implements ICameraV2.ExposureMin
+    Public ReadOnly Property ExposureMin() As Double Implements ICameraV3.ExposureMin, ICameraV2.ExposureMin
         Get
             TL.LogMessage("ExposureMin Get", "Not implemented")
             'Throw New ASCOM.PropertyNotImplementedException("ExposureMax", False)
@@ -511,71 +541,97 @@ Public Class Camera
         End Get
     End Property
 
-    Public ReadOnly Property ExposureResolution() As Double Implements ICameraV2.ExposureResolution
+    Public ReadOnly Property ExposureResolution() As Double Implements ICameraV3.ExposureResolution, ICameraV2.ExposureResolution
         Get
             TL.LogMessage("ExposureResolution Get", "Not implemented")
             'Throw New ASCOM.PropertyNotImplementedException("ExposureResolution", False)
         End Get
     End Property
 
-    Public Property FastReadout() As Boolean Implements ICameraV2.FastReadout
+    Public Property FastReadout() As Boolean Implements ICameraV3.FastReadout, ICameraV2.FastReadout
         Get
             TL.LogMessage("FastReadout Get", "Not implemented")
-            Return myCam.c.FastSequence
+            If myCam.c.DigitizationSpeed = 1 Then
+                Return True
+            Else
+                Return False
+            End If
+
         End Get
         Set(value As Boolean)
             TL.LogMessage("FastReadout Set", "Not implemented")
-            myCam.c.FastSequence = value
+            If value Then
+                myCam.c.DigitizationSpeed = 1
+            Else
+                myCam.c.DigitizationSpeed = 0
+            End If
+
         End Set
     End Property
 
-    Public ReadOnly Property FullWellCapacity() As Double Implements ICameraV2.FullWellCapacity
+    Public ReadOnly Property FullWellCapacity() As Double Implements ICameraV3.FullWellCapacity, ICameraV2.FullWellCapacity
         Get
             TL.LogMessage("FullWellCapacity Get", "Not implemented")
             'Throw New ASCOM.PropertyNotImplementedException("FullWellCapacity", False)
         End Get
     End Property
 
-    Public Property Gain() As Short Implements ICameraV2.Gain
+    Public Property Gain() As Short Implements ICameraV3.Gain, ICameraV2.Gain
         Get
 
             Dim g As Short
             If IsConnected Then
-                myCam.c.GetAdGain(g, 1, 1)
+                myCam.c.GetAdGain(g, 1, 0)
                 Return g
             End If
             Return -1
         End Get
         Set(value As Short)
 
-            If IsConnected Then
-                myCam.c.SetAdGain(value, 1, 1)
+            If IsConnected And value > -1 Then
+                myCam.c.SetAdGain(value, 1, 0)
             End If
         End Set
     End Property
 
-    Public ReadOnly Property GainMax() As Short Implements ICameraV2.GainMax
+    Public ReadOnly Property GainMax() As Short Implements ICameraV3.GainMax, ICameraV2.GainMax
         Get
-            TL.LogMessage("GainMax Get", "Not implemented")
-            ' Throw New ASCOM.PropertyNotImplementedException("GainMax", False)
+            Select Case platform
+                Case 0
+                    Return 0
+                Case 1
+                    Return 1023
+                Case 2, 3
+                    Return 63
+            End Select
         End Get
     End Property
 
-    Public ReadOnly Property GainMin() As Short Implements ICameraV2.GainMin
+    Public ReadOnly Property GainMin() As Short Implements ICameraV3.GainMin, ICameraV2.GainMin
         Get
             Return 0
             ' Throw New ASCOM.PropertyNotImplementedException("GainMin", False)
         End Get
     End Property
 
-    Public ReadOnly Property Gains() As ArrayList Implements ICameraV2.Gains
+    Public ReadOnly Property Gains() As ArrayList Implements ICameraV3.Gains, ICameraV2.Gains
         Get
-            TL.LogMessage("Gains Get", "Not implemented")
-            'Throw New ASCOM.PropertyNotImplementedException("Gains", False)
+            Dim _gains As New ArrayList()
+            Select Case platform
+                Case 0
+
+                Case 1 'alta u/e
+                    _gains.Add(0)
+                Case 2, 3 'ascent / altaf
+                    _gains.Add(0)
+                    _gains.Add(1)
+            End Select
+
+            Return _gains
         End Get
     End Property
 
-    Public ReadOnly Property HasShutter() As Boolean Implements ICameraV2.HasShutter
+    Public ReadOnly Property HasShutter() As Boolean Implements ICameraV3.HasShutter, ICameraV2.HasShutter
         Get
             TL.LogMessage("HasShutter Get", False.ToString())
             If IsConnected Then
@@ -584,7 +640,7 @@ Public Class Camera
         End Get
     End Property
 
-    Public ReadOnly Property HeatSinkTemperature() As Double Implements ICameraV2.HeatSinkTemperature
+    Public ReadOnly Property HeatSinkTemperature() As Double Implements ICameraV3.HeatSinkTemperature, ICameraV2.HeatSinkTemperature
         Get
             TL.LogMessage("HeatSinkTemperature Get", "Not implemented")
             If IsConnected Then
@@ -594,7 +650,7 @@ Public Class Camera
         End Get
     End Property
 
-    Public ReadOnly Property ImageArray() As Object Implements ICameraV2.ImageArray
+    Public ReadOnly Property ImageArray() As Object Implements ICameraV3.ImageArray, ICameraV2.ImageArray
         Get
             If (Not cameraImageReady) Then
                 TL.LogMessage("ImageArray Get", "Throwing InvalidOperationException because of a call to ImageArray before the first image has been taken!")
@@ -606,7 +662,7 @@ Public Class Camera
         End Get
     End Property
 
-    Public ReadOnly Property ImageArrayVariant() As Object Implements ICameraV2.ImageArrayVariant
+    Public ReadOnly Property ImageArrayVariant() As Object Implements ICameraV3.ImageArrayVariant, ICameraV2.ImageArrayVariant
         Get
             If (Not cameraImageReady) Then
                 TL.LogMessage("ImageArrayVariant Get", "Throwing InvalidOperationException because of a call to ImageArrayVariant before the first image has been taken!")
@@ -624,21 +680,21 @@ Public Class Camera
         End Get
     End Property
 
-    Public ReadOnly Property ImageReady() As Boolean Implements ICameraV2.ImageReady
+    Public ReadOnly Property ImageReady() As Boolean Implements ICameraV3.ImageReady, ICameraV2.ImageReady
         Get
             TL.LogMessage("ImageReady Get", cameraImageReady.ToString())
             Return cameraImageReady
         End Get
     End Property
 
-    Public ReadOnly Property IsPulseGuiding() As Boolean Implements ICameraV2.IsPulseGuiding
+    Public ReadOnly Property IsPulseGuiding() As Boolean Implements ICameraV3.IsPulseGuiding, ICameraV2.IsPulseGuiding
         Get
             TL.LogMessage("IsPulseGuiding Get", "Not implemented")
             ' Throw New ASCOM.PropertyNotImplementedException("IsPulseGuiding", False)
         End Get
     End Property
 
-    Public ReadOnly Property LastExposureDuration() As Double Implements ICameraV2.LastExposureDuration
+    Public ReadOnly Property LastExposureDuration() As Double Implements ICameraV3.LastExposureDuration, ICameraV2.LastExposureDuration
         Get
             If (Not cameraImageReady) Then
                 TL.LogMessage("LastExposureDuration Get", "Throwing InvalidOperationException because of a call to LastExposureDuration before the first image has been taken!")
@@ -649,7 +705,7 @@ Public Class Camera
         End Get
     End Property
 
-    Public ReadOnly Property LastExposureStartTime() As String Implements ICameraV2.LastExposureStartTime
+    Public ReadOnly Property LastExposureStartTime() As String Implements ICameraV3.LastExposureStartTime, ICameraV2.LastExposureStartTime
         Get
             If (Not cameraImageReady) Then
                 TL.LogMessage("LastExposureStartTime Get", "Throwing InvalidOperationException because of a call to LastExposureStartTime before the first image has been taken!")
@@ -661,14 +717,14 @@ Public Class Camera
         End Get
     End Property
 
-    Public ReadOnly Property MaxADU() As Integer Implements ICameraV2.MaxADU
+    Public ReadOnly Property MaxADU() As Integer Implements ICameraV3.MaxADU, ICameraV2.MaxADU
         Get
             TL.LogMessage("MaxADU Get", "20000")
             Return 20000
         End Get
     End Property
 
-    Public ReadOnly Property MaxBinX() As Short Implements ICameraV2.MaxBinX
+    Public ReadOnly Property MaxBinX() As Short Implements ICameraV3.MaxBinX, ICameraV2.MaxBinX
         Get
             Try
                 If IsConnected Then
@@ -682,7 +738,7 @@ Public Class Camera
         End Get
     End Property
 
-    Public ReadOnly Property MaxBinY() As Short Implements ICameraV2.MaxBinY
+    Public ReadOnly Property MaxBinY() As Short Implements ICameraV3.MaxBinY, ICameraV2.MaxBinY
         Get
             Try
                 If IsConnected Then
@@ -693,7 +749,7 @@ Public Class Camera
             End Try
         End Get
     End Property
-    Public Property NumX() As Integer Implements ICameraV2.NumX
+    Public Property NumX() As Integer Implements ICameraV3.NumX, ICameraV2.NumX
         Get
             TL.LogMessage("NumX Get", cameraNumX.ToString())
 
@@ -707,7 +763,7 @@ Public Class Camera
         End Set
     End Property
 
-    Public Property NumY() As Integer Implements ICameraV2.NumY
+    Public Property NumY() As Integer Implements ICameraV3.NumY, ICameraV2.NumY
         Get
             TL.LogMessage("NumY Get", cameraNumY.ToString())
             cameraNumY = myCam.c.RoiPixelsV
@@ -723,63 +779,64 @@ Public Class Camera
 
 
 
-    Public ReadOnly Property PercentCompleted() As Short Implements ICameraV2.PercentCompleted
+    Public ReadOnly Property PercentCompleted() As Short Implements ICameraV3.PercentCompleted, ICameraV2.PercentCompleted
         Get
             TL.LogMessage("PercentCompleted Get", "Not implemented")
             Throw New ASCOM.PropertyNotImplementedException("PercentCompleted", False)
         End Get
     End Property
 
-    Public ReadOnly Property PixelSizeX() As Double Implements ICameraV2.PixelSizeX
+    Public ReadOnly Property PixelSizeX() As Double Implements ICameraV3.PixelSizeX, ICameraV2.PixelSizeX
         Get
             Return myCam.c.PixelSizeX
         End Get
     End Property
 
-    Public ReadOnly Property PixelSizeY() As Double Implements ICameraV2.PixelSizeY
+    Public ReadOnly Property PixelSizeY() As Double Implements ICameraV3.PixelSizeY, ICameraV2.PixelSizeY
         Get
 
             Return myCam.c.PixelSizeY
         End Get
     End Property
 
-    Public Sub PulseGuide(Direction As GuideDirections, Duration As Integer) Implements ICameraV2.PulseGuide
+    Public Sub PulseGuide(Direction As GuideDirections, Duration As Integer) Implements ICameraV3.PulseGuide, ICameraV2.PulseGuide
         TL.LogMessage("PulseGuide", "Not implemented - " & Direction.ToString)
         ' Throw New ASCOM.MethodNotImplementedException("Direction")
     End Sub
 
-    Public Property ReadoutMode() As Short Implements ICameraV2.ReadoutMode
+    Public Property ReadoutMode() As Short Implements ICameraV3.ReadoutMode, ICameraV2.ReadoutMode
         Get
-            TL.LogMessage("ReadoutMode Get", "Not implemented")
-            'Throw New ASCOM.PropertyNotImplementedException("ReadoutMode", False)
+            'TL.LogMessage("ReadoutMode Get", "Not implemented")
+            Return myCam.c.DigitizationSpeed
         End Get
         Set(value As Short)
-            TL.LogMessage("ReadoutMode Set", "Not implemented")
+            'TL.LogMessage("ReadoutMode Set", "Not implemented")
             'Throw New ASCOM.PropertyNotImplementedException("ReadoutMode", True)
+            myCam.c.DigitizationSpeed = value
         End Set
     End Property
 
-    Public ReadOnly Property ReadoutModes() As ArrayList Implements ICameraV2.ReadoutModes
+    Public ReadOnly Property ReadoutModes() As ArrayList Implements ICameraV3.ReadoutModes, ICameraV2.ReadoutModes
         Get
-            TL.LogMessage("ReadoutModes Get", "Not implemented")
+            'TL.LogMessage("ReadoutModes Get", "Not implemented")
             'Throw New ASCOM.PropertyNotImplementedException("ReadoutModes", False)
             Return _readoutModes
         End Get
     End Property
 
-    Public ReadOnly Property SensorName() As String Implements ICameraV2.SensorName
+    Public ReadOnly Property SensorName() As String Implements ICameraV3.SensorName, ICameraV2.SensorName
         Get
             Return myCam.c.Sensor
         End Get
     End Property
 
-    Public ReadOnly Property SensorType() As SensorType Implements ICameraV2.SensorType
+    Public ReadOnly Property SensorType() As SensorType Implements ICameraV3.SensorType, ICameraV2.SensorType
         Get
             Return myCam.c.SensorTypeCCD
         End Get
     End Property
 
-    Public Property SetCCDTemperature() As Double Implements ICameraV2.SetCCDTemperature
+    Public Property SetCCDTemperature() As Double Implements ICameraV3.SetCCDTemperature, ICameraV2.SetCCDTemperature
         Get
             Return myCam.c.CoolerSetPoint
         End Get
@@ -803,7 +860,7 @@ Public Class Camera
         ' End If
         cameraImageReady = True
     End Sub
-    Public Sub StartExposure(Duration As Double, Light As Boolean) Implements ICameraV2.StartExposure
+    Public Sub StartExposure(Duration As Double, Light As Boolean) Implements ICameraV3.StartExposure, ICameraV2.StartExposure
         cameraImageReady = False
         If (Duration < 0.0) Then Throw New InvalidValueException("StartExposure", Duration.ToString(), "0.0 upwards")
         'If (cameraNumX > myCam.ccdWidth) Then Throw New InvalidValueException("StartExposure", cameraNumX.ToString(), myCam.ccdWidth.ToString())
@@ -853,7 +910,7 @@ Public Class Camera
 
 
     End Function
-    Public Property StartX() As Integer Implements ICameraV2.StartX
+    Public Property StartX() As Integer Implements ICameraV3.StartX, ICameraV2.StartX
         Get
             TL.LogMessage("StartX Get", cameraStartX.ToString())
             Return myCam.c.RoiStartX
@@ -864,7 +921,7 @@ Public Class Camera
         End Set
     End Property
 
-    Public Property StartY() As Integer Implements ICameraV2.StartY
+    Public Property StartY() As Integer Implements ICameraV3.StartY, ICameraV2.StartY
         Get
             TL.LogMessage("StartY Get", cameraStartY.ToString())
             Return myCam.c.RoiStartY
@@ -875,7 +932,7 @@ Public Class Camera
         End Set
     End Property
 
-    Public Sub StopExposure() Implements ICameraV2.StopExposure
+    Public Sub StopExposure() Implements ICameraV3.StopExposure, ICameraV2.StopExposure
         Debug.Print("stopping exposure")
         myCam.c.StopExposure(False)
         Debug.Print("stopped exposure")
@@ -926,6 +983,65 @@ Public Class Camera
             Return connectedState
         End Get
     End Property
+
+    Public Property Offset As Integer Implements ICameraV3.Offset
+        Get
+            Dim o As Integer
+
+            ApogeeCam.c.GetAdOffset(o, 1, 0)
+            Return o
+        End Get
+        Set(value As Integer)
+            ApogeeCam.c.GetAdOffset(value, 1, 0)
+        End Set
+    End Property
+
+    Public ReadOnly Property OffsetMax As Integer Implements ICameraV3.OffsetMax
+        Get
+            Select Case platform
+                Case 0
+                    Return 0
+                Case 1
+                    Return 255
+                Case 2, 3
+                    Return 511
+            End Select
+        End Get
+    End Property
+
+    Public ReadOnly Property OffsetMin As Integer Implements ICameraV3.OffsetMin
+        Get
+            Return 0
+        End Get
+    End Property
+
+    Public ReadOnly Property Offsets As ArrayList Implements ICameraV3.Offsets
+        Get
+            Dim _offsets As New ArrayList()
+            Select Case platform
+                Case 0
+
+                Case 1 'alta u/e
+                    _offsets.Add(0)
+                Case 2, 3 'ascent / altaf
+                    _offsets.Add(0)
+                    _offsets.Add(1)
+            End Select
+
+            Return _offsets
+        End Get
+    End Property
+
+    Public Property SubExposureDuration As Double Implements ICameraV3.SubExposureDuration
+        Get
+            Throw New System.NotImplementedException()
+        End Get
+        Set(value As Double)
+            Throw New System.NotImplementedException()
+        End Set
+    End Property
+
+
 
     ''' <summary>
     ''' Use this function to throw an exception if we aren't connected to the hardware
@@ -981,6 +1097,8 @@ Public Class Camera
         ' myCam.c.Close()
         '  MyBase.Finalize()
     End Sub
+
+
 
 #End Region
 

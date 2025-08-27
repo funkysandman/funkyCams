@@ -1,6 +1,6 @@
 ﻿Public Class ApogeeCam
 
-    Public Shared c As New APOGEELib.Camera2
+    Public Shared c As APOGEELib.Camera2
     Public imageData As Array
     Public ccdWidth As Integer = 0
     Public ccdHeight As Integer = 0
@@ -8,10 +8,8 @@
     Sub New()
         FindDlg = New APOGEELib.CamDiscover()
         c = New APOGEELib.Camera2
-
-
         Debug.Print("new camera")
-        Dim tempImage As Array
+
         FindDlg.DlgCheckEthernet = False
         FindDlg.DlgCheckUsb = True
 
