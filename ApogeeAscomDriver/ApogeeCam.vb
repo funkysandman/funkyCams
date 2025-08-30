@@ -5,42 +5,44 @@
     Public ccdWidth As Integer = 0
     Public ccdHeight As Integer = 0
     Private FindDlg As APOGEELib.CamDiscover
-    Sub New()
-        FindDlg = New APOGEELib.CamDiscover()
+    Sub New(ByRef inter As APOGEELib.Apn_Interface, ByRef selectedModel As String, ByRef selectedDevice As Integer, ByRef camIdOne As Integer, ByRef camIdTwo As Integer)
         c = New APOGEELib.Camera2
-        Debug.Print("new camera")
+        If selectedModel = "" Then
+            'no camera selected
+            FindDlg = New APOGEELib.CamDiscover()
 
-        FindDlg.DlgCheckEthernet = False
-        FindDlg.DlgCheckUsb = True
+            Debug.Print("new camera")
 
-        FindDlg.ShowDialog(True)
+            FindDlg.DlgCheckEthernet = False
+            FindDlg.DlgCheckUsb = True
 
-        If FindDlg.ValidSelection Then
-            Debug.WriteLine("here we are")
-            c.Init(FindDlg.SelectedInterface, FindDlg.SelectedCamIdOne, FindDlg.SelectedCamIdTwo, 0)
-            c.ResetSystem()
-            c.ImageCount = 0
-            'c.RoiBinningH = 1
-            'c.RoiBinningV = 1
-            'c.RoiStartX = 0
-            'c.RoiStartY = 0
-            ccdWidth = c.RoiPixelsH
-            ccdHeight = c.RoiPixelsV
-            Debug.WriteLine(c.ImagingStatus)
-            '  AltaCamera.Expose(0.001, False)
-            '  Debug.WriteLine(AltaCamera.ImagingStatus)
+            FindDlg.ShowDialog(True)
 
-            ' Do
-            '     Debug.WriteLine(AltaCamera.ImagingStatus)
-            ' Loop Until AltaCamera.ImagingStatus = APOGEELib.Apn_Status.Apn_Status_ImageReady
-            ' Debug.WriteLine(AltaCamera.ImagingStatus)
-            ' imageData = AltaCamera.Image
-            Debug.WriteLine(c.RoiPixelsH)
-            Debug.WriteLine(c.RoiPixelsV)
+
+            If FindDlg.ValidSelection Then
+                Debug.WriteLine("here we are")
+                camIdOne = FindDlg.SelectedCamIdOne
+                camIdTwo = FindDlg.SelectedCamIdTwo
+                inter = FindDlg.SelectedInterface
+                selectedModel = FindDlg.SelectedModel
+
+            End If
+
+
         End If
-        Debug.WriteLine(c.ImagingStatus)
-        Debug.WriteLine(c.Sensor)
-        Debug.WriteLine(c.CameraModel)
+        'connect to rememberd camera
+        c.Init(inter, camIdOne, camIdTwo, 0)
+        c.ResetSystem()
+        c.ImageCount = 0
+
+        ccdWidth = c.RoiPixelsH
+        ccdHeight = c.RoiPixelsV
+
+
+        Debug.WriteLine(c.RoiPixelsH)
+        Debug.WriteLine(c.RoiPixelsV)
+
+
     End Sub
 
     Public Sub Expose(t As Double, light As Boolean)

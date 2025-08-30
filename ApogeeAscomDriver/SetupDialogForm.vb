@@ -7,7 +7,7 @@ Imports ASCOM.Apogee
 Public Class SetupDialogForm
 
     Public c As APOGEELib.Camera2
-
+    Public selectedModel As String
     Private Sub OK_Button_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles OK_Button.Click ' OK button event handler
         ' Persist new values of user settings to the ASCOM profile
         Camera.comPort = ComboBoxComPort.SelectedItem ' Update the state variables with results from the dialogue
@@ -128,5 +128,15 @@ Public Class SetupDialogForm
 
 
         End If
+    End Sub
+
+    Private Sub btnChooseCam_Click(sender As Object, e As EventArgs) Handles btnChooseCam.Click
+        'select different camera
+        c.Close()
+        Me.DialogResult = System.Windows.Forms.DialogResult.Retry
+        Me.selectedModel = ""
+        Me.Close()
+
+
     End Sub
 End Class

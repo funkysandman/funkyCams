@@ -81,6 +81,11 @@ Public Class Camera
     Friend Shared useROIProfileName As String = "useROI" '
     Friend Shared analogGainProfileName As String = "gain" '
     Friend Shared adOffsetProfileName As String = "offset" '
+    Friend Shared interfaceProfileName As String = "Interface"
+    Friend Shared cam1IDProfileName As String = "Camera1"
+    Friend Shared cam2IDProfileName As String = "Camera2"
+    Friend Shared selectedModelProfileName As String = "selectedModel"
+    Friend Shared selectedDeviceProfileName As String = "selectedDevice"
     Friend Shared useROI As Boolean = False
     Friend Shared xStart As Integer = "0" '
     Friend Shared xWidth As Integer = "4096" '
@@ -88,6 +93,11 @@ Public Class Camera
     Friend Shared yHeight As Integer = "4096" '
     Friend Shared analogGain As Integer = "-1" '
     Friend Shared adOffset As Integer = "-1" '
+    Friend Shared camId1 As String = "camera1"
+    Friend Shared camId2 As String = "camera2"
+    Friend Shared inter As String = ""
+    Friend Shared selectedModel As String = ""
+    Friend Shared selectedDevice As Integer = "0"
 
     Private connectedState As Boolean ' Private variable to hold the connected state
     Private utilities As Util ' Private variable to hold an ASCOM Utilities object
@@ -117,7 +127,8 @@ Public Class Camera
         astroUtilities = New AstroUtils 'Initialise new astro utiliites object
 
         'TODO: Implement your additional construction here
-        myCam = New ApogeeCam
+        myCam = New ApogeeCam(inter, selectedModel, selectedDevice, camId1, camId2)
+        WriteProfile()
         'get readout modes
         _readoutModes.add("normal")
         _readoutModes.add("speedy")
@@ -146,11 +157,18 @@ Public Class Camera
 
         Using F As SetupDialogForm = New SetupDialogForm()
             Connected = True
-            If IsConnected Then F.c = ApogeeCam.c
+            If IsConnected Then
+                F.c = ApogeeCam.c
+                F.selectedModel = selectedModel
+            End If
 
             Dim result As System.Windows.Forms.DialogResult = F.ShowDialog()
             If result = DialogResult.OK Then
                 WriteProfile() ' Persist device configuration values to the ASCOM Profile store
+            End If
+            If result = DialogResult.Retry Then
+                myCam = New ApogeeCam(inter, "", 0, 0, 0) ' should force a selection of camera
+                SetupDialog()
             End If
             Connected = False
         End Using
@@ -228,28 +246,28 @@ Public Class Camera
                     myCam.ccdHeight = Camera.yHeight
                 End If
                 'retrieve gain
-                Dim innerCam As APOGEELib.Camera2
+
                 Dim g As Integer
                 Dim o As Integer
 
-                innerCam = myCam.c
+
                 Try
                     If Camera.analogGain > -1 Then
-                        innerCam.SetAdGain(Camera.analogGain, 1, 0)
+                        myCam.c.SetAdGain(Camera.analogGain, 1, 0)
                     End If
                 Catch ex As Exception
 
                 End Try
                 Try
                     If Camera.adOffset > -1 Then
-                        innerCam.SetAdOffset(Camera.adOffset, 1, 0)
+                        myCam.c.SetAdOffset(Camera.adOffset, 1, 0)
                     End If
                 Catch ex As Exception
 
                 End Try
 
                 'get platform
-                platform = innerCam.PlatformType
+                platform = myCam.c.PlatformType
                 Dim platformName As String
                 platformName = "unknown"
                 Select Case platform
@@ -1067,6 +1085,10 @@ Public Class Camera
             yHeight = driverProfile.GetValue(driverID, yHeightProfileName, String.Empty, 4096)
             adOffset = driverProfile.GetValue(driverID, adOffsetProfileName, String.Empty, -1)
             analogGain = driverProfile.GetValue(driverID, analogGainProfileName, String.Empty, -1)
+            inter = driverProfile.GetValue(driverID, interfaceProfileName, String.Empty, -1)
+            camId1 = driverProfile.GetValue(driverID, cam1IDProfileName, String.Empty, -1)
+            camId2 = driverProfile.GetValue(driverID, cam2IDProfileName, String.Empty, -1)
+            selectedModel = driverProfile.GetValue(driverID, selectedModelProfileName, String.Empty, "")
 
         End Using
     End Sub
@@ -1089,6 +1111,14 @@ Public Class Camera
             driverProfile.WriteValue(driverID, useROIProfileName, useROI.ToString())
             driverProfile.WriteValue(driverID, adOffsetProfileName, adOffset.ToString())
             driverProfile.WriteValue(driverID, analogGainProfileName, analogGain.ToString())
+            driverProfile.WriteValue(driverID, cam1IDProfileName, camId1.ToString())
+            driverProfile.WriteValue(driverID, cam2IDProfileName, camId2.ToString())
+            driverProfile.WriteValue(driverID, interfaceProfileName, inter.ToString())
+            driverProfile.WriteValue(driverID, selectedModelProfileName, selectedModel)
+
+
+
+
         End Using
 
     End Sub

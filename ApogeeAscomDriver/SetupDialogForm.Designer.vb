@@ -56,6 +56,7 @@ Partial Class SetupDialogForm
         Me.tbOffsetChannel = New System.Windows.Forms.TextBox()
         Me.Label8 = New System.Windows.Forms.Label()
         Me.Label9 = New System.Windows.Forms.Label()
+        Me.btnChooseCam = New System.Windows.Forms.Button()
         Me.TableLayoutPanel1.SuspendLayout()
         CType(Me.PictureBox1, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.Panel1.SuspendLayout()
@@ -382,6 +383,15 @@ Partial Class SetupDialogForm
         Me.Label9.Text = "channel"
         Me.Label9.Visible = False
         '
+        'btnChooseCam
+        '
+        Me.btnChooseCam.Location = New System.Drawing.Point(373, 70)
+        Me.btnChooseCam.Name = "btnChooseCam"
+        Me.btnChooseCam.Size = New System.Drawing.Size(94, 32)
+        Me.btnChooseCam.TabIndex = 37
+        Me.btnChooseCam.Text = "Choose Camera"
+        Me.btnChooseCam.UseVisualStyleBackColor = True
+        '
         'SetupDialogForm
         '
         Me.AcceptButton = Me.OK_Button
@@ -389,6 +399,7 @@ Partial Class SetupDialogForm
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.CancelButton = Me.Cancel_Button
         Me.ClientSize = New System.Drawing.Size(528, 388)
+        Me.Controls.Add(Me.btnChooseCam)
         Me.Controls.Add(Me.Label9)
         Me.Controls.Add(Me.Label8)
         Me.Controls.Add(Me.tbOffsetChannel)
@@ -462,4 +473,5 @@ Partial Class SetupDialogForm
     Friend WithEvents tbOffsetChannel As TextBox
     Friend WithEvents Label8 As Label
     Friend WithEvents Label9 As Label
+    Friend WithEvents btnChooseCam As Button
 End Class

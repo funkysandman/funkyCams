@@ -21,8 +21,8 @@ OutputBaseFilename="ApogeeAlta Setup"
 Compression=lzma
 SolidCompression=yes
 ; Put there by Platform if Driver Installer Support selected
-WizardImageFile="C:\Program Files (x86)\ASCOM\Platform 6 Developer Components\Installer Generator\Resources\WizardImage.bmp"
-LicenseFile="C:\Program Files (x86)\ASCOM\Platform 6 Developer Components\Installer Generator\Resources\CreativeCommons.txt"
+;WizardImageFile="C:\Program Files (x86)\ASCOM\Platform 6 Developer Components\Installer Generator\Resources\WizardImage.bmp"
+;LicenseFile="C:\Program Files (x86)\ASCOM\Platform 6 Developer Components\Installer Generator\Resources\CreativeCommons.txt"
 ; {cf}\ASCOM\Uninstall\Camera folder created by Platform, always
 UninstallFilesDir="{cf}\ASCOM\Uninstall\Camera\ApogeeAlta"
 
