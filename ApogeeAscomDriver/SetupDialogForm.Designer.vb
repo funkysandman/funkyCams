@@ -9,6 +9,7 @@ Partial Class SetupDialogForm
             If disposing AndAlso components IsNot Nothing Then
                 components.Dispose()
             End If
+            c.Close()
         Finally
             MyBase.Dispose(disposing)
         End Try

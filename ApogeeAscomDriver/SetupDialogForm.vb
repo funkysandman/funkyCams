@@ -19,7 +19,7 @@ Public Class SetupDialogForm
         Camera.yHeight = tbYheight.Text
         Camera.adOffset = tbOffset1.Text
         Camera.analogGain = tbGain1.Text
-
+        c.Close()
         Me.DialogResult = System.Windows.Forms.DialogResult.OK
         Me.Close()
     End Sub

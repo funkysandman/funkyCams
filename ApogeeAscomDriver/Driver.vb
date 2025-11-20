@@ -1,4 +1,4 @@
-'tabs=4
+﻿'tabs=4
 ' --------------------------------------------------------------------------------
 ' TODO fill in this information for your driver, then remove this line!
 '
@@ -108,6 +108,7 @@ Public Class Camera
     Private _readoutModes = New ArrayList(2)
     Private t As Threading.Thread
     Private platform As Integer
+    Private ReadOnly GainValues As List(Of Double) = New List(Of Double)({0})
 
     '
     ' Constructor - Must be public for COM registration!
@@ -593,24 +594,32 @@ Public Class Camera
             'Throw New ASCOM.PropertyNotImplementedException("FullWellCapacity", False)
         End Get
     End Property
-
-    Public Property Gain() As Short Implements ICameraV3.Gain, ICameraV2.Gain
+    'Public ReadOnly Property Gains As ArrayList Implements ICameraV3.Gains
+    '    Get
+    '        Return New ArrayList({"default"})
+    '    End Get
+    'End Property
+    Public Property Gain As Short Implements ICameraV3.Gain, ICameraV2.Gain
         Get
-
-            Dim g As Short
-            If IsConnected Then
-                myCam.c.GetAdGain(g, 1, 0)
-                Return g
-            End If
-            Return -1
+            'If IsConnected Then
+            '    Dim gainIndex As Short
+            '    myCam.c.GetAdGain(gainIndex, 1, 0)
+            '    Return GainValues(gainIndex)  ' actual gain in dB
+            'End If
+            Return 0
         End Get
-        Set(value As Short)
 
-            If IsConnected And value > -1 Then
-                myCam.c.SetAdGain(value, 1, 0)
+        Set(value As Short)
+            If IsConnected Then
+                Dim index As Integer = GainValues.IndexOf(value)
+                If index >= 0 Then
+                    myCam.c.SetAdGain(CShort(index), 1, 0)
+                End If
             End If
         End Set
     End Property
+
+
 
     Public ReadOnly Property GainMax() As Short Implements ICameraV3.GainMax, ICameraV2.GainMax
         Get
@@ -632,7 +641,7 @@ Public Class Camera
         End Get
     End Property
 
-    Public ReadOnly Property Gains() As ArrayList Implements ICameraV3.Gains, ICameraV2.Gains
+    Public ReadOnly Property Gains As ArrayList Implements ICameraV3.Gains, ICameraV2.Gains
         Get
             Dim _gains As New ArrayList()
             Select Case platform
