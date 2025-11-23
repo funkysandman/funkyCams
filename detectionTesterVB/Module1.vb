@@ -13,7 +13,7 @@ Module Module1
 
     Sub Main()
         'loop through files and generate qe as well
-        Dim from_date = DateTime.Now.AddHours(-19)
+        Dim from_date = DateTime.Now.AddHours(-48)
         Dim to_date = DateTime.Now.AddHours(0)
         Dim c As Bitmap
         Dim fName As String

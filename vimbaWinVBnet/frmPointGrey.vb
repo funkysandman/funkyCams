@@ -1,12 +1,15 @@
 ﻿
+Imports System.Collections.Specialized
+Imports System.Drawing.Imaging
 Imports System.Environment
+Imports System.IO
+Imports System.Runtime.InteropServices
+Imports System.Threading
 Imports SpinnakerNET
 Imports SpinnakerNET.GenApi
-Imports System.Collections.Specialized
+Imports BitMiracle.LibTiff.Classic
+Imports SVCamApi
 Imports vimbaWinVBnet.vimbaWinVBnet
-Imports System.Drawing.Imaging
-Imports System.IO
-Imports System.Threading
 
 Public Class frmPointGrey
     Inherits frmMaster
@@ -202,10 +205,137 @@ Public Class frmPointGrey
 
         End Sub
 
+
+        Sub SubtractDark_StrideSafe(image As ManagedImage, darkBytes() As Byte)
+            If darkBytes Is Nothing Then Throw New ArgumentException("dark is Nothing")
+            Dim width As Integer = image.Width
+            Dim height As Integer = image.Height
+            Dim stride As Integer = image.Stride
+            Dim ptr As IntPtr = image.DataPtr
+
+            Dim darkHasStride As Boolean = (darkBytes.Length = image.DataSize)
+            Dim darkNoStride As Boolean = (darkBytes.Length = width * height * 2)
+            If Not darkHasStride AndAlso Not darkNoStride Then
+                Throw New ArgumentException($"dark length {darkBytes.Length} does not match image size ({image.DataSize}) nor width*height*2 ({width * height * 2})")
+            End If
+
+            For y As Integer = 0 To height - 1
+                Dim rowPtr As IntPtr = IntPtr.Add(ptr, y * stride)
+                Dim darkRowOffset As Integer
+                If darkHasStride Then
+                    darkRowOffset = y * stride
+                Else
+                    darkRowOffset = y * width * 2
+                End If
+
+                For x As Integer = 0 To width - 1
+                    Dim idx As Integer = x * 2
+                    Dim darkIdx As Integer = darkRowOffset + idx
+
+                    ' read image big-endian
+                    Dim hi As Byte = Marshal.ReadByte(rowPtr, idx)
+                    Dim lo As Byte = Marshal.ReadByte(rowPtr, idx + 1)
+                    Dim imgVal As Integer = (hi << 8) Or lo
+
+                    ' read dark big-endian from appropriate layout
+                    Dim dhi As Byte = darkBytes(darkIdx)
+                    Dim dlo As Byte = darkBytes(darkIdx + 1)
+                    Dim darkVal As Integer = (dhi << 8) Or dlo
+
+                    ' subtract and clamp
+                    Dim r As Integer = imgVal ' - darkVal
+                    If r < 0 Then r = 0
+                    If r > UShort.MaxValue Then r = UShort.MaxValue
+                    Dim outVal As UShort = CUShort(r)
+
+                    ' write back big-endian
+                    Marshal.WriteByte(rowPtr, idx, CByte((outVal >> 8) And &HFF))
+                    Marshal.WriteByte(rowPtr, idx + 1, CByte(outVal And &HFF))
+                Next
+            Next
+        End Sub
+
+        Public Sub SaveDarkSubtractedTiff(image As SpinnakerNET.IManagedImage, dark() As Byte, outputPath As String)
+            Dim width As Integer = image.Width
+            Dim height As Integer = image.Height
+            Dim stride As Integer = image.Stride
+            Dim pixelCount As Integer = width * height
+
+            Dim ptr As IntPtr = image.DataPtr
+
+            ' Prepare output buffer for 16-bit TIFF
+            ' Assuming outputBytes has been initialized to store the output image data
+            Dim outputBytes(pixelCount * 2 - 1) As Byte
+            Dim outzero = 0
+            For idx = 1 To pixelCount * 2 - 2 Step 2
+
+
+
+
+                ' Read big-endian from image
+                Dim hi As Byte = Marshal.ReadByte(ptr, idx)
+                Dim lo As Byte = Marshal.ReadByte(ptr, idx + 1)
+                Dim val As Integer = (CInt(hi) << 8) Or CInt(lo)
+                Dim val2 As Integer = (CInt(lo) << 8) Or CInt(hi)
+
+                ' Read big-endian from dark frame
+                Dim dhi As Byte = dark(idx)       ' Assuming dark is an array of bytes
+                Dim dlo As Byte = dark(idx + 1)
+                Dim dval As Integer = (CInt(dhi) << 8) Or CInt(dlo)
+                Dim dval2 As Integer = (CInt(dlo) << 8) Or CInt(dhi)
+                ' Subtract and clamp
+
+
+
+                Dim r As Integer = val - dval
+                If r < 0 Then
+                    r = 0
+                    outzero = outzero + 1
+                    'Debug.Print("hi:{0}, lo:{1}, dhi:{2}, dlo:{3}", hi, lo, dhi, dlo)
+                End If
+                If r > &HFFFF Then r = &HFFFF
+
+                Dim outVal As UShort = CUShort(r)
+                Dim outHigh As Byte = CByte((outVal >> 8) And &HFF)
+                Dim outLow As Byte = CByte(outVal And &HFF)
+
+                ' --- Write to output buffer (tight array, no stride) ---
+                outputBytes(idx) = outHigh
+                outputBytes(idx + 1) = outLow
+
+                If outHigh <= 0 And outLow <= 0 Then
+
+                    '
+                End If
+
+                Dim xxxx = 0
+
+            Next
+            Debug.Print("outzero: " + outzero.ToString)
+            ' Write 16-bit TIFF using LibTiff.NET
+            Using tiff As Tiff = Tiff.Open(outputPath, "w")
+                tiff.SetField(TiffTag.IMAGEWIDTH, width)
+                tiff.SetField(TiffTag.IMAGELENGTH, height)
+                tiff.SetField(TiffTag.BITSPERSAMPLE, 16)
+                tiff.SetField(TiffTag.SAMPLESPERPIXEL, 1)
+                tiff.SetField(TiffTag.ROWSPERSTRIP, height)
+                tiff.SetField(TiffTag.COMPRESSION, Compression.NONE)
+                tiff.SetField(TiffTag.PHOTOMETRIC, Photometric.MINISBLACK)
+                tiff.SetField(TiffTag.PLANARCONFIG, PlanarConfig.CONTIG)
+
+                For y As Integer = 0 To height - 1
+                    ' Write each row (row length = width * 2 bytes)
+                    tiff.WriteScanline(outputBytes, y * width * 2, y, 0)
+                Next
+            End Using
+        End Sub
+
         ' This method defines an image event. In it, the image that
         ' triggered the event is converted and saved before incrementing
         ' the count. Please see Acquisition_CSharp example for more
         ' in-depth comments on the acquisition of images.
+
+
         Protected Overrides Sub OnImageEvent(image As ManagedImage)
 
             myForm.running = True
@@ -228,125 +358,145 @@ Public Class frmPointGrey
 
             'image.Save("pgDark.raw")
             'darks
-            Dim pixel, dPixel, newPixel, neighborPixel As Long
+
+            'check temperature
+
+            'fetch temperature
+            Dim temp As Float = m_cam.DeviceTemperature
+
+            myForm.txtTemp.Invoke(Sub()
+                                      myForm.txtTemp.Text = temp.ToString("0.0")
+                                  End Sub)
+
             If myForm.cbUseDarks.Checked And myForm.lblDayNight.Text = "night" Then
                 If myForm.dark Is Nothing Then
-                    myForm.dark = System.IO.File.ReadAllBytes("pgdark.raw")
+                    myForm.dark = System.IO.File.ReadAllBytes("pgdark" + m_cam.DeviceSerialNumber.Value + ".raw")
 
                     'For i = 0 To myForm.dark.Length - 1
                     '    myForm.dark(i) = CByte(CInt(myForm.dark(i)) * mult)
                     'Next
                 End If
 
-                Dim mult As Decimal
-                Dim range As Integer
-                range = myForm.tbUpper.Text - myForm.tbLower.Text
-                Dim multiplier As Single
-                multiplier = 65355 / range
-                'Dim lower, upper As Integer
-                'lower = CInt(myForm.tbLower.Text)
-                'upper = CInt(myForm.tbUpper.Text)
-                Dim darkCutOff As Integer = myForm.tbDarkCutOff.Text
-                mult = Val(myForm.tbMultiplier.Text)
-                For i = 0 To image.DataSize - 1 Step 2
-                    pixel = image.ManagedData(i) + image.ManagedData(i + 1) * 256
-                    If i > 6 Then
-                        neighborPixel = image.ManagedData(i - 4) + image.ManagedData(i - 3) * 256
+                'SaveDarkSubtractedTiff(image, myForm.dark, "dark_subtracted_libtiff.tiff")
+
+                'SubtractDark_StrideSafe(image, myForm.dark)
+                '    Dim mult As Decimal
+                '    Dim range As Integer
+                '    range = myForm.tbUpper.Text - myForm.tbLower.Text
+                '    Dim multiplier As Single
+                '    multiplier = 65355 / range
+                '    'Dim lower, upper As Integer
+                '    'lower = CInt(myForm.tbLower.Text)
+                '    'upper = CInt(myForm.tbUpper.Text)
+                '    Dim darkCutOff As Integer = myForm.tbDarkCutOff.Text
+                '    mult = Val(myForm.tbMultiplier.Text)
+                '    Debug.WriteLine("PixelFormat = " & image.PixelFormat.ToString())
+                '    'images are stored as bayerRG16
+                ' assume image.DataSize and ManagedData already valid
+                '--- Assume:
+                ' image        = your Spinnaker IManagedImage (16-bit BayerRG, big-endian)
+                ' dark         = byte() array, contiguous big-endian dark frame, Width*Height*2 bytes
+                ' convertedImg = IManagedImage for BGR8 output
+
+                '--- Assume:
+                ' image = your Spinnaker IManagedImage (16-bit BayerRG, big-endian)
+                ' dark  = byte() array, contiguous big-endian dark frame, Width*Height*2 bytes
+
+                Dim width As Integer = image.Width
+                Dim height As Integer = image.Height
+                Dim stride As Integer = image.Stride
+                Dim ptr As IntPtr = image.DataPtr
+                Dim pixelCount As Integer = width * height
+                ' Create output buffer for 16-bit image (big-endian)
+                Dim outputBytes(width * height * 2 - 1) As Byte
+
+                For idx As Integer = 1 To pixelCount * 2 - 2 Step 2
 
 
-                        dPixel = myForm.dark(i) + myForm.dark(i + 1) * 256
-                        If (dPixel > darkCutOff) Then
-                            pixel = neighborPixel
-                        End If
+                    ' --- Read light pixel (big-endian) ---
+                    Dim hi As Byte = Marshal.ReadByte(ptr, idx)
+                    Dim lo As Byte = Marshal.ReadByte(ptr, idx + 1)
+                    Dim val As Integer = (CInt(hi) << 8) Or CInt(lo)
 
-                    End If
+                    ' --- Read dark pixel (big-endian) ---
+                    Dim darkHi As Byte = myForm.dark(idx)
+                    Dim darkLo As Byte = myForm.dark(idx + 1)
+                    Dim dval As Integer = (CInt(darkHi) << 8) Or CInt(darkLo)
 
-                    'newPixel = CByte(Math.Max(0, CInt(image.ManagedData(i)) - CInt(myForm.dark(i)) * mult))
+                        ' --- Subtract and clamp ---
+                        Dim r As Integer = val - dval
+                        If r < 0 Then r = 0
+                        If r > UShort.MaxValue Then r = UShort.MaxValue
+                        Dim outVal As UShort = CUShort(r)
+                        Dim outHigh As Byte = CByte((outVal >> 8) And &HFF)
+                        Dim outLow As Byte = CByte(outVal And &HFF)
 
-
-                    'pixel = CInt(pixel * multiplier)
-
-
-                    'value = value * 255 / span
-                    If pixel > 65355 Then
-                        pixel = 65355
-                    End If
-                    If pixel < 0 Then
-                        pixel = 0
-                    End If
-
-
-                    image.ManagedData(i + 1) = CByte(pixel >> 8)
-
-                    image.ManagedData(i) = CByte(pixel And &HFF)
-
-
-
+                    ' --- Write to output buffer (tight array, no stride) ---
+                    outputBytes(idx) = outHigh
+                    outputBytes(idx + 1) = outLow
                 Next
 
-                'copy managedData back to image
-                System.Runtime.InteropServices.Marshal.Copy(image.ManagedData, 0, image.DataPtr, image.DataSize - 1)
-                ' Convert image
-                'image.PixelFormat = PixelFormatEnums.BayerRG16
+                ' Copy back to unmanaged buffer
+                Marshal.Copy(outputBytes, 0, ptr, outputBytes.Length)
 
             End If
-            'stretch image
-
-            Dim value As Integer
-
-
-
-            'For i = 0 To image.DataSize - 1 Step 2  ' This loop converts from 16bit to 8bit using min and max
-            '    pixel = image.ManagedData(i) + image.ManagedData(i + 1) * 256
-            '    'value = value >> 2
-
-            '    ''Debug.Print(value)
-            '    'If value < 0 Then ' Type cast from short to ushort? Forget it: Not with VB
-            '    '    value = value * -1
-            '    '    value = value + &H8000
-            '    'End If
-            '    'value = value - lower
-            '    'If value < 0 Then
-            '    '    value = 0
-            '    'End If
+            ''stretch image
+            image.Save("image.raw", ImageFileFormat.Tiff)
+            'Dim value As Integer
 
 
 
-            '    image.ManagedData(i + 1) = CByte(pixel >> 8)
+            ''For i = 0 To image.DataSize - 1 Step 2  ' This loop converts from 16bit to 8bit using min and max
+            ''    pixel = image.ManagedData(i) + image.ManagedData(i + 1) * 256
+            ''    'value = value >> 2
 
-            '    image.ManagedData(i) = CByte(pixel And &HFF)
+            ''    ''Debug.Print(value)
+            ''    'If value < 0 Then ' Type cast from short to ushort? Forget it: Not with VB
+            ''    '    value = value * -1
+            ''    '    value = value + &H8000
+            ''    'End If
+            ''    'value = value - lower
+            ''    'If value < 0 Then
+            ''    '    value = 0
+            ''    'End If
 
 
 
-            'Next
+            ''    image.ManagedData(i + 1) = CByte(pixel >> 8)
 
-            ' Marshal.Copy(Image24, 0, bmpData.Scan0, isize) ' Copy intermediate buffer to the bitmap
+            ''    image.ManagedData(i) = CByte(pixel And &HFF)
+
+
+
+            ''Next
+
+            '' Marshal.Copy(Image24, 0, bmpData.Scan0, isize) ' Copy intermediate buffer to the bitmap
 
 
 
 
             Dim mTransformImage As BGAPI2.Image = Nothing
-            Dim mImage As BGAPI2.Image = Nothing
-            ' Dim buff As BGAPI2.Buffer = New BGAPI2.Buffer()
-            'Dim imgProcessor As New BGAPI2.ImageProcessor()
+                Dim mImage As BGAPI2.Image = Nothing
+                ' Dim buff As BGAPI2.Buffer = New BGAPI2.Buffer()
+                'Dim imgProcessor As New BGAPI2.ImageProcessor()
 
 
-            '            //copy back to imageInfo
-            'Marshal.Copy(rawImage.imagebytes, 0, ImageInfo.pImagePtr, imageSizeX * imageSizeY);
+                '            //copy back to imageInfo
+                'Marshal.Copy(rawImage.imagebytes, 0, ImageInfo.pImagePtr, imageSizeX * imageSizeY);
 
-            ''//debayer buffer into RGB
-            ''//myApi.SVS_UtilBufferBayerToRGB(ImageInfo, ref imagebufferRGB[currentIdex].imagebytes[0], imageSizeX * imageSizeY );
-            ''BGAPI2.Image mTransformImage = null;
-            ''BGAPI2.Buffer mBufferFilled = New BGAPI2.Buffer();
-            '' Dim pImagePtr As IntPtr
-            ' Dim convertedImage As IManagedImage = image.Convert(PixelFormatEnums., ColorProcessingAlgorithm.NEAREST_NEIGHBOR_AVG)
+                ''//debayer buffer into RGB
+                ''//myApi.SVS_UtilBufferBayerToRGB(ImageInfo, ref imagebufferRGB[currentIdex].imagebytes[0], imageSizeX * imageSizeY );
+                ''BGAPI2.Image mTransformImage = null;
+                ''BGAPI2.Buffer mBufferFilled = New BGAPI2.Buffer();
+                '' Dim pImagePtr As IntPtr
+                ' Dim convertedImage As IManagedImage = image.Convert(PixelFormatEnums., ColorProcessingAlgorithm.NEAREST_NEIGHBOR_AVG)
 
 
-            Dim convertedImage As New ManagedImage
+                Dim convertedImage As New ManagedImage
             ' image.Convert(PixelFormatEnums.RGB8, ColorProcessingAlgorithm.NEAREST_NEIGHBOR_AVG)
             'image.ConvertToBitmapSource(PixelFormatEnums.RGB8, ColorProcessingAlgorithm.NEAREST_NEIGHBOR_AVG)
 
-            image.Convert(convertedImage, PixelFormatEnums.BGR8, ColorProcessingAlgorithm.DEFAULT)
+            image.Convert(convertedImage, PixelFormatEnums.BGR8)
 
             'mImage = imgProcessor.CreateImage(image.Width, image.Height, "BayerGB16", image.DataPtr, image.Width * image.Height * 2)
 
@@ -456,10 +606,17 @@ Public Class frmPointGrey
 
             Try
                 ' Run example
-                m_cam = managedCamera
-                m_cam.Init()
-                m_nodeMap = m_cam.GetNodeMap()
-                m_nodeMapTLDevice = m_cam.GetTLDeviceNodeMap()
+                managedCamera.Init()
+                If managedCamera.DeviceSerialNumber.ToString() = cmbCam.SelectedItem.ToString().Split(" "c)(UBound(cmbCam.SelectedItem.ToString().Split(" "c))) Then
+                    Console.WriteLine("Opening camera {0}...{1}", managedCamera.DeviceSerialNumber, NewLine)
+                    managedCamera.Init()
+                    m_cam = managedCamera
+                    m_cam.Init()
+                    m_nodeMap = m_cam.GetNodeMap()
+                    m_nodeMapTLDevice = m_cam.GetTLDeviceNodeMap()
+                    Exit For
+                End If
+                managedCamera.DeInit()
             Catch ex As SpinnakerException
                 Console.WriteLine("Error: {0}", ex.Message)
                 Return False
@@ -558,7 +715,11 @@ Public Class frmPointGrey
         '
         'if exposure is less than 1 second then turn on framerate
 
-        Dim iAcquisitionFrameRateEnable As IBool = m_nodeMap.GetNode(Of IBool)("AcquisitionFrameRateEnabled")
+        Dim iAcquisitionFrameRateEnable As IBool = m_nodeMap.GetNode(Of IBool)("AcquisitionFrameRateEnable")
+
+        If iAcquisitionFrameRateEnable Is Nothing OrElse Not iAcquisitionFrameRateEnable.IsWritable Then
+            iAcquisitionFrameRateEnable = m_nodeMap.GetNode(Of IBool)("AcquisitionFrameRateEnabled") 'might like the letter d
+        End If
         Dim iAcquisitionFrameRateAuto As IEnum = m_nodeMap.GetNode(Of IEnum)("AcquisitionFrameRateAuto")
         Dim iAcquisitionFrameRateAutoModeOff As IEnumEntry = iAcquisitionFrameRateAuto.GetEntryByName("Off")
 
@@ -593,8 +754,10 @@ Public Class frmPointGrey
             End If
 
         Else 'long exposure
-            iAcquisitionFrameRateEnable.Value = False
-
+            Try
+                iAcquisitionFrameRateEnable.Value = False
+            Catch ex As Exception
+            End Try
         End If
 
         ' Ensure desired exposure time does not exceed the maximum
@@ -660,15 +823,20 @@ Public Class frmPointGrey
     Private Sub btnStop_Click(sender As Object, e As EventArgs) Handles btnStop.Click
         running = False
         TimerFPS.Enabled = False
-        m_cam.EndAcquisition()
+        'start a thread to stop acquisition and call m_cam.EndAcquisition()
+        Dim tstop As New Thread(AddressOf m_cam.EndAcquisition)
+        tstop.Start()
+
+
         meteorCheckRunning = False
         btnStart.Enabled = True
         btnStop.Enabled = False
     End Sub
 
     Private Sub frmPointGrey_Load(sender As Object, e As EventArgs) Handles Me.Load
-        getCameraReady()
-        Me.cmbCam.Visible = False
+        loadCameraList()
+
+        Me.cmbCam.Visible = True
         Me.cbUseTrigger.Visible = False
         MyBase.Form_Load(sender, e)
         'load defaults
@@ -678,11 +846,27 @@ Public Class frmPointGrey
         tbNightExp.Text = "7500000"
         tbDayGain.Text = "0"
         tbNightAgain.Text = "27"
-        loadProfile(m_cam.DeviceModelName.ToString().Replace(" ", ""))
+
 
 
     End Sub
+    Private Sub loadCameraList()
 
+        m_system = New ManagedSystem()
+        ' Retrieve list of cameras from the system
+        m_camList = m_system.GetCameras()
+        Console.WriteLine("Number of cameras detected: {0}{1}{1}", m_camList.Count, NewLine)
+        ' Finish if there are no cameras
+        If m_camList.Count > 0 Then
+            ' populate camera list cmbCam
+            For Each managedCamera As IManagedCamera In m_camList
+                ' get properties of camera
+                managedCamera.Init()
+                Me.cmbCam.Items.Add(managedCamera.DeviceModelName.ToString() & " " & managedCamera.DeviceSerialNumber.ToString())
+                managedCamera.DeInit()
+            Next
+        End If
+    End Sub
     Private Sub getCameraReady()
 
         m_system = New ManagedSystem()
@@ -781,7 +965,10 @@ Public Class frmPointGrey
     Private Sub btnStopWeb_Click(sender As Object, e As EventArgs) Handles btnStopWeb.Click
         btnStartWeb.Enabled = True
         btnStopWeb.Enabled = False
-        myWebServer.StopWebServer()
+        'start a thread to stop web server
+        Dim tstop As New Thread(AddressOf myWebServer.StopWebServer)
+        tstop.Start()
+
     End Sub
 
 
@@ -1027,7 +1214,7 @@ Public Class frmPointGrey
     Private Sub Button2_Click(sender As Object, e As EventArgs) Handles Button2.Click
         'take ten darks
         m_cam.UnregisterEvent(m_imageEventListener)
-        Dim numDarks As Integer = 10
+        Dim numDarks As Integer = 1
         Dim numBytes As Integer = 0
         MsgBox("cover lens")
         setExposure(CDbl(tbExposureTime.Text))
@@ -1042,9 +1229,28 @@ Public Class frmPointGrey
         For i = 1 To numDarks
             rawImage = m_cam.GetNextImage()
             Debug.Print("image - {0}", i)
-            For x = 0 To numBytes - 1
-                darks(x) = darks(x) + CInt(rawImage.ManagedData(x))
+            Dim ptr As IntPtr = rawImage.DataPtr
+            Dim stride As Integer = rawImage.Stride
+            Dim width As Integer = rawImage.Width
+
+            Dim dstIndex As Integer = 0
+
+            For y = 0 To rawImage.Height - 1
+                Dim rowPtr As IntPtr = ptr + y * stride
+                For x = 0 To width - 1
+                    Dim idx = x * 2
+
+                    ' BIG-ENDIAN READ (matches light)
+                    Dim hi As Byte = Marshal.ReadByte(rowPtr, idx)
+                    Dim lo As Byte = Marshal.ReadByte(rowPtr, idx + 1)
+
+                    darks(dstIndex) = hi
+                    darks(dstIndex + 1) = lo
+
+                    dstIndex += 2
+                Next
             Next
+
             rawImage.Release()
         Next
         m_cam.EndAcquisition()
@@ -1052,10 +1258,13 @@ Public Class frmPointGrey
         For i = 0 To numBytes - 1
             darkBytes(i) = CByte(darks(i) / numDarks)
         Next
-        System.IO.File.WriteAllBytes("pgDark.raw", darkBytes)
+        System.IO.File.WriteAllBytes("pgdark" + m_cam.DeviceSerialNumber.Value + ".raw", darkBytes)
         MsgBox("finished darks")
     End Sub
-
+    Private Sub cmbCam_SelectedIndexChanged(sender As Object, e As EventArgs) Handles cmbCam.SelectedIndexChanged
+        getCameraReady()
+        loadProfile(m_cam.DeviceModelName.ToString().Replace(" ", ""))
+    End Sub
     'Private Sub InitializeComponent()
     '    Me.SuspendLayout()
     '    '

@@ -181,7 +181,7 @@ Public Class frmSVSVistek
         'load defaults
 
         tbPort.Text = "8050"
-        tbPath.Text = "e:\image_svs"
+        ''tbPath.Text = "e:\image_svs"
         tbDayTimeExp.Text = "125"
         tbNightExp.Text = "4996100"
         tbDayGain.Text = "0"
@@ -281,16 +281,17 @@ Public Class frmSVSVistek
             'End If
 
             'fetch temperature
-
-            txtTemp.Text = mySVCamGrabber.getTemperature()
-            ' End If
-
-
-            If cbFan.Checked Then
-                mySVCamGrabber.FanOn(True)
-            Else
-                mySVCamGrabber.FanOn(False)
+            If Not mySVCamGrabber.current_selected_cam Is Nothing Then
+                txtTemp.Text = mySVCamGrabber.getTemperature()
+                If cbFan.Checked Then
+                    mySVCamGrabber.fanOn(True)
+                Else
+                    mySVCamGrabber.fanOn(False)
+                End If
             End If
+
+
+
 
 
         Catch ex As Exception
@@ -468,6 +469,7 @@ Public Class frmSVSVistek
         Debug.Print("day to night / night to day")
         If mySVCamGrabber Is Nothing Then Exit Sub
         If Not mySVCamGrabber.acqThreadIsRuning Then Exit Sub
+
         mySVCamGrabber.stopAcquisitionThread()
 
         'wait for thread to stop
@@ -476,14 +478,6 @@ Public Class frmSVSVistek
         End While
 
 
-
-
-
-        'halt camera and wait for it to stop
-        'mySVCam.stopAcquisitionThread()
-        'While (mySVCam.current_selected_cam.isGrabbing)
-        '    Application.DoEvents()
-        'End While
         Dim webserverWasrunning As Boolean
         webserverWasrunning = False
         If Not myWebServer Is Nothing Then
@@ -542,8 +536,14 @@ Public Class frmSVSVistek
         mySVCamGrabber.current_selected_cam.openConnection()
 
         mySVCamGrabber.setParams(Val(Me.tbExposureTime.Text), Val(Me.tbGain.Text))
-        mySVCamGrabber.prepareCameraForTimed(mySVCamGrabber.current_selected_cam)
-        mySVCamGrabber.startAcquisitionThread(AddressOf Me.received_frame)
+        If cbUseTrigger.Checked Then
+            mySVCamGrabber.prepareCameraForTriggerWidth(mySVCamGrabber.current_selected_cam)
+            mySVCamGrabber.startAcquisitionTriggerWidthThread(AddressOf Me.received_frame)
+        Else
+            mySVCamGrabber.prepareCameraForTimed(mySVCamGrabber.current_selected_cam)
+            mySVCamGrabber.startAcquisitionThread(AddressOf Me.received_frame)
+        End If
+
         If webserverWasrunning Then
 
             myWebServer.StartWebServer(mySVCamGrabber, Me, Val(Me.tbPort.Text))
