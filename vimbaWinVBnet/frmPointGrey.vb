@@ -601,29 +601,27 @@ Public Class frmPointGrey
 
     Private Function OpenCamera() As Boolean
 
-        For Each managedCamera As IManagedCamera In m_camList
+        Dim managedCamera As IManagedCamera
+        managedCamera = m_camList.Item(cmbCam.SelectedIndex)
 
+        Try
+            ' Run example
+            managedCamera.Init()
+            'If managedCamera.DeviceSerialNumber.ToString() = cmbCam.SelectedItem.ToString().Split(" "c)(UBound(cmbCam.SelectedItem.ToString().Split(" "c))) Then
+            Console.WriteLine("Opening camera {0}...{1}", managedCamera.DeviceSerialNumber, NewLine)
 
-            Try
-                ' Run example
-                managedCamera.Init()
-                If managedCamera.DeviceSerialNumber.ToString() = cmbCam.SelectedItem.ToString().Split(" "c)(UBound(cmbCam.SelectedItem.ToString().Split(" "c))) Then
-                    Console.WriteLine("Opening camera {0}...{1}", managedCamera.DeviceSerialNumber, NewLine)
-                    managedCamera.Init()
-                    m_cam = managedCamera
-                    m_cam.Init()
-                    m_nodeMap = m_cam.GetNodeMap()
-                    m_nodeMapTLDevice = m_cam.GetTLDeviceNodeMap()
-                    Exit For
-                End If
-                managedCamera.DeInit()
-            Catch ex As SpinnakerException
-                Console.WriteLine("Error: {0}", ex.Message)
-                Return False
-            End Try
+            m_cam = managedCamera
+            m_cam.Init()
+            m_nodeMap = m_cam.GetNodeMap()
+            m_nodeMapTLDevice = m_cam.GetTLDeviceNodeMap()
 
+            ' End If
 
-        Next
+        Catch ex As SpinnakerException
+            Console.WriteLine("Error: {0}", ex.Message)
+            Return False
+        End Try
+
         Return True
     End Function
 
@@ -861,9 +859,18 @@ Public Class frmPointGrey
             ' populate camera list cmbCam
             For Each managedCamera As IManagedCamera In m_camList
                 ' get properties of camera
-                managedCamera.Init()
-                Me.cmbCam.Items.Add(managedCamera.DeviceModelName.ToString() & " " & managedCamera.DeviceSerialNumber.ToString())
-                managedCamera.DeInit()
+                ' camera may be occupied by another application
+                Try
+                    managedCamera.Init()
+                    Me.cmbCam.Items.Add(managedCamera.DeviceModelName.ToString() & " " & managedCamera.DeviceSerialNumber.ToString())
+                    managedCamera.DeInit()
+                Catch ex As SpinnakerException
+                    Me.cmbCam.Items.Add("occupied camera")
+                    Console.WriteLine("Camera   is not available. It may be in use by another application.")
+                    Continue For
+                End Try
+
+
             Next
         End If
     End Sub
@@ -1263,7 +1270,7 @@ Public Class frmPointGrey
     End Sub
     Private Sub cmbCam_SelectedIndexChanged(sender As Object, e As EventArgs) Handles cmbCam.SelectedIndexChanged
         getCameraReady()
-        loadProfile(m_cam.DeviceModelName.ToString().Replace(" ", ""))
+        loadProfile(m_cam.DeviceUserID.ToString().Replace(" ", ""))
     End Sub
     'Private Sub InitializeComponent()
     '    Me.SuspendLayout()
