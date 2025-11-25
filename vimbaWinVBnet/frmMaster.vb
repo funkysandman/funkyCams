@@ -60,6 +60,9 @@ Public Class frmMaster
         Public Property url As String
         Public Property Rects As New List(Of MyRectangle)
 
+        Public Property fanOn As Boolean
+
+
         Public Sub readSettings()
 
             'try to read settings file
@@ -89,6 +92,7 @@ Public Class frmMaster
                 Me.darkMultiplier = jsonResulttodict.Item("darkMultiplier")
                 Me.darkCutOff = jsonResulttodict.Item("darkCutOff")
                 Me.url = jsonResulttodict.Item("url")
+                Me.fanOn = jsonResulttodict.Item("fanOn")
                 Dim rectJS As Object = jsonResulttodict.Item("Rects")
                 Me.Rects = New List(Of MyRectangle)
                 For Each item In rectJS
@@ -174,6 +178,26 @@ Public Class frmMaster
             End Get
         End Property
 
+        ' m_ManagedImages(m_BitmapSelector) = b
+        'copy raw data into m_buffers
+        Dim rawData(b.DataSize - 1) As Byte
+        ' Dim BoundsRect = New Rectangle(0, 0, b.Width, b.Height)
+        ' Dim bmpData As System.Drawing.Imaging.BitmapData = m_Bitmaps(m_BitmapSelector).LockBits(BoundsRect, System.Drawing.Imaging.ImageLockMode.[WriteOnly], m_Bitmaps(m_BitmapSelector).PixelFormat)
+        'Dim ptr As IntPtr = bmpData.Scan0
+        'System.Runtime.InteropServices.Marshal.Copy(b.DataPtr, ptr, 0, b.DataSize) 'copy into bitmap
+        'System.Runtime.InteropServices.Marshal.Copy(b.ManagedData, 0, rawData, b.DataSize) 'copy into array
+
+        If m_buffers(m_BitmapSelector) Is Nothing OrElse m_buffers(m_BitmapSelector).Length <> b.DataSize Then
+                m_buffers(m_BitmapSelector) = New Byte(b.DataSize - 1) {}
+            End If
+
+            Buffer.BlockCopy(b.ManagedData, 0, m_buffers(m_BitmapSelector), 0, b.DataSize)
+            m_width = b.Width
+            m_height = b.Height
+            m_dataSize = b.DataSize
+
+
+        End Sub
         Public Sub FillNextBitmap(b As Bitmap)
             SwitchBitmap()
 
@@ -224,7 +248,7 @@ Public Class frmMaster
         Dim BoundsRect = New Rectangle(0, 0, m_pics.width, m_pics.height)
         Dim bmpData As System.Drawing.Imaging.BitmapData = x.LockBits(BoundsRect, System.Drawing.Imaging.ImageLockMode.[WriteOnly], x.PixelFormat)
         Dim ptr As IntPtr = bmpData.Scan0
-        System.Runtime.InteropServices.Marshal.Copy(m_pics.ImageBytes, 0, ptr, m_pics.dataSize - 1) 'copy into bitmap
+        System.Runtime.InteropServices.Marshal.Copy(m_pics.ImageBytes, 0, ptr, m_pics.dataSize) 'copy into bitmap
 
 
         x.UnlockBits(bmpData)
@@ -287,7 +311,7 @@ Public Class frmMaster
         tbUpper.Text = mySettings.maxValue
         tbDarkCutOff.Text = mySettings.darkCutOff
         tbURL.Text = mySettings.url
-
+        cbFan.Checked = mySettings.fanOn
 
     End Sub
 
@@ -334,7 +358,7 @@ Public Class frmMaster
         encoders = ImageCodecInfo.GetImageEncoders()
 
         j = 0
-        While j <encoders.Length
+        While j < encoders.Length
             If encoders(j).MimeType = mimeType Then
                 Return encoders(j)
             End If
@@ -351,12 +375,19 @@ Public Class frmMaster
         Dim aQE As queueEntry
         While (meteorCheckRunning)
             If myDetectionQueue.Count > 0 Then
+                'Try
                 aQE = myDetectionQueue.Dequeue()
+                If Not aQE Is Nothing Then
 
-                CallAzureMeteorDetection(aQE)
+                    CallAzureMeteorDetection(aQE)
 
+                End If
 
                 aQE = Nothing
+                'Catch
+
+                'End Try
+
 
             End If
             'Console.WriteLine("in the queue:{0}", myDetectionQueue.Count)
@@ -397,16 +428,18 @@ Public Class frmMaster
         Dim client As New HttpClient()
 
         Dim byteContent = New ByteArrayContent(qe.img)
-        Try
+        'Try
 
 
-            Dim response = client.PostAsync(myUriBuilder.ToString, byteContent)
-            Dim responseString = response.Result
-            byteContent = Nothing
+        'Dim response = client.PostAsync(myUriBuilder.ToString, byteContent)
+        Dim response = Await client.PostAsync(myUriBuilder.ToString(), byteContent)
+        Dim responseString = Await response.Content.ReadAsStringAsync()
 
-        Catch ex As Exception
-            Console.WriteLine("calling meteor detection:" & ex.Message)
-        End Try
+        'Dim responseString = response.Result
+        byteContent = Nothing
+        'Catch ex As Exception
+        '    Console.WriteLine("calling meteor detection:" & ex.Message)
+        'End Try
     End Function
 
 
@@ -455,7 +488,7 @@ Public Class frmMaster
         mySettings.darkMultiplier = tbMultiplier.Text
         mySettings.darkCutOff = tbDarkCutOff.Text
         mySettings.url = tbURL.Text
-
+        mySettings.fanOn = cbFan.Checked
         mySettings.writeSettings()
 
     End Sub

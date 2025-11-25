@@ -71,6 +71,23 @@ Public Class Camera
     Friend Shared comPort As String ' Variables to hold the currrent device configuration
     Friend Shared traceState As Boolean
 
+
+
+    Friend Shared xStartProfileName As String = "ROIxStart" '
+    Friend Shared yStartProfileName As String = "ROIyStart" '
+    Friend Shared xWidthProfileName As String = "ROIxWidth" '
+    Friend Shared yHeightProfileName As String = "ROIyHeight" '
+    Friend Shared useROIProfileName As String = "useROI" '
+    Friend Shared analogGainProfileName As String = "gain" '
+    Friend Shared adOffsetProfileName As String = "offset" '
+    Friend Shared useROI As Boolean = False
+    Friend Shared xStart As Integer = "0" '
+    Friend Shared xWidth As Integer = "4096" '
+    Friend Shared yStart As Integer = "0" '
+    Friend Shared yHeight As Integer = "4096" '
+    Friend Shared analogGain As Integer = "-1" '
+    Friend Shared adOffset As Integer = "-1" '
+
     Private connectedState As Boolean ' Private variable to hold the connected state
     Private utilities As Util ' Private variable to hold an ASCOM Utilities object
     Private astroUtilities As AstroUtils ' Private variable to hold an AstroUtils object to provide the Range method
@@ -118,11 +135,13 @@ Public Class Camera
     Public Sub SetupDialog() Implements ICameraV2.SetupDialog
         ' consider only showing the setup dialog if not connected
         ' or call a different dialog if connected
-        If IsConnected Then
-            System.Windows.Forms.MessageBox.Show("Already connected, just press OK")
-        End If
+        'If IsConnected Then
+        '    System.Windows.Forms.MessageBox.Show("Already connected, just press OK")
+        'End If
 
         Using F As SetupDialogForm = New SetupDialogForm()
+            If IsConnected Then F.c = ApogeeCam.c
+
             Dim result As System.Windows.Forms.DialogResult = F.ShowDialog()
             If result = DialogResult.OK Then
                 WriteProfile() ' Persist device configuration values to the ASCOM Profile store
@@ -184,6 +203,38 @@ Public Class Camera
 
                 myCam = New ApogeeCam()
                 connectedState = True
+                If useROI Then
+                    myCam.c.RoiStartX = Camera.xStart
+                    myCam.c.RoiStartY = Camera.yStart
+                    myCam.c.RoiPixelsH = Camera.xWidth
+                    myCam.c.RoiPixelsV = Camera.yHeight
+                    myCam.ccdWidth = Camera.xWidth
+                    myCam.ccdHeight = Camera.yHeight
+                End If
+                'retrieve gain
+                Dim innerCam As APOGEELib.Camera2
+                Dim g As Integer
+                Dim o As Integer
+
+                innerCam = myCam.c
+                Try
+                    innerCam.SetAdGain(Camera.analogGain, 1, 1)
+                Catch ex As Exception
+
+                End Try
+                Try
+                    innerCam.SetAdOffset(Camera.adOffset, 1, 1)
+                Catch ex As Exception
+
+                End Try
+
+                'set gain
+
+                'set offset
+
+
+
+
 
             Else
                 connectedState = False
@@ -273,14 +324,14 @@ Public Class Camera
     Public ReadOnly Property BayerOffsetX() As Short Implements ICameraV2.BayerOffsetX
         Get
             TL.LogMessage("BayerOffsetX Get", "Not implemented")
-            Throw New PropertyNotImplementedException("BayerOffsetX", False)
+            ' Throw New PropertyNotImplementedException("BayerOffsetX", False)
         End Get
     End Property
 
     Public ReadOnly Property BayerOffsetY() As Short Implements ICameraV2.BayerOffsetY
         Get
             TL.LogMessage("BayerOffsetY Get", "Not implemented")
-            Throw New ASCOM.PropertyNotImplementedException("BayerOffsetY", False)
+            ' Throw New ASCOM.PropertyNotImplementedException("BayerOffsetY", False)
         End Get
     End Property
 
@@ -288,6 +339,7 @@ Public Class Camera
         Get
             TL.LogMessage("BinX Get", "1")
             Return myCam.c.RoiBinningH
+
         End Get
         Set(value As Short)
             TL.LogMessage("BinX Set", value.ToString())
@@ -370,7 +422,7 @@ Public Class Camera
     Public ReadOnly Property CanGetCoolerPower() As Boolean Implements ICameraV2.CanGetCoolerPower
         Get
             TL.LogMessage("CanGetCoolerPower Get", False.ToString())
-            Return False
+            Return True
         End Get
     End Property
 
@@ -486,12 +538,19 @@ Public Class Camera
 
     Public Property Gain() As Short Implements ICameraV2.Gain
         Get
-            TL.LogMessage("Gain Get", "Not implemented")
-            'Throw New ASCOM.PropertyNotImplementedException("Gain", False)
+
+            Dim g As Short
+            If IsConnected Then
+                myCam.c.GetAdGain(g, 1, 1)
+                Return g
+            End If
+            Return -1
         End Get
         Set(value As Short)
-            TL.LogMessage("Gain Set", "Not implemented")
-            'Throw New ASCOM.PropertyNotImplementedException("Gain", True)
+
+            If IsConnected Then
+                myCam.c.SetAdGain(value, 1, 1)
+            End If
         End Set
     End Property
 
@@ -504,7 +563,7 @@ Public Class Camera
 
     Public ReadOnly Property GainMin() As Short Implements ICameraV2.GainMin
         Get
-            TL.LogMessage("GainMin Get", "Not implemented")
+            Return 0
             ' Throw New ASCOM.PropertyNotImplementedException("GainMin", False)
         End Get
     End Property
@@ -519,7 +578,9 @@ Public Class Camera
     Public ReadOnly Property HasShutter() As Boolean Implements ICameraV2.HasShutter
         Get
             TL.LogMessage("HasShutter Get", False.ToString())
-            Return True
+            If IsConnected Then
+                Return myCam.c.ExternalShutter()
+            End If
         End Get
     End Property
 
@@ -641,7 +702,7 @@ Public Class Camera
         End Get
         Set(value As Integer)
             cameraNumX = value
-            myCam.c.RoiPixelsH = value
+            ' myCam.c.RoiPixelsH = value
             TL.LogMessage("NumX set", value.ToString())
         End Set
     End Property
@@ -654,7 +715,7 @@ Public Class Camera
         End Get
         Set(value As Integer)
             cameraNumY = value
-            myCam.c.RoiPixelsV = value
+            'myCam.c.RoiPixelsV = value
             TL.LogMessage("NumY set", value.ToString())
         End Set
     End Property
@@ -745,10 +806,10 @@ Public Class Camera
     Public Sub StartExposure(Duration As Double, Light As Boolean) Implements ICameraV2.StartExposure
         cameraImageReady = False
         If (Duration < 0.0) Then Throw New InvalidValueException("StartExposure", Duration.ToString(), "0.0 upwards")
-        If (cameraNumX > myCam.ccdWidth) Then Throw New InvalidValueException("StartExposure", cameraNumX.ToString(), myCam.ccdWidth.ToString())
-        If (cameraNumY > myCam.ccdHeight) Then Throw New InvalidValueException("StartExposure", cameraNumY.ToString(), myCam.ccdHeight.ToString())
-        If (cameraStartX > myCam.ccdWidth) Then Throw New InvalidValueException("StartExposure", cameraStartX.ToString(), myCam.ccdWidth.ToString())
-        If (cameraStartY > myCam.ccdHeight) Then Throw New InvalidValueException("StartExposure", cameraStartY.ToString(), myCam.ccdHeight.ToString())
+        'If (cameraNumX > myCam.ccdWidth) Then Throw New InvalidValueException("StartExposure", cameraNumX.ToString(), myCam.ccdWidth.ToString())
+        'If (cameraNumY > myCam.ccdHeight) Then Throw New InvalidValueException("StartExposure", cameraNumY.ToString(), myCam.ccdHeight.ToString())
+        'If (cameraStartX > myCam.ccdWidth) Then Throw New InvalidValueException("StartExposure", cameraStartX.ToString(), myCam.ccdWidth.ToString())
+        'If (cameraStartY > myCam.ccdHeight) Then Throw New InvalidValueException("StartExposure", cameraStartY.ToString(), myCam.ccdHeight.ToString())
 
 
         cameraLastExposureDuration = Duration
@@ -798,7 +859,7 @@ Public Class Camera
             Return myCam.c.RoiStartX
         End Get
         Set(value As Integer)
-            myCam.c.RoiStartX = value
+            ''myCam.c.RoiStartX = value
             TL.LogMessage("StartX set", value.ToString())
         End Set
     End Property
@@ -809,7 +870,7 @@ Public Class Camera
             Return myCam.c.RoiStartY
         End Get
         Set(value As Integer)
-            myCam.c.RoiStartY = value
+            ''myCam.c.RoiStartY = value
             TL.LogMessage("StartY set", value.ToString())
         End Set
     End Property
@@ -884,6 +945,13 @@ Public Class Camera
             driverProfile.DeviceType = "Camera"
             traceState = Convert.ToBoolean(driverProfile.GetValue(driverID, traceStateProfileName, String.Empty, traceStateDefault))
             comPort = driverProfile.GetValue(driverID, comPortProfileName, String.Empty, comPortDefault)
+            xStart = driverProfile.GetValue(driverID, xStartProfileName, String.Empty, 0)
+            xWidth = driverProfile.GetValue(driverID, xWidthProfileName, String.Empty, 4096)
+            yStart = driverProfile.GetValue(driverID, yStartProfileName, String.Empty, 0)
+            yHeight = driverProfile.GetValue(driverID, yHeightProfileName, String.Empty, 4096)
+            adOffset = driverProfile.GetValue(driverID, adOffsetProfileName, String.Empty, -1)
+            analogGain = driverProfile.GetValue(driverID, analogGainProfileName, String.Empty, -1)
+
         End Using
     End Sub
 
@@ -892,9 +960,19 @@ Public Class Camera
     ''' </summary>
     Friend Sub WriteProfile()
         Using driverProfile As New Profile()
+
             driverProfile.DeviceType = "Camera"
             driverProfile.WriteValue(driverID, traceStateProfileName, traceState.ToString())
-            driverProfile.WriteValue(driverID, comPortProfileName, comPort.ToString())
+            If comPort IsNot Nothing Then
+                driverProfile.WriteValue(driverID, comPortProfileName, comPort.ToString())
+            End If
+            driverProfile.WriteValue(driverID, xStartProfileName, xStart.ToString())
+            driverProfile.WriteValue(driverID, xWidthProfileName, xWidth.ToString())
+            driverProfile.WriteValue(driverID, yStartProfileName, yStart.ToString())
+            driverProfile.WriteValue(driverID, yHeightProfileName, yHeight.ToString())
+            driverProfile.WriteValue(driverID, useROIProfileName, useROI.ToString())
+            driverProfile.WriteValue(driverID, adOffsetProfileName, adOffset.ToString())
+            driverProfile.WriteValue(driverID, analogGainProfileName, analogGain.ToString())
         End Using
 
     End Sub

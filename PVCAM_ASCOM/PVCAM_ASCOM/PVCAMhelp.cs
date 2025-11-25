@@ -9,6 +9,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.IO;
+using System.Diagnostics;
 
 namespace pvcam_helper
 {
@@ -467,7 +468,7 @@ namespace pvcam_helper
 
         Int16 m_xSize;
         Int16 m_ySize;
-        Int16 m_pixelSize;
+        Int16 m_pixelSize =4540;
         public static Int16 NrOfCameras;
 
         //ROI 
@@ -989,25 +990,37 @@ namespace pvcam_helper
         {
             Int16 status;
             UInt32 byte_cnt;
+            UInt32 timeoutCounter = 0;
+            UInt32 timeoutLimit = 0;
             Boolean isMultiROI = (CurrentROICount > 1) || (IsCentroidEnabled);
             UInt16 roiCount = IsCentroidEnabled ? (CentroidInfo.CurrentCount) : ((UInt16)CurrentROICount);
 
+            timeoutLimit = m_exposureTime / 10 + 2000;
             status = (Int16)PvTypes.ReadoutStatuses.READOUT_FAILED;
-
+            
             //wait for image acquisition to be completed with polling, every 10ms check
             //whether the frame has arrived
             while (!m_abortAcquisition
                     && PVCAM.pl_exp_check_status(m_hCam, out status, out byte_cnt)
                     && status != (Int16)PvTypes.ReadoutStatuses.READOUT_COMPLETE
-                    && status != (Int16)PvTypes.ReadoutStatuses.READOUT_FAILED)
+                    && status != (Int16)PvTypes.ReadoutStatuses.READOUT_FAILED
+                    && timeoutCounter<timeoutLimit)
             {
+                Debug.WriteLine(status);
                 Thread.Sleep(10);
+                timeoutCounter=timeoutCounter+1;
 
             }
-
+            if (timeoutCounter>= timeoutLimit)
+            {
+                Debug.WriteLine("timedout waiting for readout -continue anyway");
+            }
+            Debug.Write("timeoutCounter:");
+            Debug.WriteLine(timeoutCounter);
             if (m_abortAcquisition)
             {
                 m_acqRunning = false;
+                Debug.WriteLine("aborted");
                 return;
             }
 
@@ -1015,7 +1028,7 @@ namespace pvcam_helper
             {
                 ReportMsg(this, new ReportMessage("Single acquisition readout failed", MsgTypes.MSG_ERROR));
             }
-            else if (status == (Int16)PvTypes.ReadoutStatuses.READOUT_COMPLETE)
+            else if (status == (Int16)PvTypes.ReadoutStatuses.READOUT_COMPLETE || timeoutCounter>= timeoutLimit)
             {
                 ReportMsg(this, new ReportMessage("Readout completed", MsgTypes.MSG_STATUS));
 
@@ -1087,6 +1100,7 @@ namespace pvcam_helper
                             {
                                 ReportMsg(this, new ReportMessage("Failed to recompose frame", MsgTypes.MSG_ERROR));
                                 m_acqRunning = false;
+                                Debug.WriteLine("Failed to recompose frame");
                                 return;
                             }
                             else
@@ -1105,6 +1119,7 @@ namespace pvcam_helper
                         Marshal.FreeHGlobal(ptr_md_Frame);
                         ptr_md_Frame = IntPtr.Zero;
                         CamNotif(this, new ReportEvent(CameraNotifications.ACQ_SINGLE_FAILED));
+                        Debug.WriteLine("Failed to decode metadata structure");
                         return;
                     }
 
@@ -1152,7 +1167,7 @@ namespace pvcam_helper
                 }
             }
 
-
+            Debug.WriteLine("finished with singleAcquisition");
         }
 
         //start continuous acquisition
@@ -2995,14 +3010,19 @@ namespace pvcam_helper
         public void SetTemperatureSetpoint(Int16 setPoint)
         {
             //Check if value is in range
-            if (setPoint < m_tempSetpointMin || setPoint > m_tempSetpointMax)
+            //setPoint = (short)(setPoint * 100);
+            if (setPoint< m_tempSetpointMin )
             {
-                ReportMsg(this, new ReportMessage("Setpoint is out of range, Can not set", MsgTypes.MSG_ERROR));
-                return;
+                setPoint = m_tempSetpointMin;
             }
-            IntPtr unmngSetpoint;
+            if (setPoint> m_tempSetpointMax)
+            {
+                setPoint = m_tempSetpointMax;
+            }
+                IntPtr unmngSetpoint;
             unmngSetpoint = Marshal.AllocHGlobal(sizeof(Int16));
-            Marshal.WriteInt16(unmngSetpoint, setPoint);
+            m_tempSetpoint = (short)(setPoint);
+            Marshal.WriteInt16(unmngSetpoint, (Int16)m_tempSetpoint);
 
             if (!PVCAM.pl_set_param(m_hCam, PvTypes.PARAM_TEMP_SETPOINT, unmngSetpoint))
             {
@@ -3010,10 +3030,32 @@ namespace pvcam_helper
             }
             else
             {
+                m_tempSetpoint = setPoint;
                 ReportMsg(this, new ReportMessage(String.Format("Temperature setpoint Changed to  {0:0.00}", setPoint / 100.0), MsgTypes.MSG_STATUS));
             }
             Marshal.FreeHGlobal(unmngSetpoint);
             unmngSetpoint = IntPtr.Zero;
+        }
+
+        public Int16 GetTemperatureSetpoint()
+        {
+            
+            IntPtr unmngSetpoint;
+            unmngSetpoint = Marshal.AllocHGlobal(sizeof(Int16));
+           
+
+            if (!PVCAM.pl_set_param(m_hCam, PvTypes.PARAM_TEMP_SETPOINT, unmngSetpoint))
+            {
+                ReportMsg(this, new ReportMessage("getting temperature setpoint has failed", MsgTypes.MSG_ERROR));
+            }
+            else
+            {
+                ReportMsg(this, new ReportMessage(String.Format("Temperature setpoint is {0:0.00}", m_tempSetpoint / 100.0), MsgTypes.MSG_STATUS));
+            }
+            Marshal.ReadInt16(unmngSetpoint, m_tempSetpoint);
+            Marshal.FreeHGlobal(unmngSetpoint);
+            unmngSetpoint = IntPtr.Zero;
+            return m_tempSetpoint;
         }
 
         //Get Clocking mode as list of strings from Clocking mode Name/Value pair list.
@@ -3883,6 +3925,7 @@ namespace pvcam_helper
         {
             Message = msg;
             TypeToReport = tp;
+            Debug.WriteLine(msg);
         }
         private string MessageToReport;
         public string Message

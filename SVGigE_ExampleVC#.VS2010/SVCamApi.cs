@@ -31,6 +31,8 @@ namespace SVCamApi
             public const string SeqCount = "SeqCount";
             public const string PayloadSize = "PayloadSize";
             public const string TLParamsLocked = "TLParamsLocked";
+            public const string Temperature = "DeviceTemperature";
+            public const string LineInverter = "LineInverter";
             //...
             //SV_intfICommand:
             public const string TriggerMode = "TriggerMode";

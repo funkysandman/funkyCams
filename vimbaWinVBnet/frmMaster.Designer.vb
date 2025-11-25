@@ -73,6 +73,9 @@ Partial Class frmMaster
         Me.lblURL = New System.Windows.Forms.Label()
         Me.Image_timer = New System.Windows.Forms.Timer(Me.components)
         Me.Button1 = New System.Windows.Forms.Button()
+        Me.Label6 = New System.Windows.Forms.Label()
+        Me.txtTemp = New System.Windows.Forms.TextBox()
+        Me.cbFan = New System.Windows.Forms.CheckBox()
         CType(Me.PictureBox1, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
         '
@@ -219,6 +222,7 @@ Partial Class frmMaster
         '
         'btnStop
         '
+        Me.btnStop.Enabled = False
         Me.btnStop.Location = New System.Drawing.Point(246, 325)
         Me.btnStop.Name = "btnStop"
         Me.btnStop.Size = New System.Drawing.Size(62, 23)
@@ -343,6 +347,7 @@ Partial Class frmMaster
         '
         'btnStopWeb
         '
+        Me.btnStopWeb.Enabled = False
         Me.btnStopWeb.Location = New System.Drawing.Point(177, 450)
         Me.btnStopWeb.Name = "btnStopWeb"
         Me.btnStopWeb.Size = New System.Drawing.Size(116, 22)
@@ -491,11 +496,42 @@ Partial Class frmMaster
         Me.Button1.Text = "define exclusion"
         Me.Button1.UseVisualStyleBackColor = True
         '
+        'Label6
+        '
+        Me.Label6.AutoSize = True
+        Me.Label6.Location = New System.Drawing.Point(26, 313)
+        Me.Label6.Name = "Label6"
+        Me.Label6.Size = New System.Drawing.Size(68, 13)
+        Me.Label6.TabIndex = 159
+        Me.Label6.Text = "camera temp"
+        '
+        'txtTemp
+        '
+        Me.txtTemp.Location = New System.Drawing.Point(29, 328)
+        Me.txtTemp.Margin = New System.Windows.Forms.Padding(2)
+        Me.txtTemp.Name = "txtTemp"
+        Me.txtTemp.Size = New System.Drawing.Size(45, 20)
+        Me.txtTemp.TabIndex = 158
+        Me.txtTemp.Text = "-1"
+        '
+        'cbFan
+        '
+        Me.cbFan.AutoSize = True
+        Me.cbFan.Location = New System.Drawing.Point(29, 289)
+        Me.cbFan.Name = "cbFan"
+        Me.cbFan.Size = New System.Drawing.Size(56, 17)
+        Me.cbFan.TabIndex = 160
+        Me.cbFan.Text = "fan on"
+        Me.cbFan.UseVisualStyleBackColor = True
+        '
         'frmMaster
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.ClientSize = New System.Drawing.Size(422, 525)
+        Me.Controls.Add(Me.cbFan)
+        Me.Controls.Add(Me.Label6)
+        Me.Controls.Add(Me.txtTemp)
         Me.Controls.Add(Me.Button1)
         Me.Controls.Add(Me.lblURL)
         Me.Controls.Add(Me.tbURL)
@@ -599,4 +635,7 @@ Partial Class frmMaster
     Friend WithEvents lblURL As Label
     Friend WithEvents Image_timer As Timer
     Friend WithEvents Button1 As Button
+    Friend WithEvents Label6 As Label
+    Friend WithEvents txtTemp As TextBox
+    Friend WithEvents cbFan As CheckBox
 End Class

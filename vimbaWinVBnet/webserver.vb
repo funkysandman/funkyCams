@@ -7,16 +7,20 @@ Imports System.Xml
 Imports System.Drawing
 Imports System.Drawing.Imaging
 Imports System.Runtime.InteropServices
-
+Imports AVT.VmbAPINET
+Imports SpinnakerNET
+Imports SpinnakerNET.GenApi
 
 Public Class WebServer
 #Region "Declarations"
-    Private singleWebserver As WebServer
+
     Private blnFlag As Boolean
     Private bTakingPic As Boolean
     Private bFault As Boolean
     Private bProcessingPic As Boolean = False
     Private LocalTCPListener As TcpListener
+    Private localSocket As Socket
+    Private cancellationTokenSource As CancellationTokenSource
     Private LocalPort As Integer = 80
     Private LocalAddress As IPAddress = GetIPAddress()
     Private localUseDarks As String = True
@@ -26,15 +30,30 @@ Public Class WebServer
     Private LocalVirtualRoot As String
     Private imageInUse As Integer = 0
     '  Private WithEvents myGigECam As CCamera
-
+    Private WithEvents myGigECam As AVT.VmbAPINET.Camera
+    Private myQICam As QCamManagedDriver.QCam
+    Private myToupcam As Toupcam
+    Private myPointGreycam As IManagedCamera
+    Private myBaslerCam As BaslerWrapper.Grabber
+    Private mySVSVistekCam As SVCamApi.SVCamGrabber
     Private _running As Boolean
-
-    Private myISForm As frmIS
-
+    Private myGenericForm As frmMaster
+    Private myForm As frmAVT
+    Private myFWform As frmFoculs
+    Private myQIform As frmQ
+    Private myToupForm As frmToupcam
+    ' Private myISForm As frmIS
+    Private myCoolsnapForm As frmCoolsnap
+    Private myPointGreyForm As frmPointGrey
     Private restart As Boolean = False
-
+    Private myBaslerForm As frmScout
+    Private mySVSVistekForm As frmSVSVistek
+    Private mySVSVistekBaumerForm As frmGIGE
+    Private myPCOForm As frmPCO
     Private myPixeLinkForm As Object
-    Dim rawDark() As Byte
+    Public rawDark() As Byte
+
+    Public Delegate Sub getImage()
 #End Region
 
 #Region "Properties"
@@ -127,31 +146,182 @@ Public Class WebServer
         'End If
     End Function
 
-    Public Sub StartWebServer(f As frmIS, port As Integer)
+    Public Sub StartWebServer(f As frmGIGE, port As Integer)
         Try
             LocalPort = port
-            myISform = f
+            mySVSVistekBaumerForm = f
 
             'loadGigEDarks()
             LocalTCPListener = New TcpListener(LocalAddress, LocalPort)
             LocalTCPListener.Start()
-            WebThread = New Thread(AddressOf StartListenIS)
+            WebThread = New Thread(AddressOf StartListenSVSVistekBaumer)
+            WebThread.Start()
+            f.writeline("starting SVS Vistek web server")
+        Catch ex As Exception
+            f.writeline(ex.Message)
+        End Try
+    End Sub
+
+    Public Sub StartWebServer(f As frmPCO, port As Integer)
+        Try
+            LocalPort = port
+            myPCOForm = f
+
+            'loadGigEDarks()
+            LocalTCPListener = New TcpListener(LocalAddress, LocalPort)
+            LocalTCPListener.Start()
+            WebThread = New Thread(AddressOf StartListenPCO)
+            WebThread.Start()
+            '.writeline("starting SVS Vistek web server")
+        Catch ex As Exception
+            ' f.writeline(ex.Message)
+        End Try
+    End Sub
+    Public Sub StartWebServer(f As frmQ, port As Integer)
+        Try
+            LocalPort = port
+            myQIform = f
+
+
+            LocalTCPListener = New TcpListener(LocalAddress, LocalPort)
+            LocalTCPListener.Start()
+            WebThread = New Thread(AddressOf StartListen)
             WebThread.Start()
 
         Catch ex As Exception
 
         End Try
     End Sub
-    ' Here is where we check our XML file and see what MIME types are defined and handle the accordingly.
-    Private Sub loadGigEDarks()
-        'Dim fs As FileStream
-        'fs = New FileStream(Application.StartupPath & "\darkGigE.drk", FileMode.Open)
+    Public Sub StartWebServer(f As frmCoolsnap, port As Integer)
+        Try
+            LocalPort = port
+            myCoolsnapForm = f
 
-        ''
-        'rawDark = New Byte(2457656) {}
-        'fs.Read(rawDark, 0, rawDark.Length - 1)
-        'fs.Close()
+
+            LocalTCPListener = New TcpListener(LocalAddress, LocalPort)
+            LocalTCPListener.Start()
+            WebThread = New Thread(AddressOf StartListenCoolsnapFirewire)
+            WebThread.Start()
+
+        Catch ex As Exception
+
+        End Try
     End Sub
+    Public Sub StartWebServer(aCam As SVCamApi.SVCamGrabber, f As Object, port As Integer)
+        Try
+            myGenericForm = f
+            LocalPort = port
+            mySVSVistekForm = f
+            mySVSVistekCam = aCam
+            'loadGigEDarks()
+            LocalTCPListener = New TcpListener(LocalAddress, LocalPort)
+
+            WebThread = New Thread(AddressOf StartListen)
+            WebThread.Start()
+            f.writeline("starting SVS Vistek web server")
+        Catch ex As Exception
+            f.writeline(ex.Message)
+        End Try
+    End Sub
+    Public Sub StartWebServer(aCam As BaslerWrapper.Grabber, f As Object, port As Integer)
+        Try
+            LocalPort = port
+            myBaslerForm = f
+            myBaslerCam = aCam
+            'loadGigEDarks()
+            LocalTCPListener = New TcpListener(LocalAddress, LocalPort)
+            LocalTCPListener.Start()
+            WebThread = New Thread(AddressOf StartListen)
+            WebThread.Start()
+            f.writeline("starting SVS Vistek web server")
+        Catch ex As Exception
+            f.writeline(ex.Message)
+        End Try
+    End Sub
+
+    Public Sub StartWebServer(aCam As AVT.VmbAPINET.Camera, f As frmAVT, port As Integer)
+        Try
+            LocalPort = port
+            myForm = f
+            myGigECam = aCam
+            LocalTCPListener = New TcpListener(LocalAddress, LocalPort)
+            LocalTCPListener.Start()
+            WebThread = New Thread(AddressOf StartListen)
+            WebThread.Start()
+            f.writeline("starting Allied Vision web server")
+        Catch ex As Exception
+            f.writeline(ex.Message)
+        End Try
+    End Sub
+
+    Public Sub StartWebServer(aCam As Toupcam, f As frmToupcam, port As Integer)
+        Try
+            LocalPort = port
+            myToupcam = aCam
+            myToupForm = f
+            'loadGigEDarks()
+            LocalTCPListener = New TcpListener(LocalAddress, LocalPort)
+            LocalTCPListener.Start()
+            WebThread = New Thread(AddressOf StartListen)
+            WebThread.Start()
+            f.writeline("starting Toupcam web server")
+        Catch ex As Exception
+            f.writeline(ex.Message)
+        End Try
+    End Sub
+    Public Sub StartWebServer(f As frmPointGrey, port As Integer)
+        Try
+            myGenericForm = f
+            LocalPort = port
+            myPointGreycam = f.m_cam
+            myPointGreyForm = f
+            'loadGigEDarks()
+            LocalTCPListener = New TcpListener(LocalAddress, LocalPort)
+            LocalTCPListener.Start()
+            WebThread = New Thread(AddressOf StartListen)
+            WebThread.Start()
+            ' f.writeline("starting point grey web server")
+        Catch ex As Exception
+            ' f.writeline(ex.Message)
+        End Try
+    End Sub
+    Public Sub StartWebServer(aCam As QCamManagedDriver.QCam, f As frmQ, port As Integer)
+        Try
+            LocalPort = port
+            myQIform = f
+            myQICam = aCam
+            LocalTCPListener = New TcpListener(LocalAddress, LocalPort)
+            LocalTCPListener.Start()
+            WebThread = New Thread(AddressOf StartListen)
+            WebThread.Start()
+
+        Catch ex As Exception
+
+        End Try
+    End Sub
+    Public Sub StartWebServer(f As frmFoculs, port As Integer)
+        Try
+            ' md.LoadModel("c:\tmp\frozen_inference_graph_orig.pb", "c:\tmp\mscoco_label_map.pbtxt")
+            LocalPort = port
+            myFWform = f
+            'myFirewireCam = aCam
+            useDarks = False
+            ' loadFirewireEDarks()
+            LocalTCPListener = New TcpListener(LocalAddress, LocalPort)
+            LocalTCPListener.Start()
+            WebThread = New Thread(AddressOf StartListen)
+            WebThread.Start()
+            f.writeline("starting Foculus web server")
+            'myImageCodecInfo = GetEncoderInfo("image/jpeg")
+
+
+        Catch ex As Exception
+            f.writeline(ex.Message)
+        End Try
+    End Sub
+
+    'Here is where we check our XML file and see what MIME types are defined and handle the accordingly.
+
     Private Sub loadFirewireEDarks()
         Dim fs As FileStream
         Try
@@ -282,188 +452,359 @@ Public Class WebServer
 
     End Sub
 
-    '    Dim iStartPos As Integer
+    Private listenTask As Task
 
-    '    Dim sErrorMessage As String
+    Public Sub StartListen()
+        If listenTask IsNot Nothing AndAlso Not listenTask.IsCompleted Then
+            Return ' already running
+        End If
 
-    '    Dim sWebserverRoot = LocalVirtualRoot
+        cancellationTokenSource = New CancellationTokenSource()
+        Dim token = cancellationTokenSource.Token
 
-    '    Dim sPhysicalFilePath As String = ""
-    '    Dim sFormattedMessage As String = ""
+        ' Ensure listener is started once
+        LocalTCPListener.Start()
 
+        listenTask = Task.Run(Sub()
+                                  Try
+                                      While Not token.IsCancellationRequested
+                                          ' If no pending connection, wait a little and re-check token
+                                          If Not LocalTCPListener.Pending() Then
+                                              Thread.Sleep(50)
+                                              Continue While
+                                          End If
 
-    '    Do While True
-    '        'accept new socket connection
-    '        LocalTCPListener.Start()
-    '        myBaslerForm.writeline("starting Basler GigE listener")
-    '        Dim mySocket As Socket = LocalTCPListener.AcceptSocket
-    '        If mySocket.Connected Then
-    '            Dim bReceive() As Byte = New [Byte](1024) {}
-    '            Dim i As Integer = mySocket.Receive(bReceive, bReceive.Length, 0)
-    '            Dim sBuffer As String = Encoding.ASCII.GetString(bReceive)
-    '            'find the GET request.
-    '            myBaslerForm.writeline("Basler image server connected")
-    '            If sBuffer.Contains("GET") And sBuffer.Contains("HTTP") Then
+                                          Dim clientSocket As Socket = Nothing
+                                          Try
+                                              clientSocket = LocalTCPListener.AcceptSocket()
+                                              If clientSocket IsNot Nothing AndAlso clientSocket.Connected Then
+                                                  ' Handle client on its own task so we can keep accepting
+                                                  Dim sock = clientSocket
+                                                  Task.Run(Sub() HandleClient(sock, token), token)
+                                              Else
+                                                  If clientSocket IsNot Nothing Then
+                                                      clientSocket.Close()
+                                                  End If
+                                              End If
+                                          Catch ex As SocketException
+                                              ' If listener was stopped due to cancellation, break
+                                              If token.IsCancellationRequested Then Exit While
+                                              Debug.Print("Socket accept error: " & ex.Message)
+                                          End Try
+                                      End While
+                                  Finally
+                                      Try
+                                          LocalTCPListener.[Stop]()
+                                      Catch ex As Exception
+                                      End Try
+                                  End Try
+                              End Sub, token)
+    End Sub
 
+    Public Sub StopListening()
+        If cancellationTokenSource IsNot Nothing Then
+            cancellationTokenSource.Cancel()
+            Try
+                ' Stop listener to unblock Accept if necessary
+                LocalTCPListener.[Stop]()
+            Catch
+            End Try
+        End If
+        If listenTask IsNot Nothing Then
+            Try
+                listenTask.Wait(1000) ' short wait; optional
+            Catch
+            End Try
+        End If
+    End Sub
 
-    '                iStartPos = sBuffer.IndexOf("HTTP", 1)
-    '                Dim sHttpVersion = sBuffer.Substring(iStartPos, 8)
+    Private Sub HandleClient(ByVal localSocket As Socket, ByVal token As CancellationToken)
+        Try
+            Using sock = localSocket
+                ' quick receive with timeout check
+                Dim buffer(1023) As Byte
+                Dim bytesRead As Integer = 0
+                Try
+                    sock.ReceiveTimeout = 2000 ' small timeout so receive doesn't block forever
+                    bytesRead = sock.Receive(buffer)
+                Catch ex As Exception
+                    Debug.Print("Receive error: " & ex.Message)
+                    Return
+                End Try
 
+                If bytesRead <= 0 Then Return
+                Dim sBuffer As String = Encoding.ASCII.GetString(buffer, 0, bytesRead)
+                If Not (sBuffer.Contains("GET") AndAlso sBuffer.Contains("HTTP")) Then Return
 
-    '                Try
-    '                    'grab image from cam
+                Dim iStartPos = sBuffer.IndexOf("HTTP", StringComparison.Ordinal)
+                Dim sHttpVersion = If(iStartPos >= 0 AndAlso iStartPos + 8 <= sBuffer.Length,
+                                  sBuffer.Substring(iStartPos, 8),
+                                  "HTTP/1.1")
 
-    '                    Dim b As Bitmap
+                ' Respect cancellation before heavy work
+                If token.IsCancellationRequested Then Return
 
-    '                    Dim myWidth As Integer = 1392
-    '                    Dim myHeight As Integer
+                Try
+                    Dim bmp As Bitmap = myGenericForm.getLastImage()
+                    If bmp Is Nothing Then
+                        Dim msg = "problem receiving images"
+                        SendHeader(sHttpVersion, "", msg.Length, " 404 Not Found", sock)
+                        SendToBrowser(msg, sock)
+                        Return
+                    End If
 
+                    Using bmp
+                        Using ms As New MemoryStream()
+                            ' encode image (same as your encoder setup)
+                            Dim codec = GetEncoderInfo("image/jpeg")
+                            Dim enc As System.Drawing.Imaging.Encoder = System.Drawing.Imaging.Encoder.Quality
+                            Dim encParams As New EncoderParameters(1)
+                            encParams.Param(0) = New EncoderParameter(enc, CType(95L, Int32))
+                            bmp.Save(ms, codec, encParams)
 
-    '                    myWidth = myBaslerCam.getSizeX
-    '                    myHeight = myBaslerCam.getSizeY
-    '                    myBaslerForm.writeline(myWidth)
+                            If token.IsCancellationRequested Then Return
+                            SendHeader(sHttpVersion, "image/jpeg", ms.Length, " 200 OK", sock)
+                            SendToBrowser(ms.ToArray(), sock)
+                        End Using
+                    End Using
+                Catch ex As Exception
+                    Debug.Print("Error while handling client: " & ex.Message)
+                    Dim msg = "404 Error! File Does Not Exist..."
+                    SendHeader(sHttpVersion, "", msg.Length, " 404 Not Found", sock)
+                    SendToBrowser(msg, sock)
+                End Try
+            End Using
+        Finally
+            Try
+                If localSocket IsNot Nothing Then localSocket.Close()
+            Catch
+            End Try
+        End Try
+    End Sub
+    Private Sub StartListenCoolsnapFirewire()
+        Dim iStartPos As Integer
 
-    '                    myBaslerForm.writeline("get Basler camera image")
-    '                    'we know this camera has the following params:
-    '                    '
-    '                    'Dim bytes() As Byte = New Byte(myBaslerCam.getSizeX() * myBaslerCam.getSizeY()) {}
+        Dim sErrorMessage As String
 
-    '                    b = myBaslerCam.getImage(myBaslerForm.tbExposureTime.Text, Val(myBaslerForm.tbGain.Text)) '30 second timeout
+        Dim sWebserverRoot = LocalVirtualRoot
 
-    '                    myBaslerForm.writeline("acquired Basler camera image")
+        Dim sPhysicalFilePath As String = ""
+        Dim sFormattedMessage As String = ""
 
+        'If LCase(mySVSVistekForm.lblDayNight.Text) = "day" Then
+        '    mySVSVistekCam.setParams(Val(mySVSVistekForm.tbExposureTime.Text), Val(mySVSVistekForm.tbDayGain.Text), Val(mySVSVistekForm.tbDayDgain.Text), Val(mySVSVistekForm.tbDayGamma.Text), 0)
+        'Else
+        '    mySVSVistekCam.setParams(Val(mySVSVistekForm.tbExposureTime.Text), Val(mySVSVistekForm.tbNightAgain.Text), Val(mySVSVistekForm.tbNightDgain.Text), Val(mySVSVistekForm.tbNightGamma.Text), 0)
 
-
-    '                    Dim BoundsRect = New Rectangle(0, 0, myWidth, myHeight)
-    '                    Dim bmpDataSrc As BitmapData = b.LockBits(BoundsRect, ImageLockMode.[ReadOnly], b.PixelFormat)
-    '                    Dim bytes As Integer = bmpDataSrc.Stride * b.Height
-    '                    Dim ptr As IntPtr = bmpDataSrc.Scan0
-
-    '                    Dim rawData = New Byte(bytes - 1) {}
-    '                    'copy source pic to byte array
-
-    '                    Marshal.Copy(ptr, rawData, 0, bytes)
-
-    '                    Dim b2 = New Bitmap(myWidth, myHeight, PixelFormat.Format8bppIndexed)
-    '                    Dim bmpData As BitmapData = b2.LockBits(BoundsRect, ImageLockMode.[WriteOnly], b2.PixelFormat)
-
-    '                    'b contains original
-    '                    'b2 is to be the copy
-    '                    'Dim ncp As ColorPalette = b2.Palette
-
-    '                    'For i = 0 To 255
-
-    '                    '    ncp.Entries(i) = Color.FromArgb(255, i, i, i)
-    '                    'Next
-    '                    b2.Palette = b.Palette
-    '                    Dim ptr2 As IntPtr = bmpData.Scan0
-    '                    Marshal.Copy(rawData, 0, ptr2, bytes)
-    '                    'from, to
-    '                    b2.UnlockBits(bmpData)
-
-    '                    b.UnlockBits(bmpDataSrc)
-
-    '                    '=======================================================
-    '                    'Service provided by Telerik (www.telerik.com)
-    '                    'Conversion powered by NRefactory.
-    '                    'Twitter: @telerik
-    '                    'Facebook: facebook.com/telerik
-    '                    '=======================================================
-
-
-
-
-
-    '                    'myBaslerForm.PictureBox1.Image = b2
-
-
-    '                    Dim iTotBytes As Integer = 0
-    '                    Dim sResponse As String = ""
-    '                    'Dim fs As New FileStream(sPhysicalFilePath, FileMode.Open, FileAccess.Read, FileShare.Read)
-    '                    '
-    '                    Dim myImageCodecInfo As ImageCodecInfo
-    '                    Dim myEncoder As System.Drawing.Imaging.Encoder
-    '                    Dim myEncoderParameter As EncoderParameter
-    '                    Dim myEncoderParameters As EncoderParameters
-
-    '                    ' Create a Bitmap object based on a BMP file.
-
-
-    '                    ' Get an ImageCodecInfo object that represents the JPEG codec.
-    '                    myImageCodecInfo = GetEncoderInfo("image/jpeg")
-
-    '                    ' Create an Encoder object based on the GUID
-    '                    ' for the Quality parameter category.
-    '                    myEncoder = System.Drawing.Imaging.Encoder.Quality
-
-    '                    ' Create an EncoderParameters object.
-    '                    ' An EncoderParameters object has an array of EncoderParameter
-    '                    ' objects. In this case, there is only one
-    '                    ' EncoderParameter object in the array.
-    '                    myEncoderParameters = New EncoderParameters(1)
-
-    '                    ' Save the bitmap as a JPEG file with quality level 25.
-    '                    myEncoderParameter = New EncoderParameter(myEncoder, CType(95L, Int32))
-    '                    myEncoderParameters.Param(0) = myEncoderParameter
-    '                    ' myBitmap.Save("Shapes025.jpg", myImageCodecInfo, myEncoderParameters)
-
-
-    '                    '
-    '                    Dim ms As New MemoryStream()
-    '                    '  Dim ms2 As New MemoryStream()
-    '                    b2.Save(ms, myImageCodecInfo, myEncoderParameters)
-    '                    ' d2.Save(ms2, Imaging.ImageFormat.Bmp)
-    '                    myBaslerForm.PictureBox1.Image = b2
-    '                    Dim reader As New BinaryReader(ms)
-    '                    '  Dim reader2 As New BinaryReader(ms2)
-    '                    Dim bytes2() As Byte = New Byte(ms.Length) {}
-    '                    '  Dim bytesDarks() As Byte = New Byte(ms2.Length) {}
-
-
-    '                    reader.BaseStream.Position = 0
-    '                    ' reader2.BaseStream.Position = 0
-
-
-
-    '                    While reader.BaseStream.Position < reader.BaseStream.Length
-    '                        reader.Read(bytes2, 0, bytes2.Length)
-
-    '                    End While
-    '                    ' While reader2.BaseStream.Position < reader2.BaseStream.Length
-    '                    '     reader2.Read(bytesDarks, 0, bytesDarks.Length)
-
-    '                    ' End While
-    '                    ' Dim aVal As Integer
+        'End If
+        'If Not mySVSVistekCam.isStreaming Then
+        '    mySVSVistekCam.startStreamingFF()
+        'End If
 
 
-    '                    sResponse = sResponse & Encoding.ASCII.GetString(bytes2, 0, reader.BaseStream.Length)
-    '                    iTotBytes = reader.BaseStream.Length
-    '                    reader.Close()
-    '                    ms.Close()
+        Do While Not restart
+            'accept new socket connection
+            LocalTCPListener.Start()
+            'mySVSVistekForm.writeline("starting SVS Vistek listener")
+            Dim localSocket As Socket = LocalTCPListener.AcceptSocket
+            If localSocket.Connected Then
+                Dim bReceive() As Byte = New [Byte](1024) {}
+                Dim i As Integer
+                'Try
+                i = localSocket.Receive(bReceive, bReceive.Length, 0)
+                'Catch ex As Exception
+                '    'socket blewup
+                '    Debug.Print(ex.Message)
+                '    restart = True
+                '    localSocket.Close()
+                '    localSocket = Nothing
+                '    LocalTCPListener.Stop()
+                '    Exit Do
+                'End Try
 
-    '                    SendHeader(sHttpVersion, "image/jpeg", iTotBytes, " 200 OK", mySocket)
-    '                    SendToBrowser(bytes2, mySocket)
-
-    '                Catch ex As Exception
-    '                    imageInUse = imageInUse - 1
-    '                    sErrorMessage = "404 Error! File Does Not Exists..."
-    '                    SendHeader(sHttpVersion, "", sErrorMessage.Length, " 404 Not Found", mySocket)
-    '                    SendToBrowser(sErrorMessage, mySocket)
-    '                End Try
-    '            End If
-
-    '            ' End If
-    '            mySocket.Close()
-    '            mySocket = Nothing
-    '            LocalTCPListener.Stop()
-
-    '        End If
-    '    Loop
-
-    'End Sub
-
+                Dim sBuffer As String = Encoding.ASCII.GetString(bReceive)
+                'find the GET request.
+                ' mySVSVistekForm.writeline("SVS Vistek image server connected")
+                If sBuffer.Contains("GET") And sBuffer.Contains("HTTP") Then
 
 
+                    iStartPos = sBuffer.IndexOf("HTTP", 1)
+                    Dim sHttpVersion = sBuffer.Substring(iStartPos, 8)
+
+
+                    Try
+                        'grab image from cam
+
+
+
+                        'Dim myWidth As Integer = 1360
+                        'Dim myHeight As Integer = 1036
+
+                        Dim b As New Bitmap(1360, 1036, PixelFormat.Format8bppIndexed)
+                        'Dim ncp As System.Drawing.Imaging.ColorPalette = b.Palette
+                        'For j As Integer = 0 To 255
+                        '    ncp.Entries(j) = System.Drawing.Color.FromArgb(255, j, j, j)
+                        'Next
+                        'b.Palette = ncp
+
+
+                        'Dim bytes() As Byte
+
+                        'bytes = myQIform.getLastImageArray()
+
+
+                        'Dim BoundsRect = New Rectangle(0, 0, 1360 - 1, 1036 - 1)
+                        'Dim bmpData As System.Drawing.Imaging.BitmapData = b.LockBits(BoundsRect, System.Drawing.Imaging.ImageLockMode.[WriteOnly], b.PixelFormat)
+
+                        'Dim ptr As IntPtr = bmpData.Scan0
+
+
+                        '' b = frmQ.getLastImage
+
+
+                        'Marshal.Copy(bytes, 0, ptr, bytes.Length)
+                        'b.UnlockBits(bmpData)
+                        'b.RotateFlip(RotateFlipType.Rotate180FlipNone) 'camera is upside down
+                        b = frmCoolsnap.getLastImage()
+                        If Not b Is Nothing Then
+                            ' mySVSVistekForm.writeline("acquired last SVS Vistek image")
+
+
+                            'Dim BoundsRect = New Rectangle(0, 0, myWidth, myHeight)
+                            'Dim bmpDataSrc As BitmapData = b.LockBits(BoundsRect, ImageLockMode.[ReadOnly], b.PixelFormat)
+                            'Dim bytes As Integer = bmpDataSrc.Stride * b.Height
+                            'Dim ptr As IntPtr = bmpDataSrc.Scan0
+
+                            'Dim rawData = New Byte(bytes - 1) {}
+                            ''copy source pic to byte array
+
+                            'Marshal.Copy(ptr, rawData, 0, bytes)
+
+                            'Dim b2 = New Bitmap(myWidth, myHeight, PixelFormat.Format8bppIndexed)
+                            'Dim bmpData As BitmapData = b2.LockBits(BoundsRect, ImageLockMode.[WriteOnly], b2.PixelFormat)
+
+                            ''b contains original
+                            ''b2 is to be the copy
+                            ''Dim ncp As ColorPalette = b2.Palette
+
+                            ''For i = 0 To 255
+
+                            ''    ncp.Entries(i) = Color.FromArgb(255, i, i, i)
+                            ''Next
+                            'b2.Palette = b.Palette
+                            'Dim ptr2 As IntPtr = bmpData.Scan0
+                            'Marshal.Copy(rawData, 0, ptr2, bytes)
+                            ''from, to
+                            'b2.UnlockBits(bmpData)
+
+                            'b.UnlockBits(bmpDataSrc)
+
+                            ''=======================================================
+                            ''Service provided by Telerik (www.telerik.com)
+                            ''Conversion powered by NRefactory.
+                            ''Twitter: @telerik
+                            ''Facebook: facebook.com/telerik
+                            ''=======================================================
+
+
+
+
+
+                            ''myBaslerForm.PictureBox1.Image = b2
+
+
+                            Dim iTotBytes As Integer = 0
+                            Dim sResponse As String = ""
+                            'Dim fs As New FileStream(sPhysicalFilePath, FileMode.Open, FileAccess.Read, FileShare.Read)
+                            '
+                            Dim myImageCodecInfo As ImageCodecInfo
+                            Dim myEncoder As System.Drawing.Imaging.Encoder
+                            Dim myEncoderParameter As EncoderParameter
+                            Dim myEncoderParameters As EncoderParameters
+
+                            ' Create a Bitmap object based on a BMP file.
+
+
+                            ' Get an ImageCodecInfo object that represents the JPEG codec.
+                            myImageCodecInfo = GetEncoderInfo("image/jpeg")
+
+                            ' Create an Encoder object based on the GUID
+                            ' for the Quality parameter category.
+                            myEncoder = System.Drawing.Imaging.Encoder.Quality
+
+                            ' Create an EncoderParameters object.
+                            ' An EncoderParameters object has an array of EncoderParameter
+                            ' objects. In this case, there is only one
+                            ' EncoderParameter object in the array.
+                            myEncoderParameters = New EncoderParameters(1)
+
+                            ' Save the bitmap as a JPEG file with quality level 25.
+                            myEncoderParameter = New EncoderParameter(myEncoder, CType(95L, Int32))
+                            myEncoderParameters.Param(0) = myEncoderParameter
+                            ' myBitmap.Save("Shapes025.jpg", myImageCodecInfo, myEncoderParameters)
+
+
+                            '
+                            Dim ms As New MemoryStream()
+                            '  Dim ms2 As New MemoryStream()
+
+                            b.Save(ms, myImageCodecInfo, myEncoderParameters)
+                            ' d2.Save(ms2, Imaging.ImageFormat.Bmp)
+                            ' mySVSVistekForm.PictureBox1.Image = b
+                            'Dim reader As New BinaryReader(ms)
+                            '  Dim reader2 As New BinaryReader(ms2)
+                            ' Dim bytes2() As Byte = New Byte(ms.Length) {}
+
+
+                            'reader.BaseStream.Position = 0
+                            '' reader2.BaseStream.Position = 0
+
+
+
+                            'While reader.BaseStream.Position < reader.BaseStream.Length
+                            '    reader.Read(bytes2, 0, bytes2.Length)
+
+                            'End While
+                            '' While reader2.BaseStream.Position < reader2.BaseStream.Length
+                            ''     reader2.Read(bytesDarks, 0, bytesDarks.Length)
+
+                            '' End While
+                            '' Dim aVal As Integer
+
+
+                            'sResponse = sResponse & Encoding.ASCII.GetString(bytes2, 0, reader.BaseStream.Length)
+                            'iTotBytes = reader.BaseStream.Length
+                            'reader.Close()
+                            'ms.Close()
+                            b.Dispose()
+                            SendHeader(sHttpVersion, "image/jpeg", ms.Length, " 200 OK", localSocket)
+                            SendToBrowser(ms.ToArray(), localSocket)
+                            ms.Close()
+                        Else
+                            sErrorMessage = "problem receiving images"
+                            SendHeader(sHttpVersion, "", sErrorMessage.Length, " 404 Not Found", localSocket)
+                            SendToBrowser(sErrorMessage, localSocket)
+                        End If
+
+                    Catch ex As Exception
+                        imageInUse = imageInUse - 1
+                        sErrorMessage = "404 Error! File Does Not Exists..."
+                        SendHeader(sHttpVersion, "", sErrorMessage.Length, " 404 Not Found", localSocket)
+                        SendToBrowser(sErrorMessage, localSocket)
+                        Debug.Print("error encountered: " & ex.Message)
+                    End Try
+                End If
+
+                ' End If
+                localSocket.Close()
+                localSocket = Nothing
+                LocalTCPListener.Stop()
+
+            End If
+        Loop
+        restart = False
+        StartListen()
+    End Sub
     Private Shared Function GetEncoderInfo(ByVal mimeType As String) As ImageCodecInfo
         Dim j As Integer
         Dim encoders() As ImageCodecInfo
@@ -482,10 +823,13 @@ Public Class WebServer
     Public Sub StopWebServer()
         Try
             running = False
-            Application.DoEvents()
-            LocalTCPListener.Stop()
-            WebThread.Abort()
 
+            cancellationTokenSource.Cancel()
+
+            Application.DoEvents()
+
+
+            '
 
 
             'If Not (myFirewireCam Is Nothing) Then
@@ -496,6 +840,9 @@ Public Class WebServer
             'mySVSVistekForm.writeline(ex.Message)
         End Try
     End Sub
+
+
+
 
     Private Sub StartListenIS()
         Dim iStartPos As Integer
@@ -517,15 +864,15 @@ Public Class WebServer
         '    mySVSVistekCam.startStreamingFF()
         'End If
 
-
-        Do While True
+        cancellationTokenSource = New CancellationTokenSource()
+        Do While Not cancellationTokenSource.Token.IsCancellationRequested
             'accept new socket connection
             LocalTCPListener.Start()
             'mySVSVistekForm.writeline("starting SVS Vistek listener")
-            Dim mySocket As Socket = LocalTCPListener.AcceptSocket
-            If mySocket.Connected Then
+            Dim localSocket As Socket = LocalTCPListener.AcceptSocket
+            If localSocket.Connected Then
                 Dim bReceive() As Byte = New [Byte](1024) {}
-                Dim i As Integer = mySocket.Receive(bReceive, bReceive.Length, 0)
+                Dim i As Integer = localSocket.Receive(bReceive, bReceive.Length, 0)
                 Dim sBuffer As String = Encoding.ASCII.GetString(bReceive)
                 'find the GET request.
                 ' mySVSVistekForm.writeline("SVS Vistek image server connected")
@@ -560,7 +907,7 @@ Public Class WebServer
 
                         'End If
                         'mySVSVistekCam.useDarks = Me.useDarks
-                        b = myISForm.getLastImage()
+                        ' b = myISForm.getLastImage()
                         ' mySVSVistekForm.writeline("acquired last SVS Vistek image")
 
 
@@ -670,22 +1017,22 @@ Public Class WebServer
                         'reader.Close()
                         'ms.Close()
 
-                        SendHeader(sHttpVersion, "image/jpeg", ms.Length, " 200 OK", mySocket)
-                        SendToBrowser(ms.ToArray(), mySocket)
+                        SendHeader(sHttpVersion, "image/jpeg", ms.Length, " 200 OK", localSocket)
+                        SendToBrowser(ms.ToArray(), localSocket)
                         ms.Close()
 
                     Catch ex As Exception
                         imageInUse = imageInUse - 1
                         sErrorMessage = "404 Error! File Does Not Exists..."
-                        SendHeader(sHttpVersion, "", sErrorMessage.Length, " 404 Not Found", mySocket)
-                        SendToBrowser(sErrorMessage, mySocket)
+                        SendHeader(sHttpVersion, "", sErrorMessage.Length, " 404 Not Found", localSocket)
+                        SendToBrowser(sErrorMessage, localSocket)
 
                     End Try
                 End If
 
                 ' End If
-                mySocket.Close()
-                mySocket = Nothing
+                localSocket.Close()
+                localSocket = Nothing
                 LocalTCPListener.Stop()
 
             End If
@@ -693,6 +1040,412 @@ Public Class WebServer
 
     End Sub
 
+    Private Sub StartListenSVSVistekBaumer()
+        Dim iStartPos As Integer
+
+        Dim sErrorMessage As String
+
+        Dim sWebserverRoot = LocalVirtualRoot
+
+        Dim sPhysicalFilePath As String = ""
+        Dim sFormattedMessage As String = ""
+
+        'If LCase(mySVSVistekForm.lblDayNight.Text) = "day" Then
+        '    mySVSVistekCam.setParams(Val(mySVSVistekForm.tbExposureTime.Text), Val(mySVSVistekForm.tbDayGain.Text), Val(mySVSVistekForm.tbDayDgain.Text), Val(mySVSVistekForm.tbDayGamma.Text), 0)
+        'Else
+        '    mySVSVistekCam.setParams(Val(mySVSVistekForm.tbExposureTime.Text), Val(mySVSVistekForm.tbNightAgain.Text), Val(mySVSVistekForm.tbNightDgain.Text), Val(mySVSVistekForm.tbNightGamma.Text), 0)
+
+        'End If
+        'If Not mySVSVistekCam.isStreaming Then
+        '    mySVSVistekCam.startStreamingFF()
+        'End If
+
+
+        Do While True
+            'accept new socket connection
+            LocalTCPListener.Start()
+            'mySVSVistekForm.writeline("starting SVS Vistek listener")
+            Dim localSocket As Socket = LocalTCPListener.AcceptSocket
+            If localSocket.Connected Then
+                Dim bReceive() As Byte = New [Byte](1024) {}
+                Dim i As Integer = localSocket.Receive(bReceive, bReceive.Length, 0)
+                Dim sBuffer As String = Encoding.ASCII.GetString(bReceive)
+                'find the GET request.
+                ' mySVSVistekForm.writeline("SVS Vistek image server connected")
+                If sBuffer.Contains("GET") And sBuffer.Contains("HTTP") Then
+
+
+                    iStartPos = sBuffer.IndexOf("HTTP", 1)
+                    Dim sHttpVersion = sBuffer.Substring(iStartPos, 8)
+
+
+                    Try
+                        'grab image from cam
+
+                        Dim b As Bitmap
+
+                        Dim myWidth As Integer = 1392
+                        Dim myHeight As Integer
+
+
+
+
+                        'myWidth = mySVSVistekCam.getSizeX
+                        'myHeight = mySVSVistekCam.getSizeY
+
+                        'mySVSVistekForm.writeline("request for SVS Vistek image")
+                        'we know this camera has the following params:
+                        '
+                        'Dim bytes() As Byte = New Byte(myBaslerCam.getSizeX() * myBaslerCam.getSizeY()) {}
+                        'If LCase(mySVSVistekForm.lblDayNight.Text) = "day" Then
+                        '    mySVSVistekCam.setParams(Val(mySVSVistekForm.tbExposureTime.Text), Val(mySVSVistekForm.tbDayGain.Text), Val(mySVSVistekForm.tbDayDgain.Text), Val(mySVSVistekForm.tbDayGamma.Text), 0)
+                        'Else
+                        '    mySVSVistekCam.setParams(Val(mySVSVistekForm.tbExposureTime.Text), Val(mySVSVistekForm.tbNightAgain.Text), Val(mySVSVistekForm.tbNightDgain.Text), Val(mySVSVistekForm.tbNightGamma.Text), 0)
+
+                        'End If
+                        'mySVSVistekCam.useDarks = Me.useDarks
+                        b = mySVSVistekBaumerForm.getLastImage()
+                        ' mySVSVistekForm.writeline("acquired last SVS Vistek image")
+
+
+                        'Dim BoundsRect = New Rectangle(0, 0, myWidth, myHeight)
+                        'Dim bmpDataSrc As BitmapData = b.LockBits(BoundsRect, ImageLockMode.[ReadOnly], b.PixelFormat)
+                        'Dim bytes As Integer = bmpDataSrc.Stride * b.Height
+                        'Dim ptr As IntPtr = bmpDataSrc.Scan0
+
+                        'Dim rawData = New Byte(bytes - 1) {}
+                        ''copy source pic to byte array
+
+                        'Marshal.Copy(ptr, rawData, 0, bytes)
+
+                        'Dim b2 = New Bitmap(myWidth, myHeight, PixelFormat.Format8bppIndexed)
+                        'Dim bmpData As BitmapData = b2.LockBits(BoundsRect, ImageLockMode.[WriteOnly], b2.PixelFormat)
+
+                        ''b contains original
+                        ''b2 is to be the copy
+                        ''Dim ncp As ColorPalette = b2.Palette
+
+                        ''For i = 0 To 255
+
+                        ''    ncp.Entries(i) = Color.FromArgb(255, i, i, i)
+                        ''Next
+                        'b2.Palette = b.Palette
+                        'Dim ptr2 As IntPtr = bmpData.Scan0
+                        'Marshal.Copy(rawData, 0, ptr2, bytes)
+                        ''from, to
+                        'b2.UnlockBits(bmpData)
+
+                        'b.UnlockBits(bmpDataSrc)
+
+                        ''=======================================================
+                        ''Service provided by Telerik (www.telerik.com)
+                        ''Conversion powered by NRefactory.
+                        ''Twitter: @telerik
+                        ''Facebook: facebook.com/telerik
+                        ''=======================================================
+
+
+
+
+
+                        ''myBaslerForm.PictureBox1.Image = b2
+
+
+                        Dim iTotBytes As Integer = 0
+                        Dim sResponse As String = ""
+                        'Dim fs As New FileStream(sPhysicalFilePath, FileMode.Open, FileAccess.Read, FileShare.Read)
+                        '
+                        Dim myImageCodecInfo As ImageCodecInfo
+                        Dim myEncoder As System.Drawing.Imaging.Encoder
+                        Dim myEncoderParameter As EncoderParameter
+                        Dim myEncoderParameters As EncoderParameters
+
+                        ' Create a Bitmap object based on a BMP file.
+
+
+                        ' Get an ImageCodecInfo object that represents the JPEG codec.
+                        myImageCodecInfo = GetEncoderInfo("image/jpeg")
+
+                        ' Create an Encoder object based on the GUID
+                        ' for the Quality parameter category.
+                        myEncoder = System.Drawing.Imaging.Encoder.Quality
+
+                        ' Create an EncoderParameters object.
+                        ' An EncoderParameters object has an array of EncoderParameter
+                        ' objects. In this case, there is only one
+                        ' EncoderParameter object in the array.
+                        myEncoderParameters = New EncoderParameters(1)
+
+                        ' Save the bitmap as a JPEG file with quality level 25.
+                        myEncoderParameter = New EncoderParameter(myEncoder, CType(95L, Int32))
+                        myEncoderParameters.Param(0) = myEncoderParameter
+                        ' myBitmap.Save("Shapes025.jpg", myImageCodecInfo, myEncoderParameters)
+
+
+                        '
+                        Dim ms As New MemoryStream()
+                        '  Dim ms2 As New MemoryStream()
+                        b.Save(ms, myImageCodecInfo, myEncoderParameters)
+                        ' d2.Save(ms2, Imaging.ImageFormat.Bmp)
+                        ' mySVSVistekForm.PictureBox1.Image = b
+                        'Dim reader As New BinaryReader(ms)
+                        '  Dim reader2 As New BinaryReader(ms2)
+                        ' Dim bytes2() As Byte = New Byte(ms.Length) {}
+
+
+                        'reader.BaseStream.Position = 0
+                        '' reader2.BaseStream.Position = 0
+
+
+
+                        'While reader.BaseStream.Position < reader.BaseStream.Length
+                        '    reader.Read(bytes2, 0, bytes2.Length)
+
+                        'End While
+                        '' While reader2.BaseStream.Position < reader2.BaseStream.Length
+                        ''     reader2.Read(bytesDarks, 0, bytesDarks.Length)
+
+                        '' End While
+                        '' Dim aVal As Integer
+
+
+                        'sResponse = sResponse & Encoding.ASCII.GetString(bytes2, 0, reader.BaseStream.Length)
+                        'iTotBytes = reader.BaseStream.Length
+                        'reader.Close()
+                        'ms.Close()
+
+                        SendHeader(sHttpVersion, "image/jpeg", ms.Length, " 200 OK", localSocket)
+                        SendToBrowser(ms.ToArray(), localSocket)
+                        ms.Close()
+
+                    Catch ex As Exception
+                        imageInUse = imageInUse - 1
+                        sErrorMessage = "404 Error! File Does Not Exists..."
+                        SendHeader(sHttpVersion, "", sErrorMessage.Length, " 404 Not Found", localSocket)
+                        SendToBrowser(sErrorMessage, localSocket)
+
+                    End Try
+                End If
+
+                ' End If
+                localSocket.Close()
+                localSocket = Nothing
+                LocalTCPListener.Stop()
+
+            End If
+        Loop
+
+    End Sub
+
+    Private Sub StartListenPCO()
+        Dim iStartPos As Integer
+
+        Dim sErrorMessage As String
+
+        Dim sWebserverRoot = LocalVirtualRoot
+
+        Dim sPhysicalFilePath As String = ""
+        Dim sFormattedMessage As String = ""
+
+        'If LCase(mySVSVistekForm.lblDayNight.Text) = "day" Then
+        '    mySVSVistekCam.setParams(Val(mySVSVistekForm.tbExposureTime.Text), Val(mySVSVistekForm.tbDayGain.Text), Val(mySVSVistekForm.tbDayDgain.Text), Val(mySVSVistekForm.tbDayGamma.Text), 0)
+        'Else
+        '    mySVSVistekCam.setParams(Val(mySVSVistekForm.tbExposureTime.Text), Val(mySVSVistekForm.tbNightAgain.Text), Val(mySVSVistekForm.tbNightDgain.Text), Val(mySVSVistekForm.tbNightGamma.Text), 0)
+
+        'End If
+        'If Not mySVSVistekCam.isStreaming Then
+        '    mySVSVistekCam.startStreamingFF()
+        'End If
+
+        cancellationTokenSource = New CancellationTokenSource()
+        Do While Not cancellationTokenSource.Token.IsCancellationRequested
+            'accept new socket connection
+            LocalTCPListener.Start()
+            'mySVSVistekForm.writeline("starting SVS Vistek listener")
+            Dim localSocket As Socket = LocalTCPListener.AcceptSocket
+            If localSocket.Connected Then
+                Dim bReceive() As Byte = New [Byte](1024) {}
+                Dim i As Integer = localSocket.Receive(bReceive, bReceive.Length, 0)
+                Dim sBuffer As String = Encoding.ASCII.GetString(bReceive)
+                'find the GET request.
+                ' mySVSVistekForm.writeline("SVS Vistek image server connected")
+                If sBuffer.Contains("GET") And sBuffer.Contains("HTTP") Then
+
+
+                    iStartPos = sBuffer.IndexOf("HTTP", 1)
+                    Dim sHttpVersion = sBuffer.Substring(iStartPos, 8)
+
+
+                    Try
+                        'grab image from cam
+
+                        Dim b As Byte()
+
+                        Dim myWidth As Integer = iXres
+                        Dim myHeight As Integer = iYres
+
+
+
+
+                        'myWidth = mySVSVistekCam.getSizeX
+                        'myHeight = mySVSVistekCam.getSizeY
+
+                        'mySVSVistekForm.writeline("request for SVS Vistek image")
+                        'we know this camera has the following params:
+                        '
+                        'Dim bytes() As Byte = New Byte(myBaslerCam.getSizeX() * myBaslerCam.getSizeY()) {}
+                        'If LCase(mySVSVistekForm.lblDayNight.Text) = "day" Then
+                        '    mySVSVistekCam.setParams(Val(mySVSVistekForm.tbExposureTime.Text), Val(mySVSVistekForm.tbDayGain.Text), Val(mySVSVistekForm.tbDayDgain.Text), Val(mySVSVistekForm.tbDayGamma.Text), 0)
+                        'Else
+                        '    mySVSVistekCam.setParams(Val(mySVSVistekForm.tbExposureTime.Text), Val(mySVSVistekForm.tbNightAgain.Text), Val(mySVSVistekForm.tbNightDgain.Text), Val(mySVSVistekForm.tbNightGamma.Text), 0)
+
+                        'End If
+                        'mySVSVistekCam.useDarks = Me.useDarks
+                        b = myPCOForm.getLastImageArray()
+
+                        Dim x As New Bitmap(iXres, iYres, Imaging.PixelFormat.Format24bppRgb)
+                        Dim BoundsRect = New Rectangle(0, 0, iXres, iYres)
+                        Dim bmpData As System.Drawing.Imaging.BitmapData = x.LockBits(BoundsRect, System.Drawing.Imaging.ImageLockMode.[WriteOnly], x.PixelFormat)
+                        Dim ptr As IntPtr = bmpData.Scan0
+                        System.Runtime.InteropServices.Marshal.Copy(b, 0, ptr, b.Length - 1) 'copy into bitmap
+
+
+                        x.UnlockBits(bmpData)
+
+
+
+
+                        ' mySVSVistekForm.writeline("acquired last SVS Vistek image")
+
+
+                        'Dim BoundsRect = New Rectangle(0, 0, myWidth, myHeight)
+                        'Dim bmpDataSrc As BitmapData = b.LockBits(BoundsRect, ImageLockMode.[ReadOnly], b.PixelFormat)
+                        'Dim bytes As Integer = bmpDataSrc.Stride * b.Height
+                        'Dim ptr As IntPtr = bmpDataSrc.Scan0
+
+                        'Dim rawData = New Byte(bytes - 1) {}
+                        ''copy source pic to byte array
+
+                        'Marshal.Copy(ptr, rawData, 0, bytes)
+
+                        'Dim b2 = New Bitmap(myWidth, myHeight, PixelFormat.Format8bppIndexed)
+                        'Dim bmpData As BitmapData = b2.LockBits(BoundsRect, ImageLockMode.[WriteOnly], b2.PixelFormat)
+
+                        ''b contains original
+                        ''b2 is to be the copy
+                        ''Dim ncp As ColorPalette = b2.Palette
+
+                        ''For i = 0 To 255
+
+                        ''    ncp.Entries(i) = Color.FromArgb(255, i, i, i)
+                        ''Next
+                        'b2.Palette = b.Palette
+                        'Dim ptr2 As IntPtr = bmpData.Scan0
+                        'Marshal.Copy(rawData, 0, ptr2, bytes)
+                        ''from, to
+                        'b2.UnlockBits(bmpData)
+
+                        'b.UnlockBits(bmpDataSrc)
+
+                        ''=======================================================
+                        ''Service provided by Telerik (www.telerik.com)
+                        ''Conversion powered by NRefactory.
+                        ''Twitter: @telerik
+                        ''Facebook: facebook.com/telerik
+                        ''=======================================================
+
+
+
+
+
+                        ''myBaslerForm.PictureBox1.Image = b2
+
+
+                        Dim iTotBytes As Integer = 0
+                        Dim sResponse As String = ""
+                        'Dim fs As New FileStream(sPhysicalFilePath, FileMode.Open, FileAccess.Read, FileShare.Read)
+                        '
+                        Dim myImageCodecInfo As ImageCodecInfo
+                        Dim myEncoder As System.Drawing.Imaging.Encoder
+                        Dim myEncoderParameter As EncoderParameter
+                        Dim myEncoderParameters As EncoderParameters
+
+                        ' Create a Bitmap object based on a BMP file.
+
+
+                        ' Get an ImageCodecInfo object that represents the JPEG codec.
+                        myImageCodecInfo = GetEncoderInfo("image/jpeg")
+
+                        ' Create an Encoder object based on the GUID
+                        ' for the Quality parameter category.
+                        myEncoder = System.Drawing.Imaging.Encoder.Quality
+
+                        ' Create an EncoderParameters object.
+                        ' An EncoderParameters object has an array of EncoderParameter
+                        ' objects. In this case, there is only one
+                        ' EncoderParameter object in the array.
+                        myEncoderParameters = New EncoderParameters(1)
+
+                        ' Save the bitmap as a JPEG file with quality level 25.
+                        myEncoderParameter = New EncoderParameter(myEncoder, CType(95L, Int32))
+                        myEncoderParameters.Param(0) = myEncoderParameter
+                        ' myBitmap.Save("Shapes025.jpg", myImageCodecInfo, myEncoderParameters)
+
+
+                        '
+                        Dim ms As New MemoryStream()
+                        '  Dim ms2 As New MemoryStream()
+                        x.Save(ms, myImageCodecInfo, myEncoderParameters)
+                        ' d2.Save(ms2, Imaging.ImageFormat.Bmp)
+                        ' mySVSVistekForm.PictureBox1.Image = b
+                        'Dim reader As New BinaryReader(ms)
+                        '  Dim reader2 As New BinaryReader(ms2)
+                        ' Dim bytes2() As Byte = New Byte(ms.Length) {}
+
+
+                        'reader.BaseStream.Position = 0
+                        '' reader2.BaseStream.Position = 0
+
+
+
+                        'While reader.BaseStream.Position < reader.BaseStream.Length
+                        '    reader.Read(bytes2, 0, bytes2.Length)
+
+                        'End While
+                        '' While reader2.BaseStream.Position < reader2.BaseStream.Length
+                        ''     reader2.Read(bytesDarks, 0, bytesDarks.Length)
+
+                        '' End While
+                        '' Dim aVal As Integer
+
+
+                        'sResponse = sResponse & Encoding.ASCII.GetString(bytes2, 0, reader.BaseStream.Length)
+                        'iTotBytes = reader.BaseStream.Length
+                        'reader.Close()
+                        'ms.Close()
+
+                        SendHeader(sHttpVersion, "image/jpeg", ms.Length, " 200 OK", localSocket)
+                        SendToBrowser(ms.ToArray(), localSocket)
+                        ms.Close()
+
+                    Catch ex As Exception
+                        imageInUse = imageInUse - 1
+                        sErrorMessage = "404 Error! File Does Not Exists..."
+                        SendHeader(sHttpVersion, "", sErrorMessage.Length, " 404 Not Found", localSocket)
+                        SendToBrowser(sErrorMessage, localSocket)
+
+                    End Try
+                End If
+
+                ' End If
+                localSocket.Close()
+                localSocket = Nothing
+                LocalTCPListener.Stop()
+
+            End If
+        Loop
+
+    End Sub
 
     'Private Sub StartListenPixeLINK()
     '    Dim iStartPos As Integer
@@ -719,10 +1472,10 @@ Public Class WebServer
     '        'accept new socket connection
     '        LocalTCPListener.Start()
     '        'mySVSVistekForm.writeline("starting SVS Vistek listener")
-    '        Dim mySocket As Socket = LocalTCPListener.AcceptSocket
-    '        If mySocket.Connected Then
+    '        Dim localSocket As Socket = LocalTCPListener.AcceptSocket
+    '        If localSocket.Connected Then
     '            Dim bReceive() As Byte = New [Byte](1024) {}
-    '            Dim i As Integer = mySocket.Receive(bReceive, bReceive.Length, 0)
+    '            Dim i As Integer = localSocket.Receive(bReceive, bReceive.Length, 0)
     '            Dim sBuffer As String = Encoding.ASCII.GetString(bReceive)
     '            'find the GET request.
     '            ' mySVSVistekForm.writeline("SVS Vistek image server connected")
@@ -881,22 +1634,22 @@ Public Class WebServer
     '                    'reader.Close()
     '                    'ms.Close()
 
-    '                    SendHeader(sHttpVersion, "image/jpeg", ms.Length, " 200 OK", mySocket)
-    '                    SendToBrowser(ms.ToArray(), mySocket)
+    '                    SendHeader(sHttpVersion, "image/jpeg", ms.Length, " 200 OK", localSocket)
+    '                    SendToBrowser(ms.ToArray(), localSocket)
     '                    ms.Close()
 
     '                Catch ex As Exception
     '                    imageInUse = imageInUse - 1
     '                    sErrorMessage = "404 Error! File Does Not Exists..."
-    '                    SendHeader(sHttpVersion, "", sErrorMessage.Length, " 404 Not Found", mySocket)
-    '                    SendToBrowser(sErrorMessage, mySocket)
+    '                    SendHeader(sHttpVersion, "", sErrorMessage.Length, " 404 Not Found", localSocket)
+    '                    SendToBrowser(sErrorMessage, localSocket)
 
     '                End Try
     '            End If
 
     '            ' End If
-    '            mySocket.Close()
-    '            mySocket = Nothing
+    '            localSocket.Close()
+    '            localSocket = Nothing
     '            LocalTCPListener.Stop()
 
     '        End If
