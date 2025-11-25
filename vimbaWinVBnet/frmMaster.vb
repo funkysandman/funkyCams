@@ -25,6 +25,7 @@ Public Class frmMaster
     Public startTime As DateTime
     Public gotFrameTime As DateTime
     Public dark() As Byte
+    Public uintDark() As UInt16
     Public meteorCheckRunning As Boolean = False
     Public myImageCodecInfo As ImageCodecInfo
     Public myEncoder As System.Drawing.Imaging.Encoder
