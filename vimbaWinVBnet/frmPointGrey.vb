@@ -441,7 +441,7 @@ Public Class frmPointGrey
 
             End If
             ''stretch image
-            image.Save("image.raw", ImageFileFormat.Tiff)
+            'image.Save("image.raw", ImageFileFormat.Tiff)
             'Dim value As Integer
 
 
@@ -614,6 +614,9 @@ Public Class frmPointGrey
             m_cam.Init()
             m_nodeMap = m_cam.GetNodeMap()
             m_nodeMapTLDevice = m_cam.GetTLDeviceNodeMap()
+            'set mtu to 300
+
+            m_cam.GevSCPD.Value = 10000
 
             ' End If
 
@@ -651,6 +654,7 @@ Public Class frmPointGrey
             Console.WriteLine("Acquisition mode set to continuous...")
 
             ' Begin acquiring images
+
             cam.BeginAcquisition()
 
             Console.WriteLine("Acquiring images...")
