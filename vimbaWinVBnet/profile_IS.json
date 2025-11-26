@@ -1,0 +1,1 @@
+{"DayExposure":0.025,"DayGain":0,"ImagePath":"C:\\image_img_src","ModelName":"IS","NightExposure":6500,"NightGain":32,"Rects":[{"_height":939,"_width":333,"_x":25,"_y":928}],"darkCutOff":0,"darkMultiplier":"","detectMeteors":true,"eveningHour":17,"maxValue":0,"minValue":0,"morningHour":6,"port":8070,"saveImages":true,"url":"","useDarks":true}

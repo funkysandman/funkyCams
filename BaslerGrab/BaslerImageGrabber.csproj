@@ -48,6 +48,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\..\..\..\Program Files\Basler\pylon 6\Development\Assemblies\PylonC.NET\PylonC.NET.dll</HintPath>
     </Reference>
+    <Reference Include="PylonC.NETSupportLibrary">
+      <HintPath>..\..\..\..\Desktop\basler\Debug\PylonC.NETSupportLibrary.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />

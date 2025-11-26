@@ -31,7 +31,7 @@ Public Class WebServer
     Private imageInUse As Integer = 0
     '  Private WithEvents myGigECam As CCamera
     Private WithEvents myGigECam As AVT.VmbAPINET.Camera
-    Private myQICam As QCamManagedDriver.QCam
+    ' Private myQICam As QCamManagedDriver.QCam
     Private myToupcam As Toupcam
     Private myPointGreycam As IManagedCamera
     Private myBaslerCam As BaslerWrapper.Grabber
@@ -40,10 +40,10 @@ Public Class WebServer
     Private myGenericForm As frmMaster
     Private myForm As frmAVT
     Private myFWform As frmFoculs
-    'Private myQIform As frmQ
+    ' Private myQIform As frmQ
     Private myToupForm As frmToupcam
-    ' Private myISForm As frmIS
-    'Private myCoolsnapForm As frmCoolsnap
+    Private myISForm As frmIS
+    ' Private myCoolsnapForm As frmCoolsnap
     Private myPointGreyForm As frmPointGrey
     Private restart As Boolean = False
     Private myBaslerForm As frmScout
@@ -154,13 +154,34 @@ Public Class WebServer
             'loadGigEDarks()
             LocalTCPListener = New TcpListener(LocalAddress, LocalPort)
             LocalTCPListener.Start()
-            WebThread = New Thread(AddressOf StartListenSVSVistekBaumer)
+            WebThread = New Thread(AddressOf StartListen)
             WebThread.Start()
-            f.writeline("starting SVS Vistek web server")
+            f.writeline("starting Gige web server")
         Catch ex As Exception
             f.writeline(ex.Message)
         End Try
     End Sub
+    Public Sub StartWebServer(f As frmIS, port As Integer)
+        Try
+            LocalPort = port
+            myISForm = f
+            myGenericForm = f
+            'loadGigEDarks()
+            LocalTCPListener = New TcpListener(LocalAddress, LocalPort)
+            LocalTCPListener.Start()
+            WebThread = New Thread(AddressOf StartListen)
+            WebThread.Start()
+            f.writeline("starting Imagine Source web server")
+        Catch ex As Exception
+            f.writeline(ex.Message)
+        End Try
+    End Sub
+
+    '    Catch ex As Exception
+
+    '    End Try
+    'End Sub
+
 
 
     Public Sub StartWebServer(aCam As SVCamApi.SVCamGrabber, f As Object, port As Integer)
@@ -184,12 +205,13 @@ Public Class WebServer
             LocalPort = port
             myBaslerForm = f
             myBaslerCam = aCam
+            myGenericForm = f
             'loadGigEDarks()
             LocalTCPListener = New TcpListener(LocalAddress, LocalPort)
             LocalTCPListener.Start()
             WebThread = New Thread(AddressOf StartListen)
             WebThread.Start()
-            f.writeline("starting SVS Vistek web server")
+            f.writeline("starting Scout web server")
         Catch ex As Exception
             f.writeline(ex.Message)
         End Try
@@ -444,22 +466,7 @@ Public Class WebServer
                               End Sub, token)
     End Sub
 
-    Public Sub StopListening()
-        If cancellationTokenSource IsNot Nothing Then
-            cancellationTokenSource.Cancel()
-            Try
-                ' Stop listener to unblock Accept if necessary
-                LocalTCPListener.[Stop]()
-            Catch
-            End Try
-        End If
-        If listenTask IsNot Nothing Then
-            Try
-                listenTask.Wait(1000) ' short wait; optional
-            Catch
-            End Try
-        End If
-    End Sub
+
 
     Private Sub HandleClient(ByVal localSocket As Socket, ByVal token As CancellationToken)
         Try

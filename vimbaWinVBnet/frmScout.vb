@@ -330,8 +330,8 @@ Public Class frmScout
             m_pics = New RingBitmap(5)
         End If
 
+        'm_pics.FillNextBitmap(rawData, b.Width, b.Height, rawData.Length)
         m_pics.FillNextBitmap(b)
-
 
         ' myBitmap.Save("Shapes025.jpg", myImageCodecInfo, myEncoderParameters)
         Dim firstLocation As PointF = New PointF(10.0F, 10.0F)
@@ -413,6 +413,10 @@ Public Class frmScout
         myBaslerImageGrabber.close()
 
     End Sub
+
+
+
+
 
     'Private Sub InitializeComponent()
     '    Me.SuspendLayout()

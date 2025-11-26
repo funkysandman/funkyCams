@@ -105,11 +105,8 @@
     <Reference Include="PylonC.NET, Version=4.1.0.0, Culture=neutral, PublicKeyToken=a77e8471c5919d5a, processorArchitecture=MSIL">
       <HintPath>..\packages\Basler.PylonC.NET.5.0.5\lib\net20\PylonC.NET.dll</HintPath>
     </Reference>
-    <Reference Include="QCamManagedDriver">
-      <HintPath>..\..\..\..\..\..\Program Files\QImaging\SDK\libs\i386\QCamManagedDriver\NETv4.0\QCamManagedDriver.dll</HintPath>
-    </Reference>
     <Reference Include="SpinnakerNET_v140">
-      <HintPath>..\..\..\..\..\..\..\Program Files\Point Grey Research\Spinnaker\bin64\vs2015\SpinnakerNET_v140.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\Program Files\Teledyne\Spinnaker\bin64\vs2015\SpinnakerNET_v140.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -124,9 +121,13 @@
     <Reference Include="System.XML" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Xml.Serialization" />
+    <Reference Include="TIS.Imaging.ICImagingControl35, Version=3.5.7.4039, Culture=neutral, PublicKeyToken=257805929e8b7928, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\The Imaging Source Europe GmbH\IC Imaging Control 3.5 .NET Library\bin\x64\TIS.Imaging.ICImagingControl35.dll</HintPath>
+    </Reference>
     <Reference Include="VimbaNET, Version=1.7.0.24184, Culture=neutral, PublicKeyToken=96b729f24f119b9a, processorArchitecture=x86">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\Program Files\Allied Vision\Vimba_2.1\VimbaNET\Bin\Win64\VimbaNET.dll</HintPath>
+      <HintPath>..\..\..\..\Desktop\basler\Debug\VimbaNET.dll</HintPath>
     </Reference>
     <Reference Include="WindowsBase" />
   </ItemGroup>
@@ -153,6 +154,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include=".vb" />
+    <Compile Include="Form1.Designer.vb">
+      <DependentUpon>Form1.vb</DependentUpon>
+    </Compile>
+    <Compile Include="Form1.vb">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="frmBasler.Designer.vb">
       <DependentUpon>frmBasler.vb</DependentUpon>
     </Compile>
@@ -166,6 +173,9 @@
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="frmIPcam.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmIS.vb">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="frmScout.vb">
@@ -245,6 +255,9 @@
     <Compile Include="webserver.vb" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Form1.resx">
+      <DependentUpon>Form1.vb</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="frmBasler.resx">
       <DependentUpon>frmBasler.vb</DependentUpon>
     </EmbeddedResource>
@@ -254,6 +267,7 @@
     <EmbeddedResource Include="frmIPcam.resx">
       <DependentUpon>frmIPcam.vb</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="frmIS.resx" />
     <EmbeddedResource Include="frmMaster.resx">
       <DependentUpon>frmMaster.vb</DependentUpon>
     </EmbeddedResource>
@@ -323,6 +337,9 @@
     </None>
     <None Include="App.config" />
     <None Include="packages.config" />
+    <None Include="profile_IS.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <AdditionalFiles Include="BaumerSDKlibs\bgapi2_genicam_dotnet.dll">
@@ -453,8 +470,12 @@
     <Content Include="pgDark.raw">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="pgdark14273662.raw" />
-    <Content Include="pgdark17192757.raw" />
+    <Content Include="pgdark14273662.raw">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="pgdark17192757.raw">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="SC2_Cam.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

@@ -25,6 +25,7 @@ Public Class frmMaster
     Public startTime As DateTime
     Public gotFrameTime As DateTime
     Public dark() As Byte
+    Public uintDark() As UInt16
     Public meteorCheckRunning As Boolean = False
     Public myImageCodecInfo As ImageCodecInfo
     Public myEncoder As System.Drawing.Imaging.Encoder
@@ -181,21 +182,21 @@ Public Class frmMaster
 
             ' m_ManagedImages(m_BitmapSelector) = b
             'copy raw data into m_buffers
-            Dim rawData(b.DataSize - 1) As Byte
+            Dim rawData(b.GetBufferSize - 1) As Byte
             ' Dim BoundsRect = New Rectangle(0, 0, b.Width, b.Height)
             ' Dim bmpData As System.Drawing.Imaging.BitmapData = m_Bitmaps(m_BitmapSelector).LockBits(BoundsRect, System.Drawing.Imaging.ImageLockMode.[WriteOnly], m_Bitmaps(m_BitmapSelector).PixelFormat)
             'Dim ptr As IntPtr = bmpData.Scan0
-            'System.Runtime.InteropServices.Marshal.Copy(b.DataPtr, ptr, 0, b.DataSize) 'copy into bitmap
-            'System.Runtime.InteropServices.Marshal.Copy(b.ManagedData, 0, rawData, b.DataSize) 'copy into array
+            'System.Runtime.InteropServices.Marshal.Copy(b.DataPtr, ptr, 0, b.GetBufferSize) 'copy into bitmap
+            'System.Runtime.InteropServices.Marshal.Copy(b.ManagedData, 0, rawData, b.GetBufferSize) 'copy into array
 
-            If m_buffers(m_BitmapSelector) Is Nothing OrElse m_buffers(m_BitmapSelector).Length <> b.DataSize Then
-                m_buffers(m_BitmapSelector) = New Byte(b.DataSize - 1) {}
+            If m_buffers(m_BitmapSelector) Is Nothing OrElse m_buffers(m_BitmapSelector).Length <> b.GetBufferSize Then
+                m_buffers(m_BitmapSelector) = New Byte(b.GetBufferSize - 1) {}
             End If
 
-            Buffer.BlockCopy(b.ManagedData, 0, m_buffers(m_BitmapSelector), 0, b.DataSize)
+            Buffer.BlockCopy(b.ManagedData, 0, m_buffers(m_BitmapSelector), 0, b.GetBufferSize)
             m_width = b.Width
             m_height = b.Height
-            m_dataSize = b.DataSize
+            m_dataSize = b.GetBufferSize
 
 
         End Sub
@@ -209,7 +210,7 @@ Public Class frmMaster
             Dim bmpData As System.Drawing.Imaging.BitmapData = b.LockBits(BoundsRect, System.Drawing.Imaging.ImageLockMode.[WriteOnly], b.PixelFormat)
             Dim rawData(b.Height * bmpData.Stride) As Byte
             Dim ptr As IntPtr = bmpData.Scan0
-            'System.Runtime.InteropServices.Marshal.Copy(b.DataPtr, ptr, 0, b.DataSize) 'copy into bitmap
+            'System.Runtime.InteropServices.Marshal.Copy(b.DataPtr, ptr, 0, b.GetBufferSize) 'copy into bitmap
             System.Runtime.InteropServices.Marshal.Copy(ptr, rawData, 0, rawData.Length - 1) 'copy into array
 
             m_buffers(m_BitmapSelector) = rawData
@@ -222,6 +223,14 @@ Public Class frmMaster
         Public Sub FillNextBitmap(b As Byte())
             SwitchBitmap()
             m_buffers(m_BitmapSelector) = b
+
+        End Sub
+        Public Sub FillNextBitmap(b As Byte(), w As Integer, h As Integer, s As Integer)
+            SwitchBitmap()
+            m_buffers(m_BitmapSelector) = b.Clone()
+            m_width = w
+            m_height = h
+            m_dataSize = s
 
         End Sub
         Private Sub SwitchBitmap()
@@ -244,16 +253,36 @@ Public Class frmMaster
 
 
         Debug.Print("get last image")
+        If Math.Abs((m_pics.width * m_pics.height) - (m_pics.ImageBytes.Length)) < 10 Then
+            'grayscale image
+            Dim x As New Bitmap(m_pics.width, m_pics.height, System.Drawing.Imaging.PixelFormat.Format8bppIndexed)
+            Dim BoundsRect = New Rectangle(0, 0, m_pics.width, m_pics.height)
+            Dim bmpData As System.Drawing.Imaging.BitmapData = x.LockBits(BoundsRect, System.Drawing.Imaging.ImageLockMode.[WriteOnly], x.PixelFormat)
+            Dim ptr As IntPtr = bmpData.Scan0
+            Dim ncp As System.Drawing.Imaging.ColorPalette = x.Palette
 
-        Dim x As New Bitmap(m_pics.width, m_pics.height, PixelFormat.Format24bppRgb)
-        Dim BoundsRect = New Rectangle(0, 0, m_pics.width, m_pics.height)
-        Dim bmpData As System.Drawing.Imaging.BitmapData = x.LockBits(BoundsRect, System.Drawing.Imaging.ImageLockMode.[WriteOnly], x.PixelFormat)
-        Dim ptr As IntPtr = bmpData.Scan0
-        System.Runtime.InteropServices.Marshal.Copy(m_pics.ImageBytes, 0, ptr, m_pics.dataSize) 'copy into bitmap
+            For i = 0 To 255
+
+                ncp.Entries(i) = System.Drawing.Color.FromArgb(255, i, i, i)
+            Next
+            x.Palette = ncp
+            System.Runtime.InteropServices.Marshal.Copy(m_pics.ImageBytes, 0, ptr, m_pics.dataSize - 1) 'copy into bitmap
 
 
-        x.UnlockBits(bmpData)
-        Return x
+            x.UnlockBits(bmpData)
+            Return x
+        Else
+            Dim x As New Bitmap(m_pics.width, m_pics.height, PixelFormat.Format24bppRgb)
+            Dim BoundsRect = New Rectangle(0, 0, m_pics.width, m_pics.height)
+            Dim bmpData As System.Drawing.Imaging.BitmapData = x.LockBits(BoundsRect, System.Drawing.Imaging.ImageLockMode.[WriteOnly], x.PixelFormat)
+            Dim ptr As IntPtr = bmpData.Scan0
+            System.Runtime.InteropServices.Marshal.Copy(m_pics.ImageBytes, 0, ptr, m_pics.dataSize) 'copy into bitmap
+            x.UnlockBits(bmpData)
+            Return x
+        End If
+
+
+
 
 
     End Function

@@ -1,6 +1,4 @@
 ﻿
-Imports System.Collections.Specialized
-Imports System.Drawing.Imaging
 Imports System.Environment
 Imports System.IO
 Imports System.Runtime.InteropServices
@@ -8,8 +6,6 @@ Imports System.Threading
 Imports SpinnakerNET
 Imports SpinnakerNET.GenApi
 Imports BitMiracle.LibTiff.Classic
-Imports SVCamApi
-Imports vimbaWinVBnet.vimbaWinVBnet
 
 Public Class frmPointGrey
     Inherits frmMaster
@@ -64,7 +60,7 @@ Public Class frmPointGrey
     Shared chosenEvent As eventType = eventType.Specific
 
     Public Class DeviceEventListener
-        Inherits ManagedDeviceEvent
+        Inherits ManagedDeviceEventHandler
 
         Private specificEvent As String
         Private count As Integer
@@ -76,109 +72,109 @@ Public Class frmPointGrey
             count = 0
         End Sub
 
-        Protected Overrides Sub OnDeviceEvent(eventName As String)
-            m_imageCnt = m_imageCnt + 1
-            ' Check that device event is registered
-            If eventName = specificEvent Then
-                count += 1
+        'Protected Overrides Sub OnDeviceEvent(eventName As String)
+        '    m_imageCnt = m_imageCnt + 1
+        '    ' Check that device event is registered
+        '    If eventName = specificEvent Then
+        '        count += 1
 
-                ' Print information on specified device event
-                Console.WriteLine("{0}Device event {1} with ID {2} number {3}...", vbTab, GetDeviceEventName(), GetDeviceEventID(), count)
+        '        ' Print information on specified device event
+        '        Console.WriteLine("{0}Device event {1} with ID {2} number {3}...", vbTab, GetDeviceEventName(), GetDeviceEventID(), count)
 
-            Else
-                ' Print no information on non-specified information
-                Console.WriteLine("{0}Device event occurred; not {1}; ignoring...", specificEvent)
+        '    Else
+        '        ' Print no information on non-specified information
+        '        Console.WriteLine("{0}Device event occurred; not {1}; ignoring...", specificEvent)
 
-            End If
-            Dim deviceSerialNumber As String = "grasshopper"
+        '    End If
+        '    Dim deviceSerialNumber As String = "grasshopper"
 
-            Try
-                ' Retrieve next received image
-                Using rawImage As IManagedImage = m_cam.GetNextImage()
+        '    Try
+        '        ' Retrieve next received image
+        '        Using rawImage As IManagedImage = m_cam.GetNextImage()
 
 
-                    ' Ensure image completion
-                    If rawImage.IsIncomplete Then
-                        Console.WriteLine("Image incomplete with image status {0}...", rawImage.ImageStatus)
-                    Else
+        '            ' Ensure image completion
+        '            If rawImage.IsIncomplete Then
+        '                Console.WriteLine("Image incomplete with image status {0}...", rawImage.ImageStatus)
+        '            Else
 
-                        ' Print image information; width and height
-                        ' recorded in pixels
-                        Dim width As UInteger = rawImage.Width
-                        Dim height As UInteger = rawImage.Height
+        '                ' Print image information; width and height
+        '                ' recorded in pixels
+        '                Dim width As UInteger = rawImage.Width
+        '                Dim height As UInteger = rawImage.Height
 
-                        Console.WriteLine("Grabbed image {0}, width = {1}, height = {2}", m_imageCnt, width, height)
+        '                Console.WriteLine("Grabbed image {0}, width = {1}, height = {2}", m_imageCnt, width, height)
 
-                        ' Convert image to mono 8
-                        Using convertedImage As IManagedImage = rawImage.Convert(PixelFormatEnums.BayerRG8)
+        '                ' Convert image to mono 8
+        '                Using convertedImage As IManagedImage = rawImage.Convert(PixelFormatEnums.BayerRG8)
 
-                            ' Create a unique filename
-                            Dim filename As String = "Exposure-VB-"
+        '                    ' Create a unique filename
+        '                    Dim filename As String = "Exposure-VB-"
 
-                            If deviceSerialNumber <> "" Then
-                                filename = filename + deviceSerialNumber + "-"
-                            End If
+        '                    If deviceSerialNumber <> "" Then
+        '                        filename = filename + deviceSerialNumber + "-"
+        '                    End If
 
-                            filename = filename + CStr(m_imageCnt) + ".jpg"
+        '                    filename = filename + CStr(m_imageCnt) + ".jpg"
 
-                            ' Save image
-                            convertedImage.Save(filename)
+        '                    ' Save image
+        '                    convertedImage.Save(filename)
 
-                            Console.WriteLine("Image saved at {0}{1}", filename, NewLine)
-                        End Using
-                    End If
-                End Using
+        '                    Console.WriteLine("Image saved at {0}{1}", filename, NewLine)
+        '                End Using
+        '            End If
+        '        End Using
 
-            Catch ex As SpinnakerException
-                Console.WriteLine("Error: {0}", ex.Message)
+        '    Catch ex As SpinnakerException
+        '        Console.WriteLine("Error: {0}", ex.Message)
 
-            End Try
+        '    End Try
 
-        End Sub
+        'End Sub
 
-        Protected Sub OnImageEvent(image As ManagedImage)
-            'If imageCnt < NumImages Then
-            Dim deviceSerialNumber As String = "grasshopper"
-            Console.WriteLine("Image event occurred...")
+        'Protected Sub OnImageEvent(image As ManagedImage)
+        '    'If imageCnt < NumImages Then
+        '    Dim deviceSerialNumber As String = "grasshopper"
+        '    Console.WriteLine("Image event occurred...")
 
-            If image.IsIncomplete Then
-                Console.WriteLine("Image incomplete with image status {0}...{1}", image.ImageStatus, NewLine)
+        '    If image.IsIncomplete Then
+        '        Console.WriteLine("Image incomplete with image status {0}...{1}", image.ImageStatus, NewLine)
 
-            Else
-                ' Convert image
-                Using convertedImage As IManagedImage = image.Convert(PixelFormatEnums.BayerRG8, ColorProcessingAlgorithm.HQ_LINEAR)
+        '    Else
+        '        ' Convert image
+        '        Using convertedImage As IManagedImage = image.Convert(PixelFormatEnums.BayerRG8, ColorProcessingAlgorithm.HQ_LINEAR)
 
-                    ' Print image information
-                    Console.WriteLine("Grabbed image {0}, width = {1}, height = {2}", m_imageCnt, convertedImage.Width, convertedImage.Height)
+        '            ' Print image information
+        '            Console.WriteLine("Grabbed image {0}, width = {1}, height = {2}", m_imageCnt, convertedImage.Width, convertedImage.Height)
 
-                    ' Create unique filename in order to save file
-                    Dim filename As String = "ImageEvents-VB-"
+        '            ' Create unique filename in order to save file
+        '            Dim filename As String = "ImageEvents-VB-"
 
-                    If deviceSerialNumber <> "" Then
-                        filename = filename + deviceSerialNumber + "-"
-                    End If
+        '            If deviceSerialNumber <> "" Then
+        '                filename = filename + deviceSerialNumber + "-"
+        '            End If
 
-                    filename = filename + Convert.ToString(m_imageCnt) + ".jpg"
+        '            filename = filename + Convert.ToString(m_imageCnt) + ".jpg"
 
-                    ' Save image
-                    convertedImage.Save(filename)
+        '            ' Save image
+        '            convertedImage.Save(filename)
 
-                    Console.WriteLine("Image saved at {0}{1}", filename, NewLine)
+        '            Console.WriteLine("Image saved at {0}{1}", filename, NewLine)
 
-                    ' Incrememnt image counter
-                    m_imageCnt += 1
+        '            ' Incrememnt image counter
+        '            m_imageCnt += 1
 
-                End Using
-            End If
+        '        End Using
+        '    End If
 
-            ' Must manually release the image to prevent buffers on the camera stream from filling up
-            image.Release()
+        '    ' Must manually release the image to prevent buffers on the camera stream from filling up
+        '    image.Release()
 
-            ' End If
-        End Sub
+        '    ' End If
+        'End Sub
     End Class
     Public Class ImageEventListener
-        Inherits ManagedImageEvent
+        Inherits ManagedImageEventHandler
 
         Private deviceSerialNumber As String
         Public Const NumImages As Integer = 10
@@ -213,10 +209,10 @@ Public Class frmPointGrey
             Dim stride As Integer = image.Stride
             Dim ptr As IntPtr = image.DataPtr
 
-            Dim darkHasStride As Boolean = (darkBytes.Length = image.DataSize)
+            Dim darkHasStride As Boolean = (darkBytes.Length = image.GetBufferSize)
             Dim darkNoStride As Boolean = (darkBytes.Length = width * height * 2)
             If Not darkHasStride AndAlso Not darkNoStride Then
-                Throw New ArgumentException($"dark length {darkBytes.Length} does not match image size ({image.DataSize}) nor width*height*2 ({width * height * 2})")
+                Throw New ArgumentException($"dark length {darkBytes.Length} does not match image size ({image.GetBufferSize}) nor width*height*2 ({width * height * 2})")
             End If
 
             For y As Integer = 0 To height - 1
@@ -392,7 +388,7 @@ Public Class frmPointGrey
                 '    mult = Val(myForm.tbMultiplier.Text)
                 '    Debug.WriteLine("PixelFormat = " & image.PixelFormat.ToString())
                 '    'images are stored as bayerRG16
-                ' assume image.DataSize and ManagedData already valid
+                ' assume image.GetBufferSize and ManagedData already valid
                 '--- Assume:
                 ' image        = your Spinnaker IManagedImage (16-bit BayerRG, big-endian)
                 ' dark         = byte() array, contiguous big-endian dark frame, Width*Height*2 bytes
@@ -423,13 +419,13 @@ Public Class frmPointGrey
                     Dim darkLo As Byte = myForm.dark(idx + 1)
                     Dim dval As Integer = (CInt(darkHi) << 8) Or CInt(darkLo)
 
-                        ' --- Subtract and clamp ---
-                        Dim r As Integer = val - dval
-                        If r < 0 Then r = 0
-                        If r > UShort.MaxValue Then r = UShort.MaxValue
-                        Dim outVal As UShort = CUShort(r)
-                        Dim outHigh As Byte = CByte((outVal >> 8) And &HFF)
-                        Dim outLow As Byte = CByte(outVal And &HFF)
+                    ' --- Subtract and clamp ---
+                    Dim r As Integer = val - dval
+                    If r < 0 Then r = 0
+                    If r > UShort.MaxValue Then r = UShort.MaxValue
+                    Dim outVal As UShort = CUShort(r)
+                    Dim outHigh As Byte = CByte((outVal >> 8) And &HFF)
+                    Dim outLow As Byte = CByte(outVal And &HFF)
 
                     ' --- Write to output buffer (tight array, no stride) ---
                     outputBytes(idx) = outHigh
@@ -446,7 +442,7 @@ Public Class frmPointGrey
 
 
 
-            ''For i = 0 To image.DataSize - 1 Step 2  ' This loop converts from 16bit to 8bit using min and max
+            ''For i = 0 To image.GetBufferSize - 1 Step 2  ' This loop converts from 16bit to 8bit using min and max
             ''    pixel = image.ManagedData(i) + image.ManagedData(i + 1) * 256
             ''    'value = value >> 2
 
@@ -476,27 +472,28 @@ Public Class frmPointGrey
 
 
             Dim mTransformImage As BGAPI2.Image = Nothing
-                Dim mImage As BGAPI2.Image = Nothing
-                ' Dim buff As BGAPI2.Buffer = New BGAPI2.Buffer()
-                'Dim imgProcessor As New BGAPI2.ImageProcessor()
+            Dim mImage As BGAPI2.Image = Nothing
+            ' Dim buff As BGAPI2.Buffer = New BGAPI2.Buffer()
+            'Dim imgProcessor As New BGAPI2.ImageProcessor()
 
 
-                '            //copy back to imageInfo
-                'Marshal.Copy(rawImage.imagebytes, 0, ImageInfo.pImagePtr, imageSizeX * imageSizeY);
+            '            //copy back to imageInfo
+            'Marshal.Copy(rawImage.imagebytes, 0, ImageInfo.pImagePtr, imageSizeX * imageSizeY);
 
-                ''//debayer buffer into RGB
-                ''//myApi.SVS_UtilBufferBayerToRGB(ImageInfo, ref imagebufferRGB[currentIdex].imagebytes[0], imageSizeX * imageSizeY );
-                ''BGAPI2.Image mTransformImage = null;
-                ''BGAPI2.Buffer mBufferFilled = New BGAPI2.Buffer();
-                '' Dim pImagePtr As IntPtr
-                ' Dim convertedImage As IManagedImage = image.Convert(PixelFormatEnums., ColorProcessingAlgorithm.NEAREST_NEIGHBOR_AVG)
+            ''//debayer buffer into RGB
+            ''//myApi.SVS_UtilBufferBayerToRGB(ImageInfo, ref imagebufferRGB[currentIdex].imagebytes[0], imageSizeX * imageSizeY );
+            ''BGAPI2.Image mTransformImage = null;
+            ''BGAPI2.Buffer mBufferFilled = New BGAPI2.Buffer();
+            '' Dim pImagePtr As IntPtr
+            ' Dim convertedImage As IManagedImage = image.Convert(PixelFormatEnums., ColorProcessingAlgorithm.NEAREST_NEIGHBOR_AVG)
 
 
-                Dim convertedImage As New ManagedImage
+            Dim convertedImage As New ManagedImage()
+            Dim processor As IManagedImageProcessor
             ' image.Convert(PixelFormatEnums.RGB8, ColorProcessingAlgorithm.NEAREST_NEIGHBOR_AVG)
             'image.ConvertToBitmapSource(PixelFormatEnums.RGB8, ColorProcessingAlgorithm.NEAREST_NEIGHBOR_AVG)
-
-            image.Convert(convertedImage, PixelFormatEnums.BGR8)
+            processor = New ManagedImageProcessor
+            convertedImage = processor.Convert(image, PixelFormatEnums.BGR8)
 
             'mImage = imgProcessor.CreateImage(image.Width, image.Height, "BayerGB16", image.DataPtr, image.Width * image.Height * 2)
 
@@ -614,9 +611,7 @@ Public Class frmPointGrey
             m_cam.Init()
             m_nodeMap = m_cam.GetNodeMap()
             m_nodeMapTLDevice = m_cam.GetTLDeviceNodeMap()
-            'set mtu to 300
 
-            m_cam.GevSCPD.Value = 10000
 
             ' End If
 
@@ -1162,7 +1157,7 @@ Public Class frmPointGrey
             If chosenEvent = eventType.Generic Then
                 ' Device event listeners registered generally will be
                 ' triggered by any device events.
-                cam.RegisterEvent(deviceEventListener)
+                cam.RegisterEventHandler(deviceEventListener)
 
                 Console.WriteLine("Device event listener registered generally...")
 
@@ -1170,7 +1165,7 @@ Public Class frmPointGrey
                 ' Device event listeners registered to a specific event
                 ' will only be triggered by the type of event that is
                 ' registered.
-                cam.RegisterEvent(deviceEventListener, "EventExposureEnd")
+                cam.RegisterEventHandler(deviceEventListener, "EventExposureEnd")
 
                 Console.WriteLine("Device event listener registered specifically to EventExposureEnd events...")
             End If
@@ -1211,7 +1206,7 @@ Public Class frmPointGrey
             ' done prior to releasing the system and while the image
             ' events are still in scope.
             '
-            cam.RegisterEvent(imageEventListener)
+            cam.RegisterEventHandler(imageEventListener)
 
         Catch ex As SpinnakerException
             Console.WriteLine("Error: {0}", ex.Message)
@@ -1224,7 +1219,7 @@ Public Class frmPointGrey
 
     Private Sub Button2_Click(sender As Object, e As EventArgs) Handles Button2.Click
         'take ten darks
-        m_cam.UnregisterEvent(m_imageEventListener)
+        m_cam.UnregisterEventHandler(m_imageEventListener)
         Dim numDarks As Integer = 1
         Dim numBytes As Integer = 0
         MsgBox("cover lens")
@@ -1232,7 +1227,7 @@ Public Class frmPointGrey
         Dim rawImage As IManagedImage
         m_cam.BeginAcquisition()
         rawImage = m_cam.GetNextImage()
-        numBytes = rawImage.DataSize
+        numBytes = rawImage.GetBufferSize
         Dim darks(numBytes) As Integer
         Dim darkBytes(numBytes) As Byte
 
@@ -1265,7 +1260,7 @@ Public Class frmPointGrey
             rawImage.Release()
         Next
         m_cam.EndAcquisition()
-        m_cam.RegisterEvent(m_imageEventListener)
+        m_cam.RegisterEventHandler(m_imageEventListener)
         For i = 0 To numBytes - 1
             darkBytes(i) = CByte(darks(i) / numDarks)
         Next
