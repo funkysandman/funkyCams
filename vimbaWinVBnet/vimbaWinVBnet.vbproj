@@ -179,12 +179,6 @@
     <Compile Include="frmMaster.vb">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="frmPCO.designer.vb">
-      <DependentUpon>frmPCO.vb</DependentUpon>
-    </Compile>
-    <Compile Include="frmPCO.vb">
-      <SubType>Form</SubType>
-    </Compile>
     <Compile Include="frmPointGrey.vb">
       <SubType>Form</SubType>
     </Compile>
@@ -216,21 +210,6 @@
       <DependentUpon>frmGIGE.vb</DependentUpon>
     </Compile>
     <Compile Include="frmGIGE.vb">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="frmCoolsnap.Designer.vb">
-      <DependentUpon>frmCoolsnap.vb</DependentUpon>
-    </Compile>
-    <Compile Include="frmCoolsnap.vb">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="frmQ.Designer.vb">
-      <DependentUpon>frmQ.vb</DependentUpon>
-    </Compile>
-    <Compile Include="frmQ.vb">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="frmQimaging.vb">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Form3.Designer.vb">
@@ -278,9 +257,6 @@
     <EmbeddedResource Include="frmMaster.resx">
       <DependentUpon>frmMaster.vb</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="frmPCO.resx">
-      <DependentUpon>frmPCO.vb</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="frmPointGrey.resx">
       <DependentUpon>frmPointGrey.vb</DependentUpon>
     </EmbeddedResource>
@@ -307,15 +283,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="frmGIGE.resx">
       <DependentUpon>frmGIGE.vb</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="frmCoolsnap.resx">
-      <DependentUpon>frmCoolsnap.vb</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="frmQ.resx">
-      <DependentUpon>frmQ.vb</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="frmQimaging.resx">
-      <DependentUpon>frmQimaging.vb</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Form3.resx">
       <DependentUpon>Form3.vb</DependentUpon>
