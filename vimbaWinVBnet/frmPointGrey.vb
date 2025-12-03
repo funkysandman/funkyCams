@@ -3,9 +3,10 @@ Imports System.Environment
 Imports System.IO
 Imports System.Runtime.InteropServices
 Imports System.Threading
+Imports BitMiracle.LibTiff.Classic
 Imports SpinnakerNET
 Imports SpinnakerNET.GenApi
-Imports BitMiracle.LibTiff.Classic
+Imports SVCamApi
 
 Public Class frmPointGrey
     Inherits frmMaster
@@ -358,10 +359,9 @@ Public Class frmPointGrey
             'check temperature
 
             'fetch temperature
-            Dim temp As Float = m_cam.DeviceTemperature
 
             myForm.txtTemp.Invoke(Sub()
-                                      myForm.txtTemp.Text = temp.ToString("0.0")
+                                      myForm.txtTemp.Text = m_cam.DeviceTemperature.Value.ToString("0.0")
                                   End Sub)
 
             If myForm.cbUseDarks.Checked And myForm.lblDayNight.Text = "night" Then
@@ -477,114 +477,111 @@ Public Class frmPointGrey
             'Dim imgProcessor As New BGAPI2.ImageProcessor()
 
 
-            '            //copy back to imageInfo
-            'Marshal.Copy(rawImage.imagebytes, 0, ImageInfo.pImagePtr, imageSizeX * imageSizeY);
+            'fetch temperature
+            If Not m_cam Is Nothing Then
 
-            ''//debayer buffer into RGB
-            ''//myApi.SVS_UtilBufferBayerToRGB(ImageInfo, ref imagebufferRGB[currentIdex].imagebytes[0], imageSizeX * imageSizeY );
-            ''BGAPI2.Image mTransformImage = null;
-            ''BGAPI2.Buffer mBufferFilled = New BGAPI2.Buffer();
-            '' Dim pImagePtr As IntPtr
-            ' Dim convertedImage As IManagedImage = image.Convert(PixelFormatEnums., ColorProcessingAlgorithm.NEAREST_NEIGHBOR_AVG)
-
+                If myForm.cbFan.Checked Then
+                    m_cam.LineSelector.Value = LineSelectorEnums.Line1
+                    m_cam.LineMode.Value = LineModeEnums.Output
+                    m_cam.LineSource.Value = 2
+                    m_cam.UserOutputValue.Value = True
+                    m_cam.V3_3Enable.Value = True
+                Else
+                    m_cam.LineSelector.Value = LineSelectorEnums.Line1
+                    m_cam.LineMode.Value = LineModeEnums.Output
+                    m_cam.LineSource.Value = 2
+                    m_cam.UserOutputValue.Value = False
+                    m_cam.V3_3Enable.Value = False
+                End If
+            End If
 
             Dim convertedImage As New ManagedImage()
             Dim processor As IManagedImageProcessor
             ' image.Convert(PixelFormatEnums.RGB8, ColorProcessingAlgorithm.NEAREST_NEIGHBOR_AVG)
             'image.ConvertToBitmapSource(PixelFormatEnums.RGB8, ColorProcessingAlgorithm.NEAREST_NEIGHBOR_AVG)
             processor = New ManagedImageProcessor
-            convertedImage = processor.Convert(image, PixelFormatEnums.BGR8)
-
-            'mImage = imgProcessor.CreateImage(image.Width, image.Height, "BayerGB16", image.DataPtr, image.Width * image.Height * 2)
-
-            ''ULong imageBufferAddress = (ULong)ImageInfo.pImagePtr;
-            'mTransformImage = imgProcessor.CreateTransformedImage(mImage, "RGB8")
-
-            'System.Runtime.InteropServices.Marshal.Copy(mTransformImage.Buffer, convertedImage.ManagedData, 0, image.Width * image.Height * 3)
-
-            ' System.IO.File.WriteAllBytes("pgxxx.raw", image.ManagedData)
-            ' System.IO.File.WriteAllBytes("pgxxxyy.raw", convertedImage.ManagedData)
-
-            'Dim convertedImage As IManagedImage = image.Convert(PixelFormatEnums.RGB8, ColorProcessingAlgorithm.NEAREST_NEIGHBOR_AVG)
-            ' System.IO.File.WriteAllBytes("pgconvert.raw", mTransformImage.Buffer)
-            'convertedImage.ConvertToWriteAbleBitmap(PixelFormatEnums.BGR8, convertedImage)
+            If image.ImageStatus = ImageStatus.IMAGE_NO_ERROR Then
+                convertedImage = processor.Convert(image, PixelFormatEnums.BGR8)
 
 
 
 
-            ' Print image information
-            Console.WriteLine("Grabbed image {0}, width = {1}, height = {2}", imageCnt, image.Width, image.Height)
+                ' Print image information
+                Console.WriteLine("Grabbed image {0}, width = {1}, height = {2}", imageCnt, image.Width, image.Height)
 
 
-            'store in ring bitmap
+                'store in ring bitmap
 
 
-            If myForm.m_pics Is Nothing Then
-                myForm.m_pics = New frmMaster.RingBitmap(5)
-            End If
-
-            myForm.m_pics.FillNextBitmap(convertedImage)
-
-
-            imageCnt += 1
-
-
-
-
-            ' Must manually release the image to prevent buffers on the camera stream from filling up
-            '  image.Release()
-            Dim filename As String
-
-            Dim folderName = String.Format("{0:yyyy-MMM-dd}", DateTime.Now)
-            filename = String.Format("{0}{1:ddMMMyyyy-HHmmss}.jpg", "imgpg_", DateTime.Now)
-            filename = Path.Combine(myForm.tbPath.Text, folderName, filename)
-
-
-
-            If myForm.cbMeteors.Checked And myForm.lblDayNight.Text.ToLower = "night" Then
-                ' md.examine(bm, filename)
-                'call azure service
-                Dim ms As New MemoryStream()
-                ' convertedImage.ConvertToWriteAbleBitmap()
-                Dim b As Bitmap
-                b = myForm.getLastImage
-
-                b.Save(ms, myForm.myImageCodecInfo, myForm.myEncoderParameters)
-                b.Dispose()
-
-                Dim contents = ms.ToArray()
-                Dim qe As New queueEntry
-                qe.img = contents
-                qe.filename = Path.GetFileName(filename)
-                qe.dateTaken = Now
-                qe.cameraID = "Point Grey Camera"
-                qe.width = image.Width
-                qe.height = image.Height
-                If myForm.myDetectionQueue.Count < 10 Then
-                    myForm.myDetectionQueue.Enqueue(qe)
-
+                If myForm.m_pics Is Nothing Then
+                    myForm.m_pics = New frmMaster.RingBitmap(5)
                 End If
 
-                ms.Close()
-
-            End If
-            If myForm.cbSaveImages.Checked = True And myForm.lblDayNight.Text = "night" Then
-                System.IO.Directory.CreateDirectory(Path.Combine(myForm.tbPath.Text, folderName))
-                Dim x As Bitmap
-                x = myForm.getLastImage
-
-                x.Save(filename, myForm.myImageCodecInfo, myForm.myEncoderParameters)
-                x.Dispose()
+                myForm.m_pics.FillNextBitmap(convertedImage)
 
 
-                If myForm.t_cleanup.ThreadState = ThreadState.Unstarted Or myForm.t_cleanup.ThreadState = ThreadState.Stopped Then
-                    myForm.t_cleanup = New Thread(AddressOf myForm.cleanFolders)
+                imageCnt += 1
 
-                    myForm.t_cleanup.Start()
-                Else
 
-                    ' Debug.WriteLine("threadstate:" & myForm.t_cleanup.ThreadState)
+
+
+                ' Must manually release the image to prevent buffers on the camera stream from filling up
+                '  image.Release()
+                Dim filename As String
+
+                Dim folderName = String.Format("{0:yyyy-MMM-dd}", DateTime.Now)
+                filename = String.Format("{0}{1:ddMMMyyyy-HHmmss}.jpg", "imgpg_", DateTime.Now)
+                filename = Path.Combine(myForm.tbPath.Text, folderName, filename)
+
+
+
+                If myForm.cbMeteors.Checked And myForm.lblDayNight.Text.ToLower = "night" Then
+                    ' md.examine(bm, filename)
+                    'call azure service
+                    Dim ms As New MemoryStream()
+                    ' convertedImage.ConvertToWriteAbleBitmap()
+                    Dim b As Bitmap
+                    b = myForm.getLastImage
+
+                    b.Save(ms, myForm.myImageCodecInfo, myForm.myEncoderParameters)
+                    b.Dispose()
+
+                    Dim contents = ms.ToArray()
+                    Dim qe As New queueEntry
+                    qe.img = contents
+                    qe.filename = Path.GetFileName(filename)
+                    qe.dateTaken = Now
+                    qe.cameraID = "Point Grey Camera"
+                    qe.width = image.Width
+                    qe.height = image.Height
+                    If myForm.myDetectionQueue.Count < 10 Then
+                        myForm.myDetectionQueue.Enqueue(qe)
+
+                    End If
+
+                    ms.Close()
+
                 End If
+                If myForm.cbSaveImages.Checked = True And myForm.lblDayNight.Text = "night" Then
+                    System.IO.Directory.CreateDirectory(Path.Combine(myForm.tbPath.Text, folderName))
+                    Dim x As Bitmap
+                    x = myForm.getLastImage
+
+                    x.Save(filename, myForm.myImageCodecInfo, myForm.myEncoderParameters)
+                    x.Dispose()
+
+
+                    If myForm.t_cleanup.ThreadState = ThreadState.Unstarted Or myForm.t_cleanup.ThreadState = ThreadState.Stopped Then
+                        myForm.t_cleanup = New Thread(AddressOf myForm.cleanFolders)
+
+                        myForm.t_cleanup.Start()
+                    Else
+
+                        ' Debug.WriteLine("threadstate:" & myForm.t_cleanup.ThreadState)
+                    End If
+                End If
+            Else
+                Console.WriteLine("Image incomplete with image status {0}...{1}", image.ImageStatus, NewLine)
             End If
             image.Release()
 
