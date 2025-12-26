@@ -405,6 +405,7 @@ Public Class frmPointGrey
                 Dim pixelCount As Integer = width * height
                 ' Create output buffer for 16-bit image (big-endian)
                 Dim outputBytes(width * height * 2 - 1) As Byte
+                Dim mult = myForm.tbMultiplier.Text
 
                 For idx As Integer = 1 To pixelCount * 2 - 2 Step 2
 
@@ -420,7 +421,11 @@ Public Class frmPointGrey
                     Dim dval As Integer = (CInt(darkHi) << 8) Or CInt(darkLo)
 
                     ' --- Subtract and clamp ---
-                    Dim r As Integer = val - dval
+                    ' reduce dark by multiplier - multiplier is a number between 0 and 1
+
+
+
+                    Dim r As Integer = val - CInt(dval * mult)
                     If r < 0 Then r = 0
                     If r > UShort.MaxValue Then r = UShort.MaxValue
                     Dim outVal As UShort = CUShort(r)
@@ -496,13 +501,17 @@ Public Class frmPointGrey
             End If
 
             Dim convertedImage As New ManagedImage()
+            Dim convertedImageTemp As New ManagedImage()
             Dim processor As IManagedImageProcessor
             ' image.Convert(PixelFormatEnums.RGB8, ColorProcessingAlgorithm.NEAREST_NEIGHBOR_AVG)
             'image.ConvertToBitmapSource(PixelFormatEnums.RGB8, ColorProcessingAlgorithm.NEAREST_NEIGHBOR_AVG)
             processor = New ManagedImageProcessor
             If image.ImageStatus = ImageStatus.IMAGE_NO_ERROR Then
-                convertedImage = processor.Convert(image, PixelFormatEnums.BGR8)
-
+                If image.PixelFormat <> PixelFormatEnums.BayerRG16 Then
+                    image = processor.Convert(image, PixelFormatEnums.BayerRG16)
+                End If
+                convertedImageTemp = processor.Convert(image, PixelFormatEnums.BGR8)
+                convertedImageTemp.ConvertToBitmapSource(PixelFormatEnums.BGR8, convertedImage, ColorProcessingAlgorithm.HQ_LINEAR)
 
 
 
@@ -608,7 +617,7 @@ Public Class frmPointGrey
             m_cam.Init()
             m_nodeMap = m_cam.GetNodeMap()
             m_nodeMapTLDevice = m_cam.GetTLDeviceNodeMap()
-
+            m_cam.PixelFormat.Value = "BayerRG16"
 
             ' End If
 
