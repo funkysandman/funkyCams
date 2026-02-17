@@ -601,11 +601,11 @@ Public Class Camera
     'End Property
     Public Property Gain As Short Implements ICameraV3.Gain, ICameraV2.Gain
         Get
-            'If IsConnected Then
-            '    Dim gainIndex As Short
-            '    myCam.c.GetAdGain(gainIndex, 1, 0)
-            '    Return GainValues(gainIndex)  ' actual gain in dB
-            'End If
+            If IsConnected Then
+                Dim gainIndex As Short
+                myCam.c.GetAdGain(gainIndex, 1, 0)
+                Return GainValues(gainIndex)  ' actual gain in dB
+            End If
             Return 0
         End Get
 
