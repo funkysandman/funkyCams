@@ -1,5 +1,5 @@
-﻿
-Imports System.IO
+﻿Imports System.IO
+Imports System.Globalization
 
 Imports System.ComponentModel
 Imports System.Drawing.Imaging
@@ -9,6 +9,8 @@ Imports System.Threading
 Imports TIS.Imaging
 Public Class frmIS
     Inherits frmMaster
+
+    Private ReadOnly m_astroCalibration As New AstroCalibration.CalibrationPipeline()
 
     Private VCDProp As TIS.Imaging.VCDHelpers.VCDSimpleProperty
     'Private WithEvents IcImagingControl1 As New TIS.Imaging.ICImagingControl
@@ -138,6 +140,7 @@ Public Class frmIS
         'TimerAcquistionRate.Enabled = False
         't.Abort()
         IcImagingControl1.LiveStop()
+        SaveAstroCalibrationForCurrentCamera()
         meteorCheckRunning = False
         btnStart.Enabled = True
         btnStop.Enabled = False
@@ -186,6 +189,7 @@ Public Class frmIS
         IcImagingControl1.DeviceFlipHorizontal = False
         IcImagingControl1.Update()
 
+        LoadAstroCalibrationForCurrentCamera()
 
         IcImagingControl1.Sink = New FrameQueueSink(AddressOf gotBuffer, MediaSubtypes.Y16, 1)
         ' VCDProp = TIS.Imaging.VCDHelpers.VCDSimpleModule.GetSimplePropertyContainer(IcImagingControl1.VCDPropertyItems)
@@ -221,6 +225,10 @@ Public Class frmIS
         Marshal.Copy(arg.GetIntPtr, img, 0, arg.ActualDataSize)
 
         Buffer.BlockCopy(img, 0, uintImg, 0, img.Length)
+
+        ApplyAstroCalibrationU16(uintImg, iWidth, iHeight)
+        Buffer.BlockCopy(uintImg, 0, img, 0, img.Length)
+        Marshal.Copy(img, 0, arg.GetIntPtr, img.Length)
 
         File.WriteAllBytes("ISraw.raw", img)
 
@@ -494,7 +502,7 @@ Public Class frmIS
 
             End If
             'End If
-            ' Dim err As QCamM_Err
+            ' Dim err:QCamM_Err
             'QCam.QCamM_SetParam(mSettings, QCamM_Param.qprmGain, CUInt((tbNightAgain.Text)))
             ' QCam.QCamM_SetParam(mSettings, QCamM_Param.qprmExposure, tbExposureTime.Text)
             'err = QCam.QCamM_SendSettingsToCam(mhCamera, mSettings)
@@ -508,38 +516,12 @@ Public Class frmIS
     Private Sub lblDayNight_TextChanged(sender As Object, e As EventArgs) Handles lblDayNight.TextChanged
 
         If m_camRunning Then
-
-
-            Dim AbsValItf As TIS.Imaging.VCDAbsoluteValueProperty
-
-
-
-            ' Retrieve an absolute value interface for exposure
-            AbsValItf = IcImagingControl1.VCDPropertyItems.FindInterface(TIS.Imaging.VCDIDs.VCDID_Exposure + ":" +
-                                                                        TIS.Imaging.VCDIDs.VCDElement_Value + ":" +
-                                                                     TIS.Imaging.VCDIDs.VCDInterface_AbsoluteValue)
-
-            AbsValItf.Value = String.Format("{0,16:0.000000e+00}", tbExposureTime.Text / 1000)
-            ' AbsValItf.Value = "3.33000003593042492866516113281e-04"
-
-
-
-            ' Retrieve an absolute value interface for gain
-            AbsValItf = IcImagingControl1.VCDPropertyItems.FindInterface(TIS.Imaging.VCDIDs.VCDID_Gain + ":" +
-                                                                        TIS.Imaging.VCDIDs.VCDElement_Value + ":" +
-                                                                     TIS.Imaging.VCDIDs.VCDInterface_AbsoluteValue)
-            AbsValItf.Value = tbGain.Text
-
-
-            AbsValItf = IcImagingControl1.VCDPropertyItems.FindInterface(TIS.Imaging.VCDIDs.VCDID_Saturation + ":" +
-                                                                        TIS.Imaging.VCDIDs.VCDElement_Value + ":" +
-                                                                     TIS.Imaging.VCDIDs.VCDInterface_AbsoluteValue)
-            AbsValItf.Value = 125
-            IcImagingControl1.DeviceFrameRate = 0.2
-            IcImagingControl1.ImageRingBufferSize = 1
-
-            IcImagingControl1.Update()
-            'Dim fh As FrameHandlerSink
+            IcImagingControl1.LiveStop()
+            Try
+                ApplyCameraSettings()
+            Finally
+                IcImagingControl1.LiveStart()
+            End Try
         End If
         'fh = IcImagingControl1.Sink
 
@@ -554,6 +536,8 @@ Public Class frmIS
 
     Private Sub frmIS_Closing(sender As Object, e As CancelEventArgs) Handles Me.Closing
         Dim i As Object
+
+        SaveAstroCalibrationForCurrentCamera()
 
         If hdialog <> 0 Then
             PCO_CloseDialogCam(hdialog)
@@ -576,36 +560,7 @@ Public Class frmIS
         'IcImagingControl1.ImageRingBufferSize = 1
         m_camRunning = True
 
-
-        'VCDProp.RangeValue(VCDIDs.VCDID_Exposure) = -1
-        Dim AbsValItf As TIS.Imaging.VCDAbsoluteValueProperty
-
-
-        ' Retrieve an absolute value interface for exposure
-        AbsValItf = IcImagingControl1.VCDPropertyItems.FindInterface(TIS.Imaging.VCDIDs.VCDID_Exposure + ":" +
-                                                                    TIS.Imaging.VCDIDs.VCDElement_Value + ":" +
-                                                                 TIS.Imaging.VCDIDs.VCDInterface_AbsoluteValue)
-
-        AbsValItf.Value = String.Format("{0,16:0.000000e+00}", tbExposureTime.Text / 1000)
-        ' AbsValItf.Value = "3.33000003593042492866516113281e-04"
-
-
-
-        ' Retrieve an absolute value interface for gain
-        AbsValItf = IcImagingControl1.VCDPropertyItems.FindInterface(TIS.Imaging.VCDIDs.VCDID_Gain + ":" +
-                                                                    TIS.Imaging.VCDIDs.VCDElement_Value + ":" +
-                                                                 TIS.Imaging.VCDIDs.VCDInterface_AbsoluteValue)
-        AbsValItf.Value = tbGain.Text
-
-
-        AbsValItf = IcImagingControl1.VCDPropertyItems.FindInterface(TIS.Imaging.VCDIDs.VCDID_Saturation + ":" +
-                                                                    TIS.Imaging.VCDIDs.VCDElement_Value + ":" +
-                                                                 TIS.Imaging.VCDIDs.VCDInterface_AbsoluteValue)
-        AbsValItf.Value = 125
-        IcImagingControl1.DeviceFrameRate = 0.2
-        ' IcImagingControl1.ImageRingBufferSize = 1
-
-        IcImagingControl1.Update()
+        ApplyCameraSettings()
         'Dim fh As FrameHandlerSink
 
         'fh = IcImagingControl1.Sink
@@ -630,6 +585,7 @@ Public Class frmIS
         t = New Thread(AddressOf processDetection)
         t.Start()
     End Sub
+
 
 
 
@@ -941,6 +897,134 @@ Public Class frmIS
 
     End Sub
 
+    Private Function GetCalibrationFilePathForCurrentCamera() As String
+        Dim model As String = Nothing
+
+        Try
+            If IcImagingControl1 IsNot Nothing AndAlso Not String.IsNullOrWhiteSpace(IcImagingControl1.Device) Then
+                model = IcImagingControl1.Device
+            End If
+        Catch
+        End Try
+
+        If String.IsNullOrWhiteSpace(model) Then
+            model = "IS_unknown_model"
+        End If
+
+        For Each c As Char In Path.GetInvalidFileNameChars()
+            model = model.Replace(c, "_"c)
+        Next
+
+        model = model.Replace(" "c, "_"c)
+
+        Return Path.Combine(AppDomain.CurrentDomain.BaseDirectory, $"astrocal_{model}.bin")
+    End Function
+
+    Private Sub LoadAstroCalibrationForCurrentCamera()
+        Dim filePath = GetCalibrationFilePathForCurrentCamera()
+        If String.IsNullOrWhiteSpace(filePath) Then
+            Return
+        End If
+
+        Try
+            SyncLock m_astroCalibration
+                m_astroCalibration.LoadFromFile(filePath)
+            End SyncLock
+        Catch ex As Exception
+            Debug.WriteLine("LoadAstroCalibrationForCurrentCamera (IS) failed: " & ex.Message)
+        End Try
+    End Sub
+
+    Private Sub SaveAstroCalibrationForCurrentCamera()
+        Dim filePath = GetCalibrationFilePathForCurrentCamera()
+        If String.IsNullOrWhiteSpace(filePath) Then
+            Return
+        End If
+
+        Try
+            SyncLock m_astroCalibration
+                m_astroCalibration.SaveToFile(filePath)
+            End SyncLock
+        Catch ex As Exception
+            Debug.WriteLine("SaveAstroCalibrationForCurrentCamera (IS) failed: " & ex.Message)
+        End Try
+    End Sub
+
+    Private Sub ApplyAstroCalibrationU16(uintImg() As UShort, width As Integer, height As Integer)
+        If uintImg Is Nothing OrElse width <= 0 OrElse height <= 0 Then
+            Return
+        End If
+
+        If Not String.Equals(lblDayNight.Text, "night", StringComparison.OrdinalIgnoreCase) Then
+            Return
+        End If
+
+        Try
+            Dim frameImg(height - 1, width - 1) As Single
+            For y = 0 To height - 1
+                Dim rowOffset As Integer = y * width
+                For x = 0 To width - 1
+                    frameImg(y, x) = uintImg(rowOffset + x)
+                Next
+            Next
+
+            Dim gain As Single = 0.0F
+            Single.TryParse(tbGain.Text, NumberStyles.Float, CultureInfo.InvariantCulture, gain)
+
+            Dim exposure As Single = 0.0F
+            Single.TryParse(tbExposureTime.Text, NumberStyles.Float, CultureInfo.InvariantCulture, exposure)
+
+            Dim frame As New AstroCalibration.Frame With {
+                .Image = frameImg,
+                .Temperature = 0.0F,
+                .Gain = gain,
+                .Exposure = exposure,
+                .Timestamp = DateTime.Now
+            }
+
+            Dim calibrated As Single(,)
+            SyncLock m_astroCalibration
+                calibrated = m_astroCalibration.Process(frame)
+            End SyncLock
+
+            For y = 0 To height - 1
+                Dim rowOffset As Integer = y * width
+                For x = 0 To width - 1
+                    Dim v As Integer = CInt(Math.Round(calibrated(y, x)))
+                    If v < 0 Then v = 0
+                    If v > UShort.MaxValue Then v = UShort.MaxValue
+                    uintImg(rowOffset + x) = CUShort(v)
+                Next
+            Next
+        Catch ex As Exception
+            Debug.WriteLine("ApplyAstroCalibrationU16 (IS) failed: " & ex.Message)
+        End Try
+    End Sub
+
+    Private Sub ApplyCameraSettings()
+        Dim AbsValItf As TIS.Imaging.VCDAbsoluteValueProperty
+
+        ' Retrieve an absolute value interface for exposure
+        AbsValItf = IcImagingControl1.VCDPropertyItems.FindInterface(TIS.Imaging.VCDIDs.VCDID_Exposure + ":" +
+                                                                    TIS.Imaging.VCDIDs.VCDElement_Value + ":" +
+                                                                 TIS.Imaging.VCDIDs.VCDInterface_AbsoluteValue)
+
+        AbsValItf.Value = String.Format("{0,16:0.000000e+00}", tbExposureTime.Text / 1000)
+
+        ' Retrieve an absolute value interface for gain
+        AbsValItf = IcImagingControl1.VCDPropertyItems.FindInterface(TIS.Imaging.VCDIDs.VCDID_Gain + ":" +
+                                                                    TIS.Imaging.VCDIDs.VCDElement_Value + ":" +
+                                                                 TIS.Imaging.VCDIDs.VCDInterface_AbsoluteValue)
+        AbsValItf.Value = tbGain.Text
+
+        AbsValItf = IcImagingControl1.VCDPropertyItems.FindInterface(TIS.Imaging.VCDIDs.VCDID_Saturation + ":" +
+                                                                    TIS.Imaging.VCDIDs.VCDElement_Value + ":" +
+                                                                 TIS.Imaging.VCDIDs.VCDInterface_AbsoluteValue)
+        AbsValItf.Value = 125
+
+        IcImagingControl1.DeviceFrameRate = 0.2
+        IcImagingControl1.Update()
+    End Sub
 
 End Class
 
