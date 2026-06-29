@@ -1,5 +1,6 @@
 ﻿Imports System.IO
 Imports System.Threading
+Imports Color = System.Drawing.Color
 
 Public Class frmScout
     Inherits frmMaster
@@ -15,7 +16,7 @@ Public Class frmScout
 
 
         'setup camera
-        myBaslerImageGrabber.Open()
+        myBaslerImageGrabber.Open(0)
 
         tbPort.Text = "8199"
         tbPath.Text = "e:\image_scout"
@@ -229,7 +230,8 @@ Public Class frmScout
 
         Dim isRunning As Boolean = False
 
-        isRunning = myBaslerImageGrabber.m_imageProvider.m_grabThread.IsAlive
+        isRunning = myBaslerImageGrabber.isRunning
+
 
         If lblDayNight.Text = "night" Then
 
@@ -281,23 +283,37 @@ Public Class frmScout
     End Sub
     Private Sub received_frame(sender As Object, args As BaslerWrapper.FrameEventArgs)
 
-        b = New Bitmap(CInt(args.image.Width), CInt(args.image.Height), System.Drawing.Imaging.PixelFormat.Format8bppIndexed)
-        Dim colorPalette As System.Drawing.Imaging.ColorPalette
-        colorPalette = b.Palette
+        Dim width As Integer = args.Width
+        Dim height As Integer = args.Height
+
+        Dim src() As UShort = args.Data
+
+        Dim b As New Bitmap(width, height, Imaging.PixelFormat.Format8bppIndexed)
+
+        Dim pal = b.Palette
         For i = 0 To 255
-            colorPalette.Entries(i) = System.Drawing.Color.FromArgb(i, i, i)
+            pal.Entries(i) = Color.FromArgb(i, i, i)
         Next
-        b.Palette = colorPalette
+        b.Palette = pal
 
+        Dim bmpData As Imaging.BitmapData =
+        b.LockBits(New Rectangle(0, 0, width, height),
+               Imaging.ImageLockMode.WriteOnly,
+               b.PixelFormat)
 
-        Dim BoundsRect = New Rectangle(0, 0, b.Width, b.Height)
-        Dim bmpData As System.Drawing.Imaging.BitmapData = b.LockBits(BoundsRect, System.Drawing.Imaging.ImageLockMode.[WriteOnly], b.PixelFormat)
-        Dim rawData(b.Height * bmpData.Stride) As Byte
         Dim ptr As IntPtr = bmpData.Scan0
 
+        Dim outBytes(width * height - 1) As Byte
+
+        ' scale 16-bit → 8-bit (IMPORTANT)
+        For i = 0 To src.Length - 1
+            Dim v As Integer = CInt(src(i))
+            outBytes(i) = CByte((v * 255) \ 4095)
+        Next
 
 
-        System.Runtime.InteropServices.Marshal.Copy(args.image.Buffer, 0, ptr, rawData.Length - 1)
+        System.Runtime.InteropServices.Marshal.Copy(outBytes, 0, ptr, outBytes.Length)
+
         b.UnlockBits(bmpData)
         b.Tag = Now
         running = True
@@ -360,7 +376,7 @@ Public Class frmScout
 
 
 
-        If Me.cbSaveImages.Checked = True And Me.lblDayNight.Text.ToLower = "night" Then
+        If Me.cbSaveImages.Checked = True Then ' And Me.lblDayNight.Text.ToLower = "night" Then
             System.IO.Directory.CreateDirectory(Path.Combine(Me.tbPath.Text, folderName))
 
 
