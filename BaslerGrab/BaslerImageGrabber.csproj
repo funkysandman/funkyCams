@@ -44,12 +44,9 @@
     </StartupObject>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="PylonC.NET, Version=4.2.0.0, Culture=neutral, PublicKeyToken=a77e8471c5919d5a, processorArchitecture=MSIL">
+    <Reference Include="Basler.Pylon, Version=1.1.0.0, Culture=neutral, PublicKeyToken=e389355f398382ab, processorArchitecture=x86">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\..\Program Files\Basler\pylon 6\Development\Assemblies\PylonC.NET\PylonC.NET.dll</HintPath>
-    </Reference>
-    <Reference Include="PylonC.NETSupportLibrary">
-      <HintPath>..\..\..\..\Desktop\basler\Debug\PylonC.NETSupportLibrary.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\Program Files\Basler\pylon 6\Development\Assemblies\Basler.Pylon\x64\Basler.Pylon.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -66,12 +63,6 @@
     <None Include="ProducerGEV.cti">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Pylon.NETSupportLibrary\Pylon.NETSupportLibrary.csproj">
-      <Project>{3eafc9f5-d49f-4f9f-86c8-fbd231b07d2e}</Project>
-      <Name>Pylon.NETSupportLibrary</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Content Include="FirmwareUpdate_MD_VC141_v3_1_Basler_pylon.dll">
