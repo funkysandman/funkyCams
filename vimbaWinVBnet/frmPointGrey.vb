@@ -360,9 +360,15 @@ Public Class frmPointGrey
 
             'fetch temperature
 
-            myForm.txtTemp.Invoke(Sub()
-                                      myForm.txtTemp.Text = m_cam.DeviceTemperature.Value.ToString("0.0")
-                                  End Sub)
+            Try
+
+                myForm.txtTemp.Invoke(Sub()
+                                          myForm.txtTemp.Text = m_cam.DeviceTemperature.Value.ToString("0.0")
+                                      End Sub)
+            Catch
+
+            End Try
+
 
             If myForm.cbUseDarks.Checked And myForm.lblDayNight.Text = "night" Then
                 If myForm.dark Is Nothing Then
@@ -490,13 +496,20 @@ Public Class frmPointGrey
                     m_cam.LineMode.Value = LineModeEnums.Output
                     m_cam.LineSource.Value = 2
                     m_cam.UserOutputValue.Value = True
-                    m_cam.V3_3Enable.Value = True
+                    Try
+                        m_cam.V3_3Enable.Value = True
+                    Catch ex As Exception
+                    End Try
                 Else
                     m_cam.LineSelector.Value = LineSelectorEnums.Line1
                     m_cam.LineMode.Value = LineModeEnums.Output
                     m_cam.LineSource.Value = 2
                     m_cam.UserOutputValue.Value = False
-                    m_cam.V3_3Enable.Value = False
+                    Try
+                        m_cam.V3_3Enable.Value = False
+                    Catch ex As Exception
+                    End Try
+
                 End If
             End If
 

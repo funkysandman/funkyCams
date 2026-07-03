@@ -106,7 +106,7 @@
       <HintPath>..\packages\Basler.PylonC.NET.5.0.5\lib\net20\PylonC.NET.dll</HintPath>
     </Reference>
     <Reference Include="SpinnakerNET_v140">
-      <HintPath>..\..\..\..\..\..\Program Files\Teledyne\Spinnaker\bin64\vs2015\SpinnakerNET_v140.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\Program Files\teledyne\spinnaker\bin64\vs2015\SpinnakerNET_v140.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -173,9 +173,6 @@
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="frmIPcam.vb">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="frmIS.vb">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="frmScout.vb">
@@ -267,7 +264,6 @@
     <EmbeddedResource Include="frmIPcam.resx">
       <DependentUpon>frmIPcam.vb</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="frmIS.resx" />
     <EmbeddedResource Include="frmMaster.resx">
       <DependentUpon>frmMaster.vb</DependentUpon>
     </EmbeddedResource>

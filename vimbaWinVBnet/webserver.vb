@@ -42,7 +42,7 @@ Public Class WebServer
     Private myFWform As frmFoculs
     ' Private myQIform As frmQ
     Private myToupForm As frmToupcam
-    Private myISForm As frmIS
+    ' Private myISForm As frmIS
     ' Private myCoolsnapForm As frmCoolsnap
     Private myPointGreyForm As frmPointGrey
     Private restart As Boolean = False
@@ -161,21 +161,21 @@ Public Class WebServer
             f.writeline(ex.Message)
         End Try
     End Sub
-    Public Sub StartWebServer(f As frmIS, port As Integer)
-        Try
-            LocalPort = port
-            myISForm = f
-            myGenericForm = f
-            'loadGigEDarks()
-            LocalTCPListener = New TcpListener(LocalAddress, LocalPort)
-            LocalTCPListener.Start()
-            WebThread = New Thread(AddressOf StartListen)
-            WebThread.Start()
-            f.writeline("starting Imagine Source web server")
-        Catch ex As Exception
-            f.writeline(ex.Message)
-        End Try
-    End Sub
+    'Public Sub StartWebServer(f As frmIS, port As Integer)
+    '    Try
+    '        LocalPort = port
+    '        myISForm = f
+    '        myGenericForm = f
+    '        'loadGigEDarks()
+    '        LocalTCPListener = New TcpListener(LocalAddress, LocalPort)
+    '        LocalTCPListener.Start()
+    '        WebThread = New Thread(AddressOf StartListen)
+    '        WebThread.Start()
+    '        f.writeline("starting Imagine Source web server")
+    '    Catch ex As Exception
+    '        f.writeline(ex.Message)
+    '    End Try
+    'End Sub
 
     '    Catch ex As Exception
 
