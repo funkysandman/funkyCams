@@ -75,35 +75,46 @@ Public Class frmMaster
                 Dim jsonResulttodict = JsonConvert.DeserializeObject(Of Dictionary(Of String, Object))(settingsJSON)
                 Dim jss As New JavaScriptSerializer()
 
-                Me.ModelName = jsonResulttodict.Item("ModelName")
-                Me.ImagePath = jsonResulttodict.Item("ImagePath")
-                Me.DayExposure = jsonResulttodict.Item("DayExposure")
-                Me.NightExposure = jsonResulttodict.Item("NightExposure")
-                Me.DayGain = jsonResulttodict.Item("DayGain")
-                Me.NightGain = jsonResulttodict.Item("NightGain")
-                Me.port = jsonResulttodict.Item("port")
-                Me.detectMeteors = jsonResulttodict.Item("detectMeteors")
-                Me.morningHour = jsonResulttodict.Item("morningHour")
-                Me.eveningHour = jsonResulttodict.Item("eveningHour")
-                Me.useDarks = jsonResulttodict.Item("useDarks")
-                Me.saveImages = jsonResulttodict.Item("saveImages")
-                Me.maxValue = jsonResulttodict.Item("maxValue")
-                Me.minValue = jsonResulttodict.Item("minValue")
-                Me.darkMultiplier = jsonResulttodict.Item("darkMultiplier")
-                Me.darkCutOff = jsonResulttodict.Item("darkCutOff")
-                Me.url = jsonResulttodict.Item("url")
-                Me.fanOn = jsonResulttodict.Item("fanOn")
-                Dim rectJS As Object = jsonResulttodict.Item("Rects")
-                Me.Rects = New List(Of MyRectangle)
-                For Each item In rectJS
-                    r = New MyRectangle()
-                    r.x = item("_x").value
-                    r.y = item("_y").value
-                    r.width = item("_width").value
-                    r.height = item("_height").value
-                    Rects.Add(r)
-                Next
+                If jsonResulttodict.ContainsKey("ModelName") Then Me.ModelName = jsonResulttodict.Item("ModelName")
+                If jsonResulttodict.ContainsKey("ImagePath") Then Me.ImagePath = jsonResulttodict.Item("ImagePath")
+                If jsonResulttodict.ContainsKey("DayExposure") Then Me.DayExposure = jsonResulttodict.Item("DayExposure")
+                If jsonResulttodict.ContainsKey("NightExposure") Then Me.NightExposure = jsonResulttodict.Item("NightExposure")
+                If jsonResulttodict.ContainsKey("DayGain") Then Me.DayGain = jsonResulttodict.Item("DayGain")
+                If jsonResulttodict.ContainsKey("NightGain") Then Me.NightGain = jsonResulttodict.Item("NightGain")
+                If jsonResulttodict.ContainsKey("port") Then Me.port = jsonResulttodict.Item("port")
+                If jsonResulttodict.ContainsKey("detectMeteors") Then Me.detectMeteors = jsonResulttodict.Item("detectMeteors")
+                If jsonResulttodict.ContainsKey("morningHour") Then Me.morningHour = jsonResulttodict.Item("morningHour")
+                If jsonResulttodict.ContainsKey("eveningHour") Then Me.eveningHour = jsonResulttodict.Item("eveningHour")
+                If jsonResulttodict.ContainsKey("useDarks") Then Me.useDarks = jsonResulttodict.Item("useDarks")
+                If jsonResulttodict.ContainsKey("saveImages") Then Me.saveImages = jsonResulttodict.Item("saveImages")
+                If jsonResulttodict.ContainsKey("maxValue") Then Me.maxValue = jsonResulttodict.Item("maxValue")
+                If jsonResulttodict.ContainsKey("minValue") Then Me.minValue = jsonResulttodict.Item("minValue")
+                If jsonResulttodict.ContainsKey("darkMultiplier") Then Me.darkMultiplier = jsonResulttodict.Item("darkMultiplier")
+                If jsonResulttodict.ContainsKey("darkCutOff") Then Me.darkCutOff = jsonResulttodict.Item("darkCutOff")
+                If jsonResulttodict.ContainsKey("url") Then Me.url = jsonResulttodict.Item("url")
 
+                ' Backward compatibility: older profile files may not contain fanOn
+                If jsonResulttodict.ContainsKey("fanOn") Then
+                    Me.fanOn = jsonResulttodict.Item("fanOn")
+                Else
+                    Me.fanOn = False
+                End If
+
+                If jsonResulttodict.ContainsKey("Rects") Then
+                    Dim rectJS As Object = jsonResulttodict.Item("Rects")
+                    Me.Rects = New List(Of MyRectangle)
+                    For Each item In rectJS
+                        r = New MyRectangle()
+                        r.x = item("_x").value
+                        r.y = item("_y").value
+                        r.width = item("_width").value
+                        r.height = item("_height").value
+                        Rects.Add(r)
+                    Next
+                End If
+
+                ' Persist any new default fields back to profile
+                Me.writeSettings()
 
             Catch ex As Exception
 
@@ -388,7 +399,7 @@ Public Class frmMaster
         encoders = ImageCodecInfo.GetImageEncoders()
 
         j = 0
-        While j <encoders.Length
+        While j < encoders.Length
             If encoders(j).MimeType = mimeType Then
                 Return encoders(j)
             End If
@@ -407,13 +418,13 @@ Public Class frmMaster
             If myDetectionQueue.Count > 0 Then
                 'Try
                 aQE = myDetectionQueue.Dequeue()
-                    If Not aQE Is Nothing Then
+                If Not aQE Is Nothing Then
 
-                        CallAzureMeteorDetection(aQE)
+                    CallAzureMeteorDetection(aQE)
 
-                    End If
+                End If
 
-                    aQE = Nothing
+                aQE = Nothing
                 'Catch
 
                 'End Try

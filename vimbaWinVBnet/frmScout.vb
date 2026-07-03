@@ -1,10 +1,17 @@
 ﻿Imports System.IO
 Imports System.Threading
+Imports Color = System.Drawing.Color
 
 Public Class frmScout
     Inherits frmMaster
 
     Private myBaslerImageGrabber As New BaslerWrapper.Grabber
+    Private ReadOnly m_lastFrameLock As New Object()
+    Private m_lastFrameBytes As Byte()
+    Private m_lastFrameWidth As Integer
+    Private m_lastFrameHeight As Integer
+    Private m_lastFramePixels As UShort()
+
     Private Sub frmScout_Load(sender As Object, e As EventArgs) Handles Me.Load
 
 
@@ -15,7 +22,7 @@ Public Class frmScout
 
 
         'setup camera
-        myBaslerImageGrabber.Open()
+        myBaslerImageGrabber.Open(0)
 
         tbPort.Text = "8199"
         tbPath.Text = "e:\image_scout"
@@ -203,12 +210,12 @@ Public Class frmScout
             End If
         End If
         If LCase(Me.lblDayNight.Text) = "day" Then
-            myBaslerImageGrabber.setParams(Val(Me.tbExposureTime.Text), Val(Me.tbDayGain.Text))
+            myBaslerImageGrabber.SetParams(Val(Me.tbExposureTime.Text), Val(Me.tbDayGain.Text))
         Else
-            myBaslerImageGrabber.setParams(Val(Me.tbExposureTime.Text), Val(Me.tbNightAgain.Text))
+            myBaslerImageGrabber.SetParams(Val(Me.tbExposureTime.Text), Val(Me.tbNightAgain.Text))
 
         End If
-        myBaslerImageGrabber.startAcquisition(AddressOf received_frame)
+        myBaslerImageGrabber.StartAcquisition(AddressOf received_frame)
 
 
 
@@ -219,7 +226,7 @@ Public Class frmScout
         btnStart.Enabled = True
         btnStop.Enabled = False
 
-        myBaslerImageGrabber.stopAcquisition()
+        myBaslerImageGrabber.StopAcquisition()
         meteorCheckRunning = False
 
     End Sub
@@ -229,7 +236,8 @@ Public Class frmScout
 
         Dim isRunning As Boolean = False
 
-        isRunning = myBaslerImageGrabber.m_imageProvider.m_grabThread.IsAlive
+        isRunning = myBaslerImageGrabber.isRunning
+
 
         If lblDayNight.Text = "night" Then
 
@@ -247,28 +255,28 @@ Public Class frmScout
             'if the camera is running...stop exposing
 
             If isRunning Then
-                myBaslerImageGrabber.stopAcquisition()
+                myBaslerImageGrabber.StopAcquisition()
             End If
 
-            myBaslerImageGrabber.setParams(Val(Me.tbExposureTime.Text), Val(Me.tbNightAgain.Text))
+            myBaslerImageGrabber.SetParams(Val(Me.tbExposureTime.Text), Val(Me.tbNightAgain.Text))
 
             If isRunning Then
-                myBaslerImageGrabber.startAcquisition(AddressOf Me.received_frame)
+                myBaslerImageGrabber.StartAcquisition(AddressOf Me.received_frame)
             End If
 
         Else
-                'day mode
-                tbGain.Text = tbDayGain.Text
+            'day mode
+            tbGain.Text = tbDayGain.Text
             tbExposureTime.Text = tbDayTimeExp.Text
 
             If isRunning Then
-                myBaslerImageGrabber.stopAcquisition()
+                myBaslerImageGrabber.StopAcquisition()
             End If
 
-            myBaslerImageGrabber.setParams(Val(Me.tbExposureTime.Text), Val(Me.tbDayGain.Text))
+            myBaslerImageGrabber.SetParams(Val(Me.tbExposureTime.Text), Val(Me.tbDayGain.Text))
 
             If isRunning Then
-                myBaslerImageGrabber.startAcquisition(AddressOf Me.received_frame)
+                myBaslerImageGrabber.StartAcquisition(AddressOf Me.received_frame)
             End If
         End If
         'start stream
@@ -281,23 +289,43 @@ Public Class frmScout
     End Sub
     Private Sub received_frame(sender As Object, args As BaslerWrapper.FrameEventArgs)
 
-        b = New Bitmap(CInt(args.image.Width), CInt(args.image.Height), System.Drawing.Imaging.PixelFormat.Format8bppIndexed)
-        Dim colorPalette As System.Drawing.Imaging.ColorPalette
-        colorPalette = b.Palette
+        Dim width As Integer = args.Width
+        Dim height As Integer = args.Height
+
+        Dim src() As UShort = args.Data
+
+        Dim b As New Bitmap(width, height, Imaging.PixelFormat.Format8bppIndexed)
+
+        Dim pal = b.Palette
         For i = 0 To 255
-            colorPalette.Entries(i) = System.Drawing.Color.FromArgb(i, i, i)
+            pal.Entries(i) = Color.FromArgb(i, i, i)
         Next
-        b.Palette = colorPalette
+        b.Palette = pal
 
+        Dim bmpData As Imaging.BitmapData =
+        b.LockBits(New Rectangle(0, 0, width, height),
+               Imaging.ImageLockMode.WriteOnly,
+               b.PixelFormat)
 
-        Dim BoundsRect = New Rectangle(0, 0, b.Width, b.Height)
-        Dim bmpData As System.Drawing.Imaging.BitmapData = b.LockBits(BoundsRect, System.Drawing.Imaging.ImageLockMode.[WriteOnly], b.PixelFormat)
-        Dim rawData(b.Height * bmpData.Stride) As Byte
         Dim ptr As IntPtr = bmpData.Scan0
 
+        Dim outBytes(width * height - 1) As Byte
 
+        ' scale 16-bit → 8-bit (IMPORTANT)
+        For i = 0 To src.Length - 1
+            Dim v As Integer = CInt(src(i))
+            outBytes(i) = CByte((v * 255) \ 4095)
+        Next
 
-        System.Runtime.InteropServices.Marshal.Copy(args.image.Buffer, 0, ptr, rawData.Length - 1)
+        SyncLock m_lastFrameLock
+            m_lastFrameWidth = width
+            m_lastFrameHeight = height
+            m_lastFrameBytes = CType(outBytes.Clone(), Byte())
+            m_lastFramePixels = CType(src.Clone(), UShort())
+        End SyncLock
+
+        System.Runtime.InteropServices.Marshal.Copy(outBytes, 0, ptr, outBytes.Length)
+
         b.UnlockBits(bmpData)
         b.Tag = Now
         running = True
@@ -360,7 +388,7 @@ Public Class frmScout
 
 
 
-        If Me.cbSaveImages.Checked = True And Me.lblDayNight.Text.ToLower = "night" Then
+        If Me.cbSaveImages.Checked = True Then ' And Me.lblDayNight.Text.ToLower = "night" Then
             System.IO.Directory.CreateDirectory(Path.Combine(Me.tbPath.Text, folderName))
 
 
@@ -409,10 +437,53 @@ Public Class frmScout
 
     End Sub
 
+    Public Function TryGetLatestRawBitmap(ByRef image As Bitmap) As Boolean
+        Dim latest() As Byte = Nothing
+        Dim width As Integer = 0
+        Dim height As Integer = 0
+
+        SyncLock m_lastFrameLock
+            If m_lastFrameBytes Is Nothing OrElse m_lastFrameBytes.Length = 0 Then
+                Return False
+            End If
+
+            latest = CType(m_lastFrameBytes.Clone(), Byte())
+            width = m_lastFrameWidth
+            height = m_lastFrameHeight
+        End SyncLock
+
+        If width <= 0 OrElse height <= 0 OrElse latest.Length < (width * height) Then
+            Return False
+        End If
+
+        Dim output As New Bitmap(width, height, Imaging.PixelFormat.Format8bppIndexed)
+        Dim pal = output.Palette
+        For i = 0 To 255
+            pal.Entries(i) = Color.FromArgb(i, i, i)
+        Next
+        output.Palette = pal
+
+        Dim bmpData As Imaging.BitmapData = output.LockBits(New Rectangle(0, 0, width, height), Imaging.ImageLockMode.WriteOnly, output.PixelFormat)
+        System.Runtime.InteropServices.Marshal.Copy(latest, 0, bmpData.Scan0, width * height)
+        output.UnlockBits(bmpData)
+
+        image = output
+        Return True
+    End Function
+
     Private Sub frmScout_FormClosing(sender As Object, e As FormClosingEventArgs) Handles Me.FormClosing
-        myBaslerImageGrabber.close()
+        myBaslerImageGrabber.Close()
 
     End Sub
+
+    Friend Function getLastImageArray(ByRef scoutImageArray As UShort()) As Boolean
+        If m_lastFramePixels Is Nothing OrElse m_lastFramePixels.Length = 0 Then
+            Return False
+        End If
+
+        scoutImageArray = CType(m_lastFramePixels.Clone(), UShort())
+        Return True
+    End Function
 
 
 
