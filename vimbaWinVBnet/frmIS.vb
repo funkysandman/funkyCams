@@ -226,7 +226,7 @@ Public Class frmIS
 
         Buffer.BlockCopy(img, 0, uintImg, 0, img.Length)
 
-        ApplyAstroCalibrationU16(uintImg, iWidth, iHeight)
+        'ApplyAstroCalibrationU16(uintImg, iWidth, iHeight)
         Buffer.BlockCopy(uintImg, 0, img, 0, img.Length)
         Marshal.Copy(img, 0, arg.GetIntPtr, img.Length)
 

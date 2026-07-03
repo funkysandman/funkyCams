@@ -35,6 +35,7 @@ Partial Class Form3
         Me.Button9 = New System.Windows.Forms.Button()
         Me.btnIS = New System.Windows.Forms.Button()
         Me.btnIPCam = New System.Windows.Forms.Button()
+        Me.btnFusion = New System.Windows.Forms.Button()
         Me.SuspendLayout()
         '
         'Button1
@@ -156,11 +157,21 @@ Partial Class Form3
         Me.btnIPCam.Text = "IP Camera"
         Me.btnIPCam.UseVisualStyleBackColor = True
         '
+        'btnFusion
+        '
+        Me.btnFusion.Location = New System.Drawing.Point(631, 196)
+        Me.btnFusion.Name = "btnFusion"
+        Me.btnFusion.Size = New System.Drawing.Size(112, 38)
+        Me.btnFusion.TabIndex = 13
+        Me.btnFusion.Text = "Fusion Camera"
+        Me.btnFusion.UseVisualStyleBackColor = True
+        '
         'Form3
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(807, 246)
+        Me.ClientSize = New System.Drawing.Size(807, 290)
+        Me.Controls.Add(Me.btnFusion)
         Me.Controls.Add(Me.btnIPCam)
         Me.Controls.Add(Me.btnIS)
         Me.Controls.Add(Me.Button9)
@@ -192,4 +203,5 @@ Partial Class Form3
     Friend WithEvents Button9 As Button
     Friend WithEvents btnIS As Button
     Friend WithEvents btnIPCam As Button
+    Friend WithEvents btnFusion As Button
 End Class

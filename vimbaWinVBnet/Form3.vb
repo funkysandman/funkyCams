@@ -125,4 +125,11 @@ Public Class Form3
         f.ShowDialog()
         Me.Close()
     End Sub
+
+    Private Sub btnFusion_Click(sender As Object, e As EventArgs) Handles btnFusion.Click
+        Dim f As New frmFusion
+        Me.Hide()
+        f.ShowDialog()
+        Me.Close()
+    End Sub
 End Class

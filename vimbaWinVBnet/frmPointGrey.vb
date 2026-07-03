@@ -11,7 +11,7 @@ Imports SVCamApi
 Public Class frmPointGrey
     Inherits frmMaster
 
-    Private ReadOnly m_astroCalibration As New AstroCalibration.CalibrationPipeline()
+    'Private ReadOnly m_astroCalibration As New AstroCalibration.CalibrationPipeline()
     Private m_loadedCalibrationFile As String = Nothing
 
     'Private mhCamera As IntPtr
@@ -53,6 +53,11 @@ Public Class frmPointGrey
     Private m_nodeMapTLDevice As INodeMap
     Private m_deviceListener As DeviceEventListener = Nothing
     Private m_imageEventListener As ImageEventListener = Nothing
+    Private ReadOnly m_lastFrameLock As New Object()
+    Private m_lastFrameBytes As Byte()
+    Private m_lastFramePixels As UShort()
+    Private m_lastFrameWidth As Integer
+    Private m_lastFrameHeight As Integer
 
     Shared m_imageCnt As Integer = 0
 
@@ -205,89 +210,89 @@ Public Class frmPointGrey
 
         End Sub
 
-        Private Sub ApplyAstroCalibration(image As ManagedImage)
-            Try
-                If image Is Nothing OrElse image.ImageStatus <> ImageStatus.IMAGE_NO_ERROR Then
-                    Return
-                End If
+        'Private Sub ApplyAstroCalibration(image As ManagedImage)
+        '    Try
+        '        If image Is Nothing OrElse image.ImageStatus <> ImageStatus.IMAGE_NO_ERROR Then
+        '            Return
+        '        End If
 
-                If image.PixelFormat <> PixelFormatEnums.BayerRG16 Then
-                    Return
-                End If
+        '        If image.PixelFormat <> PixelFormatEnums.BayerRG16 Then
+        '            Return
+        '        End If
 
-                Dim width As Integer = image.Width
-                Dim height As Integer = image.Height
-                Dim stride As Integer = image.Stride
-                Dim ptr As IntPtr = image.DataPtr
-                Dim bufferSize As Integer = image.GetBufferSize
+        '        Dim width As Integer = image.Width
+        '        Dim height As Integer = image.Height
+        '        Dim stride As Integer = image.Stride
+        '        Dim ptr As IntPtr = image.DataPtr
+        '        Dim bufferSize As Integer = image.GetBufferSize
 
-                If width <= 0 OrElse height <= 0 OrElse ptr = IntPtr.Zero Then
-                    Return
-                End If
+        '        If width <= 0 OrElse height <= 0 OrElse ptr = IntPtr.Zero Then
+        '            Return
+        '        End If
 
-                If stride <= 0 OrElse bufferSize < (height * stride) OrElse stride < (width * 2) Then
-                    Return
-                End If
+        '        If stride <= 0 OrElse bufferSize < (height * stride) OrElse stride < (width * 2) Then
+        '            Return
+        '        End If
 
-                Dim bytes() As Byte = image.ManagedData
-                If bytes Is Nothing OrElse bytes.Length < (height * stride) Then
-                    Return
-                End If
+        '        Dim bytes() As Byte = image.ManagedData
+        '        If bytes Is Nothing OrElse bytes.Length < (height * stride) Then
+        '            Return
+        '        End If
 
-                Dim rawFrame(height - 1, width - 1) As Single
+        '        Dim rawFrame(height - 1, width - 1) As Single
 
-                For y As Integer = 0 To height - 1
-                    Dim rowOffset As Integer = y * stride
-                    For x As Integer = 0 To width - 1
-                        Dim idx As Integer = rowOffset + (x * 2)
-                        Dim hi As Byte = bytes(idx)
-                        Dim lo As Byte = bytes(idx + 1)
-                        rawFrame(y, x) = CSng((CInt(hi) << 8) Or CInt(lo))
-                    Next
-                Next
+        '        For y As Integer = 0 To height - 1
+        '            Dim rowOffset As Integer = y * stride
+        '            For x As Integer = 0 To width - 1
+        '                Dim idx As Integer = rowOffset + (x * 2)
+        '                Dim hi As Byte = bytes(idx)
+        '                Dim lo As Byte = bytes(idx + 1)
+        '                rawFrame(y, x) = CSng((CInt(hi) << 8) Or CInt(lo))
+        '            Next
+        '        Next
 
-                Dim sensorTemp As Single = 0.0F
-                If frmPointGrey.m_cam IsNot Nothing Then
-                    sensorTemp = CSng(frmPointGrey.m_cam.DeviceTemperature.Value)
-                End If
+        '        Dim sensorTemp As Single = 0.0F
+        '        If frmPointGrey.m_cam IsNot Nothing Then
+        '            sensorTemp = CSng(frmPointGrey.m_cam.DeviceTemperature.Value)
+        '        End If
 
-                Dim gain As Single = 0.0F
-                Single.TryParse(myForm.tbGain.Text, NumberStyles.Float, CultureInfo.InvariantCulture, gain)
+        '        Dim gain As Single = 0.0F
+        '        Single.TryParse(myForm.tbGain.Text, NumberStyles.Float, CultureInfo.InvariantCulture, gain)
 
-                Dim exposure As Single = 0.0F
-                Single.TryParse(myForm.tbExposureTime.Text, NumberStyles.Float, CultureInfo.InvariantCulture, exposure)
+        '        Dim exposure As Single = 0.0F
+        '        Single.TryParse(myForm.tbExposureTime.Text, NumberStyles.Float, CultureInfo.InvariantCulture, exposure)
 
-                Dim frame As New AstroCalibration.Frame With {
-                    .Image = rawFrame,
-                    .Temperature = sensorTemp,
-                    .Gain = gain,
-                    .Exposure = exposure,
-                    .Timestamp = DateTime.Now
-                }
+        '        Dim frame As New AstroCalibration.Frame With {
+        '            .Image = rawFrame,
+        '            .Temperature = sensorTemp,
+        '            .Gain = gain,
+        '            .Exposure = exposure,
+        '            .Timestamp = DateTime.Now
+        '        }
 
-                Dim calibratedFrame As Single(,)
-                SyncLock myForm.m_astroCalibration
-                    calibratedFrame = myForm.m_astroCalibration.Process(frame)
-                End SyncLock
+        '        Dim calibratedFrame As Single(,)
+        '        SyncLock myForm.m_astroCalibration
+        '            calibratedFrame = myForm.m_astroCalibration.Process(frame)
+        '        End SyncLock
 
-                For y As Integer = 0 To height - 1
-                    Dim rowOffset As Integer = y * stride
-                    For x As Integer = 0 To width - 1
-                        Dim idx As Integer = rowOffset + (x * 2)
-                        Dim value As Integer = CInt(Math.Round(calibratedFrame(y, x)))
-                        If value < 0 Then value = 0
-                        If value > UShort.MaxValue Then value = UShort.MaxValue
+        '        For y As Integer = 0 To height - 1
+        '            Dim rowOffset As Integer = y * stride
+        '            For x As Integer = 0 To width - 1
+        '                Dim idx As Integer = rowOffset + (x * 2)
+        '                Dim value As Integer = CInt(Math.Round(calibratedFrame(y, x)))
+        '                If value < 0 Then value = 0
+        '                If value > UShort.MaxValue Then value = UShort.MaxValue
 
-                        bytes(idx) = CByte((value >> 8) And &HFF)
-                        bytes(idx + 1) = CByte(value And &HFF)
-                    Next
-                Next
+        '                bytes(idx) = CByte((value >> 8) And &HFF)
+        '                bytes(idx + 1) = CByte(value And &HFF)
+        '            Next
+        '        Next
 
-                Marshal.Copy(bytes, 0, ptr, Math.Min(bytes.Length, bufferSize))
-            Catch ex As Exception
-                Debug.WriteLine("ApplyAstroCalibration failed: " & ex.ToString())
-            End Try
-        End Sub
+        '        Marshal.Copy(bytes, 0, ptr, Math.Min(bytes.Length, bufferSize))
+        '    Catch ex As Exception
+        '        Debug.WriteLine("ApplyAstroCalibration failed: " & ex.ToString())
+        '    End Try
+        'End Sub
 
         Sub SubtractDark_StrideSafe(image As ManagedImage, darkBytes() As Byte)
             If darkBytes Is Nothing Then Throw New ArgumentException("dark is Nothing")
@@ -422,7 +427,10 @@ Public Class frmPointGrey
         Protected Overrides Sub OnImageEvent(image As ManagedImage)
             Dim convertedImage As ManagedImage = Nothing
             Dim convertedImageTemp As ManagedImage = Nothing
-
+            Dim pixelCount As Integer = image.Width * image.Height
+            Dim pixelArray(pixelCount - 1) As UShort
+            Dim ptr As IntPtr = image.DataPtr
+            Dim i As Integer = 0
             Try
                 myForm.running = True
                 myForm.frames = myForm.frames + 1
@@ -453,9 +461,9 @@ Public Class frmPointGrey
                                           myForm.txtTemp.Text = m_cam.DeviceTemperature.Value.ToString("0.0")
                                       End Sub)
 
-                If String.Equals(myForm.lblDayNight.Text, "night", StringComparison.OrdinalIgnoreCase) Then
-                    ApplyAstroCalibration(image)
-                End If
+                'If String.Equals(myForm.lblDayNight.Text, "night", StringComparison.OrdinalIgnoreCase) Then
+                '    ApplyAstroCalibration(image)
+                'End If
 
                 If myForm.cbUseDarks.Checked And myForm.lblDayNight.Text = "night" Then
                     If myForm.dark Is Nothing Then
@@ -494,11 +502,12 @@ Public Class frmPointGrey
                     Dim width As Integer = image.Width
                     Dim height As Integer = image.Height
                     Dim stride As Integer = image.Stride
-                    Dim ptr As IntPtr = image.DataPtr
-                    Dim pixelCount As Integer = width * height
+
+
                     ' Create output buffer for 16-bit image (big-endian)
                     Dim outputBytes(width * height * 2 - 1) As Byte
                     Dim mult = myForm.tbMultiplier.Text
+                    Dim cutoff = myForm.tbDarkCutOff.Text
 
                     For idx As Integer = 1 To pixelCount * 2 - 2 Step 2
 
@@ -517,7 +526,7 @@ Public Class frmPointGrey
                         ' reduce dark by multiplier - multiplier is a number between 0 and 1
 
 
-
+                        If dval < cutoff Then dval = 0
                         Dim r As Integer = val - CInt(dval * mult)
                         If r < 0 Then r = 0
                         If r > UShort.MaxValue Then r = UShort.MaxValue
@@ -526,8 +535,10 @@ Public Class frmPointGrey
                         Dim outLow As Byte = CByte(outVal And &HFF)
 
                         ' --- Write to output buffer (tight array, no stride) ---
+                        pixelArray(i) = outVal
                         outputBytes(idx) = outHigh
                         outputBytes(idx + 1) = outLow
+                        i = i + 1
                     Next
 
                     ' Copy back to unmanaged buffer
@@ -605,8 +616,17 @@ Public Class frmPointGrey
                     End If
                     convertedImageTemp = processor.Convert(image, PixelFormatEnums.BGR8)
                     convertedImageTemp.ConvertToBitmapSource(PixelFormatEnums.BGR8, convertedImage, ColorProcessingAlgorithm.HQ_LINEAR)
+                    i = 0
+                    For idx As Integer = 1 To pixelCount * 2 - 2 Step 2
 
 
+                        ' --- Read light pixel (big-endian) ---
+                        Dim hi As Byte = Marshal.ReadByte(ptr, idx)
+                        Dim lo As Byte = Marshal.ReadByte(ptr, idx + 1)
+                        Dim val As Integer = (CInt(hi) << 8) Or CInt(lo)
+                        pixelArray(i) = val
+                        i = i + 1
+                    Next
 
                     ' Print image information
                     Console.WriteLine("Grabbed image {0}, width = {1}, height = {2}", imageCnt, image.Width, image.Height)
@@ -621,6 +641,7 @@ Public Class frmPointGrey
 
                     myForm.m_pics.FillNextBitmap(convertedImage)
 
+                    myForm.StoreLatestRawFrame(convertedImage.ManagedData, pixelArray, convertedImage.Width, convertedImage.Height)
 
                     imageCnt += 1
 
@@ -945,7 +966,7 @@ Public Class frmPointGrey
         Dim tstop As New Thread(AddressOf m_cam.EndAcquisition)
         tstop.Start()
 
-        SaveAstroCalibrationForCurrentCamera()
+        'SaveAstroCalibrationForCurrentCamera()
 
         meteorCheckRunning = False
         btnStart.Enabled = True
@@ -1027,7 +1048,7 @@ Public Class frmPointGrey
             System.Windows.Forms.MessageBox.Show("The application was unable to connect to a Point Grey camera.  Please ensure one is connected and turned on before running this application.")
             System.Environment.[Exit](0)
         Else
-            LoadAstroCalibrationForCurrentCamera()
+            'LoadAstroCalibrationForCurrentCamera()
             'msgbox("openned camera")
         End If
         'setup events
@@ -1073,23 +1094,90 @@ Public Class frmPointGrey
 
     '    'Return m_pics.Bitmap
     'End Function
-    Public Function getLastImageArray() As Byte()
-        Dim stopWatch As Stopwatch = New Stopwatch()
-        stopWatch.Start()
+    Friend Sub StoreLatestRawFrame(source As Byte(), original As UShort(), width As Integer, height As Integer)
+        If source Is Nothing OrElse width <= 0 OrElse height <= 0 Then
+            Return
+        End If
 
-        While running AndAlso stopWatch.ElapsedMilliseconds < 20000
+        Dim required As Integer = width * height * 3
+        If source.Length < required Then
+            Return
+        End If
 
-        End While
+        Dim copy(required - 1) As Byte
+        Buffer.BlockCopy(source, 0, copy, 0, required)
 
-        stopWatch.[Stop]()
+        SyncLock m_lastFrameLock
+            m_lastFrameBytes = copy
+            m_lastFramePixels = original
+            m_lastFrameWidth = width
+            m_lastFrameHeight = height
+        End SyncLock
+    End Sub
 
-        'Dim x As New Bitmap(b)
-        Debug.Print("get last image")
-        Return m_pics.ImageBytes
+    Public Function TryGetLatestRawBitmap(ByRef image As Bitmap) As Boolean
+        Dim localBytes() As Byte = Nothing
+        Dim width As Integer = 0
+        Dim height As Integer = 0
 
+        SyncLock m_lastFrameLock
+            If m_lastFrameBytes Is Nothing OrElse m_lastFrameBytes.Length = 0 Then
+                Return False
+            End If
 
+            localBytes = CType(m_lastFrameBytes.Clone(), Byte())
+            width = m_lastFrameWidth
+            height = m_lastFrameHeight
+        End SyncLock
 
+        Dim required As Integer = width * height * 3
+        If width <= 0 OrElse height <= 0 OrElse localBytes.Length < required Then
+            Return False
+        End If
+
+        Dim output As New Bitmap(width, height, System.Drawing.Imaging.PixelFormat.Format24bppRgb)
+        Dim bmpData As System.Drawing.Imaging.BitmapData = output.LockBits(New Rectangle(0, 0, width, height), System.Drawing.Imaging.ImageLockMode.WriteOnly, output.PixelFormat)
+        Dim rowBytes As Integer = width * 3
+
+        For y As Integer = 0 To height - 1
+            Dim srcOffset As Integer = y * rowBytes
+            Dim dstPtr As IntPtr = IntPtr.Add(bmpData.Scan0, y * bmpData.Stride)
+            Marshal.Copy(localBytes, srcOffset, dstPtr, rowBytes)
+        Next
+
+        output.UnlockBits(bmpData)
+        image = output
+        Return True
     End Function
+    Friend Function getLastImageArray(ByRef scoutImageArray As UShort()) As Boolean
+        SyncLock m_lastFrameLock
+            If m_lastFrameBytes Is Nothing OrElse m_lastFrameBytes.Length = 0 Then
+                Return False
+            End If
+
+            scoutImageArray = CType(m_lastFramePixels.Clone(), UShort())
+        End SyncLock
+
+        Return True
+    End Function
+
+    'Public Function getLastImageArray() As Byte()
+    '    'Dim stopWatch As Stopwatch = New Stopwatch()
+    '    'stopWatch.Start()
+
+    '    'While running AndAlso stopWatch.ElapsedMilliseconds < 20000
+
+    '    'End While
+
+    '    'stopWatch.[Stop]()
+
+    '    'Dim x As New Bitmap(b)
+    '    Debug.Print("get last image")
+    '    Return m_pics.ImageBytes
+
+
+
+    'End Function
 
     Private Sub btnStopWeb_Click(sender As Object, e As EventArgs) Handles btnStopWeb.Click
         btnStartWeb.Enabled = True
@@ -1391,7 +1479,7 @@ Public Class frmPointGrey
         MsgBox("finished darks")
     End Sub
     Private Sub cmbCam_SelectedIndexChanged(sender As Object, e As EventArgs) Handles cmbCam.SelectedIndexChanged
-        SaveAstroCalibrationForCurrentCamera()
+        'SaveAstroCalibrationForCurrentCamera()
         getCameraReady()
         loadProfile(m_cam.DeviceUserID.ToString().Replace(" ", ""))
     End Sub
@@ -1428,44 +1516,45 @@ Public Class frmPointGrey
         Return Path.Combine(AppDomain.CurrentDomain.BaseDirectory, fileName)
     End Function
 
-    Private Sub LoadAstroCalibrationForCurrentCamera()
-        Dim filePath = GetCalibrationFilePathForCurrentCamera()
-        If String.IsNullOrWhiteSpace(filePath) Then
-            Return
-        End If
+    'Private Sub LoadAstroCalibrationForCurrentCamera()
+    '    Dim filePath = GetCalibrationFilePathForCurrentCamera()
+    '    If String.IsNullOrWhiteSpace(filePath) Then
+    '        Return
+    '    End If
 
-        Try
-            SyncLock m_astroCalibration
-                m_astroCalibration.LoadFromFile(filePath)
-            End SyncLock
-            m_loadedCalibrationFile = filePath
-        Catch ex As Exception
-            Debug.WriteLine("LoadAstroCalibrationForCurrentCamera failed: " & ex.Message)
-        End Try
-    End Sub
+    '    Try
+    '        SyncLock m_astroCalibration
+    '            m_astroCalibration.LoadFromFile(filePath)
+    '        End SyncLock
+    '        m_loadedCalibrationFile = filePath
+    '    Catch ex As Exception
+    '        Debug.WriteLine("LoadAstroCalibrationForCurrentCamera failed: " & ex.Message)
+    '    End Try
+    'End Sub
 
-    Private Sub SaveAstroCalibrationForCurrentCamera()
-        Dim filePath = GetCalibrationFilePathForCurrentCamera()
-        If String.IsNullOrWhiteSpace(filePath) Then
-            Return
-        End If
+    'Private Sub SaveAstroCalibrationForCurrentCamera()
+    '    Exit Sub
+    '    Dim filePath = GetCalibrationFilePathForCurrentCamera()
+    '    If String.IsNullOrWhiteSpace(filePath) Then
+    '        Return
+    '    End If
 
-        Try
-            SyncLock m_astroCalibration
-                m_astroCalibration.SaveToFile(filePath)
-            End SyncLock
-            m_loadedCalibrationFile = filePath
-        Catch ex As Exception
-            Debug.WriteLine("SaveAstroCalibrationForCurrentCamera failed: " & ex.Message)
-        End Try
-    End Sub
+    '    Try
+    '        SyncLock m_astroCalibration
+    '            m_astroCalibration.SaveToFile(filePath)
+    '        End SyncLock
+    '        m_loadedCalibrationFile = filePath
+    '    Catch ex As Exception
+    '        Debug.WriteLine("SaveAstroCalibrationForCurrentCamera failed: " & ex.Message)
+    '    End Try
+    'End Sub
 
     Private Sub frmPointGrey_Shown(sender As Object, e As EventArgs) Handles Me.Shown
-        LoadAstroCalibrationForCurrentCamera()
+        'LoadAstroCalibrationForCurrentCamera()
     End Sub
 
     Private Sub frmPointGrey_FormClosing(sender As Object, e As FormClosingEventArgs) Handles Me.FormClosing
-        SaveAstroCalibrationForCurrentCamera()
+        'SaveAstroCalibrationForCurrentCamera()
     End Sub
 
 End Class
