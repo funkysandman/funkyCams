@@ -309,14 +309,30 @@ Public Class frmScout
 
         Dim ptr As IntPtr = bmpData.Scan0
 
-        Dim outBytes(width * height - 1) As Byte
+        Dim outBytes(src.Length * 2 - 1) As Byte
+        Dim outBytes8(src.Length - 1) As Byte
 
         ' scale 16-bit → 8-bit (IMPORTANT)
         For i = 0 To src.Length - 1
             Dim v As Integer = CInt(src(i))
-            outBytes(i) = CByte((v * 255) \ 4095)
+            outBytes8(i) = CByte((v * 255) \ 4095)
         Next
 
+        'Dim value16 As UShort = CUShort((CUInt(value12) * 65535UI) \ 4095UI)
+        'For i = 0 To src.Length - 1
+        '    src(i) = CUInt(src(i) * (65535 / 4095))
+        'Next
+        Buffer.BlockCopy(src, 0, outBytes, 0, outBytes.Length)
+
+        For i = 0 To src.Length - 1
+            outBytes(i * 2) = CByte(src(i) And &HFF)         'Low byte
+            outBytes(i * 2 + 1) = CByte(src(i) >> 8)         'High byte
+        Next
+        'For i = 0 To src.Length - 1
+        '    Dim v As Integer = CInt(src(i))
+        '    outBytes(i) = src(i) / 256
+        '    outBytes(i + 1) = src(i) And 256
+        'Next
         SyncLock m_lastFrameLock
             m_lastFrameWidth = width
             m_lastFrameHeight = height
@@ -324,7 +340,7 @@ Public Class frmScout
             m_lastFramePixels = CType(src.Clone(), UShort())
         End SyncLock
 
-        System.Runtime.InteropServices.Marshal.Copy(outBytes, 0, ptr, outBytes.Length)
+        System.Runtime.InteropServices.Marshal.Copy(outBytes8, 0, ptr, outBytes8.Length)
 
         b.UnlockBits(bmpData)
         b.Tag = Now
@@ -484,7 +500,14 @@ Public Class frmScout
         scoutImageArray = CType(m_lastFramePixels.Clone(), UShort())
         Return True
     End Function
+    Friend Function getLastImageByteArray(ByRef scoutImageArray As Byte()) As Boolean
+        If m_lastFrameBytes Is Nothing OrElse m_lastFrameBytes.Length = 0 Then
+            Return False
+        End If
 
+        scoutImageArray = CType(m_lastFrameBytes.Clone(), Byte())
+        Return True
+    End Function
 
 
 

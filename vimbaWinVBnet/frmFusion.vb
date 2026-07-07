@@ -1,3 +1,5 @@
+Imports System.IO
+
 Public Class frmFusion
     Private m_pointGreyForm As frmPointGrey
     Private m_scoutForm As frmScout
@@ -23,7 +25,7 @@ Public Class frmFusion
         Dim scoutImage As Bitmap = Nothing
         Dim colorFusionBitmap As Bitmap = Nothing
         Dim displayBitmap As Bitmap = Nothing
-
+        Dim scoutImageArray() As Byte
         Try
             If Not m_pointGreyForm.TryGetLatestRawBitmap(pointGreyImage) Then
                 MessageBox.Show("Point Grey has no frame available yet.")
@@ -34,7 +36,15 @@ Public Class frmFusion
                 MessageBox.Show("Scout has no frame available yet.")
                 Return
             End If
+            'save raw bitmaps
+            pointGreyImage.Save("pointGreyRaw.bmp")
+            m_scoutForm.getLastImageByteArray(scoutImageArray)
 
+            Dim fs As New FileStream(Application.StartupPath & "\scout.raw", FileMode.Create)
+
+            Dim ms As New MemoryStream()
+            fs.Write(scoutImageArray, 0, scoutImageArray.Length)
+            fs.Close()
             Dim offsetX As Integer = 0
             Dim offsetY As Integer = 0
             Integer.TryParse(Me.tbX.Text, offsetX)
