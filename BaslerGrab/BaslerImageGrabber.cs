@@ -96,7 +96,8 @@ namespace BaslerWrapper
         {
             EnsureOpen();
             if (_camera.Parameters.Contains(PLCamera.ExposureTimeBaseAbs))
-                _camera.Parameters[PLCamera.ExposureTimeBaseAbs].SetValue(1);//2441
+               // _camera.Parameters[PLCamera.ExposureTimeBaseAbs].SetValue(1);//2441
+                _camera.Parameters[PLCamera.ExposureTimeBaseAbs].SetValue(2441);//2441
             if (_camera.Parameters.Contains(PLCamera.ExposureTimeAbs))
                 _camera.Parameters[PLCamera.ExposureTimeAbs].SetValue((double)microseconds);
         }
@@ -104,8 +105,8 @@ namespace BaslerWrapper
         public void SetParams(int durationMs, long gain)
         {
             SetGain(gain);
-            //SetExposure(durationMs*1000);
-            SetExposure(durationMs);
+            SetExposure(durationMs*1000);
+            //SetExposure(durationMs);
         }
 
         public void StartAcquisition(FrameReceivedHandler handler)

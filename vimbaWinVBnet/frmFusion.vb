@@ -19,77 +19,211 @@ Public Class frmFusion
         hostPanel.Controls.Add(child)
         child.Show()
     End Sub
+    Private Sub btnFuse_Click(sender As Object, e As EventArgs) Handles btnCombine.Click
 
-    Private Sub btnCombine_Click(sender As Object, e As EventArgs) Handles btnCombine.Click
-        Dim pointGreyImage As Bitmap = Nothing
-        Dim scoutImage As Bitmap = Nothing
-        Dim colorFusionBitmap As Bitmap = Nothing
-        Dim displayBitmap As Bitmap = Nothing
-        Dim scoutImageArray() As Byte
-        Try
-            If Not m_pointGreyForm.TryGetLatestRawBitmap(pointGreyImage) Then
-                MessageBox.Show("Point Grey has no frame available yet.")
-                Return
-            End If
+        '--------------------------------------------------
+        ' Camera image dimensions
+        '--------------------------------------------------
 
-            If Not m_scoutForm.TryGetLatestRawBitmap(scoutImage) Then
-                MessageBox.Show("Scout has no frame available yet.")
-                Return
-            End If
-            'save raw bitmaps
-            pointGreyImage.Save("pointGreyRaw.bmp")
-            m_scoutForm.getLastImageByteArray(scoutImageArray)
+        Dim monoWidth As Integer = 1392
+        Dim monoHeight As Integer = 1040
 
-            Dim fs As New FileStream(Application.StartupPath & "\scout.raw", FileMode.Create)
+        Dim colorWidth As Integer = 1920
+        Dim colorHeight As Integer = 1200
+        Dim monoData() As UShort
+        Dim colorData() As UShort
 
-            Dim ms As New MemoryStream()
-            fs.Write(scoutImageArray, 0, scoutImageArray.Length)
-            fs.Close()
-            Dim offsetX As Integer = 0
-            Dim offsetY As Integer = 0
-            Integer.TryParse(Me.tbX.Text, offsetX)
-            Integer.TryParse(Me.tbY.Text, offsetY)
+        m_scoutForm.getLastImageArray(monoData)
+        m_pointGreyForm.getLastImageArray(colorData)
+        '--------------------------------------------------
+        ' Wrap camera arrays as Image16
+        '--------------------------------------------------
+        Dim mono As New Image16(monoData, monoWidth, monoHeight, 4095)
 
-            colorFusionBitmap = CreateColorFusionBitmap(pointGreyImage, scoutImage, offsetX, offsetY)
-            If colorFusionBitmap Is Nothing Then
-                MessageBox.Show("Unable to produce color fusion preview.")
-                Return
-            End If
+        Dim color As New Image16(colorData, colorWidth, colorHeight, 65535)
 
-            displayBitmap = CombineThreeImages(pointGreyImage, colorFusionBitmap, scoutImage)
-            If displayBitmap Is Nothing Then
-                MessageBox.Show("Unable to compose preview images.")
-                Return
-            End If
 
-            If picFusion.Image IsNot Nothing Then
-                picFusion.Image.Dispose()
-            End If
 
-            picFusion.Image = displayBitmap
-            displayBitmap = Nothing
+        '--------------------------------------------------
+        ' 1. Resample mono to match angular pixel scale
+        '
+        ' scale =
+        ' (target pixel size / target focal length) /
+        ' (source pixel size / source focal length)
+        '
+        ' Both cameras using 8mm lenses here
+        '--------------------------------------------------
 
-            Dim savePath As String = System.IO.Path.Combine(Application.StartupPath, "fusion_image.png")
-            picFusion.Image.Save(savePath, System.Drawing.Imaging.ImageFormat.Png)
+        Dim monoScale =
+        ImageResampler.CalculateScale(
+            6.45,     ' ICX285 pixel µm
+            8.0,      ' mono lens mm
+            5.86,     ' IMX249 pixel µm
+            8.0)      ' color lens mm
 
-        Finally
-            If displayBitmap IsNot Nothing Then
-                displayBitmap.Dispose()
-            End If
 
-            If colorFusionBitmap IsNot Nothing Then
-                colorFusionBitmap.Dispose()
-            End If
+        Dim monoScaled =
+        ImageResampler.Resize(
+            mono, 1 / monoScale)
 
-            If pointGreyImage IsNot Nothing Then
-                pointGreyImage.Dispose()
-            End If
 
-            If scoutImage IsNot Nothing Then
-                scoutImage.Dispose()
-            End If
-        End Try
+
+        '--------------------------------------------------
+        ' 2. Debayer the color camera
+        '--------------------------------------------------
+
+        Dim colorRgb =
+        Debayer16.Debayer(
+            color,
+            BayerPattern.RGGB)
+
+
+        '--------------------------------------------------
+        ' 3. Center intersection
+        '
+        ' The images now represent the same angular scale
+        '--------------------------------------------------
+
+        Dim monoCrop As Image16
+        Dim rgbCrop As RgbImage16
+
+
+        GetIntersection(
+        monoScaled,
+        colorRgb,
+        monoCrop,
+        rgbCrop)
+
+
+        'normalize
+        For i = 0 To monoCrop.Data.Length - 1
+            monoCrop.Data(i) = (monoCrop.Data(i) / CDbl(monoCrop.MaxValue)) * 65535
+            rgbCrop.R.Data(i) = (rgbCrop.R.Data(i) / CDbl(rgbCrop.R.MaxValue)) * 65535
+        Next
+
+
+        '--------------------------------------------------
+        ' 4. Fuse mono luminance into RGB
+        '
+        ' offsetX/Y allow small alignment adjustments
+        '--------------------------------------------------
+        Dim offsetX As Integer = 0
+        Dim offsetY As Integer = 0
+        Integer.TryParse(Me.tbX.Text, offsetX)
+        Integer.TryParse(Me.tbY.Text, offsetY)
+        Dim fused =
+        ImageFusion.FuseLuminance(
+            monoCrop,
+            rgbCrop,
+            0.85,    ' mono contribution
+            offsetX,
+            offsetY)
+
+
+
+        '--------------------------------------------------
+        ' 5. Convert to display bitmap
+        '--------------------------------------------------
+
+        Dim bmp =
+        ImageDisplay.CreateBitmap(
+            fused,
+            250,      ' black point
+            65535)    ' white point
+        'Dim bmpRight = ImageDisplay.CreateBitmap(
+        '    rgbCrop,
+        '    0,      ' black point
+        '    65000)    ' white point
+        'Dim bmpLeft = ImageDisplay.CreateBitmap(
+        '    monoCrop,
+        '    0,      ' black point
+        '    65000)    ' white point
+        'Me.picFusion.Image?.Dispose()
+        '' PictureBox1.Image = bmp
+
+
+
+        picFusion.Image = bmp
+        bmp = Nothing
+
+        Dim savePath As String = System.IO.Path.Combine(Application.StartupPath, "fusion_image.png")
+        picFusion.Image.Save(savePath, System.Drawing.Imaging.ImageFormat.Png)
     End Sub
+    'Private Sub btnCombine_Click(sender As Object, e As EventArgs)
+    '    Dim pointGreyImage As Bitmap = Nothing
+    '    Dim scoutImage As Bitmap = Nothing
+    '    Dim colorFusionBitmap As Bitmap = Nothing
+    '    Dim displayBitmap As Bitmap = Nothing
+    '    Dim scoutImageArray() As UShort
+    '    Dim pgImageArray() As UShort
+    '    Try
+
+    '        m_scoutForm.getLastImageArray(scoutImageArray)
+    '        m_pointGreyForm.getLastImageArray(pgImageArray)
+    '        Dim fs As New FileStream(Application.StartupPath & "\output.raw", FileMode.Create)
+
+    '        'Dim ms As New MemoryStream()
+    '        'fs.Write(scoutImageArray, 0, scoutImageArray.Length)
+    '        'fs.Close()
+    '        Dim offsetX As Integer = 0
+    '        Dim offsetY As Integer = 0
+    '        Integer.TryParse(Me.tbX.Text, offsetX)
+    '        Integer.TryParse(Me.tbY.Text, offsetY)
+
+    '        Dim fused As Image16
+
+    '        Dim scoutImage16 As Image16
+    '        Dim pgImage16 As Image16
+
+    '        scoutImage16 = New Image16(scoutImageArray, 1392, 1040)
+    '        pgImage16 = New Image16(pgImageArray, 1920, 1200)
+    '        fused = FuseCentered(scoutImage16, pgImage16, 6.54, 5.86, 8, 8, 1)
+    '        Dim fusedBytes(fused.Data.Length * 2 - 1) As Byte
+    '        'convert ushort to byte
+    '        Buffer.BlockCopy(fused.Data, 0, fusedBytes, 0, fusedBytes.Length)
+    '        fs.Write(fusedBytes, 0, fusedBytes.Length)
+    '        fs.Close()
+
+    '        colorFusionBitmap = CreateColorFusionBitmap(pointGreyImage, scoutImage, offsetX, offsetY)
+    '        If colorFusionBitmap Is Nothing Then
+    '            MessageBox.Show("Unable to produce color fusion preview.")
+    '            Return
+    '        End If
+
+    '        displayBitmap = CombineThreeImages(pointGreyImage, colorFusionBitmap, scoutImage)
+    '        If displayBitmap Is Nothing Then
+    '            MessageBox.Show("Unable to compose preview images.")
+    '            Return
+    '        End If
+
+    '        If picFusion.Image IsNot Nothing Then
+    '            picFusion.Image.Dispose()
+    '        End If
+
+    '        picFusion.Image = displayBitmap
+    '        displayBitmap = Nothing
+
+    '        Dim savePath As String = System.IO.Path.Combine(Application.StartupPath, "fusion_image.png")
+    '        picFusion.Image.Save(savePath, System.Drawing.Imaging.ImageFormat.Png)
+
+    '    Finally
+    '        If displayBitmap IsNot Nothing Then
+    '            displayBitmap.Dispose()
+    '        End If
+
+    '        If colorFusionBitmap IsNot Nothing Then
+    '            colorFusionBitmap.Dispose()
+    '        End If
+
+    '        If pointGreyImage IsNot Nothing Then
+    '            pointGreyImage.Dispose()
+    '        End If
+
+    '        If scoutImage IsNot Nothing Then
+    '            scoutImage.Dispose()
+    '        End If
+    '    End Try
+    'End Sub
     Private Function CreateColorFusionBitmap(pointGreySource As Bitmap,
                                              scoutSource As Bitmap,
                                              offsetX As Integer,

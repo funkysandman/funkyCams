@@ -154,6 +154,7 @@
   <ItemGroup>
     <Compile Include=".vb" />
     <Compile Include="AstroCalibrationPipeline.vb" />
+    <Compile Include="debayer16.vb" />
     <Compile Include="Form1.Designer.vb">
       <DependentUpon>Form1.vb</DependentUpon>
     </Compile>
@@ -184,6 +185,11 @@
     <Compile Include="frmScout.vb">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="fusion.vb" />
+    <Compile Include="image16.vb" />
+    <Compile Include="imageDisplay.vb" />
+    <Compile Include="imageFusion.vb" />
+    <Compile Include="imageResampler.vb" />
     <Compile Include="IniFile.vb" />
     <Compile Include="device.vb" />
     <Compile Include="frmMaster.Designer.vb">
