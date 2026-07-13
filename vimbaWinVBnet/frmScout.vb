@@ -445,7 +445,7 @@ Public Class frmScout
     '    Me.ResumeLayout(False)
     '    Me.PerformLayout()
 
-    End Sub
+    'End Sub
 
 
 End Class
