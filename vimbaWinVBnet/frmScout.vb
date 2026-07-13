@@ -257,8 +257,8 @@ Public Class frmScout
             End If
 
         Else
-                'day mode
-                tbGain.Text = tbDayGain.Text
+            'day mode
+            tbGain.Text = tbDayGain.Text
             tbExposureTime.Text = tbDayTimeExp.Text
 
             If isRunning Then
@@ -414,6 +414,26 @@ Public Class frmScout
 
     End Sub
 
+    Friend Function getLastImageArray(ByRef scoutImageArray As UShort()) As Boolean
+        If m_lastFramePixels Is Nothing OrElse m_lastFramePixels.Length = 0 Then
+            Return False
+        End If
+
+        scoutImageArray = CType(m_lastFramePixels.Clone(), UShort())
+        Return True
+    End Function
+    Friend Function getLastImageByteArray(ByRef scoutImageArray As Byte()) As Boolean
+        If m_lastFrameBytes Is Nothing OrElse m_lastFrameBytes.Length = 0 Then
+            Return False
+        End If
+
+        scoutImageArray = CType(m_lastFrameBytes.Clone(), Byte())
+        Return True
+    End Function
+
+
+
+
     'Private Sub InitializeComponent()
     '    Me.SuspendLayout()
     '    '
@@ -425,7 +445,7 @@ Public Class frmScout
     '    Me.ResumeLayout(False)
     '    Me.PerformLayout()
 
-    'End Sub
+    End Sub
 
 
 End Class
