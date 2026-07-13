@@ -25,6 +25,7 @@ Public Class frmMaster
     Public startTime As DateTime
     Public gotFrameTime As DateTime
     Public dark() As Byte
+    Public uintDark() As UInt16
     Public meteorCheckRunning As Boolean = False
     Public myImageCodecInfo As ImageCodecInfo
     Public myEncoder As System.Drawing.Imaging.Encoder
@@ -74,35 +75,46 @@ Public Class frmMaster
                 Dim jsonResulttodict = JsonConvert.DeserializeObject(Of Dictionary(Of String, Object))(settingsJSON)
                 Dim jss As New JavaScriptSerializer()
 
-                Me.ModelName = jsonResulttodict.Item("ModelName")
-                Me.ImagePath = jsonResulttodict.Item("ImagePath")
-                Me.DayExposure = jsonResulttodict.Item("DayExposure")
-                Me.NightExposure = jsonResulttodict.Item("NightExposure")
-                Me.DayGain = jsonResulttodict.Item("DayGain")
-                Me.NightGain = jsonResulttodict.Item("NightGain")
-                Me.port = jsonResulttodict.Item("port")
-                Me.detectMeteors = jsonResulttodict.Item("detectMeteors")
-                Me.morningHour = jsonResulttodict.Item("morningHour")
-                Me.eveningHour = jsonResulttodict.Item("eveningHour")
-                Me.useDarks = jsonResulttodict.Item("useDarks")
-                Me.saveImages = jsonResulttodict.Item("saveImages")
-                Me.maxValue = jsonResulttodict.Item("maxValue")
-                Me.minValue = jsonResulttodict.Item("minValue")
-                Me.darkMultiplier = jsonResulttodict.Item("darkMultiplier")
-                Me.darkCutOff = jsonResulttodict.Item("darkCutOff")
-                Me.url = jsonResulttodict.Item("url")
-                Me.fanOn = jsonResulttodict.Item("fanOn")
-                Dim rectJS As Object = jsonResulttodict.Item("Rects")
-                Me.Rects = New List(Of MyRectangle)
-                For Each item In rectJS
-                    r = New MyRectangle()
-                    r.x = item("_x").value
-                    r.y = item("_y").value
-                    r.width = item("_width").value
-                    r.height = item("_height").value
-                    Rects.Add(r)
-                Next
+                If jsonResulttodict.ContainsKey("ModelName") Then Me.ModelName = jsonResulttodict.Item("ModelName")
+                If jsonResulttodict.ContainsKey("ImagePath") Then Me.ImagePath = jsonResulttodict.Item("ImagePath")
+                If jsonResulttodict.ContainsKey("DayExposure") Then Me.DayExposure = jsonResulttodict.Item("DayExposure")
+                If jsonResulttodict.ContainsKey("NightExposure") Then Me.NightExposure = jsonResulttodict.Item("NightExposure")
+                If jsonResulttodict.ContainsKey("DayGain") Then Me.DayGain = jsonResulttodict.Item("DayGain")
+                If jsonResulttodict.ContainsKey("NightGain") Then Me.NightGain = jsonResulttodict.Item("NightGain")
+                If jsonResulttodict.ContainsKey("port") Then Me.port = jsonResulttodict.Item("port")
+                If jsonResulttodict.ContainsKey("detectMeteors") Then Me.detectMeteors = jsonResulttodict.Item("detectMeteors")
+                If jsonResulttodict.ContainsKey("morningHour") Then Me.morningHour = jsonResulttodict.Item("morningHour")
+                If jsonResulttodict.ContainsKey("eveningHour") Then Me.eveningHour = jsonResulttodict.Item("eveningHour")
+                If jsonResulttodict.ContainsKey("useDarks") Then Me.useDarks = jsonResulttodict.Item("useDarks")
+                If jsonResulttodict.ContainsKey("saveImages") Then Me.saveImages = jsonResulttodict.Item("saveImages")
+                If jsonResulttodict.ContainsKey("maxValue") Then Me.maxValue = jsonResulttodict.Item("maxValue")
+                If jsonResulttodict.ContainsKey("minValue") Then Me.minValue = jsonResulttodict.Item("minValue")
+                If jsonResulttodict.ContainsKey("darkMultiplier") Then Me.darkMultiplier = jsonResulttodict.Item("darkMultiplier")
+                If jsonResulttodict.ContainsKey("darkCutOff") Then Me.darkCutOff = jsonResulttodict.Item("darkCutOff")
+                If jsonResulttodict.ContainsKey("url") Then Me.url = jsonResulttodict.Item("url")
 
+                ' Backward compatibility: older profile files may not contain fanOn
+                If jsonResulttodict.ContainsKey("fanOn") Then
+                    Me.fanOn = jsonResulttodict.Item("fanOn")
+                Else
+                    Me.fanOn = False
+                End If
+
+                If jsonResulttodict.ContainsKey("Rects") Then
+                    Dim rectJS As Object = jsonResulttodict.Item("Rects")
+                    Me.Rects = New List(Of MyRectangle)
+                    For Each item In rectJS
+                        r = New MyRectangle()
+                        r.x = item("_x").value
+                        r.y = item("_y").value
+                        r.width = item("_width").value
+                        r.height = item("_height").value
+                        Rects.Add(r)
+                    Next
+                End If
+
+                ' Persist any new default fields back to profile
+                Me.writeSettings()
 
             Catch ex As Exception
 
@@ -181,17 +193,21 @@ Public Class frmMaster
 
             ' m_ManagedImages(m_BitmapSelector) = b
             'copy raw data into m_buffers
-            Dim rawData(b.DataSize) As Byte
+            Dim rawData(b.GetBufferSize - 1) As Byte
             ' Dim BoundsRect = New Rectangle(0, 0, b.Width, b.Height)
             ' Dim bmpData As System.Drawing.Imaging.BitmapData = m_Bitmaps(m_BitmapSelector).LockBits(BoundsRect, System.Drawing.Imaging.ImageLockMode.[WriteOnly], m_Bitmaps(m_BitmapSelector).PixelFormat)
             'Dim ptr As IntPtr = bmpData.Scan0
-            'System.Runtime.InteropServices.Marshal.Copy(b.DataPtr, ptr, 0, b.DataSize) 'copy into bitmap
-            'System.Runtime.InteropServices.Marshal.Copy(b.ManagedData, 0, rawData, b.DataSize) 'copy into array
+            'System.Runtime.InteropServices.Marshal.Copy(b.DataPtr, ptr, 0, b.GetBufferSize) 'copy into bitmap
+            'System.Runtime.InteropServices.Marshal.Copy(b.ManagedData, 0, rawData, b.GetBufferSize) 'copy into array
 
-            m_buffers(m_BitmapSelector) = b.ManagedData
+            If m_buffers(m_BitmapSelector) Is Nothing OrElse m_buffers(m_BitmapSelector).Length <> b.GetBufferSize Then
+                m_buffers(m_BitmapSelector) = New Byte(b.GetBufferSize - 1) {}
+            End If
+
+            Buffer.BlockCopy(b.ManagedData, 0, m_buffers(m_BitmapSelector), 0, b.GetBufferSize)
             m_width = b.Width
             m_height = b.Height
-            m_dataSize = b.DataSize
+            m_dataSize = b.GetBufferSize
 
 
         End Sub
@@ -205,7 +221,7 @@ Public Class frmMaster
             Dim bmpData As System.Drawing.Imaging.BitmapData = b.LockBits(BoundsRect, System.Drawing.Imaging.ImageLockMode.[WriteOnly], b.PixelFormat)
             Dim rawData(b.Height * bmpData.Stride) As Byte
             Dim ptr As IntPtr = bmpData.Scan0
-            'System.Runtime.InteropServices.Marshal.Copy(b.DataPtr, ptr, 0, b.DataSize) 'copy into bitmap
+            'System.Runtime.InteropServices.Marshal.Copy(b.DataPtr, ptr, 0, b.GetBufferSize) 'copy into bitmap
             System.Runtime.InteropServices.Marshal.Copy(ptr, rawData, 0, rawData.Length - 1) 'copy into array
 
             m_buffers(m_BitmapSelector) = rawData
@@ -218,6 +234,14 @@ Public Class frmMaster
         Public Sub FillNextBitmap(b As Byte())
             SwitchBitmap()
             m_buffers(m_BitmapSelector) = b
+
+        End Sub
+        Public Sub FillNextBitmap(b As Byte(), w As Integer, h As Integer, s As Integer)
+            SwitchBitmap()
+            m_buffers(m_BitmapSelector) = b.Clone()
+            m_width = w
+            m_height = h
+            m_dataSize = s
 
         End Sub
         Private Sub SwitchBitmap()
@@ -240,16 +264,36 @@ Public Class frmMaster
 
 
         Debug.Print("get last image")
+        If Math.Abs((m_pics.width * m_pics.height) - (m_pics.ImageBytes.Length)) < 10 Then
+            'grayscale image
+            Dim x As New Bitmap(m_pics.width, m_pics.height, System.Drawing.Imaging.PixelFormat.Format8bppIndexed)
+            Dim BoundsRect = New Rectangle(0, 0, m_pics.width, m_pics.height)
+            Dim bmpData As System.Drawing.Imaging.BitmapData = x.LockBits(BoundsRect, System.Drawing.Imaging.ImageLockMode.[WriteOnly], x.PixelFormat)
+            Dim ptr As IntPtr = bmpData.Scan0
+            Dim ncp As System.Drawing.Imaging.ColorPalette = x.Palette
 
-        Dim x As New Bitmap(m_pics.width, m_pics.height, PixelFormat.Format24bppRgb)
-        Dim BoundsRect = New Rectangle(0, 0, m_pics.width, m_pics.height)
-        Dim bmpData As System.Drawing.Imaging.BitmapData = x.LockBits(BoundsRect, System.Drawing.Imaging.ImageLockMode.[WriteOnly], x.PixelFormat)
-        Dim ptr As IntPtr = bmpData.Scan0
-        System.Runtime.InteropServices.Marshal.Copy(m_pics.ImageBytes, 0, ptr, m_pics.dataSize - 1) 'copy into bitmap
+            For i = 0 To 255
+
+                ncp.Entries(i) = System.Drawing.Color.FromArgb(255, i, i, i)
+            Next
+            x.Palette = ncp
+            System.Runtime.InteropServices.Marshal.Copy(m_pics.ImageBytes, 0, ptr, m_pics.dataSize - 1) 'copy into bitmap
 
 
-        x.UnlockBits(bmpData)
-        Return x
+            x.UnlockBits(bmpData)
+            Return x
+        Else
+            Dim x As New Bitmap(m_pics.width, m_pics.height, PixelFormat.Format24bppRgb)
+            Dim BoundsRect = New Rectangle(0, 0, m_pics.width, m_pics.height)
+            Dim bmpData As System.Drawing.Imaging.BitmapData = x.LockBits(BoundsRect, System.Drawing.Imaging.ImageLockMode.[WriteOnly], x.PixelFormat)
+            Dim ptr As IntPtr = bmpData.Scan0
+            System.Runtime.InteropServices.Marshal.Copy(m_pics.ImageBytes, 0, ptr, m_pics.dataSize) 'copy into bitmap
+            x.UnlockBits(bmpData)
+            Return x
+        End If
+
+
+
 
 
     End Function
@@ -355,7 +399,7 @@ Public Class frmMaster
         encoders = ImageCodecInfo.GetImageEncoders()
 
         j = 0
-        While j <encoders.Length
+        While j < encoders.Length
             If encoders(j).MimeType = mimeType Then
                 Return encoders(j)
             End If
@@ -374,13 +418,13 @@ Public Class frmMaster
             If myDetectionQueue.Count > 0 Then
                 'Try
                 aQE = myDetectionQueue.Dequeue()
-                    If Not aQE Is Nothing Then
+                If Not aQE Is Nothing Then
 
-                        CallAzureMeteorDetection(aQE)
+                    CallAzureMeteorDetection(aQE)
 
-                    End If
+                End If
 
-                    aQE = Nothing
+                aQE = Nothing
                 'Catch
 
                 'End Try

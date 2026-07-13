@@ -71,10 +71,10 @@ Public Class Form3
     End Sub
 
     Private Sub Button7_Click(sender As Object, e As EventArgs) Handles Button7.Click
-        Dim f As New frmCoolsnap
-        Me.Hide()
-        f.ShowDialog()
-        Me.Close()
+        'Dim f As New frmCoolsnap
+        'Me.Hide()
+        'f.ShowDialog()
+        'Me.Close()
     End Sub
 
     Private Sub btnToup_Click(sender As Object, e As EventArgs) Handles btnToup.Click
@@ -92,10 +92,10 @@ Public Class Form3
     End Sub
 
     Private Sub btnPCO_Click(sender As Object, e As EventArgs) Handles btnPCO.Click
-        Dim f As New frmPCO
-        Me.Hide()
-        f.ShowDialog()
-        Me.Close()
+        'Dim f As New frmPCO
+        'Me.Hide()
+        'f.ShowDialog()
+        'Me.Close()
     End Sub
 
     Private Sub Button9_Click(sender As Object, e As EventArgs) Handles Button9.Click
@@ -114,6 +114,20 @@ Public Class Form3
 
     Private Sub btnIPCam_Click(sender As Object, e As EventArgs) Handles btnIPCam.Click
         Dim f As New frmIPCam
+        Me.Hide()
+        f.ShowDialog()
+        Me.Close()
+    End Sub
+
+    Private Sub btnIS_Click(sender As Object, e As EventArgs) Handles btnIS.Click
+        'Dim f As New frmIS
+        'Me.Hide()
+        'f.ShowDialog()
+        'Me.Close()
+    End Sub
+
+    Private Sub btnFusion_Click(sender As Object, e As EventArgs) Handles btnFusion.Click
+        Dim f As New frmFusion
         Me.Hide()
         f.ShowDialog()
         Me.Close()

@@ -11,7 +11,7 @@ Public Class frmBasler
 
         cboNight.SelectedIndex = 1
         cboDay.SelectedIndex = 1
-        myBaslerImageGrabber.Open()
+        myBaslerImageGrabber.Open(0)
     End Sub
 
  
