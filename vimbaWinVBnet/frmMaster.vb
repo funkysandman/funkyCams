@@ -36,6 +36,11 @@ Public Class frmMaster
     Public t_cleanup As Thread
     Public mySettings As CameraSettings
     Public Shared m_pics As RingBitmap
+    Public ReadOnly m_lastFrameLock As New Object()
+    Public m_lastFrameBytes As Byte()
+    Public m_lastFramePixels As UShort()
+    Public m_lastFrameWidth As Integer
+    Public m_lastFrameHeight As Integer
 
     Public Class CameraSettings
 
@@ -176,12 +181,13 @@ Public Class frmMaster
                 Return m_dataSize
             End Get
         End Property
+
         Public Sub FillNextBitmap(b As SpinnakerNET.IManagedImage)
             SwitchBitmap()
 
             ' m_ManagedImages(m_BitmapSelector) = b
             'copy raw data into m_buffers
-            Dim rawData(b.DataSize) As Byte
+            Dim rawData(b.BufferSize) As Byte
             ' Dim BoundsRect = New Rectangle(0, 0, b.Width, b.Height)
             ' Dim bmpData As System.Drawing.Imaging.BitmapData = m_Bitmaps(m_BitmapSelector).LockBits(BoundsRect, System.Drawing.Imaging.ImageLockMode.[WriteOnly], m_Bitmaps(m_BitmapSelector).PixelFormat)
             'Dim ptr As IntPtr = bmpData.Scan0
@@ -191,7 +197,7 @@ Public Class frmMaster
             m_buffers(m_BitmapSelector) = b.ManagedData
             m_width = b.Width
             m_height = b.Height
-            m_dataSize = b.DataSize
+            m_dataSize = b.BufferSize
 
 
         End Sub
@@ -229,6 +235,27 @@ Public Class frmMaster
         End Sub
     End Class
 
+    ' Method moved from inside RingBitmap class to frmMaster
+    Friend Sub StoreLatestRawFrame(source As Byte(), original As UShort(), width As Integer, height As Integer)
+        If source Is Nothing OrElse width <= 0 OrElse height <= 0 Then
+            Return
+        End If
+
+        Dim required As Integer = width * height * 3
+        If source.Length < required Then
+            Return
+        End If
+
+        Dim copy(required - 1) As Byte
+        Buffer.BlockCopy(source, 0, copy, 0, required)
+
+        SyncLock m_lastFrameLock
+            m_lastFrameBytes = copy
+            m_lastFramePixels = original
+            m_lastFrameWidth = width
+            m_lastFrameHeight = height
+        End SyncLock
+    End Sub
 
 
 
