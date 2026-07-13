@@ -95,11 +95,7 @@ Public Class frmAscom
         End Sub
     End Class
 
-    ' Constructor
-    Public Sub New()
-        MyBase.New()
-        InitializeComponent()
-    End Sub
+
 
     ' Form Load - Initialize camera list
     Private Sub frmAscom_Load(sender As Object, e As EventArgs) Handles Me.Load
@@ -107,7 +103,7 @@ Public Class frmAscom
             MyBase.Form_Load(sender, e)
 
             ' Load defaults
-            tbPort.Text = "8080"
+            tbPort.Text = "8999"
             tbPath.Text = "e:\image_ascom"
             tbDayTimeExp.Text = "0.1"
             tbNightExp.Text = "5"
@@ -322,6 +318,20 @@ Public Class frmAscom
         End Try
     End Sub
 
+    Private Sub btnStartWeb_Click(sender As Object, e As EventArgs) Handles btnStartWeb.Click
+        btnStopWeb.Enabled = True
+        btnStartWeb.Enabled = False
+        myWebServer = WebServer.getWebServer
+
+        myWebServer.StartWebServer(Me, Val(Me.tbPort.Text))
+        myWebServer.ImageDirectory = "c:\web\images\"
+        myWebServer.VirtualRoot = "c:\web\"
+    End Sub
+    Private Sub btnStopWeb_Click(sender As Object, e As EventArgs) Handles btnStopWeb.Click
+        btnStartWeb.Enabled = True
+        btnStopWeb.Enabled = False
+        myWebServer.StopWebServer()
+    End Sub
     ' Acquire images continuously
     Private Sub AcquireImages()
         Try
@@ -484,6 +494,46 @@ Public Class frmAscom
             SetExposure(CDbl(tbExposureTime.Text))
             SetGain(CInt(tbGain.Text))
         End If
+    End Sub
+    Private Sub TimerDayNight_Tick(sender As Object, e As EventArgs) Handles TimerDayNight.Tick
+
+        Try
+
+
+
+            Dim currentMode As Boolean
+            currentMode = False
+
+            If Now.Hour >= cboNight.SelectedItem Or Now.Hour <= cboDay.SelectedItem Then
+                night = True
+            Else
+                night = False
+            End If
+            ' If currentMode <> night Then
+
+            If night Then
+                'axfgcontrolctrl2.ExposureTimeAuto = "Off"
+                '  axfgcontrolctrl2.AcquisitionMode = "Continuous"
+
+                tbExposureTime.Text = tbNightExp.Text
+                tbGain.Text = tbNightAgain.Text
+                lblDayNight.Text = "night"
+                'night mode
+
+
+            Else
+                'day mode
+
+                tbExposureTime.Text = tbDayTimeExp.Text
+                tbGain.Text = tbDayGain.Text
+                lblDayNight.Text = "day"
+
+
+            End If
+
+        Catch ex As Exception
+
+        End Try
     End Sub
 
     ' Cleanup when form closes

@@ -118,4 +118,11 @@ Public Class Form3
         f.ShowDialog()
         Me.Close()
     End Sub
+
+    Private Sub btnAscom_Click(sender As Object, e As EventArgs) Handles btnAscom.Click
+        Dim f As New frmAscom
+        Me.Hide()
+        f.ShowDialog()
+        Me.Close()
+    End Sub
 End Class
