@@ -150,6 +150,7 @@ Public Class frmAscom
             If selectedText.Contains(" - ") Then
                 m_selectedCameraId = selectedText.Substring(0, selectedText.IndexOf(" - "))
             End If
+            loadProfile(m_selectedCameraId)
         End If
     End Sub
 

@@ -125,9 +125,8 @@ Public Class Form3
         f.ShowDialog()
         Me.Close()
     End Sub
-End Class
 
-Private Sub btnIS_Click(sender As Object, e As EventArgs) Handles btnIS.Click
+    Private Sub btnIS_Click(sender As Object, e As EventArgs) Handles btnIS.Click
     'Dim f As New frmIS
     'Me.Hide()
     'f.ShowDialog()
@@ -140,4 +139,5 @@ Private Sub btnFusion_Click(sender As Object, e As EventArgs) Handles btnFusion.
     f.ShowDialog()
     Me.Close()
 End Sub
+
 End Class

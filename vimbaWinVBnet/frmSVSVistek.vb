@@ -234,10 +234,6 @@ Public Class frmSVSVistek
     End Sub
 
 
-    Protected Overrides Sub Finalize()
-        'myVistekImageGrabber.close()
-        MyBase.Finalize()
-    End Sub
 
     Private Sub TimerDayNight_Tick(sender As Object, e As EventArgs) Handles TimerDayNight.Tick
         Try
