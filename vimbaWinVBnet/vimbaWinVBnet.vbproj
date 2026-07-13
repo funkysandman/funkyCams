@@ -211,11 +211,11 @@
     </Compile>
     <Compile Include="IniFile.vb" />
     <Compile Include="device.vb" />
-    <Compile Include="frmMaster.Designer.vb">
-      <DependentUpon>frmMaster.vb</DependentUpon>
-    </Compile>
     <Compile Include="frmMaster.vb">
       <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmMaster.Designer.vb">
+      <DependentUpon>frmMaster.vb</DependentUpon>
     </Compile>
     <Compile Include="frmPCO.designer.vb">
       <DependentUpon>frmPCO.vb</DependentUpon>
