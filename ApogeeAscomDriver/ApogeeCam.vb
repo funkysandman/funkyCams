@@ -1,48 +1,48 @@
 ﻿Public Class ApogeeCam
 
-    Public Shared c As New APOGEELib.Camera2
+    Public Shared c As APOGEELib.Camera2
     Public imageData As Array
     Public ccdWidth As Integer = 0
     Public ccdHeight As Integer = 0
     Private FindDlg As APOGEELib.CamDiscover
-    Sub New()
-        FindDlg = New APOGEELib.CamDiscover()
+    Sub New(ByRef inter As APOGEELib.Apn_Interface, ByRef selectedModel As String, ByRef selectedDevice As Integer, ByRef camIdOne As Integer, ByRef camIdTwo As Integer)
         c = New APOGEELib.Camera2
+        If selectedModel = "" Then
+            'no camera selected
+            FindDlg = New APOGEELib.CamDiscover()
+
+            Debug.Print("new camera")
+
+            FindDlg.DlgCheckEthernet = False
+            FindDlg.DlgCheckUsb = True
+
+            FindDlg.ShowDialog(True)
 
 
-        Debug.Print("new camera")
-        Dim tempImage As Array
-        FindDlg.DlgCheckEthernet = False
-        FindDlg.DlgCheckUsb = True
+            If FindDlg.ValidSelection Then
+                Debug.WriteLine("here we are")
+                camIdOne = FindDlg.SelectedCamIdOne
+                camIdTwo = FindDlg.SelectedCamIdTwo
+                inter = FindDlg.SelectedInterface
+                selectedModel = FindDlg.SelectedModel
 
-        FindDlg.ShowDialog(True)
+            End If
 
-        If FindDlg.ValidSelection Then
-            Debug.WriteLine("here we are")
-            c.Init(FindDlg.SelectedInterface, FindDlg.SelectedCamIdOne, FindDlg.SelectedCamIdTwo, 0)
-            c.ResetSystem()
-            c.ImageCount = 0
-            'c.RoiBinningH = 1
-            'c.RoiBinningV = 1
-            'c.RoiStartX = 0
-            'c.RoiStartY = 0
-            ccdWidth = c.RoiPixelsH
-            ccdHeight = c.RoiPixelsV
-            Debug.WriteLine(c.ImagingStatus)
-            '  AltaCamera.Expose(0.001, False)
-            '  Debug.WriteLine(AltaCamera.ImagingStatus)
 
-            ' Do
-            '     Debug.WriteLine(AltaCamera.ImagingStatus)
-            ' Loop Until AltaCamera.ImagingStatus = APOGEELib.Apn_Status.Apn_Status_ImageReady
-            ' Debug.WriteLine(AltaCamera.ImagingStatus)
-            ' imageData = AltaCamera.Image
-            Debug.WriteLine(c.RoiPixelsH)
-            Debug.WriteLine(c.RoiPixelsV)
         End If
-        Debug.WriteLine(c.ImagingStatus)
-        Debug.WriteLine(c.Sensor)
-        Debug.WriteLine(c.CameraModel)
+        'connect to rememberd camera
+        c.Init(inter, camIdOne, camIdTwo, 0)
+        c.ResetSystem()
+        c.ImageCount = 0
+
+        ccdWidth = c.RoiPixelsH
+        ccdHeight = c.RoiPixelsV
+
+
+        Debug.WriteLine(c.RoiPixelsH)
+        Debug.WriteLine(c.RoiPixelsV)
+
+
     End Sub
 
     Public Sub Expose(t As Double, light As Boolean)

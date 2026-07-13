@@ -81,7 +81,7 @@
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="VimbaNET, Version=1.0.0.7690, Culture=neutral, PublicKeyToken=96b729f24f119b9a">
-      <HintPath>$(SolutionDir)$(Platform)\$(Configuration)\VimbaNET.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\Desktop\basler\Debug\VimbaNET.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
     </Reference>
   </ItemGroup>

@@ -9,6 +9,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.ComTypes;
 using System.Text;
@@ -600,7 +601,7 @@ namespace SVCamApi
                     Console.WriteLine("about to streamWaitForNewBuffer");
                     //
                     ret = SVcamApi.SVSCamApiReturn.SV_ERROR_NOT_INITIALIZED;
-                    uint timeout = 5000;// wait no more than 5000 ms
+                    uint timeout = 15000;// wait no more than 5000 ms
 
                     //while (ret!= SVcamApi.SVSCamApiReturn.SV_ERROR_SUCCESS)
                     //{ 
@@ -2082,8 +2083,13 @@ namespace SVCamApi
 
         public int getTemperature()
         {
+            try
+            { 
+                return current_selected_cam.GetTemperature();
+            }
+            catch
+            { return -99; }
 
-            return current_selected_cam.GetTemperature();
         }
         public void closeCamera()
         {

@@ -9,6 +9,7 @@ Partial Class SetupDialogForm
             If disposing AndAlso components IsNot Nothing Then
                 components.Dispose()
             End If
+            c.Close()
         Finally
             MyBase.Dispose(disposing)
         End Try
@@ -48,6 +49,15 @@ Partial Class SetupDialogForm
         Me.btnSetOffset1 = New System.Windows.Forms.Button()
         Me.Label6 = New System.Windows.Forms.Label()
         Me.Label7 = New System.Windows.Forms.Label()
+        Me.lbGain = New System.Windows.Forms.Label()
+        Me.lbOffset = New System.Windows.Forms.Label()
+        Me.TbGainAd = New System.Windows.Forms.TextBox()
+        Me.tbGainChannel = New System.Windows.Forms.TextBox()
+        Me.tbOffsetAd = New System.Windows.Forms.TextBox()
+        Me.tbOffsetChannel = New System.Windows.Forms.TextBox()
+        Me.Label8 = New System.Windows.Forms.Label()
+        Me.Label9 = New System.Windows.Forms.Label()
+        Me.btnChooseCam = New System.Windows.Forms.Button()
         Me.TableLayoutPanel1.SuspendLayout()
         CType(Me.PictureBox1, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.Panel1.SuspendLayout()
@@ -61,7 +71,7 @@ Partial Class SetupDialogForm
         Me.TableLayoutPanel1.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50.0!))
         Me.TableLayoutPanel1.Controls.Add(Me.OK_Button, 0, 0)
         Me.TableLayoutPanel1.Controls.Add(Me.Cancel_Button, 1, 0)
-        Me.TableLayoutPanel1.Location = New System.Drawing.Point(314, 347)
+        Me.TableLayoutPanel1.Location = New System.Drawing.Point(370, 347)
         Me.TableLayoutPanel1.Name = "TableLayoutPanel1"
         Me.TableLayoutPanel1.RowCount = 1
         Me.TableLayoutPanel1.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50.0!))
@@ -92,7 +102,7 @@ Partial Class SetupDialogForm
         Me.PictureBox1.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.PictureBox1.Cursor = System.Windows.Forms.Cursors.Hand
         Me.PictureBox1.Image = Global.ASCOM.Apogee.My.Resources.Resources.ASCOM
-        Me.PictureBox1.Location = New System.Drawing.Point(411, 12)
+        Me.PictureBox1.Location = New System.Drawing.Point(467, 12)
         Me.PictureBox1.Name = "PictureBox1"
         Me.PictureBox1.Size = New System.Drawing.Size(48, 56)
         Me.PictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize
@@ -248,30 +258,32 @@ Partial Class SetupDialogForm
         '
         'tbGain1
         '
-        Me.tbGain1.Location = New System.Drawing.Point(317, 251)
+        Me.tbGain1.Location = New System.Drawing.Point(353, 251)
         Me.tbGain1.Name = "tbGain1"
-        Me.tbGain1.Size = New System.Drawing.Size(81, 20)
+        Me.tbGain1.Size = New System.Drawing.Size(45, 20)
         Me.tbGain1.TabIndex = 23
+        Me.tbGain1.Visible = False
         '
         'tbOffset1
         '
-        Me.tbOffset1.Location = New System.Drawing.Point(317, 289)
+        Me.tbOffset1.Location = New System.Drawing.Point(412, 289)
         Me.tbOffset1.Name = "tbOffset1"
-        Me.tbOffset1.Size = New System.Drawing.Size(81, 20)
+        Me.tbOffset1.Size = New System.Drawing.Size(45, 20)
         Me.tbOffset1.TabIndex = 24
         '
         'btnSetGain1
         '
-        Me.btnSetGain1.Location = New System.Drawing.Point(404, 251)
+        Me.btnSetGain1.Location = New System.Drawing.Point(463, 251)
         Me.btnSetGain1.Name = "btnSetGain1"
         Me.btnSetGain1.Size = New System.Drawing.Size(53, 20)
         Me.btnSetGain1.TabIndex = 25
         Me.btnSetGain1.Text = "Set"
         Me.btnSetGain1.UseVisualStyleBackColor = True
+        Me.btnSetGain1.Visible = False
         '
         'btnSetOffset1
         '
-        Me.btnSetOffset1.Location = New System.Drawing.Point(404, 289)
+        Me.btnSetOffset1.Location = New System.Drawing.Point(463, 288)
         Me.btnSetOffset1.Name = "btnSetOffset1"
         Me.btnSetOffset1.Size = New System.Drawing.Size(53, 20)
         Me.btnSetOffset1.TabIndex = 26
@@ -281,20 +293,105 @@ Partial Class SetupDialogForm
         'Label6
         '
         Me.Label6.AutoSize = True
-        Me.Label6.Location = New System.Drawing.Point(271, 251)
+        Me.Label6.Location = New System.Drawing.Point(271, 255)
         Me.Label6.Name = "Label6"
         Me.Label6.Size = New System.Drawing.Size(29, 13)
         Me.Label6.TabIndex = 27
         Me.Label6.Text = "Gain"
+        Me.Label6.Visible = False
         '
         'Label7
         '
         Me.Label7.AutoSize = True
-        Me.Label7.Location = New System.Drawing.Point(271, 289)
+        Me.Label7.Location = New System.Drawing.Point(329, 292)
         Me.Label7.Name = "Label7"
         Me.Label7.Size = New System.Drawing.Size(35, 13)
         Me.Label7.TabIndex = 28
         Me.Label7.Text = "Offset"
+        '
+        'lbGain
+        '
+        Me.lbGain.AutoSize = True
+        Me.lbGain.Location = New System.Drawing.Point(309, 255)
+        Me.lbGain.Name = "lbGain"
+        Me.lbGain.Size = New System.Drawing.Size(29, 13)
+        Me.lbGain.TabIndex = 29
+        Me.lbGain.Text = "Gain"
+        Me.lbGain.Visible = False
+        '
+        'lbOffset
+        '
+        Me.lbOffset.AutoSize = True
+        Me.lbOffset.Location = New System.Drawing.Point(370, 292)
+        Me.lbOffset.Name = "lbOffset"
+        Me.lbOffset.Size = New System.Drawing.Size(35, 13)
+        Me.lbOffset.TabIndex = 30
+        Me.lbOffset.Text = "Offset"
+        '
+        'TbGainAd
+        '
+        Me.TbGainAd.Location = New System.Drawing.Point(404, 251)
+        Me.TbGainAd.Name = "TbGainAd"
+        Me.TbGainAd.Size = New System.Drawing.Size(20, 20)
+        Me.TbGainAd.TabIndex = 31
+        Me.TbGainAd.Text = "1"
+        Me.TbGainAd.Visible = False
+        '
+        'tbGainChannel
+        '
+        Me.tbGainChannel.Location = New System.Drawing.Point(430, 252)
+        Me.tbGainChannel.Name = "tbGainChannel"
+        Me.tbGainChannel.Size = New System.Drawing.Size(20, 20)
+        Me.tbGainChannel.TabIndex = 32
+        Me.tbGainChannel.Text = "0"
+        Me.tbGainChannel.Visible = False
+        '
+        'tbOffsetAd
+        '
+        Me.tbOffsetAd.Location = New System.Drawing.Point(452, 321)
+        Me.tbOffsetAd.Name = "tbOffsetAd"
+        Me.tbOffsetAd.Size = New System.Drawing.Size(20, 20)
+        Me.tbOffsetAd.TabIndex = 33
+        Me.tbOffsetAd.Text = "1"
+        Me.tbOffsetAd.Visible = False
+        '
+        'tbOffsetChannel
+        '
+        Me.tbOffsetChannel.Location = New System.Drawing.Point(479, 321)
+        Me.tbOffsetChannel.Name = "tbOffsetChannel"
+        Me.tbOffsetChannel.Size = New System.Drawing.Size(20, 20)
+        Me.tbOffsetChannel.TabIndex = 34
+        Me.tbOffsetChannel.Text = "0"
+        Me.tbOffsetChannel.Visible = False
+        '
+        'Label8
+        '
+        Me.Label8.AutoSize = True
+        Me.Label8.Location = New System.Drawing.Point(405, 235)
+        Me.Label8.Name = "Label8"
+        Me.Label8.Size = New System.Drawing.Size(19, 13)
+        Me.Label8.TabIndex = 35
+        Me.Label8.Text = "ad"
+        Me.Label8.Visible = False
+        '
+        'Label9
+        '
+        Me.Label9.AutoSize = True
+        Me.Label9.Location = New System.Drawing.Point(427, 235)
+        Me.Label9.Name = "Label9"
+        Me.Label9.Size = New System.Drawing.Size(45, 13)
+        Me.Label9.TabIndex = 36
+        Me.Label9.Text = "channel"
+        Me.Label9.Visible = False
+        '
+        'btnChooseCam
+        '
+        Me.btnChooseCam.Location = New System.Drawing.Point(373, 70)
+        Me.btnChooseCam.Name = "btnChooseCam"
+        Me.btnChooseCam.Size = New System.Drawing.Size(94, 32)
+        Me.btnChooseCam.TabIndex = 37
+        Me.btnChooseCam.Text = "Choose Camera"
+        Me.btnChooseCam.UseVisualStyleBackColor = True
         '
         'SetupDialogForm
         '
@@ -302,7 +399,16 @@ Partial Class SetupDialogForm
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.CancelButton = Me.Cancel_Button
-        Me.ClientSize = New System.Drawing.Size(472, 388)
+        Me.ClientSize = New System.Drawing.Size(528, 388)
+        Me.Controls.Add(Me.btnChooseCam)
+        Me.Controls.Add(Me.Label9)
+        Me.Controls.Add(Me.Label8)
+        Me.Controls.Add(Me.tbOffsetChannel)
+        Me.Controls.Add(Me.tbOffsetAd)
+        Me.Controls.Add(Me.tbGainChannel)
+        Me.Controls.Add(Me.TbGainAd)
+        Me.Controls.Add(Me.lbOffset)
+        Me.Controls.Add(Me.lbGain)
         Me.Controls.Add(Me.Label7)
         Me.Controls.Add(Me.Label6)
         Me.Controls.Add(Me.btnSetOffset1)
@@ -360,4 +466,13 @@ Partial Class SetupDialogForm
     Friend WithEvents btnSetOffset1 As Button
     Friend WithEvents Label6 As Label
     Friend WithEvents Label7 As Label
+    Friend WithEvents lbGain As Label
+    Friend WithEvents lbOffset As Label
+    Friend WithEvents TbGainAd As TextBox
+    Friend WithEvents tbGainChannel As TextBox
+    Friend WithEvents tbOffsetAd As TextBox
+    Friend WithEvents tbOffsetChannel As TextBox
+    Friend WithEvents Label8 As Label
+    Friend WithEvents Label9 As Label
+    Friend WithEvents btnChooseCam As Button
 End Class

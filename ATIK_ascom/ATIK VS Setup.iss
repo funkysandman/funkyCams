@@ -34,7 +34,7 @@ Name: "{cf}\ASCOM\Uninstall\Camera\ATIK VS"
 ; TODO: Add subfolders below {app} as needed (e.g. Name: "{app}\MyFolder")
 
 [Files]
-Source: "C:\Users\funky\source\repos\funkysandman\funkyCams\ATIK_ascom\bin\Debug\ASCOM.ATIKVS.dll"; DestDir: "{app}"
+Source: "C:\Program Files (x86)\Common Files\ASCOM\Camera\ASCOM.ATIKVS.dll"; DestDir: "{app}"
 ; Require a read-me HTML to appear after installation, maybe driver's Help doc
 Source: "C:\Users\funky\source\repos\funkysandman\funkyCams\ATIK_ascom\ReadMe.htm"; DestDir: "{app}"; Flags: isreadme
 ; TODO: Add other files needed by your driver here (add subfolders above)

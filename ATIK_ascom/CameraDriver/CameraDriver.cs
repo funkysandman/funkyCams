@@ -41,7 +41,7 @@ namespace ASCOM.ATIKVS.Camera
     [ProgId("ASCOM.ATIKVS.Camera")]
     [ServedClassName("ASCOM Camera Driver for ATIKVS")] // Driver description that appears in the Chooser, customise as required
     [ClassInterface(ClassInterfaceType.None)]
-    public class Camera :  ICameraV4, IDisposable
+    public class Camera :  ICameraV3, IDisposable
     {
         internal static string DriverProgId; // ASCOM DeviceID (COM ProgID) for this driver, the value is retrieved from the ServedClassName attribute in the class initialiser.
         internal static string DriverDescription; // The value is retrieved from the ServedClassName attribute in the class initialiser.
@@ -81,6 +81,7 @@ namespace ASCOM.ATIKVS.Camera
                 SetTraceState();
 
                 // Initialise the hardware if required
+
                 CameraHardware.InitialiseHardware();
 
                 LogMessage("Camera", "Starting driver initialisation");
@@ -108,7 +109,7 @@ namespace ASCOM.ATIKVS.Camera
         {
             // Please do not change this code.
             // The Dispose(false) method is called here just to release unmanaged resources. Managed resources will be dealt with automatically by the .NET runtime.
-
+          
             Dispose(false);
         }
 
@@ -157,7 +158,7 @@ namespace ASCOM.ATIKVS.Camera
                     try
                     {
                         // Dispose of managed objects here
-                        
+                        CameraHardware.Dispose();
                         // Clean up the trace logger object
                         if (!(tl is null))
                         {
@@ -1100,37 +1101,37 @@ namespace ASCOM.ATIKVS.Camera
         /// <summary>
         /// Return the device's operational state in one call
         /// </summary>
-        public IStateValueCollection DeviceState
-        {
-            get
-            {
-                try
-                {
-                    CheckConnected("DeviceState");
+        //public IStateValueCollection DeviceState
+        //{
+        //    get
+        //    {
+        //        try
+        //        {
+        //            CheckConnected("DeviceState");
 
-                    // Create an array list to hold the IStateValue entries
-                    List<IStateValue> deviceState = new List<IStateValue>();
+        //            // Create an array list to hold the IStateValue entries
+        //            List<IStateValue> deviceState = new List<IStateValue>();
 
-                    // Add one entry for each operational state, if possible
-                    try { deviceState.Add(new StateValue(nameof(ICameraV4.CameraState), CameraState)); } catch { }
-                    try { deviceState.Add(new StateValue(nameof(ICameraV4.CCDTemperature), CCDTemperature)); } catch { }
-                    try { deviceState.Add(new StateValue(nameof(ICameraV4.CoolerPower), CoolerPower)); } catch { }
-                    try { deviceState.Add(new StateValue(nameof(ICameraV4.HeatSinkTemperature), HeatSinkTemperature)); } catch { }
-                    try { deviceState.Add(new StateValue(nameof(ICameraV4.ImageReady), ImageReady)); } catch { }
-                    try { deviceState.Add(new StateValue(nameof(ICameraV4.IsPulseGuiding), IsPulseGuiding)); } catch { }
-                    try { deviceState.Add(new StateValue(nameof(ICameraV4.PercentCompleted), PercentCompleted)); } catch { }
-                    try { deviceState.Add(new StateValue(DateTime.Now)); } catch { }
+        //            // Add one entry for each operational state, if possible
+        //            try { deviceState.Add(new StateValue(nameof(ICameraV4.CameraState), CameraState)); } catch { }
+        //            try { deviceState.Add(new StateValue(nameof(ICameraV4.CCDTemperature), CCDTemperature)); } catch { }
+        //            try { deviceState.Add(new StateValue(nameof(ICameraV4.CoolerPower), CoolerPower)); } catch { }
+        //            try { deviceState.Add(new StateValue(nameof(ICameraV4.HeatSinkTemperature), HeatSinkTemperature)); } catch { }
+        //            try { deviceState.Add(new StateValue(nameof(ICameraV4.ImageReady), ImageReady)); } catch { }
+        //            try { deviceState.Add(new StateValue(nameof(ICameraV4.IsPulseGuiding), IsPulseGuiding)); } catch { }
+        //            try { deviceState.Add(new StateValue(nameof(ICameraV4.PercentCompleted), PercentCompleted)); } catch { }
+        //            try { deviceState.Add(new StateValue(DateTime.Now)); } catch { }
 
-                    // Return the overall device state
-                    return new StateValueCollection(deviceState); ;
-                }
-                catch (Exception ex)
-                {
-                    LogMessage("DeviceState", $"Threw an exception: {ex.Message}\r\n{ex}");
-                    throw;
-                }
-            }
-        }
+        //            // Return the overall device state
+        //            return new StateValueCollection(deviceState); ;
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            LogMessage("DeviceState", $"Threw an exception: {ex.Message}\r\n{ex}");
+        //            throw;
+        //        }
+        //    }
+        //}
         /// <summary>
         /// Returns the gain of the camera in photoelectrons per A/D unit.
         /// </summary>

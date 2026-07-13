@@ -7,7 +7,7 @@ Imports ASCOM.Apogee
 Public Class SetupDialogForm
 
     Public c As APOGEELib.Camera2
-
+    Public selectedModel As String
     Private Sub OK_Button_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles OK_Button.Click ' OK button event handler
         ' Persist new values of user settings to the ASCOM profile
         Camera.comPort = ComboBoxComPort.SelectedItem ' Update the state variables with results from the dialogue
@@ -19,7 +19,7 @@ Public Class SetupDialogForm
         Camera.yHeight = tbYheight.Text
         Camera.adOffset = tbOffset1.Text
         Camera.analogGain = tbGain1.Text
-
+        c.Close()
         Me.DialogResult = System.Windows.Forms.DialogResult.OK
         Me.Close()
     End Sub
@@ -48,6 +48,8 @@ Public Class SetupDialogForm
     End Sub
 
     Private Sub InitUI()
+
+
         If Camera.useROI Then
             cbUseROI.Checked = True
             tbXstart.Text = Camera.xStart
@@ -58,6 +60,9 @@ Public Class SetupDialogForm
         tbGain1.Text = Camera.analogGain
         tbOffset1.Text = Camera.adOffset
 
+        If c IsNot Nothing Then
+            displayGainOffset()
+        End If
         chkTrace.Checked = Camera.traceState
         ' set the list of com ports to those that are currently available
         ComboBoxComPort.Items.Clear()
@@ -88,12 +93,21 @@ Public Class SetupDialogForm
 
         End If
     End Sub
+    Private Sub displayGainOffset()
+        Dim g, o As Integer
+        c.GetAdGain(g, TbGainAd.Text, tbGainChannel.Text)
+        c.GetAdOffset(o, tbOffsetAd.Text, tbOffsetChannel.Text)
+        lbGain.Text = g
+        lbOffset.Text = o
+    End Sub
+
 
     Private Sub btnSetGain1_Click(sender As Object, e As EventArgs) Handles btnSetGain1.Click
         If c IsNot Nothing Then
             Try
-                c.SetAdGain(tbGain1.Text, 1, 1)
+                c.SetAdGain(tbGain1.Text, TbGainAd.Text, tbGainChannel.Text)
                 MsgBox("gain set")
+                displayGainOffset()
             Catch ex As Exception
                 MsgBox("cannot set gain")
             End Try
@@ -105,13 +119,24 @@ Public Class SetupDialogForm
     Private Sub btnSetOffset1_Click(sender As Object, e As EventArgs) Handles btnSetOffset1.Click
         If c IsNot Nothing Then
             Try
-                c.SetAdOffset(tbOffset1.Text, 1, 1)
+                c.SetAdOffset(tbOffset1.Text, tbOffsetAd.Text, tbOffsetChannel.Text)
                 MsgBox("offset set")
+                displayGainOffset()
             Catch ex As Exception
-                MsgBox("could not set gain")
+                MsgBox("could not set offset")
             End Try
 
 
         End If
+    End Sub
+
+    Private Sub btnChooseCam_Click(sender As Object, e As EventArgs) Handles btnChooseCam.Click
+        'select different camera
+        c.Close()
+        Me.DialogResult = System.Windows.Forms.DialogResult.Retry
+        Me.selectedModel = ""
+        Me.Close()
+
+
     End Sub
 End Class

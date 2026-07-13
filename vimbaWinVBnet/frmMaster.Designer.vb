@@ -222,6 +222,7 @@ Partial Class frmMaster
         '
         'btnStop
         '
+        Me.btnStop.Enabled = False
         Me.btnStop.Location = New System.Drawing.Point(246, 325)
         Me.btnStop.Name = "btnStop"
         Me.btnStop.Size = New System.Drawing.Size(62, 23)
@@ -346,6 +347,7 @@ Partial Class frmMaster
         '
         'btnStopWeb
         '
+        Me.btnStopWeb.Enabled = False
         Me.btnStopWeb.Location = New System.Drawing.Point(177, 450)
         Me.btnStopWeb.Name = "btnStopWeb"
         Me.btnStopWeb.Size = New System.Drawing.Size(116, 22)

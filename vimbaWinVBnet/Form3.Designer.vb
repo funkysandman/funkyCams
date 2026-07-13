@@ -1,9 +1,9 @@
-﻿<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()> _
+﻿<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()>
 Partial Class Form3
     Inherits System.Windows.Forms.Form
 
     'Form overrides dispose to clean up the component list.
-    <System.Diagnostics.DebuggerNonUserCode()> _
+    <System.Diagnostics.DebuggerNonUserCode()>
     Protected Overrides Sub Dispose(ByVal disposing As Boolean)
         Try
             If disposing AndAlso components IsNot Nothing Then
@@ -20,7 +20,7 @@ Partial Class Form3
     'NOTE: The following procedure is required by the Windows Form Designer
     'It can be modified using the Windows Form Designer.  
     'Do not modify it using the code editor.
-    <System.Diagnostics.DebuggerStepThrough()> _
+    <System.Diagnostics.DebuggerStepThrough()>
     Private Sub InitializeComponent()
         Me.Button1 = New System.Windows.Forms.Button()
         Me.Button2 = New System.Windows.Forms.Button()
@@ -35,6 +35,7 @@ Partial Class Form3
         Me.Button9 = New System.Windows.Forms.Button()
         Me.btnIS = New System.Windows.Forms.Button()
         Me.btnIPCam = New System.Windows.Forms.Button()
+        Me.btnFusion = New System.Windows.Forms.Button()
         Me.btnAscom = New System.Windows.Forms.Button()
         Me.SuspendLayout()
         '
@@ -157,6 +158,15 @@ Partial Class Form3
         Me.btnIPCam.Text = "IP Camera"
         Me.btnIPCam.UseVisualStyleBackColor = True
         '
+        'btnFusion
+        '
+        Me.btnFusion.Location = New System.Drawing.Point(631, 196)
+        Me.btnFusion.Name = "btnFusion"
+        Me.btnFusion.Size = New System.Drawing.Size(112, 38)
+        Me.btnFusion.TabIndex = 13
+        Me.btnFusion.Text = "Fusion Camera"
+        Me.btnFusion.UseVisualStyleBackColor = True
+        '
         'btnAscom
         '
         Me.btnAscom.Location = New System.Drawing.Point(16, 196)
@@ -170,6 +180,8 @@ Partial Class Form3
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
+        Me.ClientSize = New System.Drawing.Size(807, 290)
+        Me.Controls.Add(Me.btnFusion)
         Me.ClientSize = New System.Drawing.Size(807, 246)
         Me.Controls.Add(Me.btnAscom)
         Me.Controls.Add(Me.btnIPCam)
@@ -203,5 +215,6 @@ Partial Class Form3
     Friend WithEvents Button9 As Button
     Friend WithEvents btnIS As Button
     Friend WithEvents btnIPCam As Button
+    Friend WithEvents btnFusion As Button
     Friend WithEvents btnAscom As Button
 End Class

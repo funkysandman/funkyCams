@@ -93,7 +93,7 @@ namespace ASCOM.ATIKVS.Camera
                 //
 
                 AtikPInvoke.ArtemisRefreshDevicesCount();
-                Thread.Sleep(1000); // The sleep is here to account for our CMOS cameras
+                //Thread.Sleep(1000); // The sleep is here to account for our CMOS cameras
                 int cam_index = 0;
                 for (var i = 0; i < 16; ++i)
                 {
@@ -108,7 +108,62 @@ namespace ASCOM.ATIKVS.Camera
 
                     }
                 }
-                // assume camera is at index 0 for now
+
+                //CameraComboBox.Items.Clear();
+                //foreach (var camera in ComboBoxCameras)
+                //    CameraComboBox.Items.Add(camera);
+
+
+                //
+                LogMessage("CameraHardware", $"Static initialiser completed.");
+            }
+            catch (Exception ex)
+            {
+                try { LogMessage("CameraHardware", $"Initialisation exception: {ex}"); } catch { }
+                MessageBox.Show($"CameraHardware - {ex.Message}\r\n{ex}", $"Exception creating {Camera.DriverProgId}", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                throw;
+            }
+
+        }
+
+        /// <summary>
+        /// Place device initialisation code here
+        /// </summary>
+        /// <remarks>Called every time a new instance of the driver is created.</remarks>
+        internal static void InitialiseHardware()
+        {
+
+            if (tl is null)
+            {
+                tl = new TraceLogger("", "ATIKVS.Hardware");
+
+            }
+            // This method will be called every time a new ASCOM client loads your driver
+            LogMessage("InitialiseHardware", $"Start.");
+
+            // Add any code that you want to run every time a client connects to your driver here
+
+            // Add any code that you only want to run when the first client connects in the if (runOnce == false) block below
+            if (runOnce == false)
+            {
+                LogMessage("InitialiseHardware", $"Starting one-off initialisation.");
+
+                DriverDescription = Camera.DriverDescription; // Get this device's Chooser description
+
+                LogMessage("InitialiseHardware", $"ProgID: {DriverProgId}, Description: {DriverDescription}");
+
+                connectedState = false; // Initialise connected to false
+                utilities = new Util(); //Initialise ASCOM Utilities object
+                astroUtilities = new AstroUtils(); // Initialise ASCOM Astronomy Utilities object
+
+                LogMessage("InitialiseHardware", "Completed basic initialisation");
+
+                // Add your own "one off" device initialisation here e.g. validating existence of hardware and setting up communications
+                // If you are using a serial COM port you will find the COM port name selected by the user through the setup dialogue in the comPort variable.
+
+                LogMessage("InitialiseHardware", $"One-off initialisation complete.");
+                //runOnce = true; // Set the flag to ensure that this code is not run again
+                                // assume camera is at index 0 for now
                 handle = AtikPInvoke.ArtemisConnect(0);
 
                 if (handle.ToInt32() != 0)
@@ -140,54 +195,6 @@ namespace ASCOM.ATIKVS.Camera
 
                 }
 
-                //CameraComboBox.Items.Clear();
-                //foreach (var camera in ComboBoxCameras)
-                //    CameraComboBox.Items.Add(camera);
-
-
-                //
-                LogMessage("CameraHardware", $"Static initialiser completed.");
-            }
-            catch (Exception ex)
-            {
-                try { LogMessage("CameraHardware", $"Initialisation exception: {ex}"); } catch { }
-                MessageBox.Show($"CameraHardware - {ex.Message}\r\n{ex}", $"Exception creating {Camera.DriverProgId}", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                throw;
-            }
-
-        }
-
-        /// <summary>
-        /// Place device initialisation code here
-        /// </summary>
-        /// <remarks>Called every time a new instance of the driver is created.</remarks>
-        internal static void InitialiseHardware()
-        {
-            // This method will be called every time a new ASCOM client loads your driver
-            LogMessage("InitialiseHardware", $"Start.");
-
-            // Add any code that you want to run every time a client connects to your driver here
-
-            // Add any code that you only want to run when the first client connects in the if (runOnce == false) block below
-            if (runOnce == false)
-            {
-                LogMessage("InitialiseHardware", $"Starting one-off initialisation.");
-
-                DriverDescription = Camera.DriverDescription; // Get this device's Chooser description
-
-                LogMessage("InitialiseHardware", $"ProgID: {DriverProgId}, Description: {DriverDescription}");
-
-                connectedState = false; // Initialise connected to false
-                utilities = new Util(); //Initialise ASCOM Utilities object
-                astroUtilities = new AstroUtils(); // Initialise ASCOM Astronomy Utilities object
-
-                LogMessage("InitialiseHardware", "Completed basic initialisation");
-
-                // Add your own "one off" device initialisation here e.g. validating existence of hardware and setting up communications
-                // If you are using a serial COM port you will find the COM port name selected by the user through the setup dialogue in the comPort variable.
-
-                LogMessage("InitialiseHardware", $"One-off initialisation complete.");
-                runOnce = true; // Set the flag to ensure that this code is not run again
             }
         }
 
@@ -416,7 +423,7 @@ namespace ASCOM.ATIKVS.Camera
                     }
                 }
             }
-
+            connectedState =newState;
             // Log the current connected state
             LogMessage("SetConnected", $"Currently connected driver ids:");
             foreach (Guid id in uniqueIds)
@@ -489,7 +496,7 @@ namespace ASCOM.ATIKVS.Camera
             // TODO customise this device name as required
             get
             {
-                string name = "Short driver name - please customise";
+                string name = "Atik VS60";
                 LogMessage("Name Get", name);
                 return name;
             }
@@ -1323,10 +1330,21 @@ namespace ASCOM.ATIKVS.Camera
         {
             get
             {
-                LogMessage("SensorType Get", "Not implemented");
-                throw new PropertyNotImplementedException("SensorType", false);
+                try
+                {
+                    CheckConnected("SensorType");
+                    SensorType sensorType = SensorType.Monochrome;
+                    LogMessage("SensorType", sensorType.ToString());
+                    return sensorType;
+                }
+                catch (Exception ex)
+                {
+                    LogMessage("SensorType", $"Threw an exception: \r\n{ex}");
+                    throw;
+                }
             }
         }
+
 
         /// <summary>
         /// Sets the camera cooler set point in degrees Celsius, and returns the current set point.
@@ -1607,7 +1625,11 @@ namespace ASCOM.ATIKVS.Camera
         /// <param name="message"></param>
         internal static void LogMessage(string identifier, string message)
         {
-            tl.LogMessageCrLf(identifier, message);
+            try {
+                tl.LogMessageCrLf(identifier, message);
+            }
+            catch 
+            { }
         }
 
         /// <summary>
