@@ -343,50 +343,84 @@ Public Class frmAscom
     ' Acquire images continuously
     Private Sub AcquireImages()
         Try
+            Dim exposureTime As Double = CDbl(tbExposureTime.Text)
+            Dim previousImageArray As Object = Nothing
+            Dim firstExposure As Boolean = True
+
+            ' Start first exposure before entering loop
+            If m_camera IsNot Nothing AndAlso m_camera.Connected Then
+                m_camera.StartExposure(exposureTime, True)
+            End If
+
             While m_acquiringImages
                 If m_camera IsNot Nothing AndAlso m_camera.Connected Then
-                    Dim exposureTime As Double = CDbl(tbExposureTime.Text)
+                    ' Update exposure time if changed
+                    Dim currentExposureTime As Double = CDbl(tbExposureTime.Text)
+                    If currentExposureTime <> exposureTime Then
+                        exposureTime = currentExposureTime
+                    End If
 
-                    ' Start exposure
-                    m_camera.StartExposure(exposureTime, True) ' True = light frame
-
-                    ' Wait for exposure to complete
+                    ' Wait for current exposure to complete
                     While Not m_camera.ImageReady
-                        Thread.Sleep(100)
+                        Thread.Sleep(10) ' Reduced sleep for faster response
                     End While
 
-                    ' Get image data
+                    ' Get image data immediately
                     Dim imageArray As Object = m_camera.ImageArray
 
-                    ' Convert image array to bitmap
-                    Dim bmp As Bitmap = ConvertImageArrayToBitmap(imageArray)
+                    ' START NEXT EXPOSURE IMMEDIATELY (minimizes gap)
+                    If m_acquiringImages Then
+                        m_camera.StartExposure(exposureTime, True)
+                    End If
 
-                    If bmp IsNot Nothing Then
-                        ' Update the display
-                        If m_ascomPics Is Nothing Then
-                            m_ascomPics = New AscomRingBitmap(5)
+                    ' Now process the previous image while new exposure is happening
+                    If Not firstExposure AndAlso previousImageArray IsNot Nothing Then
+                        ' Convert previous image array to bitmap
+                        Dim bmp As Bitmap = ConvertImageArrayToBitmap(previousImageArray)
+
+                        If bmp IsNot Nothing Then
+                            ' Update the display
+                            If m_ascomPics Is Nothing Then
+                                m_ascomPics = New AscomRingBitmap(5)
+                            End If
+                            m_ascomPics.FillNextBitmap(bmp)
+
+                            ' Handle image saving and processing
+                            ProcessImage(bmp, exposureTime)
+
+                            ' Update frame counter
+                            running = True
+                            frames = frames + 1
+                            If frames Mod 100 = 0 Then
+                                startTime = Now
+                                frames = 0
+                            End If
+                            running = False
+                        Else
+                            Console.WriteLine("Failed to convert image array to bitmap")
                         End If
-                        m_ascomPics.FillNextBitmap(bmp)
-
-                        ' Handle image saving and processing
-                        ProcessImage(bmp, exposureTime)
-                    Else
-                        Console.WriteLine("Failed to convert image array to bitmap")
                     End If
 
-                    ' Update frame counter
-                    running = True
-                    frames = frames + 1
-                    If frames Mod 100 = 0 Then
-                        startTime = Now
-                        frames = 0
-                    End If
+                    ' Store current image for processing in next iteration
+                    previousImageArray = imageArray
+                    firstExposure = False
 
-                    running = False
                 Else
                     Thread.Sleep(1000)
                 End If
             End While
+
+            ' Process the last captured image
+            If previousImageArray IsNot Nothing Then
+                Dim bmp As Bitmap = ConvertImageArrayToBitmap(previousImageArray)
+                If bmp IsNot Nothing Then
+                    If m_ascomPics Is Nothing Then
+                        m_ascomPics = New AscomRingBitmap(5)
+                    End If
+                    m_ascomPics.FillNextBitmap(bmp)
+                    ProcessImage(bmp, CDbl(tbExposureTime.Text))
+                End If
+            End If
 
         Catch ex As Exception
             Console.WriteLine("Error in acquisition loop: " & ex.Message)
@@ -539,8 +573,51 @@ Public Class frmAscom
 
             End If
 
+            ' Update camera temperature display
+            UpdateCameraTemperature()
+
         Catch ex As Exception
 
+        End Try
+    End Sub
+
+    ' Update camera temperature display
+    Private Sub UpdateCameraTemperature()
+        Try
+            If m_camera IsNot Nothing AndAlso m_camera.Connected Then
+                ' Check if camera supports temperature reading
+                If m_camera.CanSetCCDTemperature Then
+                    Dim temp As Double = m_camera.CCDTemperature
+                    txtTemp.Text = temp.ToString("F1")
+                Else
+                    txtTemp.Text = "N/A"
+                End If
+            Else
+                txtTemp.Text = "-"
+            End If
+        Catch ex As Exception
+            ' Silently fail - some cameras may not support temperature
+            txtTemp.Text = "ERR"
+        End Try
+    End Sub
+
+    ' FPS Timer - Update frame rate and temperature
+    Private Sub TimerFPS_Tick(sender As Object, e As EventArgs) Handles TimerFPS.Tick
+        Try
+            ' Calculate and display FPS
+            If frames > 0 Then
+                Dim elapsed As TimeSpan = Now - startTime
+                If elapsed.TotalSeconds > 0 Then
+                    Dim fps As Double = frames / elapsed.TotalSeconds
+                    txtFps.Text = fps.ToString("F1")
+                End If
+            End If
+
+            ' Update temperature display
+            UpdateCameraTemperature()
+
+        Catch ex As Exception
+            ' Silently handle errors
         End Try
     End Sub
 
