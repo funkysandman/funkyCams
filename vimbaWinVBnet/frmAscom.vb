@@ -214,7 +214,14 @@ Public Class frmAscom
 
             Console.WriteLine("Connected to: " & m_camera.Name)
             Console.WriteLine("Camera resolution: " & m_camera.CameraXSize & " x " & m_camera.CameraYSize)
+            'hard code binning to 2x2 for now
 
+            m_camera.BinX = 2
+            m_camera.BinY = 2
+            '
+            'set cooling point to 0C
+            m_camera.SetCCDTemperature = 0
+            m_camera.CoolerOn = True
             Return True
 
         Catch ex As Exception
@@ -393,8 +400,8 @@ Public Class frmAscom
                 Return Nothing
             End If
 
-            Dim width As Integer = m_camera.CameraXSize
-            Dim height As Integer = m_camera.CameraYSize
+            Dim width As Integer = m_camera.CameraXSize / m_camera.BinX
+            Dim height As Integer = m_camera.CameraYSize / m_camera.BinY
 
             Dim bmp As New Bitmap(width, height, PixelFormat.Format24bppRgb)
             Dim imageData As Integer(,) = CType(imageArray, Integer(,))
@@ -557,6 +564,7 @@ Public Class frmAscom
                     End If
                     m_camera.Connected = False
                 End If
+                m_camera.CoolerOn = False
                 m_camera.Dispose()
                 m_camera = Nothing
             End If
