@@ -300,29 +300,61 @@ Public Class frmAscom
     ' Stop image acquisition
     Private Sub btnStop_Click(sender As Object, e As EventArgs) Handles btnStop.Click
         Try
+            ' Signal threads to stop
             m_acquiringImages = False
             running = False
             TimerFPS.Enabled = False
             meteorCheckRunning = False
 
-            ' Wait for acquisition thread to finish
+            Console.WriteLine("Stopping acquisition...")
+
+            ' Try to abort any ongoing exposure
+            Try
+                If m_camera IsNot Nothing AndAlso m_camera.Connected Then
+                    If m_camera.CanAbortExposure AndAlso Not m_camera.ImageReady Then
+                        m_camera.AbortExposure()
+                        Console.WriteLine("Aborted ongoing exposure")
+                    End If
+                End If
+            Catch ex As Exception
+                Console.WriteLine("Error aborting exposure: " & ex.Message)
+            End Try
+
+            ' Wait for acquisition thread to finish with extended timeout
             If m_acquisitionThread IsNot Nothing AndAlso m_acquisitionThread.IsAlive Then
-                m_acquisitionThread.Join(5000)
+                Console.WriteLine("Waiting for acquisition thread to finish...")
+                If Not m_acquisitionThread.Join(10000) Then ' 10 second timeout
+                    Console.WriteLine("WARNING: Acquisition thread did not stop gracefully")
+                    ' Consider thread abort as last resort (not recommended but prevents complete hang)
+                    Try
+                        m_acquisitionThread.Abort()
+                        Console.WriteLine("Acquisition thread aborted")
+                    Catch
+                        ' Thread abort failed
+                    End Try
+                Else
+                    Console.WriteLine("Acquisition thread stopped gracefully")
+                End If
             End If
 
             ' Disconnect camera
-            If m_camera IsNot Nothing AndAlso m_camera.Connected Then
-                If m_camera.ImageReady Then
-                    m_camera.StopExposure()
+            Try
+                If m_camera IsNot Nothing AndAlso m_camera.Connected Then
+                    m_camera.Connected = False
+                    Console.WriteLine("Camera disconnected")
                 End If
-                m_camera.Connected = False
-            End If
+            Catch ex As Exception
+                Console.WriteLine("Error disconnecting camera: " & ex.Message)
+            End Try
 
             btnStart.Enabled = True
             btnStop.Enabled = False
 
         Catch ex As Exception
             MessageBox.Show("Error stopping acquisition: " & ex.Message, "Stop Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            ' Ensure buttons are re-enabled even on error
+            btnStart.Enabled = True
+            btnStop.Enabled = False
         End Try
     End Sub
 
@@ -353,81 +385,153 @@ Public Class frmAscom
             End If
 
             While m_acquiringImages
-                If m_camera IsNot Nothing AndAlso m_camera.Connected Then
-                    ' Update exposure time if changed
-                    Dim currentExposureTime As Double = CDbl(tbExposureTime.Text)
-                    If currentExposureTime <> exposureTime Then
-                        exposureTime = currentExposureTime
-                    End If
-
-                    ' Wait for current exposure to complete
-                    While Not m_camera.ImageReady
-                        Thread.Sleep(10) ' Reduced sleep for faster response
-                    End While
-
-                    ' Get image data immediately
-                    Dim imageArray As Object = m_camera.ImageArray
-
-                    ' START NEXT EXPOSURE IMMEDIATELY (minimizes gap)
-                    If m_acquiringImages Then
-                        m_camera.StartExposure(exposureTime, True)
-                    End If
-
-                    ' Now process the previous image while new exposure is happening
-                    If Not firstExposure AndAlso previousImageArray IsNot Nothing Then
-                        ' Convert previous image array to bitmap
-                        Dim bmp As Bitmap = ConvertImageArrayToBitmap(previousImageArray)
-
-                        If bmp IsNot Nothing Then
-                            ' Update the display
-                            If m_ascomPics Is Nothing Then
-                                m_ascomPics = New AscomRingBitmap(5)
-                            End If
-                            m_ascomPics.FillNextBitmap(bmp)
-
-                            ' Handle image saving and processing
-                            ProcessImage(bmp, exposureTime)
-
-                            ' Update frame counter
-                            running = True
-                            frames = frames + 1
-                            If frames Mod 100 = 0 Then
-                                startTime = Now
-                                frames = 0
-                            End If
-                            running = False
-                        Else
-                            Console.WriteLine("Failed to convert image array to bitmap")
+                Try
+                    If m_camera IsNot Nothing AndAlso m_camera.Connected Then
+                        ' Update exposure time if changed
+                        Dim currentExposureTime As Double = CDbl(tbExposureTime.Text)
+                        If currentExposureTime <> exposureTime Then
+                            exposureTime = currentExposureTime
                         End If
+
+                        ' Wait for current exposure to complete with timeout and cancellation check
+                        Dim timeoutSeconds As Integer = CInt(exposureTime) + 60 ' Exposure time + 60 second buffer
+                        Dim maxWaitTime As DateTime = DateTime.Now.AddSeconds(timeoutSeconds)
+                        Dim imageReady As Boolean = False
+
+                        While m_acquiringImages AndAlso DateTime.Now < maxWaitTime
+                            ' Check if camera is still connected
+                            If Not m_camera.Connected Then
+                                Console.WriteLine("Camera disconnected during exposure")
+                                Exit While
+                            End If
+
+                            ' Check if image is ready
+                            Try
+                                If m_camera.ImageReady Then
+                                    imageReady = True
+                                    Exit While
+                                End If
+                            Catch ex As Exception
+                                Console.WriteLine("Error checking ImageReady: " & ex.Message)
+                                Exit While
+                            End Try
+
+                            Thread.Sleep(10) ' Reduced sleep for faster response
+                        End While
+
+                        ' Check if we timed out
+                        If Not imageReady Then
+                            If m_acquiringImages Then
+                                Console.WriteLine("Timeout waiting for image or acquisition stopped")
+                            End If
+                            ' Try to abort the exposure if possible
+                            Try
+                                If m_camera.CanAbortExposure Then
+                                    m_camera.AbortExposure()
+                                End If
+                            Catch
+                                ' Ignore abort errors
+                            End Try
+                            Exit While ' Exit acquisition loop
+                        End If
+
+                        ' Get image data immediately
+                        Dim imageArray As Object = Nothing
+                        Try
+                            imageArray = m_camera.ImageArray
+                        Catch ex As Exception
+                            Console.WriteLine("Error retrieving image array: " & ex.Message)
+                            lost += 1
+                            ' Continue to next iteration
+                            If m_acquiringImages AndAlso m_camera.Connected Then
+                                m_camera.StartExposure(exposureTime, True)
+                            End If
+                            Continue While
+                        End Try
+
+                        ' START NEXT EXPOSURE IMMEDIATELY (minimizes gap)
+                        If m_acquiringImages AndAlso m_camera.Connected Then
+                            Try
+                                m_camera.StartExposure(exposureTime, True)
+                            Catch ex As Exception
+                                Console.WriteLine("Error starting next exposure: " & ex.Message)
+                                Exit While
+                            End Try
+                        End If
+
+                        ' Now process the previous image while new exposure is happening
+                        If Not firstExposure AndAlso previousImageArray IsNot Nothing Then
+                            ' Convert previous image array to bitmap
+                            Dim bmp As Bitmap = ConvertImageArrayToBitmap(previousImageArray)
+
+                            If bmp IsNot Nothing Then
+                                ' Update the display
+                                If m_ascomPics Is Nothing Then
+                                    m_ascomPics = New AscomRingBitmap(5)
+                                End If
+                                m_ascomPics.FillNextBitmap(bmp)
+
+                                ' Handle image saving and processing
+                                ProcessImage(bmp, exposureTime)
+
+                                ' Update frame counter
+                                running = True
+                                frames = frames + 1
+                                If frames Mod 100 = 0 Then
+                                    startTime = Now
+                                    frames = 0
+                                End If
+                                running = False
+                            Else
+                                Console.WriteLine("Failed to convert image array to bitmap")
+                            End If
+                        End If
+
+                        ' Store current image for processing in next iteration
+                        previousImageArray = imageArray
+                        firstExposure = False
+
+                    Else
+                        Console.WriteLine("Camera not connected in acquisition loop")
+                        Thread.Sleep(1000)
+                        Exit While ' Exit if camera not connected
                     End If
 
-                    ' Store current image for processing in next iteration
-                    previousImageArray = imageArray
-                    firstExposure = False
-
-                Else
-                    Thread.Sleep(1000)
-                End If
+                Catch ex As Exception
+                    Console.WriteLine("Error in acquisition iteration: " & ex.Message)
+                    lost += 1
+                    ' Try to continue if still acquiring
+                    If Not m_acquiringImages Then
+                        Exit While
+                    End If
+                    Thread.Sleep(100)
+                End Try
             End While
 
             ' Process the last captured image
             If previousImageArray IsNot Nothing Then
-                Dim bmp As Bitmap = ConvertImageArrayToBitmap(previousImageArray)
-                If bmp IsNot Nothing Then
-                    If m_ascomPics Is Nothing Then
-                        m_ascomPics = New AscomRingBitmap(5)
+                Try
+                    Dim bmp As Bitmap = ConvertImageArrayToBitmap(previousImageArray)
+                    If bmp IsNot Nothing Then
+                        If m_ascomPics Is Nothing Then
+                            m_ascomPics = New AscomRingBitmap(5)
+                        End If
+                        m_ascomPics.FillNextBitmap(bmp)
+                        ProcessImage(bmp, CDbl(tbExposureTime.Text))
                     End If
-                    m_ascomPics.FillNextBitmap(bmp)
-                    ProcessImage(bmp, CDbl(tbExposureTime.Text))
-                End If
+                Catch ex As Exception
+                    Console.WriteLine("Error processing last image: " & ex.Message)
+                End Try
             End If
 
         Catch ex As Exception
             Console.WriteLine("Error in acquisition loop: " & ex.Message)
+        Finally
+            Console.WriteLine("Acquisition thread exiting")
         End Try
     End Sub
 
-    ' Convert ASCOM image array to bitmap
+    ' Convert ASCOM image array to bitmap with fixed 14-bit to 8-bit scaling
     Private Function ConvertImageArrayToBitmap(imageArray As Object) As Bitmap
         Try
             If imageArray Is Nothing Then
@@ -440,29 +544,43 @@ Public Class frmAscom
             Dim bmp As New Bitmap(width, height, PixelFormat.Format24bppRgb)
             Dim imageData As Integer(,) = CType(imageArray, Integer(,))
 
-            ' Find min and max values for scaling
-            Dim minVal As Integer = Integer.MaxValue
-            Dim maxVal As Integer = Integer.MinValue
+            ' Lock bitmap for fast pixel access
+            Dim BoundsRect As New Rectangle(0, 0, width, height)
+            Dim bmpData As BitmapData = bmp.LockBits(BoundsRect, ImageLockMode.WriteOnly, bmp.PixelFormat)
 
-            For y As Integer = 0 To height - 1
-                For x As Integer = 0 To width - 1
-                    Dim pixelValue As Integer = imageData(x, y)
-                    If pixelValue < minVal Then minVal = pixelValue
-                    If pixelValue > maxVal Then maxVal = pixelValue
+            Try
+                Dim stride As Integer = bmpData.Stride
+                Dim ptr As IntPtr = bmpData.Scan0
+                Dim bytes As Integer = Math.Abs(stride) * height
+                Dim rgbValues(bytes - 1) As Byte
+
+                ' Fixed 14-bit to 8-bit conversion: divide by 64 (shift right 6 bits)
+                ' 14-bit range: 0-16383 -> 8-bit range: 0-255
+                For y As Integer = 0 To height - 1
+                    Dim rowOffset As Integer = y * stride
+                    For x As Integer = 0 To width - 1
+                        Dim pixelValue As Integer = imageData(x, y)
+
+                        ' Scale 14-bit to 8-bit (0-16383 -> 0-255)
+                        ' Using bit shift for performance: value >> 6 is equivalent to value / 64
+                        Dim scaled As Byte = CByte(Math.Min(255, pixelValue >> 6))
+
+                        ' Calculate byte position (24bpp = 3 bytes per pixel: BGR format)
+                        Dim pixelOffset As Integer = rowOffset + (x * 3)
+
+                        ' Set BGR values (grayscale, so all three channels same)
+                        rgbValues(pixelOffset) = scaled     ' Blue
+                        rgbValues(pixelOffset + 1) = scaled ' Green
+                        rgbValues(pixelOffset + 2) = scaled ' Red
+                    Next
                 Next
-            Next
 
-            ' Convert to 8-bit and create bitmap
-            Dim range As Integer = maxVal - minVal
-            If range = 0 Then range = 1
+                ' Copy byte array back to bitmap
+                System.Runtime.InteropServices.Marshal.Copy(rgbValues, 0, ptr, bytes)
 
-            For y As Integer = 0 To height - 1
-                For x As Integer = 0 To width - 1
-                    Dim pixelValue As Integer = imageData(x, y)
-                    Dim scaled As Byte = CByte(((pixelValue - minVal) * 255) \ range)
-                    bmp.SetPixel(x, y, System.Drawing.Color.FromArgb(scaled, scaled, scaled))
-                Next
-            Next
+            Finally
+                bmp.UnlockBits(bmpData)
+            End Try
 
             Return bmp
 
@@ -583,22 +701,23 @@ Public Class frmAscom
 
     ' Update camera temperature display
     Private Sub UpdateCameraTemperature()
-        Try
-            If m_camera IsNot Nothing AndAlso m_camera.Connected Then
-                ' Check if camera supports temperature reading
-                If m_camera.CanSetCCDTemperature Then
-                    Dim temp As Double = m_camera.CCDTemperature
-                    txtTemp.Text = temp.ToString("F1")
-                Else
-                    txtTemp.Text = "N/A"
-                End If
-            Else
-                txtTemp.Text = "-"
-            End If
-        Catch ex As Exception
-            ' Silently fail - some cameras may not support temperature
-            txtTemp.Text = "ERR"
-        End Try
+        Exit Sub
+        'Try
+        '    If m_camera IsNot Nothing AndAlso m_camera.Connected Then
+        '        ' Check if camera supports temperature reading
+        '        'If m_camera.CanSetCCDTemperature Then
+        '        '    Dim temp As Double = m_camera.CCDTemperature
+        '        '    txtTemp.Text = temp.ToString("F1")
+        '        'Else
+        '        '    txtTemp.Text = "N/A"
+        '    End If
+        '    Else
+        '    txtTemp.Text = "-"
+        '    End If
+        'Catch ex As Exception
+        '    ' Silently fail - some cameras may not support temperature
+        '    txtTemp.Text = "ERR"
+        'End Try
     End Sub
 
     ' FPS Timer - Update frame rate and temperature

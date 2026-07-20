@@ -107,24 +107,24 @@ namespace pvcam_helper
             //ActiveCamera.CloseCamera();
         }
 
-        /*Setup the acquisition for single snap*/
-        private void btnSingleCapture_Click(object sender, EventArgs e)
-        {
-            if (!ActiveCamera.AcqSetup(PVCamCamera.AcqTypes.ACQ_TYPE_SINGLE))
-            {
-                return;
-            }
+        ///*Setup the acquisition for single snap*/
+        //private void btnSingleCapture_Click(object sender, EventArgs e)
+        //{
+        //    if (!ActiveCamera.AcqSetup(PVCamCamera.AcqTypes.ACQ_TYPE_SINGLE))
+        //    {
+        //        return;
+        //    }
 
            
 
-            //SetupFrameViewer(FrameViewer);
+        //    //SetupFrameViewer(FrameViewer);
 
-            //if acqusition setup succeeded, start the acquisition
-            if (!ActiveCamera.StartSeqAcq())
-            {
-                return;
-            }
-        }
+        //    //if acqusition setup succeeded, start the acquisition
+        //    if (!ActiveCamera.StartSeqAcq())
+        //    {
+        //        return;
+        //    }
+        //}
 
         /*start acquisition in continuous mode with circular buffer*/
        

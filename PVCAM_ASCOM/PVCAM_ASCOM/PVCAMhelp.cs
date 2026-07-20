@@ -3246,6 +3246,32 @@ namespace pvcam_helper
             return true;
         }
 
+        //Set exposure resolution (milliseconds, microseconds, or seconds)
+        //Should be called during camera initialization or before setting exposure time
+        public bool SetExposureResolution(UInt16 resolutionIndex)
+        {
+            if (!isParamAvailable(PvTypes.PARAM_EXP_RES_INDEX))
+            {
+                ReportMsg(this, new ReportMessage("Exposure resolution parameter not available on this camera", MsgTypes.MSG_ERROR));
+                return false;
+            }
+
+            IntPtr unmngExpRes = Marshal.AllocHGlobal(sizeof(UInt16));
+            Marshal.WriteInt16(unmngExpRes, (Int16)resolutionIndex);
+
+            if (!PVCAM.pl_set_param(m_hCam, PvTypes.PARAM_EXP_RES_INDEX, unmngExpRes))
+            {
+                ReportMsg(this, new ReportMessage("Setting exposure resolution failed", MsgTypes.MSG_ERROR));
+                Marshal.FreeHGlobal(unmngExpRes);
+                return false;
+            }
+
+            string resName = resolutionIndex == 0 ? "milliseconds" : (resolutionIndex == 1 ? "microseconds" : "seconds");
+            ReportMsg(this, new ReportMessage(String.Format("Exposure resolution set to {0}", resName), MsgTypes.MSG_STATUS));
+            Marshal.FreeHGlobal(unmngExpRes);
+            return true;
+        }
+
         //exposure time is only applied when pl_exp_setup_seq() or pl_exp_setup_cont() is called
         //so just remember the value for now
         public void SetExposureTime(UInt32 expTime)

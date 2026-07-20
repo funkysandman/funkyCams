@@ -126,11 +126,12 @@ namespace ASCOM.Photometrics
             //myCam.ReadCameraParams();
             ccdWidth = myCam.XSize;
             ccdHeight = myCam.YSize;
-            myCam.SetClockingMode("Alternate Normal");
+          //  myCam.SetClockingMode("Alternate Normal");
+            myCam.SetClockingMode("Normal");
             myCam.SetClearMode("Pre-Exposure");
             myCam.SetClearCycles(4);
             // myCam.SetEMGain(4);// - doesn't seem to do much
-            myCam.SetReadoutSpeed(2); //1.25Mhz biggest dynamic range
+            myCam.SetReadoutSpeed(1); //1.25Mhz biggest dynamic range
             myCam.SetTriggerMode("Timed");
             myCam.SetBinning("1");
             myCam.SetGainState(2);//gain state 3 - highest gain
@@ -995,9 +996,10 @@ namespace ASCOM.Photometrics
             else
             {
                 if (myCam.SpeedTableIndex != 2)
-                    myCam.SetReadoutSpeed(2);//1.25mhz
+                    myCam.SetReadoutSpeed(1);//1.25mhz //10 mhz
             }
-            myCam.SetExposureTime(Convert.ToUInt32(Duration * 1000));
+            myCam.SetExposureResolution(1);//1 microsecond resolution
+            myCam.SetExposureTime(Convert.ToUInt32(Duration));
             if (Duration < 0.0) throw new InvalidValueException("StartExposure", Duration.ToString(), "0.0 upwards");
             if (cameraNumX > ccdWidth) throw new InvalidValueException("StartExposure", cameraNumX.ToString(), ccdWidth.ToString());
             if (cameraNumY > ccdHeight) throw new InvalidValueException("StartExposure", cameraNumY.ToString(), ccdHeight.ToString());
