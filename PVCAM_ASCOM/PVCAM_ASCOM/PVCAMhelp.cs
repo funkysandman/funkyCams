@@ -1134,7 +1134,11 @@ namespace pvcam_helper
                 }
 
                 //convert the data in managed memory from signed to unsigned shorts
-                System.Buffer.BlockCopy(m_frameDataSigned, 0, m_frameDataShorts, 0, (Int32)(m_stream_size));
+                //Use lock to prevent race condition with image readers
+                lock (m_bmpLock)
+                {
+                    System.Buffer.BlockCopy(m_frameDataSigned, 0, m_frameDataShorts, 0, (Int32)(m_stream_size));
+                }
 
                 m_frameNumber++;
 
@@ -1337,7 +1341,11 @@ namespace pvcam_helper
                     }
 
                     //convert the data in managed memory from signed to unsigned shorts
-                    System.Buffer.BlockCopy(m_frameDataSigned, 0, m_frameDataShorts, 0, (Int32)(m_stream_size));
+                    //Use lock to prevent race condition with image readers
+                    lock (m_bmpLock)
+                    {
+                        System.Buffer.BlockCopy(m_frameDataSigned, 0, m_frameDataShorts, 0, (Int32)(m_stream_size));
+                    }
 
                     m_frameNumber++;
 

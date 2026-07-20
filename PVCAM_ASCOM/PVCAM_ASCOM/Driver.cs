@@ -29,6 +29,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Text;
 using System.Runtime.InteropServices;
 using Photometrics.Pvcam;
@@ -178,30 +179,46 @@ namespace ASCOM.Photometrics
             if (evtType.NotifEvent == pvcam_helper.CameraNotifications.ACQ_NEW_FRAME_RECEIVED)
             {
 
-                //copy image frame
+                //copy image frame with thread safety
                 //check if roi in use
-
-                int tempW = (myCam.Region[0].s2 - myCam.Region[0].s1 + 1) / myCam.Region[0].sbin;
-
-                int tempH = (myCam.Region[0].p2 - myCam.Region[0].p1 + 1) / myCam.Region[0].pbin;
-                cameraImageArray = new int[tempW, tempH];
-                int n = 0;
-                for (int y = 0; y < tempH; y++)
+                lock (myCam.BmpLock)
                 {
-                    for (int x = 0; x < tempW; x++)
+                    int tempW = (myCam.Region[0].s2 - myCam.Region[0].s1 + 1) / myCam.Region[0].sbin;
+
+                    int tempH = (myCam.Region[0].p2 - myCam.Region[0].p1 + 1) / myCam.Region[0].pbin;
+                    cameraImageArray = new int[tempW, tempH];
+                    int n = 0;
+                    for (int y = 0; y < tempH; y++)
                     {
-                        if (n < myCam.FrameDataShorts.Length)
+                        for (int x = 0; x < tempW; x++)
                         {
-                            cameraImageArray[x, y] = (UInt16)myCam.FrameDataShorts[n];
+                            if (n < myCam.FrameDataShorts.Length)
+                            {
+                                cameraImageArray[x, y] = (UInt16)myCam.FrameDataShorts[n];
+                            }
+                            else
+                            {
+                                //data interrupted
+                                x = tempW;
+                                y = tempH;
+                                Debug.WriteLine("incomplete image");
+                            }
+                            n++;
                         }
-                        else
+                    }
+
+                    // Diagnostic: Check for black frames
+                    if (myCam.FrameDataShorts.Length > 0)
+                    {
+                        int minVal = myCam.FrameDataShorts.Min();
+                        int maxVal = myCam.FrameDataShorts.Max();
+                        double avgVal = myCam.FrameDataShorts.Average(x => (double)x);
+                        Debug.WriteLine($"Frame stats - Min: {minVal}, Max: {maxVal}, Avg: {avgVal:F1}");
+
+                        if (maxVal < 10)
                         {
-                            //data interupted
-                            x = tempW;
-                            y = tempH;
-                            Debug.WriteLine("incomplete image");
+                            Debug.WriteLine("WARNING: Frame appears to be black or nearly black!");
                         }
-                        n++;
                     }
                 }
                 var test = 0;
