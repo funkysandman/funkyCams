@@ -21,8 +21,8 @@ OutputBaseFilename="Photometrics Setup"
 Compression=lzma
 SolidCompression=yes
 ; Put there by Platform if Driver Installer Support selected
-WizardImageFile="C:\Program Files (x86)\ASCOM\Platform 6 Developer Components\Installer Generator\Resources\WizardImage.bmp"
-LicenseFile="C:\Program Files (x86)\ASCOM\Platform 6 Developer Components\Installer Generator\Resources\CreativeCommons.txt"
+;WizardImageFile="d:\Program Files (x86)\ASCOM\Platform 6 Developer Components\Installer Generator\Resources\WizardImage.bmp"
+;LicenseFile="d:\Program Files (x86)\ASCOM\Platform 6 Developer Components\Installer Generator\Resources\CreativeCommons.txt"
 ; {cf}\ASCOM\Uninstall\Camera folder created by Platform, always
 UninstallFilesDir="{cf}\ASCOM\Uninstall\Camera\Photometrics"
 
@@ -34,9 +34,11 @@ Name: "{cf}\ASCOM\Uninstall\Camera\Photometrics"
 ; TODO: Add subfolders below {app} as needed (e.g. Name: "{app}\MyFolder")
 
 [Files]
-Source: "C:\Users\funky\source\repos\funkysandman\funkyCams\PVCAM_ASCOM\PVCAM_ASCOM\bin\Debug\ASCOM.Photometrics.Camera.dll"; DestDir: "{app}"
+Source: "D:\Users\sandy\Source\Repos\funkyCams\PVCAM_ASCOM\PVCAM_ASCOM\bin\Debug\ASCOM.Photometrics.Camera.dll"; DestDir: "{app}"
+
+
 ; Require a read-me HTML to appear after installation, maybe driver's Help doc
-Source: "C:\Users\funky\source\repos\funkysandman\funkyCams\PVCAM_ASCOM\PVCAM_ASCOM\bin\Debug\ReadMe.htm"; DestDir: "{app}"; Flags: isreadme
+;Source: "C:\Users\funky\source\repos\funkysandman\funkyCams\PVCAM_ASCOM\PVCAM_ASCOM\bin\Debug\ReadMe.htm"; DestDir: "{app}"; Flags: isreadme
 ; TODO: Add other files needed by your driver here (add subfolders above)
 
 
