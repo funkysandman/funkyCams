@@ -75,11 +75,16 @@ Public Class frmAscom
             m_Bitmaps(m_BitmapSelector) = b
             ' Copy raw data into m_buffers
             Try
-                Dim rawData(b.Width * b.Height * 3 - 1) As Byte ' 3 bytes per pixel for 24bpp
                 Dim BoundsRect = New Rectangle(0, 0, b.Width, b.Height)
                 Dim bmpData As System.Drawing.Imaging.BitmapData = b.LockBits(BoundsRect, System.Drawing.Imaging.ImageLockMode.ReadOnly, b.PixelFormat)
+
+                ' Calculate actual buffer size using stride (accounts for row padding)
+                Dim stride As Integer = Math.Abs(bmpData.Stride)
+                Dim dataSize As Integer = stride * b.Height
+                Dim rawData(dataSize - 1) As Byte
+
                 Dim ptr As IntPtr = bmpData.Scan0
-                System.Runtime.InteropServices.Marshal.Copy(ptr, rawData, 0, rawData.Length)
+                System.Runtime.InteropServices.Marshal.Copy(ptr, rawData, 0, dataSize)
                 m_buffers(m_BitmapSelector) = rawData
                 b.UnlockBits(bmpData)
             Catch ex As Exception
@@ -394,7 +399,7 @@ Public Class frmAscom
                         End If
 
                         ' Wait for current exposure to complete with timeout and cancellation check
-                        Dim timeoutSeconds As Integer = CInt(exposureTime) + 60 ' Exposure time + 60 second buffer
+                        Dim timeoutSeconds As Integer =  60 '  60 second buffer
                         Dim maxWaitTime As DateTime = DateTime.Now.AddSeconds(timeoutSeconds)
                         Dim imageReady As Boolean = False
 
@@ -449,15 +454,6 @@ Public Class frmAscom
                             Continue While
                         End Try
 
-                        ' START NEXT EXPOSURE IMMEDIATELY (minimizes gap)
-                        If m_acquiringImages AndAlso m_camera.Connected Then
-                            Try
-                                m_camera.StartExposure(exposureTime, True)
-                            Catch ex As Exception
-                                Console.WriteLine("Error starting next exposure: " & ex.Message)
-                                Exit While
-                            End Try
-                        End If
 
                         ' Now process the previous image while new exposure is happening
                         If Not firstExposure AndAlso previousImageArray IsNot Nothing Then
@@ -495,6 +491,16 @@ Public Class frmAscom
                         Console.WriteLine("Camera not connected in acquisition loop")
                         Thread.Sleep(1000)
                         Exit While ' Exit if camera not connected
+                    End If
+
+                    ' START NEXT EXPOSURE IMMEDIATELY (minimizes gap)
+                    If m_acquiringImages AndAlso m_camera.Connected Then
+                        Try
+                            m_camera.StartExposure(exposureTime, True)
+                        Catch ex As Exception
+                            Console.WriteLine("Error starting next exposure: " & ex.Message)
+                            Exit While
+                        End Try
                     End If
 
                 Catch ex As Exception
@@ -563,8 +569,8 @@ Public Class frmAscom
 
                         ' Scale 14-bit to 8-bit (0-16383 -> 0-255)
                         ' Using bit shift for performance: value >> 6 is equivalent to value / 64
-                        Dim scaled As Byte = CByte(Math.Min(255, pixelValue >> 6))
-
+                        ' Dim scaled As Byte = CByte(Math.Min(255, pixelValue >> 6))
+                        Dim scaled As Byte = CByte((pixelValue * 255) \ 16383)
                         ' Calculate byte position (24bpp = 3 bytes per pixel: BGR format)
                         Dim pixelOffset As Integer = rowOffset + (x * 3)
 

@@ -1002,7 +1002,7 @@ namespace pvcam_helper
             //whether the frame has arrived
             while (!m_abortAcquisition
                     && PVCAM.pl_exp_check_status(m_hCam, out status, out byte_cnt)
-                    && status != (Int16)PvTypes.ReadoutStatuses.READOUT_COMPLETE
+                    && status != (Int16)PvTypes.ReadoutStatuses.FRAME_AVAILABLE
                     && status != (Int16)PvTypes.ReadoutStatuses.READOUT_FAILED
                     && timeoutCounter<timeoutLimit)
             {

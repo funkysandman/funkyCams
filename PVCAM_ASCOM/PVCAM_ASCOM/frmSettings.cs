@@ -349,12 +349,16 @@ namespace pvcam_helper
         //receive messages from the PVCamCamera class
         public void SubscribeToReportMessages(PVCamCamera pvcc)
         {
+            // Unsubscribe first to prevent duplicate registrations
+            pvcc.ReportMsg -= new PVCamCamera.ReportHandler(ReportReceived);
             pvcc.ReportMsg += new PVCamCamera.ReportHandler(ReportReceived);
         }
 
         //receive notifications from the PVCamCamera class
         public void SubscribeToAcquisitionNotifications(PVCamCamera pvcc)
         {
+            // Unsubscribe first to prevent duplicate registrations
+            pvcc.CamNotif -= new PVCamCamera.CameraNotificationsHandler(CameraNotificationReceived);
             pvcc.CamNotif += new PVCamCamera.CameraNotificationsHandler(CameraNotificationReceived);
         }
 

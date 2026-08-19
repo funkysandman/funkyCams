@@ -127,12 +127,12 @@ namespace ASCOM.Photometrics
             //myCam.ReadCameraParams();
             ccdWidth = myCam.XSize;
             ccdHeight = myCam.YSize;
-          //  myCam.SetClockingMode("Alternate Normal");
+            //myCam.SetClockingMode("Alternate Normal");
             myCam.SetClockingMode("Normal");
             myCam.SetClearMode("Pre-Exposure");
-            myCam.SetClearCycles(4);
+            myCam.SetClearCycles(2);
             // myCam.SetEMGain(4);// - doesn't seem to do much
-            myCam.SetReadoutSpeed(1); //1.25Mhz biggest dynamic range
+            myCam.SetReadoutSpeed(1);//10 Mhz for now  //1.25Mhz biggest dynamic range
             myCam.SetTriggerMode("Timed");
             myCam.SetBinning("1");
             myCam.SetGainState(2);//gain state 3 - highest gain
@@ -181,6 +181,7 @@ namespace ASCOM.Photometrics
 
                 //copy image frame with thread safety
                 //check if roi in use
+                Debug.WriteLine("new frame received");
                 lock (myCam.BmpLock)
                 {
                     int tempW = (myCam.Region[0].s2 - myCam.Region[0].s1 + 1) / myCam.Region[0].sbin;
@@ -221,11 +222,12 @@ namespace ASCOM.Photometrics
                         }
                     }
                 }
-                var test = 0;
+
                 cameraImageReady = true; //either way image is finished
             }
             if (evtType.NotifEvent == pvcam_helper.CameraNotifications.CAMERA_REFRESH_DONE)
             {
+                Debug.WriteLine("refresh done");
                 if (pvcam_helper.PVCamCamera.NrOfCameras > 0)
                 {
                     //open camera
@@ -237,11 +239,15 @@ namespace ASCOM.Photometrics
         }
         public void SubscribeToReportMessages(pvcam_helper.PVCamCamera pvcc)
         {
+            // Unsubscribe first to prevent duplicate registrations
+            pvcc.ReportMsg -= new pvcam_helper.PVCamCamera.ReportHandler(ReportReceived);
             pvcc.ReportMsg += new pvcam_helper.PVCamCamera.ReportHandler(ReportReceived);
         }
 
         public void SubscribeToAcquisitionNotifications(pvcam_helper.PVCamCamera pvcc)
         {
+            // Unsubscribe first to prevent duplicate registrations
+            pvcc.CamNotif -= new pvcam_helper.PVCamCamera.CameraNotificationsHandler(CameraNotificationReceived);
             pvcc.CamNotif += new pvcam_helper.PVCamCamera.CameraNotificationsHandler(CameraNotificationReceived);
         }
         //
@@ -1004,7 +1010,7 @@ namespace ASCOM.Photometrics
 
         {
             cameraImageReady = false;
-            Debug.WriteLine("startExposure");
+            Debug.WriteLine("startExposure begin");
             if (fastreadout)
             {
                 if (myCam.SpeedTableIndex != 0)
@@ -1013,7 +1019,7 @@ namespace ASCOM.Photometrics
             else
             {
                 if (myCam.SpeedTableIndex != 2)
-                    myCam.SetReadoutSpeed(1);//1.25mhz //10 mhz
+                    myCam.SetReadoutSpeed(1);//2=1.25mhz //1=10 mhz //2=20Mhz
             }
             myCam.SetExposureResolution(1);//1 microsecond resolution
             myCam.SetExposureTime(Convert.ToUInt32(Duration));
@@ -1046,7 +1052,7 @@ namespace ASCOM.Photometrics
 
 
 
-            tl.LogMessage("StartExposure", Duration.ToString() + " " + Light.ToString());
+            tl.LogMessage("StartExposure done", Duration.ToString() + " " + Light.ToString());
 
         }
 
