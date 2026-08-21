@@ -127,19 +127,18 @@ namespace ASCOM.Photometrics
             //myCam.ReadCameraParams();
             ccdWidth = myCam.XSize;
             ccdHeight = myCam.YSize;
-            //myCam.SetClockingMode("Alternate Normal");
-            myCam.SetClockingMode("Normal");
+            myCam.SetClockingMode("Alternate Normal"); //turn off amp during exposure to reduce noise
+            //myCam.SetClockingMode("Normal");
             myCam.SetClearMode("Pre-Exposure");
             myCam.SetClearCycles(2);
             // myCam.SetEMGain(4);// - doesn't seem to do much
-            myCam.SetReadoutSpeed(1);//10 Mhz for now  //1.25Mhz biggest dynamic range
+            myCam.SetReadoutSpeed(1);//1 is 725khz
             myCam.SetTriggerMode("Timed");
             myCam.SetBinning("1");
-            myCam.SetGainState(2);//gain state 3 - highest gain
+            myCam.SetGainState(2);// gain state 3
             myCam.FramesToGet = 1;
             myCam.SetExposureTime(1);
-            myCam.SetADCoffset(40); //40 was found to best for zeroing the bias frame
-
+            //myCam.SetADCoffset(40); //40 was found to best for zeroing the bias frame
             readoutModes.Add("Live");
             readoutModes.Add("Normal");
 
@@ -1009,6 +1008,8 @@ namespace ASCOM.Photometrics
         public void StartExposure(double Duration, bool Light)
 
         {
+            //convert Duration to milliseconds for PVCAM
+            UInt32 durationInMilliseconds = Convert.ToUInt32(Duration * 1000);
             cameraImageReady = false;
             Debug.WriteLine("startExposure begin");
             if (fastreadout)
@@ -1021,8 +1022,9 @@ namespace ASCOM.Photometrics
                 if (myCam.SpeedTableIndex != 2)
                     myCam.SetReadoutSpeed(1);//2=1.25mhz //1=10 mhz //2=20Mhz
             }
-            myCam.SetExposureResolution(1);//1 microsecond resolution
-            myCam.SetExposureTime(Convert.ToUInt32(Duration));
+            myCam.SetGainState(2);//gain state 3
+            myCam.SetExposureResolution(0);//milliseconds
+            myCam.SetExposureTime(durationInMilliseconds);
             if (Duration < 0.0) throw new InvalidValueException("StartExposure", Duration.ToString(), "0.0 upwards");
             if (cameraNumX > ccdWidth) throw new InvalidValueException("StartExposure", cameraNumX.ToString(), ccdWidth.ToString());
             if (cameraNumY > ccdHeight) throw new InvalidValueException("StartExposure", cameraNumY.ToString(), ccdHeight.ToString());
