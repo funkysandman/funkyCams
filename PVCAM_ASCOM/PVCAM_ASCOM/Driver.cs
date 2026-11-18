@@ -135,11 +135,10 @@ namespace ASCOM.Photometrics
             myCam.SetReadoutSpeed(0);//10 Mhz for now  //1.25Mhz biggest dynamic range
             myCam.SetTriggerMode("Timed");
             myCam.SetBinning("1");
-            myCam.SetGainState(2);//gain state 3 - highest gain
+            myCam.SetGainState(2);// gain state 3
             myCam.FramesToGet = 1;
             myCam.SetExposureTime(1);
-            myCam.SetADCoffset(40); //40 was found to best for zeroing the bias frame
-
+            //myCam.SetADCoffset(40); //40 was found to best for zeroing the bias frame
             readoutModes.Add("Live");
             readoutModes.Add("Normal");
 
@@ -1009,18 +1008,20 @@ namespace ASCOM.Photometrics
         public void StartExposure(double Duration, bool Light)
 
         {
+            //convert Duration to milliseconds for PVCAM
+            UInt32 durationInMilliseconds = Convert.ToUInt32(Duration * 1000);
             cameraImageReady = false;
             Debug.WriteLine("startExposure begin");
-            //if (fastreadout)
-            //{
-            //    if (myCam.SpeedTableIndex != 0)
-            //        myCam.SetReadoutSpeed(0);//20mhz
-            //}
-            //else
-            //{
-            //    if (myCam.SpeedTableIndex != 2)
-            //        myCam.SetReadoutSpeed(0);//2=1.25mhz //1=10 mhz //2=20Mhz
-            //}
+            if (fastreadout)
+            {
+                if (myCam.SpeedTableIndex != 0)
+                    myCam.SetReadoutSpeed(0);//20mhz
+            }
+            else
+            {
+                if (myCam.SpeedTableIndex != 2)
+                    myCam.SetReadoutSpeed(1);//2=1.25mhz //1=10 mhz //2=20Mhz
+            }
             myCam.SetExposureResolution(1);//1 microsecond resolution
             myCam.SetExposureTime(Convert.ToUInt32(Duration));
             if (Duration < 0.0) throw new InvalidValueException("StartExposure", Duration.ToString(), "0.0 upwards");

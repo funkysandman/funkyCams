@@ -181,7 +181,25 @@ namespace ASCOM.ATIKVS.Camera
                     NumY = cameraProperties.NPixelsY;
                     SetOffset(offset);
 
-
+                    // Check if camera supports exposure speed setting and set it to 0 (fastest)
+                    if (AtikPInvoke.ArtemisHasCameraSpecificOption(handle, (ushort)AtikCameraSpecificOptions.ID_ExposureSpeed))
+                    {
+                        int length = 0;
+                        byte[] expSpeed = new byte[2];
+                        
+                        // Query current exposure speed
+                        success = AtikPInvoke.ArtemisCameraSpecificOptionGetData(handle, (ushort)AtikCameraSpecificOptions.ID_ExposureSpeed, expSpeed, 2, ref length);
+                        LogMessage("InitialiseHardware", $"Current exposure speed: {expSpeed[0]}");
+                        
+                        // Set exposure speed to 0 (fastest)
+                        expSpeed[0] = 0;
+                        success = AtikPInvoke.ArtemisCameraSpecificOptionSetData(handle, (ushort)AtikCameraSpecificOptions.ID_ExposureSpeed, expSpeed, 2);
+                        LogMessage("InitialiseHardware", $"Exposure speed set to 0 (fastest), result: {success}");
+                    }
+                    else
+                    {
+                        LogMessage("InitialiseHardware", "Camera does not support exposure speed setting");
+                    }
 
                     //if (num != 0)
                     //{
