@@ -570,7 +570,7 @@ Public Class frmAscom
                         ' Scale 14-bit to 8-bit (0-16383 -> 0-255)
                         ' Using bit shift for performance: value >> 6 is equivalent to value / 64
                         ' Dim scaled As Byte = CByte(Math.Min(255, pixelValue >> 6))
-                        Dim scaled As Byte = CByte((pixelValue * 255) \ 16383)
+                        Dim scaled As Byte = CByte((pixelValue * 255) \ 65535)
                         ' Calculate byte position (24bpp = 3 bytes per pixel: BGR format)
                         Dim pixelOffset As Integer = rowOffset + (x * 3)
 

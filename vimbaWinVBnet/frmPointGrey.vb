@@ -3,6 +3,7 @@ Imports System.Globalization
 Imports System.IO
 Imports System.Runtime.InteropServices
 Imports System.Threading
+Imports ASCOM.Utilities
 Imports BitMiracle.LibTiff.Classic
 Imports SpinnakerNET
 Imports SpinnakerNET.GenApi
@@ -993,7 +994,7 @@ Public Class frmPointGrey
 
     End Sub
     Private Sub loadCameraList()
-
+        Dim serial As String = String.Empty
         m_system = New ManagedSystem()
         ' Retrieve list of cameras from the system
         m_camList = m_system.GetCameras()
@@ -1006,7 +1007,19 @@ Public Class frmPointGrey
                 ' camera may be occupied by another application
                 Try
                     managedCamera.Init()
-                    Me.cmbCam.Items.Add(managedCamera.DeviceModelName.ToString() & " " & managedCamera.DeviceSerialNumber.ToString())
+                    Try
+                        If managedCamera.DeviceSerialNumber IsNot Nothing Then
+                            serial = managedCamera.DeviceSerialNumber.ToString()
+                        End If
+                    Catch
+                        ' Accessing the serial can throw for some cameras; treat as unknown
+                        serial = String.Empty
+                    End Try
+
+                    If String.IsNullOrWhiteSpace(serial) Then
+                        serial = "(unknown serial)"
+                    End If
+                    Me.cmbCam.Items.Add(managedCamera.DeviceModelName.ToString() & " " & serial)
                     managedCamera.DeInit()
                 Catch ex As SpinnakerException
                     Me.cmbCam.Items.Add("occupied camera")

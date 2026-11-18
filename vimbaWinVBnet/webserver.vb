@@ -126,14 +126,15 @@ Public Class WebServer
 #Region "Methods"
 
     Private Function GetIPAddress() As IPAddress
-        Dim oAddr As System.Net.IPAddress = Nothing
+        Dim addresses = System.Net.Dns.GetHostEntry(System.Net.Dns.GetHostName()).AddressList
 
-        With System.Net.Dns.GetHostEntry(System.Net.Dns.GetHostName())
-            If .AddressList.Length > 0 Then
-                oAddr = New IPAddress(.AddressList.GetLowerBound(0))
+        For Each address As IPAddress In addresses
+            If address.AddressFamily = Net.Sockets.AddressFamily.InterNetwork Then
+                Return address
             End If
-        End With
-        GetIPAddress = oAddr
+        Next
+
+        Return Nothing
     End Function
 
 
